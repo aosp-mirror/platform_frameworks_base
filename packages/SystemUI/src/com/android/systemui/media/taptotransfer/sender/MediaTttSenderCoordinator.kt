@@ -27,7 +27,6 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.CommandQueue
@@ -52,7 +51,6 @@ constructor(
     private val context: Context,
     private val dumpManager: DumpManager,
     private val logger: MediaTttSenderLogger,
-    private val mediaTttFlags: MediaTttFlags,
     private val uiEventLogger: MediaTttSenderUiEventLogger,
 ) : CoreStartable {
 
@@ -67,27 +65,25 @@ constructor(
             override fun updateMediaTapToTransferSenderDisplay(
                 @StatusBarManager.MediaTransferSenderState displayState: Int,
                 routeInfo: MediaRoute2Info,
-                undoCallback: IUndoMediaTransferCallback?
+                undoCallback: IUndoMediaTransferCallback?,
             ) {
                 this@MediaTttSenderCoordinator.updateMediaTapToTransferSenderDisplay(
                     displayState,
                     routeInfo,
-                    undoCallback
+                    undoCallback,
                 )
             }
         }
 
     override fun start() {
-        if (mediaTttFlags.isMediaTttEnabled()) {
-            commandQueue.addCallback(commandQueueCallbacks)
-            dumpManager.registerNormalDumpable(this)
-        }
+        commandQueue.addCallback(commandQueueCallbacks)
+        dumpManager.registerNormalDumpable(this)
     }
 
     private fun updateMediaTapToTransferSenderDisplay(
         @StatusBarManager.MediaTransferSenderState displayState: Int,
         routeInfo: MediaRoute2Info,
-        undoCallback: IUndoMediaTransferCallback?
+        undoCallback: IUndoMediaTransferCallback?,
     ) {
         val chipState: ChipStateSender? = ChipStateSender.getSenderStateFromId(displayState)
         val stateName = chipState?.name ?: "Invalid"
@@ -106,7 +102,7 @@ constructor(
             // ChipStateSender.FAR_FROM_RECEIVER is the default state when there is no state.
             logger.logInvalidStateTransitionError(
                 currentState = currentStateForId?.name ?: ChipStateSender.FAR_FROM_RECEIVER.name,
-                chipState.name
+                chipState.name,
             )
             return
         }
@@ -125,7 +121,7 @@ constructor(
                 // still be able to see the status of the transfer.
                 logger.logRemovalBypass(
                     removalReason,
-                    bypassReason = "transferStatus=${currentStateForId.transferStatus.name}"
+                    bypassReason = "transferStatus=${currentStateForId.transferStatus.name}",
                 )
                 return
             }
@@ -138,14 +134,7 @@ constructor(
             logger.logStateMap(stateMap)
             chipbarCoordinator.registerListener(displayListener)
             chipbarCoordinator.displayView(
-                createChipbarInfo(
-                    chipState,
-                    routeInfo,
-                    undoCallback,
-                    context,
-                    logger,
-                    instanceId,
-                )
+                createChipbarInfo(chipState, routeInfo, undoCallback, context, logger, instanceId)
             )
         }
     }
@@ -244,10 +233,7 @@ constructor(
                 )
             }
 
-        return ChipbarEndItem.Button(
-            Text.Resource(R.string.media_transfer_undo),
-            onClickListener,
-        )
+        return ChipbarEndItem.Button(Text.Resource(R.string.media_transfer_undo), onClickListener)
     }
 
     private val displayListener =

@@ -25,9 +25,7 @@ import java.io.PrintWriter
 
 /** [Sequence] that yields all of the direct children of this [ViewGroup] */
 val ViewGroup.children
-    get() = sequence {
-        for (i in 0 until childCount) yield(getChildAt(i))
-    }
+    get() = sequence { for (i in 0 until childCount) yield(getChildAt(i)) }
 
 /** Inclusive version of [Iterable.takeWhile] */
 fun <T> Sequence<T>.takeUntil(pred: (T) -> Boolean): Sequence<T> = sequence {
@@ -61,4 +59,26 @@ val View.boundsOnScreen: Rect
 /** Extension method to convert [dagger.Lazy] to [kotlin.Lazy] for object of any class [T]. */
 fun <T> Lazy<T>.toKotlinLazy(): kotlin.Lazy<T> {
     return lazy { this.get() }
+}
+
+/**
+ * Returns whether this [Collection] contains exactly all [elements].
+ *
+ * Order of elements is not taken into account, but multiplicity is. For example, an element
+ * duplicated exactly 3 times in the parameter asserts that the element must likewise be duplicated
+ * exactly 3 times in this [Collection].
+ */
+fun <T> Collection<T>.containsExactly(vararg elements: T): Boolean {
+    return eachCountMap() == elements.asList().eachCountMap()
+}
+
+/**
+ * Returns a map where keys are the distinct elements of the collection and values are their
+ * corresponding counts.
+ *
+ * This is a convenient extension function for any [Collection] that allows you to easily count the
+ * occurrences of each element.
+ */
+fun <T> Collection<T>.eachCountMap(): Map<T, Int> {
+    return groupingBy { it }.eachCount()
 }

@@ -31,7 +31,6 @@ import android.view.ScaleGestureDetector;
 import android.view.ViewConfiguration;
 
 import com.android.internal.R;
-import com.android.server.accessibility.Flags;
 
 /**
  * Handles the behavior while receiving scaling and panning gestures if it's enabled.
@@ -73,13 +72,9 @@ class PanningScalingHandler extends
         mMaxScale = maxScale;
         mMinScale = minScale;
         mBlockScroll = blockScroll;
-        if (Flags.pinchZoomZeroMinSpan()) {
-            mScaleGestureDetector = new ScaleGestureDetector(context,
-                    ViewConfiguration.get(context).getScaledTouchSlop() * 2,
-                    /* minSpan= */ 0, Handler.getMain(), this);
-        } else {
-            mScaleGestureDetector = new ScaleGestureDetector(context, this, Handler.getMain());
-        }
+        mScaleGestureDetector = new ScaleGestureDetector(context,
+                ViewConfiguration.get(context).getScaledTouchSlop() * 2,
+                /* minSpan= */ 0, Handler.getMain(), this);
         mScrollGestureDetector = new GestureDetector(context, this, Handler.getMain());
         mScaleGestureDetector.setQuickScaleEnabled(false);
         mMagnificationDelegate = magnificationDelegate;

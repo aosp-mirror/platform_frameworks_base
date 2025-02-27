@@ -115,6 +115,19 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".NonResizeableFixedAspectRatioPortraitActivity"
+            android:theme="@style/CutoutNever"
+            android:resizeableActivity="false"
+            android:screenOrientation="portrait"
+            android:minAspectRatio="1.77"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.NonResizeableFixedAspectRatioPortraitActivity"
+            android:label="NonResizeableFixedAspectRatioPortraitActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".StartMediaProjectionActivity"
             android:theme="@style/CutoutNever"
             android:resizeableActivity="false"
@@ -143,6 +156,7 @@
         <activity android:name=".LaunchTransparentActivity"
                   android:resizeableActivity="false"
                   android:screenOrientation="portrait"
+                  android:minAspectRatio="1.77"
                   android:theme="@style/OptOutEdgeToEdge"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchTransparentActivity"
                   android:label="LaunchTransparentActivity"
@@ -333,12 +347,34 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".BottomHalfPipLaunchingActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.BottomHalfPipLaunchingActivity"
+            android:theme="@style/CutoutShortEdges"
+            android:label="BottomHalfPipLaunchingActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".BottomHalfPipActivity"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.BottomHalfPipLaunchingActivity"
+            android:theme="@style/TranslucentTheme"
+            android:label="BottomHalfPipActivity"
+            android:exported="true">
+        </activity>
         <activity android:name=".SplitScreenActivity"
                   android:resizeableActivity="true"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SplitScreenActivity"
                   android:theme="@style/CutoutShortEdges"
                   android:label="SplitScreenPrimaryActivity"
-                  android:exported="true">
+                  android:exported="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -349,7 +385,8 @@
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SplitScreenSecondaryActivity"
                   android:theme="@style/CutoutShortEdges"
                   android:label="SplitScreenSecondaryActivity"
-                  android:exported="true">
+                  android:exported="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

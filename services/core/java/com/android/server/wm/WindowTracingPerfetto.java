@@ -159,22 +159,28 @@ class WindowTracingPerfetto extends WindowTracing {
 
     void onStart(WindowTracingDataSource.Config config) {
         if (config.mLogFrequency == WindowTracingLogFrequency.FRAME) {
+            Log.i(TAG, "Started session (frequency=FRAME, log level=" + config.mLogFrequency + ")");
             mCountSessionsOnFrame.incrementAndGet();
         } else if (config.mLogFrequency == WindowTracingLogFrequency.TRANSACTION) {
+            Log.i(TAG, "Started session (frequency=TRANSACTION, log level="
+                    + config.mLogFrequency + ")");
             mCountSessionsOnTransaction.incrementAndGet();
         }
 
-        Log.i(TAG, "Started with logLevel: " + config.mLogLevel
-                + " logFrequency: " + config.mLogFrequency);
+        Log.i(TAG, getStatus());
+
         log(WHERE_START_TRACING);
     }
 
     void onStop(WindowTracingDataSource.Config config) {
         if (config.mLogFrequency == WindowTracingLogFrequency.FRAME) {
+            Log.i(TAG, "Stopped session (frequency=FRAME)");
             mCountSessionsOnFrame.decrementAndGet();
+            Log.i(TAG, "Stopped session (frequency=TRANSACTION)");
         } else if (config.mLogFrequency == WindowTracingLogFrequency.TRANSACTION) {
             mCountSessionsOnTransaction.decrementAndGet();
         }
-        Log.i(TAG, "Stopped");
+
+        Log.i(TAG, getStatus());
     }
 }

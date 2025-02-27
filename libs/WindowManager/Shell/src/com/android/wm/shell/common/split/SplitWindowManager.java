@@ -67,6 +67,8 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     public interface ParentContainerCallbacks {
         void attachToParentSurface(SurfaceControl.Builder b);
         void onLeashReady(SurfaceControl leash);
+        /** Inflates the given touch zone on the appropriate stage root. */
+        void inflateOnStageRoot(OffscreenTouchZone touchZone);
     }
 
     public SplitWindowManager(String windowName, Context context, Configuration config,

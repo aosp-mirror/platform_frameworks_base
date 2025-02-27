@@ -37,7 +37,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
-import com.android.settingslib.Utils
 import com.android.systemui.biometrics.Utils.ellipsize
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
@@ -294,7 +293,7 @@ private fun getListItemBulletGapWidth(resources: Resources): Int =
     resources.getDimensionPixelSize(R.dimen.biometric_prompt_content_list_item_bullet_gap_width)
 
 private fun getListItemBulletColor(context: Context): Int =
-    Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.materialColorOnSurface)
+    context.getColor(com.android.internal.R.color.materialColorOnSurface)
 
 private fun <T : View> T.width(function: (Int) -> Unit) {
     if (width == 0)

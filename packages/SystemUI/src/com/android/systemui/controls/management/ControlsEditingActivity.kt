@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.management
 
+import android.app.Activity
 import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Context
@@ -34,25 +35,25 @@ import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.res.R
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
-/**
- * Activity for rearranging and removing controls for a given structure
- */
-open class ControlsEditingActivity @Inject constructor(
+/** Activity for rearranging and removing controls for a given structure */
+open class ControlsEditingActivity
+@Inject
+constructor(
     @Main private val mainExecutor: Executor,
     private val controller: ControlsControllerImpl,
     private val userTracker: UserTracker,
     private val customIconCache: CustomIconCache,
-) : ComponentActivity() {
+) : ComponentActivity(), ControlsManagementActivity {
 
     companion object {
         private const val DEBUG = false
@@ -64,6 +65,9 @@ open class ControlsEditingActivity @Inject constructor(
         private val EMPTY_TEXT_ID = R.string.controls_favorite_removed
     }
 
+    override val activity: Activity
+        get() = this
+
     private lateinit var component: ComponentName
     private lateinit var structure: CharSequence
     private lateinit var model: FavoritesModel
@@ -73,16 +77,17 @@ open class ControlsEditingActivity @Inject constructor(
 
     private var isFromFavoriting: Boolean = false
 
-    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
-        private val startingUser = controller.currentUserId
+    private val userTrackerCallback: UserTracker.Callback =
+        object : UserTracker.Callback {
+            private val startingUser = controller.currentUserId
 
-        override fun onUserChanged(newUser: Int, userContext: Context) {
-            if (newUser != startingUser) {
-                userTracker.removeCallback(this)
-                finish()
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                if (newUser != startingUser) {
+                    userTracker.removeCallback(this)
+                    finish()
+                }
             }
         }
-    }
 
     private val mOnBackInvokedCallback = OnBackInvokedCallback {
         if (DEBUG) {
@@ -98,9 +103,7 @@ open class ControlsEditingActivity @Inject constructor(
             component = it
         } ?: run(this::finish)
         isFromFavoriting = intent.getBooleanExtra(EXTRA_FROM_FAVORITING, false)
-        intent.getCharSequenceExtra(EXTRA_STRUCTURE)?.let {
-            structure = it
-        } ?: run(this::finish)
+        intent.getCharSequenceExtra(EXTRA_STRUCTURE)?.let { structure = it } ?: run(this::finish)
 
         bindViews()
 
@@ -117,7 +120,9 @@ open class ControlsEditingActivity @Inject constructor(
             Log.d(TAG, "Registered onBackInvokedCallback")
         }
         onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback)
+            OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+            mOnBackInvokedCallback,
+        )
     }
 
     override fun onStop() {
@@ -142,18 +147,21 @@ open class ControlsEditingActivity @Inject constructor(
                     override fun run() {
                         finish()
                     }
-                }
-        ).start()
+                },
+            )
+            .start()
     }
 
     private fun bindViews() {
         setContentView(R.layout.controls_management)
 
+        applyInsets(R.id.controls_management_root)
+
         lifecycle.addObserver(
             ControlsAnimations.observerForAnimations(
                 requireViewById<ViewGroup>(R.id.controls_management_root),
                 window,
-                intent
+                intent,
             )
         )
 
@@ -163,81 +171,86 @@ open class ControlsEditingActivity @Inject constructor(
         }
         requireViewById<TextView>(R.id.title).text = structure
         setTitle(structure)
-        subtitle = requireViewById<TextView>(R.id.subtitle).apply {
-            setText(SUBTITLE_ID)
-        }
+        subtitle = requireViewById<TextView>(R.id.subtitle).apply { setText(SUBTITLE_ID) }
     }
 
     private fun bindButtons() {
-        addControls = requireViewById<Button>(R.id.addControls).apply {
-            isEnabled = true
-            visibility = View.VISIBLE
-            setOnClickListener {
-                if (saveButton.isEnabled) {
-                    // The user has made changes
-                    Toast.makeText(
-                        applicationContext,
-                        R.string.controls_favorite_toast_no_changes,
-                        Toast.LENGTH_SHORT
-                    ).show()
+        addControls =
+            requireViewById<Button>(R.id.addControls).apply {
+                isEnabled = true
+                visibility = View.VISIBLE
+                setOnClickListener {
+                    if (saveButton.isEnabled) {
+                        // The user has made changes
+                        Toast.makeText(
+                                applicationContext,
+                                R.string.controls_favorite_toast_no_changes,
+                                Toast.LENGTH_SHORT,
+                            )
+                            .show()
+                    }
+                    if (isFromFavoriting) {
+                        animateExitAndFinish()
+                    } else {
+                        startActivity(
+                            Intent(context, ControlsFavoritingActivity::class.java).also {
+                                it.putExtra(ControlsFavoritingActivity.EXTRA_STRUCTURE, structure)
+                                it.putExtra(Intent.EXTRA_COMPONENT_NAME, component)
+                                it.putExtra(
+                                    ControlsFavoritingActivity.EXTRA_APP,
+                                    intent.getCharSequenceExtra(EXTRA_APP),
+                                )
+                                it.putExtra(
+                                    ControlsFavoritingActivity.EXTRA_SOURCE,
+                                    ControlsFavoritingActivity.EXTRA_SOURCE_VALUE_FROM_EDITING,
+                                )
+                            },
+                            ActivityOptions.makeSceneTransitionAnimation(
+                                    this@ControlsEditingActivity
+                                )
+                                .toBundle(),
+                        )
+                    }
                 }
-                if (isFromFavoriting) {
-                    animateExitAndFinish()
-                } else {
-                    startActivity(Intent(context, ControlsFavoritingActivity::class.java).also {
-                        it.putExtra(ControlsFavoritingActivity.EXTRA_STRUCTURE, structure)
-                        it.putExtra(Intent.EXTRA_COMPONENT_NAME, component)
-                        it.putExtra(
-                            ControlsFavoritingActivity.EXTRA_APP,
-                            intent.getCharSequenceExtra(EXTRA_APP),
-                        )
-                        it.putExtra(
-                            ControlsFavoritingActivity.EXTRA_SOURCE,
-                            ControlsFavoritingActivity.EXTRA_SOURCE_VALUE_FROM_EDITING,
-                        )
-                    },
-                                  ActivityOptions.makeSceneTransitionAnimation(
-                                      this@ControlsEditingActivity
-                                  ).toBundle(),
+            }
+        saveButton =
+            requireViewById<Button>(R.id.done).apply {
+                isEnabled = isFromFavoriting
+                setText(R.string.save)
+                setOnClickListener {
+                    saveFavorites()
+                    startActivity(
+                        Intent(applicationContext, ControlsActivity::class.java),
+                        ActivityOptions.makeSceneTransitionAnimation(this@ControlsEditingActivity)
+                            .toBundle(),
                     )
+                    animateExitAndFinish()
                 }
             }
-        }
-        saveButton = requireViewById<Button>(R.id.done).apply {
-            isEnabled = isFromFavoriting
-            setText(R.string.save)
-            setOnClickListener {
-                saveFavorites()
-                startActivity(
-                    Intent(applicationContext, ControlsActivity::class.java),
-                    ActivityOptions
-                        .makeSceneTransitionAnimation(this@ControlsEditingActivity).toBundle()
-                )
-                animateExitAndFinish()
-            }
-        }
     }
 
     private fun saveFavorites() {
         controller.replaceFavoritesForStructure(
-                StructureInfo(component, structure, model.favorites))
+            StructureInfo(component, structure, model.favorites)
+        )
     }
 
-    private val favoritesModelCallback = object : FavoritesModel.FavoritesModelCallback {
-        override fun onNoneChanged(showNoFavorites: Boolean) {
-            if (showNoFavorites) {
-                subtitle.setText(EMPTY_TEXT_ID)
-            } else {
-                subtitle.setText(SUBTITLE_ID)
+    private val favoritesModelCallback =
+        object : FavoritesModel.FavoritesModelCallback {
+            override fun onNoneChanged(showNoFavorites: Boolean) {
+                if (showNoFavorites) {
+                    subtitle.setText(EMPTY_TEXT_ID)
+                } else {
+                    subtitle.setText(SUBTITLE_ID)
+                }
+            }
+
+            override fun onChange() = Unit
+
+            override fun onFirstChange() {
+                saveButton.isEnabled = true
             }
         }
-
-        override fun onChange() = Unit
-
-        override fun onFirstChange() {
-            saveButton.isEnabled = true
-        }
-    }
 
     private fun setUpList() {
         val controls = controller.getFavoritesForStructure(component, structure)
@@ -245,44 +258,55 @@ open class ControlsEditingActivity @Inject constructor(
         val elevation = resources.getFloat(R.dimen.control_card_elevation)
         val recyclerView = requireViewById<RecyclerView>(R.id.list)
         recyclerView.alpha = 0.0f
-        val adapter = ControlAdapter(elevation, userTracker.userId).apply {
-            registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-                var hasAnimated = false
-                override fun onChanged() {
-                    if (!hasAnimated) {
-                        hasAnimated = true
-                        ControlsAnimations.enterAnimation(recyclerView).start()
-                    }
-                }
-            })
-        }
+        val adapter =
+            ControlAdapter(elevation, userTracker.userId).apply {
+                registerAdapterDataObserver(
+                    object : RecyclerView.AdapterDataObserver() {
+                        var hasAnimated = false
 
-        val margin = resources
-                .getDimensionPixelSize(R.dimen.controls_card_margin)
+                        override fun onChanged() {
+                            if (!hasAnimated) {
+                                hasAnimated = true
+                                ControlsAnimations.enterAnimation(recyclerView).start()
+                            }
+                        }
+                    }
+                )
+            }
+
+        val margin = resources.getDimensionPixelSize(R.dimen.controls_card_margin)
         val itemDecorator = MarginItemDecorator(margin, margin)
         val spanCount = ControlAdapter.findMaxColumns(resources)
 
         recyclerView.apply {
             this.adapter = adapter
-            layoutManager = object : GridLayoutManager(recyclerView.context, spanCount) {
+            layoutManager =
+                object : GridLayoutManager(recyclerView.context, spanCount) {
 
-                // This will remove from the announcement the row corresponding to the divider,
-                // as it's not something that should be announced.
-                override fun getRowCountForAccessibility(
-                    recycler: RecyclerView.Recycler,
-                    state: RecyclerView.State
-                ): Int {
-                    val initial = super.getRowCountForAccessibility(recycler, state)
-                    return if (initial > 0) initial - 1 else initial
-                }
-            }.apply {
-                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return if (adapter?.getItemViewType(position)
-                                != ControlAdapter.TYPE_CONTROL) spanCount else 1
+                        // This will remove from the announcement the row corresponding to the
+                        // divider,
+                        // as it's not something that should be announced.
+                        override fun getRowCountForAccessibility(
+                            recycler: RecyclerView.Recycler,
+                            state: RecyclerView.State,
+                        ): Int {
+                            val initial = super.getRowCountForAccessibility(recycler, state)
+                            return if (initial > 0) initial - 1 else initial
+                        }
                     }
-                }
-            }
+                    .apply {
+                        spanSizeLookup =
+                            object : GridLayoutManager.SpanSizeLookup() {
+                                override fun getSpanSize(position: Int): Int {
+                                    return if (
+                                        adapter?.getItemViewType(position) !=
+                                            ControlAdapter.TYPE_CONTROL
+                                    )
+                                        spanCount
+                                    else 1
+                                }
+                            }
+                    }
             addItemDecoration(itemDecorator)
         }
         adapter.changeModel(model)

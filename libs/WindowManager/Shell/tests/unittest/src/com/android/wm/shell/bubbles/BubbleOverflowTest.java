@@ -26,6 +26,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
@@ -45,6 +46,7 @@ public class BubbleOverflowTest extends ShellTestCase {
     private TestableBubblePositioner mPositioner;
     private BubbleOverflow mOverflow;
     private BubbleExpandedViewManager mExpandedViewManager;
+    private BubbleLogger mBubbleLogger;
 
     @Mock
     private BubbleController mBubbleController;
@@ -58,6 +60,7 @@ public class BubbleOverflowTest extends ShellTestCase {
         mExpandedViewManager = BubbleExpandedViewManager.fromBubbleController(mBubbleController);
         mPositioner = new TestableBubblePositioner(mContext,
                 mContext.getSystemService(WindowManager.class));
+        mBubbleLogger = new BubbleLogger(new UiEventLoggerFake());
         when(mBubbleController.getPositioner()).thenReturn(mPositioner);
         when(mBubbleController.getStackView()).thenReturn(mBubbleStackView);
 
@@ -77,7 +80,7 @@ public class BubbleOverflowTest extends ShellTestCase {
 
     @Test
     public void test_initialize_forBubbleBar() {
-        mOverflow.initializeForBubbleBar(mExpandedViewManager, mPositioner);
+        mOverflow.initializeForBubbleBar(mExpandedViewManager, mPositioner, mBubbleLogger);
 
         assertThat(mOverflow.getBubbleBarExpandedView()).isNotNull();
         assertThat(mOverflow.getExpandedView()).isNull();

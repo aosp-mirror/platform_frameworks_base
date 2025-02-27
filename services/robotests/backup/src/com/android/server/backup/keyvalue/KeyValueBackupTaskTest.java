@@ -107,6 +107,7 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.infra.AndroidFuture;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.backup.BackupAgentConnectionManager;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
@@ -167,7 +168,6 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-// TODO: Test agents timing out
 @RunWith(RobolectricTestRunner.class)
 @Config(
         shadows = {
@@ -195,6 +195,7 @@ public class KeyValueBackupTaskTest  {
     @Mock private IBackupManagerMonitor mMonitor;
     @Mock private OnTaskFinishedListener mListener;
     @Mock private PackageManagerInternal mPackageManagerInternal;
+    @Mock private BackupAgentConnectionManager mBackupAgentConnectionManager;
 
     private UserBackupManagerService mBackupManagerService;
     private TransportData mTransport;
@@ -257,6 +258,8 @@ public class KeyValueBackupTaskTest  {
         when(mBackupManagerService.getBaseStateDir()).thenReturn(mBaseStateDir);
         when(mBackupManagerService.getDataDir()).thenReturn(mDataDir);
         when(mBackupManagerService.getBackupManagerBinder()).thenReturn(mBackupManager);
+        when(mBackupManagerService.getBackupAgentConnectionManager()).thenReturn(
+                mBackupAgentConnectionManager);
 
         mBackupHandler = mBackupManagerService.getBackupHandler();
         mShadowBackupLooper = shadowOf(mBackupHandler.getLooper());
@@ -749,7 +752,8 @@ public class KeyValueBackupTaskTest  {
 
     /**
      * Agent unavailable means {@link
-     * UserBackupManagerService#bindToAgentSynchronous(ApplicationInfo, int)} returns {@code null}.
+     * BackupAgentConnectionManager#bindToAgentSynchronous(ApplicationInfo, int, int)} returns
+     * {@code null}.
      *
      * @see #setUpAgent(PackageData)
      */
@@ -805,7 +809,7 @@ public class KeyValueBackupTaskTest  {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         setUpAgent(PACKAGE_1);
         doThrow(SecurityException.class)
-                .when(mBackupManagerService)
+                .when(mBackupAgentConnectionManager)
                 .bindToAgentSynchronous(argThat(applicationInfo(PACKAGE_1)), anyInt(), anyInt());
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
 
@@ -823,7 +827,7 @@ public class KeyValueBackupTaskTest  {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         setUpAgent(PACKAGE_1);
         doThrow(SecurityException.class)
-                .when(mBackupManagerService)
+                .when(mBackupAgentConnectionManager)
                 .bindToAgentSynchronous(argThat(applicationInfo(PACKAGE_1)), anyInt(), anyInt());
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, true, PACKAGE_1);
 
@@ -861,7 +865,8 @@ public class KeyValueBackupTaskTest  {
         runTask(task);
 
         verify(mBackupManagerService).setWorkSource(null);
-        verify(mBackupManagerService).unbindAgent(argThat(applicationInfo(PACKAGE_1)));
+        verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(PACKAGE_1)),
+                eq(false));
     }
 
     @Test
@@ -1097,7 +1102,8 @@ public class KeyValueBackupTaskTest  {
         runTask(task);
 
         verify(agentMock.agentBinder).fail(any());
-        verify(mBackupManagerService).unbindAgent(argThat(applicationInfo(PACKAGE_1)));
+        verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(PACKAGE_1)),
+                eq(false));
     }
 
     @Test
@@ -1418,7 +1424,8 @@ public class KeyValueBackupTaskTest  {
                 .isEqualTo("newState".getBytes());
         assertCleansUpFiles(mTransport, PM_PACKAGE);
         // We don't unbind PM
-        verify(mBackupManagerService, never()).unbindAgent(argThat(applicationInfo(PM_PACKAGE)));
+        verify(mBackupAgentConnectionManager, never()).unbindAgent(
+                argThat(applicationInfo(PM_PACKAGE)), eq(false));
     }
 
     @Test
@@ -1439,7 +1446,8 @@ public class KeyValueBackupTaskTest  {
 
         runTask(task);
 
-        verify(mBackupManagerService, never()).unbindAgent(argThat(applicationInfo(PM_PACKAGE)));
+        verify(mBackupAgentConnectionManager, never()).unbindAgent(
+                argThat(applicationInfo(PM_PACKAGE)), eq(false));
     }
 
     @Test
@@ -1642,9 +1650,10 @@ public class KeyValueBackupTaskTest  {
 
         runTask(task);
 
-        InOrder inOrder = inOrder(agentMock.agent, mBackupManagerService);
+        InOrder inOrder = inOrder(agentMock.agent, mBackupAgentConnectionManager);
         inOrder.verify(agentMock.agent).onQuotaExceeded(anyLong(), eq(1234L));
-        inOrder.verify(mBackupManagerService).unbindAgent(argThat(applicationInfo(PACKAGE_1)));
+        inOrder.verify(mBackupAgentConnectionManager).unbindAgent(
+                argThat(applicationInfo(PACKAGE_1)), eq(false));
     }
 
     @Test
@@ -2634,12 +2643,12 @@ public class KeyValueBackupTaskTest  {
             doNothing().when(backupAgentBinder).fail(any());
             if (packageData.available) {
                 doReturn(backupAgentBinder)
-                        .when(mBackupManagerService)
+                        .when(mBackupAgentConnectionManager)
                         .bindToAgentSynchronous(argThat(applicationInfo(packageData)), anyInt(),
                                 anyInt());
             } else {
                 doReturn(null)
-                        .when(mBackupManagerService)
+                        .when(mBackupAgentConnectionManager)
                         .bindToAgentSynchronous(argThat(applicationInfo(packageData)), anyInt(),
                                 anyInt());
             }
@@ -2976,7 +2985,8 @@ public class KeyValueBackupTaskTest  {
 
     private void assertCleansUpFilesAndAgent(TransportData transport, PackageData packageData) {
         assertCleansUpFiles(transport, packageData);
-        verify(mBackupManagerService).unbindAgent(argThat(applicationInfo(packageData)));
+        verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(packageData)),
+                eq(false));
     }
 
     private void assertCleansUpFiles(TransportData transport, PackageData packageData) {

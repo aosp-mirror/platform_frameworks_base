@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Controls the behaviour of the whole audio

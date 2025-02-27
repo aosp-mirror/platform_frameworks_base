@@ -19,6 +19,7 @@ package android.telephony.satellite;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,7 +38,8 @@ import java.util.Objects;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public final class SatelliteSubscriberInfo implements Parcelable {
     /** provision subscriberId */
     @NonNull
@@ -50,10 +52,8 @@ public final class SatelliteSubscriberInfo implements Parcelable {
     private int mSubId;
 
     /** SubscriberId format is the ICCID. */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public static final int ICCID = 0;
     /** SubscriberId format is the 6 digit of IMSI + MSISDN. */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public static final int IMSI_MSISDN = 1;
 
     /** Type of subscriber id */
@@ -70,6 +70,9 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         readFromParcel(in);
     }
 
+    /**
+     * @hide
+     */
     public SatelliteSubscriberInfo(@NonNull Builder builder) {
         this.mSubscriberId = builder.mSubscriberId;
         this.mCarrierId = builder.mCarrierId;
@@ -80,11 +83,8 @@ public final class SatelliteSubscriberInfo implements Parcelable {
 
     /**
      * Builder class for constructing SatelliteSubscriberInfo objects
-     *
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public static class Builder {
+    public static final class Builder {
         @NonNull private String mSubscriberId;
         private int mCarrierId;
         @NonNull
@@ -95,17 +95,15 @@ public final class SatelliteSubscriberInfo implements Parcelable {
 
         /**
          * Set the SubscriberId and returns the Builder class.
-         *
-         * @hide
          */
-        public Builder setSubscriberId(String subscriberId) {
+        @NonNull
+        public Builder setSubscriberId(@NonNull String subscriberId) {
             mSubscriberId = subscriberId;
             return this;
         }
 
         /**
          * Set the CarrierId and returns the Builder class.
-         * @hide
          */
         @NonNull
         public Builder setCarrierId(int carrierId) {
@@ -114,18 +112,19 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         }
 
         /**
-         * Set the niddApn and returns the Builder class.
-         * @hide
+         * Set NIDD (Non IP Data) APN can be used for carrier roaming to satellite attachment
+         * and returns the Builder class.
+         *
+         * Refer specification 3GPP TS 23.501 V19.1.0 section 5.31.5
          */
         @NonNull
-        public Builder setNiddApn(String niddApn) {
+        public Builder setNiddApn(@NonNull String niddApn) {
             mNiddApn = niddApn;
             return this;
         }
 
         /**
          * Set the subId and returns the Builder class.
-         * @hide
          */
         @NonNull
         public Builder setSubId(int subId) {
@@ -135,7 +134,6 @@ public final class SatelliteSubscriberInfo implements Parcelable {
 
         /**
          * Set the SubscriberIdType and returns the Builder class.
-         * @hide
          */
         @NonNull
         public Builder setSubscriberIdType(@SubscriberIdType int subscriberIdType) {
@@ -145,7 +143,6 @@ public final class SatelliteSubscriberInfo implements Parcelable {
 
         /**
          * Returns SatelliteSubscriberInfo object.
-         * @hide
          */
         @NonNull
         public SatelliteSubscriberInfo build() {
@@ -153,11 +150,7 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeString(mSubscriberId);
         out.writeInt(mCarrierId);
@@ -166,7 +159,7 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         out.writeInt(mSubscriberIdType);
     }
 
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+
     public static final @android.annotation.NonNull Creator<SatelliteSubscriberInfo> CREATOR =
             new Creator<SatelliteSubscriberInfo>() {
                 @Override
@@ -180,56 +173,45 @@ public final class SatelliteSubscriberInfo implements Parcelable {
                 }
             };
 
-    /**
-     * @hide
-     */
     @Override
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public int describeContents() {
         return 0;
     }
 
     /**
-     * @return provision subscriberId.
-     * @hide
+     * Return subscriberId which is used to register with satellite gateway service
+     * during provisioning.
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    @NonNull
     public String getSubscriberId() {
         return mSubscriberId;
     }
 
     /**
-     * @return carrierId.
-     * @hide
+     * Return carrierId of the subscription used for provisioning.
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public int getCarrierId() {
         return mCarrierId;
     }
 
     /**
-     * @return niddApn.
-     * @hide
+     * Return the NIDD(Non IP Data) APN which is used for carrier roaming to satellite attachment.
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    @NonNull
     public String getNiddApn() {
         return mNiddApn;
     }
 
     /**
-     * @return subId.
-     * @hide
+     * Return the subscriptionId of the subscription which is used for satellite attachment.
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public int getSubId() {
         return mSubId;
     }
 
     /**
-     * @return subscriberIdType.
-     * @hide
+     * Return the type of subscriberId used for provisioning.
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public @SubscriberIdType int getSubscriberIdType() {
         return mSubscriberIdType;
     }

@@ -907,29 +907,6 @@ public final class TelephonyPermissions {
     }
 
     /**
-     * Ensure the caller (or self, if not processing an IPC) has
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
-     * {@link android.Manifest.permission#READ_PHONE_NUMBERS}.
-     *
-     * @throws SecurityException if the caller does not have the required permission/privileges
-     */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.READ_PHONE_NUMBERS,
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE
-    })
-    public static boolean checkCallingOrSelfReadPrivilegedPhoneStatePermissionOrReadPhoneNumber(
-            Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
-            String message) {
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            return false;
-        }
-        return (context.checkCallingOrSelfPermission(
-                Manifest.permission.READ_PRIVILEGED_PHONE_STATE) == PERMISSION_GRANTED
-                || checkCallingOrSelfReadPhoneNumber(context, subId, callingPackage,
-                callingFeatureId, message));
-    }
-
-    /**
      * @return true if the specified {@code uid} is for a system or phone process, no matter if runs
      * as system user or not.
      */

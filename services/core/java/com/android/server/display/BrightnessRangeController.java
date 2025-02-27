@@ -67,6 +67,10 @@ class BrightnessRangeController {
             mNormalBrightnessModeController.resetNbmData(
                     displayDeviceConfig.getLuxThrottlingData());
         }
+        if (flags.useNewHdrBrightnessModifier()) {
+            // HDR boost is handled by HdrBrightnessModifier and should be disabled in HbmController
+            mHbmController.disableHdrBoost();
+        }
         updateHdrClamper(info, displayToken, displayDeviceConfig);
     }
 

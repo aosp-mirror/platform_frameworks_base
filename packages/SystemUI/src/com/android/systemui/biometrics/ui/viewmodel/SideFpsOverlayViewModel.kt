@@ -164,21 +164,12 @@ constructor(
             showIndicatorForDeviceEntry: Boolean ->
             val callbacks = mutableListOf<LottieCallback>()
             if (showIndicatorForDeviceEntry) {
-                val indicatorColor =
-                    com.android.settingslib.Utils.getColorAttrDefaultColor(
-                        applicationContext,
-                        com.android.internal.R.attr.materialColorPrimaryFixed
-                    )
-                val outerRimColor =
-                    com.android.settingslib.Utils.getColorAttrDefaultColor(
-                        applicationContext,
-                        com.android.internal.R.attr.materialColorPrimaryFixedDim
-                    )
-                val chevronFill =
-                    com.android.settingslib.Utils.getColorAttrDefaultColor(
-                        applicationContext,
-                        com.android.internal.R.attr.materialColorOnPrimaryFixed
-                    )
+                val indicatorColor = applicationContext.getColor(
+                        com.android.internal.R.color.materialColorPrimaryFixed)
+                val outerRimColor = applicationContext.getColor(
+                        com.android.internal.R.color.materialColorPrimaryFixedDim)
+                val chevronFill = applicationContext.getColor(
+                        com.android.internal.R.color.materialColorOnPrimaryFixed)
                 callbacks.add(LottieCallback(KeyPath(".blue600", "**"), indicatorColor))
                 callbacks.add(LottieCallback(KeyPath(".blue400", "**"), outerRimColor))
                 callbacks.add(LottieCallback(KeyPath(".black", "**"), chevronFill))

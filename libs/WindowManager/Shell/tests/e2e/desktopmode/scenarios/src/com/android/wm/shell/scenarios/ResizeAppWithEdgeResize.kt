@@ -60,7 +60,7 @@ constructor(
         )
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
     }
 
     @Test

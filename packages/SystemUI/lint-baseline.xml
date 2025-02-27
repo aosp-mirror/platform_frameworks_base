@@ -26857,8 +26857,8 @@
 
     <issue
         id="Overdraw"
-        message="Possible overdraw: Root element paints background `?androidprv:attr/materialColorOnSurfaceVariant` with a theme that also paints a background (inferred theme is `@style/Theme.SystemUI`)"
-        errorLine1="    android:background=&quot;?androidprv:attr/materialColorOnSurfaceVariant&quot; />"
+        message="Possible overdraw: Root element paints background `@androidprv:color/materialColorOnSurfaceVariant` with a theme that also paints a background (inferred theme is `@style/Theme.SystemUI`)"
+        errorLine1="    android:background=&quot;@androidprv:color/materialColorOnSurfaceVariant&quot; />"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SystemUI/res/layout/notification_children_divider.xml"
@@ -26868,8 +26868,8 @@
 
     <issue
         id="Overdraw"
-        message="Possible overdraw: Root element paints background `?androidprv:attr/materialColorSurfaceContainerHigh` with a theme that also paints a background (inferred theme is `@style/Theme.SystemUI`)"
-        errorLine1="    android:background=&quot;?androidprv:attr/materialColorSurfaceContainerHigh&quot;"
+        message="Possible overdraw: Root element paints background `@androidprv:color/materialColorSurfaceContainerHigh` with a theme that also paints a background (inferred theme is `@style/Theme.SystemUI`)"
+        errorLine1="    android:background=&quot;@androidprv:color/materialColorSurfaceContainerHigh&quot;"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SystemUI/res/layout/notification_snooze.xml"
@@ -32783,5 +32783,1181 @@
             line="381"
             column="23"/>
     </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, val theme: Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/airplane/domain/AirplaneModeMapper.kt"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/alarm/domain/AlarmTileMapper.kt"
+            line="39"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            @NonNull Context context,"
+        errorLine2="                             ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/stack/AmbientState.java"
+            line="300"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            Context context, DeviceConfigProxy proxy) {"
+        errorLine2="                    ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/AssistantFeedbackController.java"
+            line="75"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    public AuthController(Context context,"
+        errorLine2="                                  ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/AuthController.java"
+            line="716"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated WindowManager, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of WindowManager is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            @NonNull WindowManager windowManager,"
+        errorLine2="                                   ~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/AuthController.java"
+            line="721"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val sysuiContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/AuthRippleController.kt"
+            line="72"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated ConfigurationController, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of ConfigurationController is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val configurationController: ConfigurationController,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/AuthRippleController.kt"
+            line="74"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main protected val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/battery/ui/BatterySaverTileMapper.kt"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            Context context,"
+        errorLine2="                    ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/BiometricNotificationBroadcastReceiver.java"
+            line="46"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            @Main Resources resources,"
+        errorLine2="                            ~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/BiometricNotificationDialogFactory.java"
+            line="52"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    public BiometricNotificationService(@NonNull Context context,"
+        errorLine2="                                                         ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/BiometricNotificationService.java"
+            line="148"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val applicationContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/bouncer/domain/interactor/BouncerActionButtonInteractor.kt"
+            line="62"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val applicationContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/bouncer/data/repository/BouncerRepository.kt"
+            line="37"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    c: Context,"
+        errorLine2="    ~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/ChannelEditorDialogController.kt"
+            line="61"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/colorcorrection/domain/ColorCorrectionTileMapper.kt"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/inversion/domain/ColorInversionTileMapper.kt"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val applicationContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/domain/interactor/CredentialInteractor.kt"
+            line="52"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val applicationContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/ui/viewmodel/CredentialViewModel.kt"
+            line="30"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="class CustomTileStatePersisterImpl @Inject constructor(context: Context) :"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/external/CustomTileStatePersister.kt"
+            line="74"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/saver/domain/DataSaverTileMapper.kt"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/pipeline/data/repository/DefaultTilesRepository.kt"
+            line="18"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/domain/interactor/DisplayStateInteractor.kt"
+            line="77"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/data/repository/DisplayStateRepository.kt"
+            line="68"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/bouncer/data/repository/EmergencyServicesRepository.kt"
+            line="38"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/FaceAuthAccessibilityDelegate.kt"
+            line="37"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/FaceHelpMessageDeferral.kt"
+            line="42"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application val applicationContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/data/repository/FacePropertyRepository.kt"
+            line="95"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/FgsManagerController.kt"
+            line="142"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/domain/interactor/FingerprintPropertyInteractor.kt"
+            line="44"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/flashlight/domain/FlashlightMapper.kt"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/fontscaling/domain/FontScalingTileMapper.kt"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            @NonNull final Context context,"
+        errorLine2="                                   ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/headsup/HeadsUpManagerImpl.java"
+            line="186"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated ConfigurationController, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of ConfigurationController is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            ConfigurationController configurationController,"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/headsup/HeadsUpManagerImpl.java"
+            line="192"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/hearingdevices/domain/HearingDevicesTileMapper.kt"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="class IconBuilder @Inject constructor(private val context: Context) {"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/icon/IconBuilder.kt"
+            line="27"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/irecording/IssueRecordingMapper.kt"
+            line="31"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated WindowManager, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of WindowManager is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val windowManager: WindowManager,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyboard/docking/ui/viewmodel/KeyboardDockingIndicationViewModel.kt"
+            line="39"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyboard/docking/ui/viewmodel/KeyboardDockingIndicationViewModel.kt"
+            line="40"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/data/repository/LargeTileSpanRepository.kt"
+            line="41"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/location/domain/LocationTileMapper.kt"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated LayoutInflater, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of LayoutInflater is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val layoutInflater: LayoutInflater"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/collection/render/MediaContainerController.kt"
+            line="29"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="class MinimumTilesResourceRepository @Inject constructor(@Main resources: Resources) :"
+        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/pipeline/data/repository/MinimumTilesRepository.kt"
+            line="38"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/modes/ui/ModesTileMapper.kt"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/night/domain/interactor/NightDisplayTileDataInteractor.kt"
+            line="38"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/night/ui/NightDisplayTileMapper.kt"
+            line="42"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/notes/domain/NotesTileMapper.kt"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    public NotificationGutsManager(Context context,"
+        errorLine2="                                           ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/NotificationGutsManager.java"
+            line="137"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/icon/ui/viewmodel/NotificationIconContainerAlwaysOnDisplayViewModel.kt"
+            line="47"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/icon/ui/viewmodel/NotificationIconContainerStatusBarViewModel.kt"
+            line="53"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(val context: Context) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/NotificationSectionsFeatureManager.kt"
+            line="27"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated ConfigurationController, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of ConfigurationController is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            ConfigurationController configurationController,"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/stack/NotificationStackScrollLayoutController.java"
+            line="737"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/stack/NotificationStackSizeCalculator.kt"
+            line="63"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="        Builder(@Main Resources resources, ViewConfiguration viewConfiguration,"
+        errorLine2="                                ~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/stack/NotificationSwipeHelper.java"
+            line="563"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/onehanded/ui/OneHandedModeTileMapper.kt"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    public PackageManagerAdapter(Context context) {"
+        errorLine2="                                         ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/external/PackageManagerAdapter.java"
+            line="45"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/data/repository/PaginatedGridRepository.kt"
+            line="36"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/bouncer/domain/interactor/PrimaryBouncerInteractor.kt"
+            line="74"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/promoted/PromotedNotificationContentExtractor.kt"
+            line="41"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/ui/viewmodel/PromptViewModel.kt"
+            line="82"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/qr/ui/QRCodeScannerTileMapper.kt"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/data/repository/QSColumnsRepository.kt"
+            line="36"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="        Factory(Context context, QSCustomizerController qsCustomizerController) {"
+        errorLine2="                        ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/QSTileRevealController.java"
+            line="99"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/data/repository/QuickQuickSettingsRowRepository.kt"
+            line="32"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/reducebrightness/ui/ReduceBrightColorsTileMapper.kt"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/reducebrightness/domain/interactor/ReduceBrightColorsTileUserActionInteractor.kt"
+            line="36"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/rotation/domain/interactor/RotationLockTileDataInteractor.kt"
+            line="47"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/rotation/ui/mapper/RotationLockTileMapper.kt"
+            line="36"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/pipeline/domain/autoaddable/SafetyCenterAutoAddable.kt"
+            line="51"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/screenrecord/domain/ui/ScreenRecordTileMapper.kt"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated LayoutInflater, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of LayoutInflater is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val layoutInflater: LayoutInflater,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/collection/render/SectionHeaderController.kt"
+            line="43"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    context: Context"
+        errorLine2="    ~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/collection/provider/SectionHeaderVisibilityProvider.kt"
+            line="35"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val applicationContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/ui/binder/SideFpsOverlayViewBinder.kt"
+            line="63"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val applicationContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/ui/viewmodel/SideFpsOverlayViewModel.kt"
+            line="53"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/domain/interactor/SideFpsSensorInteractor.kt"
+            line="51"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated WindowManager, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of WindowManager is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    windowManager: WindowManager,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/domain/interactor/SideFpsSensorInteractor.kt"
+            line="53"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val applicationContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/bouncer/domain/interactor/SimBouncerInteractor.kt"
+            line="60"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/bouncer/domain/interactor/SimBouncerInteractor.kt"
+            line="65"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Resources is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/bouncer/data/repository/SimBouncerRepository.kt"
+            line="91"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Context is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(context: Context, val shadeViewController: ShadeViewController) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/shade/StatusBarLongPressGestureDetector.kt"
+            line="30"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/data/repository/StockTilesRepository.kt"
+            line="31"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val context: Context"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/collection/TargetSdkResolver.kt"
+            line="33"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/pipeline/data/repository/TileSpecRepository.kt"
+            line="95"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Resources is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsKeyguardAccessibilityDelegate.kt"
+            line="33"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Context is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Application private val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/domain/interactor/UdfpsOverlayInteractor.kt"
+            line="49"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated ConfigurationController, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of ConfigurationController is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val configurationController: ConfigurationController,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/uimodenight/domain/interactor/UiModeNightTileDataInteractor.kt"
+            line="43"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="constructor(@Main private val resources: Resources, private val theme: Theme) :"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/uimodenight/domain/UiModeNightTileMapper.kt"
+            line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of Resources is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/tiles/impl/work/ui/WorkModeTileMapper.kt"
+            line="36"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated ConfigurationInteractor, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of ConfigurationInteractor is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @GlobalConfig configurationInteractor: ConfigurationInteractor,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyboard/docking/ui/viewmodel/KeyboardDockingIndicationViewModel.kt"
+            line="43"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Context is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    public AuthController(Context context,"
+        errorLine2="                                  ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/AuthController.java"
+            line="716"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated WindowManager, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of WindowManager is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            @NonNull WindowManager windowManager,"
+        errorLine2="                                   ~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/AuthController.java"
+            line="721"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Context is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val sysuiContext: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/AuthRippleController.kt"
+            line="72"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated ConfigurationController, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of ConfigurationController is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val configurationController: ConfigurationController,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/AuthRippleController.kt"
+            line="74"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Context is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            Context context,"
+        errorLine2="                    ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/BiometricNotificationBroadcastReceiver.java"
+            line="46"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Resources is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            @Main Resources resources,"
+        errorLine2="                            ~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/BiometricNotificationDialogFactory.java"
+            line="52"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Context is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    public BiometricNotificationService(@NonNull Context context,"
+        errorLine2="                                                         ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/BiometricNotificationService.java"
+            line="148"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Context is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    c: Context,"
+        errorLine2="    ~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/row/ChannelEditorDialogController.kt"
+            line="61"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Resources is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/bouncer/data/repository/EmergencyServicesRepository.kt"
+            line="39"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Resources is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/FaceAuthAccessibilityDelegate.kt"
+            line="37"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Resources is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/FaceHelpMessageDeferral.kt"
+            line="42"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Context is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="            @NonNull final Context context,"
+        errorLine2="                                   ~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/headsup/HeadsUpManagerImpl.java"
+            line="186"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Context is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="class IconBuilder @Inject constructor(private val context: Context) {"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/icon/IconBuilder.kt"
+            line="27"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated WindowManager, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of WindowManager is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val windowManager: WindowManager,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyboard/docking/ui/viewmodel/KeyboardDockingIndicationViewModel.kt"
+            line="40"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Resources is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/notification/icon/ui/viewmodel/NotificationIconContainerStatusBarViewModel.kt"
+            line="53"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Resources, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Resources is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @Main private val resources: Resources,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/pipeline/domain/autoaddable/SafetyCenterAutoAddable.kt"
+            line="51"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated Context, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of Context is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    private val context: Context,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/domain/interactor/SideFpsSensorInteractor.kt"
+            line="51"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window should use ShadeDisplayAware-annotated WindowManager, as the shade might move between windows, and only @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme). If the usage of WindowManager is not related to display specific configuration or UI, then there is technically no need to use the annotation, and you can annotate the class with @SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    windowManager: WindowManager,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/domain/interactor/SideFpsSensorInteractor.kt"
+            line="53"
+            column="5"/>
 
 </issues>

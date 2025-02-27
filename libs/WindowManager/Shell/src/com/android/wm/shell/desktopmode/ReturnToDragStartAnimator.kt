@@ -19,28 +19,25 @@ package com.android.wm.shell.desktopmode
 import android.animation.Animator
 import android.animation.RectEvaluator
 import android.animation.ValueAnimator
-import android.content.Context
 import android.graphics.Rect
 import android.view.SurfaceControl
-import android.widget.Toast
 import androidx.core.animation.addListener
 import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.wm.shell.R
 import com.android.wm.shell.windowdecor.OnTaskRepositionAnimationListener
 import java.util.function.Supplier
 
 /** Animates the task surface moving from its current drag position to its pre-drag position. */
 class ReturnToDragStartAnimator(
-    private val context: Context,
     private val transactionSupplier: Supplier<SurfaceControl.Transaction>,
-    private val interactionJankMonitor: InteractionJankMonitor
+    private val interactionJankMonitor: InteractionJankMonitor,
 ) {
     private var boundsAnimator: Animator? = null
     private lateinit var taskRepositionAnimationListener: OnTaskRepositionAnimationListener
 
-    constructor(context: Context, interactionJankMonitor: InteractionJankMonitor) :
-            this(context, Supplier { SurfaceControl.Transaction() }, interactionJankMonitor)
+    constructor(
+        interactionJankMonitor: InteractionJankMonitor
+    ) : this(Supplier { SurfaceControl.Transaction() }, interactionJankMonitor)
 
     /** Sets a listener for the start and end of the reposition animation. */
     fun setTaskRepositionAnimationListener(listener: OnTaskRepositionAnimationListener) {
@@ -53,7 +50,7 @@ class ReturnToDragStartAnimator(
         taskSurface: SurfaceControl,
         startBounds: Rect,
         endBounds: Rect,
-        isResizable: Boolean
+        doOnEnd: (() -> Unit)? = null,
     ) {
         val tx = transactionSupplier.get()
 
@@ -69,7 +66,7 @@ class ReturnToDragStartAnimator(
                                 .setPosition(
                                     taskSurface,
                                     startBounds.left.toFloat(),
-                                    startBounds.top.toFloat()
+                                    startBounds.top.toFloat(),
                                 )
                                 .show(taskSurface)
                                 .apply()
@@ -81,21 +78,15 @@ class ReturnToDragStartAnimator(
                                 .setPosition(
                                     taskSurface,
                                     endBounds.left.toFloat(),
-                                    endBounds.top.toFloat()
+                                    endBounds.top.toFloat(),
                                 )
                                 .show(taskSurface)
                                 .apply()
                             taskRepositionAnimationListener.onAnimationEnd(taskId)
                             boundsAnimator = null
-                            if (!isResizable) {
-                                Toast.makeText(
-                                    context,
-                                    R.string.desktop_mode_non_resizable_snap_text,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                            doOnEnd?.invoke()
                             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE)
-                        }
+                        },
                     )
                     addUpdateListener { anim ->
                         val rect = anim.animatedValue as Rect

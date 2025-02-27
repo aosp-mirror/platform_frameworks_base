@@ -741,7 +741,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         final IBackupAgent agent;
         try {
             agent =
-                    mBackupManagerService.bindToAgentSynchronous(
+                    mBackupManagerService.getBackupAgentConnectionManager().bindToAgentSynchronous(
                             packageInfo.applicationInfo, BACKUP_MODE_INCREMENTAL,
                             mBackupEligibilityRules.getBackupDestination());
             if (agent == null) {
@@ -1302,7 +1302,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
         // For PM metadata (for which applicationInfo is null) there is no agent-bound state.
         if (mCurrentPackage.applicationInfo != null) {
-            mBackupManagerService.unbindAgent(mCurrentPackage.applicationInfo);
+            mBackupManagerService.getBackupAgentConnectionManager().unbindAgent(
+                    mCurrentPackage.applicationInfo, /* allowKill= */ false);
         }
         mAgent = null;
     }

@@ -41,6 +41,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.flag.junit.FlagsParameterization;
+import android.provider.Settings;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.view.WindowManager;
@@ -70,6 +71,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.settings.FakeSettings;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
@@ -111,6 +113,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
 
+    private FakeSettings mSecureSettings;
     private final Executor mMainExecutor = MoreExecutors.directExecutor();
     private final Executor mBackgroundExecutor = MoreExecutors.directExecutor();
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
@@ -131,6 +134,10 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        mSecureSettings = new FakeSettings();
+        mSecureSettings.putInt(Settings.Secure.DISABLE_SECURE_WINDOWS, 0);
+
         // Preferred refresh rate is equal to the first displayMode's refresh rate
         mPreferredRefreshRate = mContext.getDisplay().getSystemSupportedModes()[0].getRefreshRate();
         overrideResource(
@@ -164,12 +171,9 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 () -> mSelectedUserInteractor,
                 mUserTracker,
                 mKosmos.getNotificationShadeWindowModel(),
-                mKosmos::getCommunalInteractor) {
-                    @Override
-                    protected boolean isDebuggable() {
-                        return false;
-                    }
-            };
+                mSecureSettings,
+                mKosmos::getCommunalInteractor,
+                mKosmos.getShadeLayoutParams());
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
         mNotificationShadeWindowController.fetchWindowRootView();
 
@@ -344,6 +348,19 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) != 0).isTrue();
+        assertThat(
+                (mLayoutParameters.getValue().inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_PRIVACY)
+                        != 0)
+                .isTrue();
+    }
+
+    @Test
+    public void setKeyguardShowingWithSecureWindowsDisabled_disablesSecureFlag() {
+        mSecureSettings.putInt(Settings.Secure.DISABLE_SECURE_WINDOWS, 1);
+        mNotificationShadeWindowController.setBouncerShowing(true);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) == 0).isTrue();
         assertThat(
                 (mLayoutParameters.getValue().inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_PRIVACY)
                         != 0)

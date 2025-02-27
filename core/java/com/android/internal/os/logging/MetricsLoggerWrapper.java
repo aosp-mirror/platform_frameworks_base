@@ -16,9 +16,15 @@
 
 package com.android.internal.os.logging;
 
+import android.app.Application;
+import android.os.Process;
+import android.util.Log;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.os.ProcfsMemoryUtil;
 import com.android.internal.util.FrameworkStatsLog;
+import java.util.Collection;
+import libcore.util.NativeAllocationRegistry;
 
 /**
  * Used to wrap different logging calls in one, so that client side code base is clean and more
@@ -48,5 +54,47 @@ public class MetricsLoggerWrapper {
                         false, FrameworkStatsLog.OVERLAY_STATE_CHANGED__STATE__EXITED);
             }
         }
+    }
+
+    public static void logPostGcMemorySnapshot() {
+        if (!com.android.libcore.readonly.Flags.nativeMetrics()) {
+            return;
+        }
+        int pid = Process.myPid();
+        String processName = Application.getProcessName();
+        Collection<NativeAllocationRegistry.Metrics> metrics =
+            NativeAllocationRegistry.getMetrics();
+        int nMetrics = metrics.size();
+
+        String[] classNames = new String[nMetrics];
+        long[] mallocedCount = new long[nMetrics];
+        long[] mallocedBytes = new long[nMetrics];
+        long[] nonmallocedCount = new long[nMetrics];
+        long[] nonmallocedBytes = new long[nMetrics];
+
+        int i = 0;
+        for (NativeAllocationRegistry.Metrics m : metrics) {
+            classNames[i] = m.getClassName();
+            mallocedCount[i] = m.getMallocedCount();
+            mallocedBytes[i] = m.getMallocedBytes();
+            nonmallocedCount[i] = m.getNonmallocedCount();
+            nonmallocedBytes[i] = m.getNonmallocedBytes();
+            i++;
+        }
+
+        ProcfsMemoryUtil.MemorySnapshot m = ProcfsMemoryUtil.readMemorySnapshotFromProcfs();
+        int oom_score_adj = ProcfsMemoryUtil.readOomScoreAdjFromProcfs();
+        FrameworkStatsLog.write(FrameworkStatsLog.POSTGC_MEMORY_SNAPSHOT,
+            m.uid, processName, pid,
+            oom_score_adj,
+            m.rssInKilobytes,
+            m.anonRssInKilobytes,
+            m.swapInKilobytes,
+            m.anonRssInKilobytes + m.swapInKilobytes,
+            classNames,
+            mallocedCount,
+            mallocedBytes,
+            nonmallocedCount,
+            nonmallocedBytes);
     }
 }

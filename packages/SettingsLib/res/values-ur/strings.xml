@@ -586,13 +586,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"یہ فون"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"یہ ٹیبلیٹ"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"یہ کمپیوٹر (داخلی)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"مائیکروفون (داخلی)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"‏یہ TV"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ڈاک اسپیکر"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"بیرونی آلہ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"منسلک آلہ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"یہ فون"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"اینالاگ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"اس آلے پر چلایا نہیں جا سکتا"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"سوئچ کرنے کے لیے اکاؤنٹ اپ گریڈ کریں"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ڈاؤن لوڈز کو یہاں چلایا نہیں جا سکتا"</string>
@@ -605,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"‏ARC کے ذریعے منسلک ہے"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"‏eARC کے ذریعے منسلک ہے"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"‏TV ڈیفالٹ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"‏HDMI آؤٹ پٹ"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"اندرونی اسپیکرز"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"پہلے سے شامل اسپیکر"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"‏‫TV آڈیو"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"منسلک کرنے میں مسئلہ پیش آ گیا۔ آلہ کو آف اور بیک آن کریں"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"وائرڈ آڈیو آلہ"</string>
     <string name="help_label" msgid="3528360748637781274">"مدد اور تاثرات"</string>
@@ -690,10 +690,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"اس تبدیلی کو لاگو کرنے کے ليے آپ کے آلہ کو ریبوٹ کرنا ضروری ہے۔ ابھی ریبوٹ کریں یا منسوخ کریں۔"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"تار والا ہیڈ فون"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"ہیڈ فون"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"‏‫USB اسپیکر"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"مائیک جیک"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"‏‫USB مائیک"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"تار والا ہیڈ فون"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"‏‫USB آڈیو"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"تار والا مائیکروفون"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"‏‫USB مائیکروفون"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"‏‫BT مائیکروفون"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"آن"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"آف"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"کیریئر نیٹ ورک کی تبدیلی"</string>

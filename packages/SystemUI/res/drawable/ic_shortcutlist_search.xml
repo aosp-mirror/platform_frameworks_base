@@ -19,7 +19,7 @@
         android:height="24dp"
         android:viewportWidth="48"
         android:viewportHeight="48"
-        android:tint="?androidprv:attr/materialColorOnSurfaceVariant">
+        android:tint="@androidprv:color/materialColorOnSurfaceVariant">
     <path
         android:fillColor="@android:color/white"
         android:strokeColor="@android:color/white"

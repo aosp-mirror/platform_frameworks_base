@@ -17,6 +17,7 @@
 package com.android.server.power.stats.wakeups;
 
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_BLUETOOTH;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SENSOR;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER;
@@ -63,6 +64,7 @@ public class CpuWakeupStats {
     private static final String SUBSYSTEM_SOUND_TRIGGER_STRING = "Sound_trigger";
     private static final String SUBSYSTEM_SENSOR_STRING = "Sensor";
     private static final String SUBSYSTEM_CELLULAR_DATA_STRING = "Cellular_data";
+    private static final String SUBSYSTEM_BLUETOOTH_STRING = "Bluetooth";
     private static final String TRACE_TRACK_WAKEUP_ATTRIBUTION = "wakeup_attribution";
 
     private static final long WAKEUP_WRITE_DELAY_MS = TimeUnit.SECONDS.toMillis(30);
@@ -512,6 +514,8 @@ public class CpuWakeupStats {
                 return CPU_WAKEUP_SUBSYSTEM_SENSOR;
             case SUBSYSTEM_CELLULAR_DATA_STRING:
                 return CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
+            case SUBSYSTEM_BLUETOOTH_STRING:
+                return CPU_WAKEUP_SUBSYSTEM_BLUETOOTH;
         }
         return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
     }
@@ -528,6 +532,8 @@ public class CpuWakeupStats {
                 return SUBSYSTEM_SENSOR_STRING;
             case CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA:
                 return SUBSYSTEM_CELLULAR_DATA_STRING;
+            case CPU_WAKEUP_SUBSYSTEM_BLUETOOTH:
+                return SUBSYSTEM_BLUETOOTH_STRING;
             case CPU_WAKEUP_SUBSYSTEM_UNKNOWN:
                 return "Unknown";
         }

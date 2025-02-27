@@ -34,6 +34,7 @@ val Kosmos.mediaDataLoader by
             fakeMediaControllerFactory,
             mediaFlags,
             imageLoader,
-            statusBarManager
+            statusBarManager,
+            media3ActionFactory,
         )
     }

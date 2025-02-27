@@ -17,6 +17,7 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import android.content.res.Resources
+import android.graphics.drawable.Drawable
 import android.service.quicksettings.Tile
 import android.text.TextUtils
 import android.widget.Switch
@@ -33,8 +34,10 @@ data class TileUiState(
     val label: String,
     val secondaryLabel: String,
     val state: Int,
+    val handlesLongClick: Boolean,
     val handlesSecondaryClick: Boolean,
     val icon: Supplier<QSTile.Icon?>,
+    val sideDrawable: Drawable?,
     val accessibilityUiState: AccessibilityUiState,
 )
 
@@ -86,8 +89,10 @@ fun QSTile.State.toUiState(resources: Resources): TileUiState {
         label = label?.toString() ?: "",
         secondaryLabel = secondaryLabel?.toString() ?: "",
         state = if (disabledByPolicy) Tile.STATE_UNAVAILABLE else state,
+        handlesLongClick = handlesLongClick,
         handlesSecondaryClick = handlesSecondaryClick,
         icon = icon?.let { Supplier { icon } } ?: iconSupplier ?: Supplier { null },
+        sideDrawable = sideViewCustomDrawable,
         AccessibilityUiState(
             contentDescription?.toString() ?: "",
             stateDescription.toString(),

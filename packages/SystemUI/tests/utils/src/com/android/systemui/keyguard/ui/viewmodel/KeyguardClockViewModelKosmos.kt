@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.applicationContext
 import android.content.res.mainResources
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
@@ -28,12 +29,13 @@ import com.android.systemui.statusbar.ui.systemBarUtilsProxy
 val Kosmos.keyguardClockViewModel by
     Kosmos.Fixture {
         KeyguardClockViewModel(
+            context = applicationContext,
             keyguardClockInteractor = keyguardClockInteractor,
             applicationScope = applicationCoroutineScope,
             aodNotificationIconViewModel = notificationIconContainerAlwaysOnDisplayViewModel,
             shadeInteractor = shadeInteractor,
             systemBarUtils = systemBarUtilsProxy,
             configurationInteractor = configurationInteractor,
-            resources = mainResources
+            resources = mainResources,
         )
     }

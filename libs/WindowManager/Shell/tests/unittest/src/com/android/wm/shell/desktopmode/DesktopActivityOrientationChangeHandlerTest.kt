@@ -23,6 +23,7 @@ import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
 import android.graphics.Rect
 import android.os.Binder
+import android.os.UserManager
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
@@ -39,10 +40,11 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.TaskStackListenerImpl
-import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
-import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFullscreenTask
 import com.android.wm.shell.desktopmode.persistence.Desktop
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
+import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -50,10 +52,10 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.setMain
@@ -94,11 +96,13 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     @Mock lateinit var resizeTransitionHandler: ToggleResizeDesktopTaskTransitionHandler
     @Mock lateinit var taskStackListener: TaskStackListenerImpl
     @Mock lateinit var persistentRepository: DesktopPersistentRepository
+    @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
+    @Mock lateinit var userManager: UserManager
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var handler: DesktopActivityOrientationChangeHandler
     private lateinit var shellInit: ShellInit
-    private lateinit var taskRepository: DesktopModeTaskRepository
+    private lateinit var userRepositories: DesktopUserRepositories
     private lateinit var testScope: CoroutineScope
     // Mock running tasks are registered here so we can get the list from mock shell task organizer.
     private val runningTasks = mutableListOf<RunningTaskInfo>()
@@ -115,8 +119,15 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
 
         testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
         shellInit = spy(ShellInit(testExecutor))
-        taskRepository =
-            DesktopModeTaskRepository(context, shellInit, persistentRepository, testScope)
+        userRepositories =
+            DesktopUserRepositories(
+                context,
+                shellInit,
+                persistentRepository,
+                repositoryInitializer,
+                testScope,
+                userManager
+            )
         whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
         whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
@@ -124,7 +135,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         )
 
         handler = DesktopActivityOrientationChangeHandler(context, shellInit, shellTaskOrganizer,
-            taskStackListener, resizeTransitionHandler, taskRepository)
+            taskStackListener, resizeTransitionHandler, userRepositories)
 
         shellInit.init()
     }
@@ -148,7 +159,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         clearInvocations(shellInit)
 
         handler = DesktopActivityOrientationChangeHandler(context, shellInit, shellTaskOrganizer,
-            taskStackListener, resizeTransitionHandler, taskRepository)
+            taskStackListener, resizeTransitionHandler, userRepositories)
 
         verify(shellInit, never()).addInitCallback(any(),
             any<DesktopActivityOrientationChangeHandler>())
@@ -172,8 +183,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         activityInfo.screenOrientation = SCREEN_ORIENTATION_PORTRAIT
         task.topActivityInfo = activityInfo
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
-        taskRepository.addActiveTask(DEFAULT_DISPLAY, task.taskId)
-        taskRepository.updateTaskVisibility(DEFAULT_DISPLAY, task.taskId, visible = true)
+        userRepositories.current.addTask(DEFAULT_DISPLAY, task.taskId, isVisible = true)
         runningTasks.add(task)
 
         taskStackListener.onActivityRequestedOrientationChanged(task.taskId,
@@ -196,7 +206,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     @Test
     fun handleActivityOrientationChange_notInDesktopMode_doNothing() {
         val task = setUpFreeformTask(isResizeable = false)
-        taskRepository.updateTaskVisibility(task.displayId, task.taskId, visible = false)
+        userRepositories.current.updateTask(task.displayId, task.taskId, isVisible = false)
 
         taskStackListener.onActivityRequestedOrientationChanged(task.taskId,
             SCREEN_ORIENTATION_LANDSCAPE)
@@ -261,9 +271,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         task.topActivityInfo = activityInfo
         task.isResizeable = isResizeable
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
-        taskRepository.addActiveTask(displayId, task.taskId)
-        taskRepository.updateTaskVisibility(displayId, task.taskId, visible = true)
-        taskRepository.addOrMoveFreeformTaskToTop(displayId, task.taskId)
+        userRepositories.current.addTask(displayId, task.taskId, isVisible = true)
         runningTasks.add(task)
         return task
     }

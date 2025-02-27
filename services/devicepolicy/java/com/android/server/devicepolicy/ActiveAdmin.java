@@ -371,6 +371,9 @@ class ActiveAdmin {
     }
 
     ActiveAdmin(int userId, boolean permissionBased) {
+        if (Flags.activeAdminCleanup()) {
+            throw new UnsupportedOperationException("permission based admin no longer supported");
+        }
         if (permissionBased == false) {
             throw new IllegalArgumentException("Can only pass true for permissionBased admin");
         }

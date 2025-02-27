@@ -21,6 +21,6 @@
         <corners android:radius="30dp" />
         <stroke
             android:width="3dp"
-            android:color="?androidprv:attr/materialColorSecondaryFixed" />
+            android:color="@androidprv:color/materialColorSecondaryFixed" />
     </shape>
 </inset>

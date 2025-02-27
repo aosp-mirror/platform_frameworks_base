@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider.Companion.areAnimationsEnabled
 import com.android.systemui.util.Compile
+import com.android.systemui.util.Utils.isDeviceFoldable
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -51,18 +52,14 @@ constructor(
     @UiBackground private val uiBgExecutor: Executor,
     private val context: Context,
     private val contentResolver: ContentResolver,
-    private val screenLifecycle: ScreenLifecycle
+    private val screenLifecycle: ScreenLifecycle,
 ) : ScreenLifecycle.Observer, TransitionProgressListener {
 
     private var folded: Boolean? = null
     private var isTransitionEnabled: Boolean? = null
     private val foldStateListener = FoldStateListener(context)
     private var unfoldInProgress = false
-    private val isFoldable: Boolean
-        get() =
-            context.resources
-                .getIntArray(com.android.internal.R.array.config_foldedDeviceStates)
-                .isNotEmpty()
+    private val isFoldable: Boolean = isDeviceFoldable(context.resources, deviceStateManager)
 
     /** Registers for relevant events only if the device is foldable. */
     fun init() {

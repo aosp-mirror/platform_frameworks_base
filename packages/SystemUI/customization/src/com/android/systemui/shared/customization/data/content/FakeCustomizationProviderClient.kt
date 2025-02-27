@@ -19,6 +19,7 @@ package com.android.systemui.shared.customization.data.content
 
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.os.Bundle
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,11 +65,13 @@ class FakeCustomizationProviderClient(
                 value = true,
             )
         ),
+    runtimeValues: Bundle = Bundle(),
 ) : CustomizationProviderClient {
 
     private val slots = MutableStateFlow(slots)
     private val affordances = MutableStateFlow(affordances)
     private val flags = MutableStateFlow(flags)
+    private val runtimeValues = MutableStateFlow(runtimeValues)
 
     private val selections = MutableStateFlow<Map<String, List<String>>>(emptyMap())
 
@@ -93,12 +96,20 @@ class FakeCustomizationProviderClient(
         return flags.value
     }
 
+    override suspend fun queryRuntimeValues(): Bundle {
+        return runtimeValues.value
+    }
+
     override fun observeSlots(): Flow<List<CustomizationProviderClient.Slot>> {
         return slots.asStateFlow()
     }
 
     override fun observeFlags(): Flow<List<CustomizationProviderClient.Flag>> {
         return flags.asStateFlow()
+    }
+
+    override fun observeRuntimeValues(): Flow<Bundle> {
+        return runtimeValues.asStateFlow()
     }
 
     override suspend fun queryAffordances(): List<CustomizationProviderClient.Affordance> {
@@ -139,15 +150,16 @@ class FakeCustomizationProviderClient(
         }
     }
 
-    fun setFlag(
-        name: String,
-        value: Boolean,
-    ) {
+    fun setFlag(name: String, value: Boolean) {
         flags.value =
             flags.value.toMutableList().apply {
                 removeIf { it.name == name }
                 add(CustomizationProviderClient.Flag(name = name, value = value))
             }
+    }
+
+    fun setRuntimeValues(runtimeValues: Bundle) {
+        this.runtimeValues.value = runtimeValues
     }
 
     fun setSlotCapacity(slotId: String, capacity: Int) {

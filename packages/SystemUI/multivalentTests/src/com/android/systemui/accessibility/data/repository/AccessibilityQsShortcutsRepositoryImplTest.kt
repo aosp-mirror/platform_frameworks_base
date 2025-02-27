@@ -22,12 +22,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -40,8 +41,6 @@ import org.mockito.junit.MockitoRule
 @RunWith(AndroidJUnit4::class)
 class AccessibilityQsShortcutsRepositoryImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()
-    private val testDispatcher = kosmos.testDispatcher
-    private val testScope = kosmos.testScope
     private val secureSettings = kosmos.fakeSettings
 
     @Rule @JvmField val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -55,8 +54,8 @@ class AccessibilityQsShortcutsRepositoryImplTest : SysuiTestCase() {
                 return UserA11yQsShortcutsRepository(
                     userId,
                     secureSettings,
-                    testScope.backgroundScope,
-                    testDispatcher,
+                    kosmos.testScope.backgroundScope,
+                    kosmos.testDispatcher,
                 )
             }
         }
@@ -69,13 +68,13 @@ class AccessibilityQsShortcutsRepositoryImplTest : SysuiTestCase() {
             AccessibilityQsShortcutsRepositoryImpl(
                 a11yManager,
                 userA11yQsShortcutsRepositoryFactory,
-                testDispatcher
+                kosmos.testDispatcher,
             )
     }
 
     @Test
     fun a11yQsShortcutTargetsForCorrectUsers() =
-        testScope.runTest {
+        kosmos.runTest {
             val user0 = 0
             val targetsForUser0 = setOf("a", "b", "c")
             val user1 = 1
@@ -94,7 +93,7 @@ class AccessibilityQsShortcutsRepositoryImplTest : SysuiTestCase() {
         secureSettings.putStringForUser(
             SETTING_NAME,
             a11yQsTargets.joinToString(separator = ":"),
-            forUser
+            forUser,
         )
     }
 

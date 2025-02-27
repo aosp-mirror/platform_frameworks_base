@@ -23,15 +23,15 @@ import android.icu.text.DateFormat
 import android.icu.text.DisplayContext
 import android.os.UserHandle
 import android.provider.Settings
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.scene.shared.model.TransitionKeys
+import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
 import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -49,15 +49,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 /** Models UI state for the shade header. */
 class ShadeHeaderViewModel
 @AssistedInject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware context: Context,
     private val activityStarter: ActivityStarter,
-    private val sceneInteractor: SceneInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
@@ -89,10 +87,6 @@ constructor(
     /** Whether or not the privacy chip is enabled in the device privacy config. */
     val isPrivacyChipEnabled: StateFlow<Boolean> = privacyChipInteractor.isChipEnabled
 
-    private val _isDisabled = MutableStateFlow(false)
-    /** Whether or not the Shade Header should be disabled based on disableFlags. */
-    val isDisabled: StateFlow<Boolean> = _isDisabled.asStateFlow()
-
     private val longerPattern = context.getString(R.string.abbrev_wday_month_day_no_year_alarm)
     private val shorterPattern = context.getString(R.string.abbrev_month_day_no_year)
     private val longerDateFormat = MutableStateFlow(getFormatFromPattern(longerPattern))
@@ -120,7 +114,7 @@ constructor(
                         map = { intent, _ ->
                             intent.action == Intent.ACTION_TIMEZONE_CHANGED ||
                                 intent.action == Intent.ACTION_LOCALE_CHANGED
-                        }
+                        },
                     )
                     .onEach { invalidateFormats -> updateDateTexts(invalidateFormats) }
                     .launchIn(this)
@@ -133,8 +127,6 @@ constructor(
                     .map { list -> list.map { it.subscriptionId } }
                     .collect { _mobileSubIds.value = it }
             }
-
-            launch { shadeInteractor.isQsEnabled.map { !it }.collect { _isDisabled.value = it } }
 
             awaitCancellation()
         }
@@ -152,10 +144,9 @@ constructor(
 
     /** Notifies that the system icons container was clicked. */
     fun onSystemIconContainerClicked() {
-        sceneInteractor.changeScene(
-            SceneFamilies.Home,
-            "ShadeHeaderViewModel.onSystemIconContainerClicked",
-            TransitionKeys.SlightlyFasterShadeCollapse,
+        shadeInteractor.collapseEitherShade(
+            loggingReason = "ShadeHeaderViewModel.onSystemIconContainerClicked",
+            transitionKey = SlightlyFasterShadeCollapse,
         )
     }
 
@@ -163,7 +154,7 @@ constructor(
     fun onShadeCarrierGroupClicked() {
         activityStarter.postStartActivityDismissingKeyguard(
             Intent(Settings.ACTION_WIRELESS_SETTINGS),
-            0
+            0,
         )
     }
 

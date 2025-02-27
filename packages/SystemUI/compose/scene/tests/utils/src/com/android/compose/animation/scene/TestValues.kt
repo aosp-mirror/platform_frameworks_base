@@ -65,4 +65,6 @@ val EmptyTestTransitions = transitions {
     }
 
     from(TestScenes.SceneC, to = TestScenes.SceneA) { spec = snap() }
+
+    from(TestScenes.SceneC, to = TestScenes.SceneD) { spec = snap() }
 }

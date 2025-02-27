@@ -21,8 +21,8 @@ import static android.view.Display.isSuspendedState;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.window.WindowProviderService.isWindowProviderService;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_ERROR;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_ERROR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -163,6 +163,22 @@ class WindowContextListenerController {
         if (callingUid != listener.getUid()) {
             throw new UnsupportedOperationException("Uid mismatch. Caller uid is " + callingUid
                     + ", while the listener's owner is from " + listener.getUid());
+        }
+        return true;
+    }
+
+    boolean assertCallerCanReparentListener(@NonNull IBinder clientToken,
+            boolean callerCanManageAppTokens, int callingUid, int displayId) {
+        if (!assertCallerCanModifyListener(clientToken, callerCanManageAppTokens, callingUid)) {
+            return false;
+        }
+
+        final WindowContainer<?> container = getContainer(clientToken);
+        if (container != null && container.getDisplayContent() != null
+                && container.getDisplayContent().mDisplayId == displayId) {
+            ProtoLog.i(WM_DEBUG_ADD_REMOVE,
+                    "The listener has already been attached to the same display id");
+            return false;
         }
         return true;
     }

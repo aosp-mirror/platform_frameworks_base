@@ -23,7 +23,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 
-@Module
+@Module(includes = [SystemEventChipAnimationControllerModule::class])
 interface StatusBarEventsModule {
 
     companion object {

@@ -1118,7 +1118,8 @@ public class AutomaticBrightnessControllerTest {
     @Test
     public void testAutoBrightnessInDoze_useNormalBrightnessForDozeFalse_scaleScreenOn()
             throws Exception {
-        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)).thenReturn(
+                true);
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
@@ -1154,7 +1155,8 @@ public class AutomaticBrightnessControllerTest {
     @Test
     public void testAutoBrightnessInDoze_useNormalBrightnessForDozeTrue_notScaleScreenOn()
             throws Exception {
-        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)).thenReturn(
+                true);
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);

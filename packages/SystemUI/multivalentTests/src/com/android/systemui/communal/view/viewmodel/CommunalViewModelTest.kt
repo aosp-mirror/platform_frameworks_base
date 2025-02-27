@@ -18,12 +18,14 @@ package com.android.systemui.communal.view.viewmodel
 
 import android.content.ComponentName
 import android.content.pm.UserInfo
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_COMMUNAL_RESPONSIVE_GRID
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
@@ -69,6 +71,7 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.mediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -178,6 +181,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             mediaHost,
             logcatLogBuffer("CommunalViewModelTest"),
             metricsLogger,
+            kosmos.mediaCarouselController,
         )
     }
 
@@ -246,7 +250,9 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
         }
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun ongoingContent_umoAndOneTimer_sizedAppropriately() =
         testScope.runTest {
             // Widgets available.
@@ -278,11 +284,13 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(timer).isInstanceOf(CommunalContentModel.Smartspace::class.java)
             assertThat(umo).isInstanceOf(CommunalContentModel.Umo::class.java)
 
-            assertThat(timer?.size).isEqualTo(CommunalContentSize.HALF)
-            assertThat(umo?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(timer?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
+            assertThat(umo?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
         }
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun ongoingContent_umoAndTwoTimers_sizedAppropriately() =
         testScope.runTest {
             // Widgets available.
@@ -322,9 +330,9 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(umo).isInstanceOf(CommunalContentModel.Umo::class.java)
 
             // One full-sized timer and a half-sized timer and half-sized UMO.
-            assertThat(timer1?.size).isEqualTo(CommunalContentSize.HALF)
-            assertThat(timer2?.size).isEqualTo(CommunalContentSize.HALF)
-            assertThat(umo?.size).isEqualTo(CommunalContentSize.FULL)
+            assertThat(timer1?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
+            assertThat(timer2?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
+            assertThat(umo?.size).isEqualTo(CommunalContentSize.FixedSize.FULL)
         }
 
     @Test
@@ -627,10 +635,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Communal),
                 stateTransition =
-                    TransitionStep(
-                        from = KeyguardState.DREAMING,
-                        to = KeyguardState.GLANCEABLE_HUB
-                    ),
+                    TransitionStep(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB),
             )
 
             // Then flow is not frozen
@@ -647,10 +652,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Lockscreen),
                 stateTransition =
-                    TransitionStep(
-                        from = KeyguardState.GLANCEABLE_HUB,
-                        to = KeyguardState.OCCLUDED
-                    ),
+                    TransitionStep(from = KeyguardState.GLANCEABLE_HUB, to = KeyguardState.OCCLUDED),
             )
 
             // Then flow is not frozen
@@ -735,10 +737,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Communal),
                 stateTransition =
-                    TransitionStep(
-                        from = KeyguardState.DREAMING,
-                        to = KeyguardState.GLANCEABLE_HUB
-                    ),
+                    TransitionStep(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB),
             )
 
             // Widgets available
@@ -898,7 +897,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+            return FlagsParameterization.allCombinationsOf(FLAG_COMMUNAL_RESPONSIVE_GRID)
+                .andSceneContainer()
         }
     }
 }

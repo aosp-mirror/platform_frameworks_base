@@ -83,7 +83,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFO
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -601,12 +601,12 @@ public class DisplayContentTests extends WindowTestsBase {
                 TYPE_WALLPAPER, TYPE_APPLICATION);
 
         // Verify not waiting for display without system decorations.
-        doReturn(false).when(secondaryDisplay).supportsSystemDecorations();
+        doReturn(false).when(secondaryDisplay).isSystemDecorationsSupported();
         assertFalse(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
 
         // Verify waiting for non-drawn windows on display with system decorations.
         reset(secondaryDisplay);
-        doReturn(true).when(secondaryDisplay).supportsSystemDecorations();
+        doReturn(true).when(secondaryDisplay).isSystemDecorationsSupported();
         assertTrue(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
 
         // Verify not waiting for drawn windows on display with system decorations.
@@ -1081,7 +1081,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayRotation dr = dc.getDisplayRotation();
         spyOn(dr);
         doReturn(false).when(dr).useDefaultSettingsProvider();
-        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setComponent(getUniqueComponentName(mContext.getPackageName())).build();
         app.setOrientation(SCREEN_ORIENTATION_LANDSCAPE, app);
 
         assertFalse(dc.getRotationReversionController().isAnyOverrideActive());
@@ -1608,8 +1609,10 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final ActivityRecord app = mAppWindow.mActivityRecord;
         app.setVisible(false);
-        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_OPEN);
-        mDisplayContent.mOpeningApps.add(app);
+        app.setVisibleRequested(false);
+        registerTestTransitionPlayer();
+        mDisplayContent.requestTransitionAndLegacyPrepare(WindowManager.TRANSIT_OPEN, 0);
+        app.setVisibility(true);
         final int newOrientation = getRotatedOrientation(mDisplayContent);
         app.setRequestedOrientation(newOrientation);
 
@@ -1640,14 +1643,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(state.isSourceOrDefaultVisible(statusBarId, statusBars()),
                 rotatedState.isSourceOrDefaultVisible(statusBarId, statusBars()));
 
-        final Rect outFrame = new Rect();
-        final Rect outInsets = new Rect();
-        final Rect outStableInsets = new Rect();
-        final Rect outSurfaceInsets = new Rect();
-        mAppWindow.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
-        // The animation frames should not be rotated because display hasn't rotated.
-        assertEquals(mDisplayContent.getBounds(), outFrame);
-
         // The display should keep current orientation and the rotated configuration should apply
         // to the activity.
         assertEquals(config.orientation, mDisplayContent.getConfiguration().orientation);
@@ -1675,9 +1670,8 @@ public class DisplayContentTests extends WindowTestsBase {
         // Launch another activity before the transition is finished.
         final Task task2 = new TaskBuilder(mSupervisor).setDisplay(mDisplayContent).build();
         final ActivityRecord app2 = new ActivityBuilder(mAtm).setTask(task2)
-                .setUseProcess(app.app).build();
-        app2.setVisible(false);
-        mDisplayContent.mOpeningApps.add(app2);
+                .setUseProcess(app.app).setVisible(false).build();
+        app2.setVisibility(true);
         app2.setRequestedOrientation(newOrientation);
 
         // The activity should share the same transform state as the existing one. The activity
@@ -1700,14 +1694,15 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(mImeWindow.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
 
         // The fixed rotation transform can only be finished when all animation finished.
-        doReturn(false).when(app2).isAnimating(anyInt(), anyInt());
-        mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app2.token);
+        doReturn(false).when(app2).inTransition();
+        mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app2.token);
         assertTrue(app.hasFixedRotationTransform());
         assertTrue(app2.hasFixedRotationTransform());
 
         // The display should be rotated after the launch is finished.
-        doReturn(false).when(app).isAnimating(anyInt(), anyInt());
-        mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
+        app.setVisible(true);
+        doReturn(false).when(app).inTransition();
+        mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
         mStatusBarWindow.finishSeamlessRotation(t);
         mNavBarWindow.finishSeamlessRotation(t);
 
@@ -1725,7 +1720,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final Task task = app.getTask();
         final ActivityRecord app2 = new ActivityBuilder(mWm.mAtmService).setTask(task).build();
         mDisplayContent.setFixedRotationLaunchingApp(app2, (mDisplayContent.getRotation() + 1) % 4);
-        doReturn(true).when(app).inTransitionSelfOrParent();
+        doReturn(true).when(app).inTransition();
         // If the task contains a transition, this should be no-op.
         mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
 
@@ -1735,7 +1730,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // The display should be unlikely to be in transition, but if it happens, the fixed
         // rotation should proceed to finish because the activity/task level transition is finished.
         doReturn(true).when(mDisplayContent).inTransition();
-        doReturn(false).when(app).inTransitionSelfOrParent();
+        doReturn(false).when(app).inTransition();
         // Although this notifies app instead of app2 that uses the fixed rotation, app2 should
         // still finish the transform because there is no more transition event.
         mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
@@ -1870,7 +1865,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 mRootWindowContainer.getDisplayRotationCoordinator();
         final DisplayContent defaultDisplayContent = mDisplayContent;
         final DisplayRotation defaultDisplayRotation = defaultDisplayContent.getDisplayRotation();
-        coordinator.removeDefaultDisplayRotationChangedCallback();
 
         DeviceStateController deviceStateController = mock(DeviceStateController.class);
         when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
@@ -1927,7 +1921,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final DisplayRotationCoordinator coordinator =
                 mRootWindowContainer.getDisplayRotationCoordinator();
-        coordinator.removeDefaultDisplayRotationChangedCallback();
 
         DeviceStateController deviceStateController = mock(DeviceStateController.class);
         when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
@@ -2268,25 +2261,25 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testForceDesktopMode() {
+    public void testIsPublicSecondaryDisplayWithDesktopModeForceEnabled() {
         mWm.mForceDesktopModeOnExternalDisplays = true;
         // Not applicable for default display
-        assertFalse(mDefaultDisplay.forceDesktopMode());
+        assertFalse(mDefaultDisplay.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
 
         // Not applicable for private secondary display.
         final DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.flags = FLAG_PRIVATE;
         final DisplayContent privateDc = createNewDisplay(displayInfo);
-        assertFalse(privateDc.forceDesktopMode());
+        assertFalse(privateDc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
 
         // Applicable for public secondary display.
         final DisplayContent publicDc = createNewDisplay();
-        assertTrue(publicDc.forceDesktopMode());
+        assertTrue(publicDc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
 
         // Make sure forceDesktopMode() is false when the force config is disabled.
         mWm.mForceDesktopModeOnExternalDisplays = false;
-        assertFalse(publicDc.forceDesktopMode());
+        assertFalse(publicDc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
     }
 
     @Test
@@ -2820,7 +2813,7 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mWm.mUmInternal, never()).isUserVisible(userId2, displayId);
     }
 
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void cameraCompatFreeformFlagEnabled_cameraCompatFreeformPolicyNotNull() {
         doReturn(true).when(() ->
@@ -2829,7 +2822,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
-    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void cameraCompatFreeformFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
         doReturn(true).when(() ->
@@ -2838,7 +2831,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void desktopWindowingFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {

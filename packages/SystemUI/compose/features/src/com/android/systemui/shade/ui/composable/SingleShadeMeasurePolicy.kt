@@ -25,7 +25,6 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.offset
-import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
 import com.android.systemui.shade.ui.composable.SingleShadeMeasurePolicy.LayoutId
 import kotlin.math.max
@@ -60,18 +59,20 @@ class SingleShadeMeasurePolicy(
 
         val shadeHeaderPlaceable =
             measurables
-                .fastFirst { it.layoutId == LayoutId.ShadeHeader }
-                .measure(constraintsWithCutout)
+                .fastFirstOrNull { it.layoutId == LayoutId.ShadeHeader }
+                ?.measure(constraintsWithCutout)
         val mediaPlaceable =
             measurables
                 .fastFirstOrNull { it.layoutId == LayoutId.Media }
                 ?.measure(applyMediaConstraints(constraintsWithCutout, isMediaInRow))
         val quickSettingsPlaceable =
             measurables
-                .fastFirst { it.layoutId == LayoutId.QuickSettings }
-                .measure(constraintsWithCutout)
+                .fastFirstOrNull { it.layoutId == LayoutId.QuickSettings }
+                ?.measure(constraintsWithCutout)
         val notificationsPlaceable =
-            measurables.fastFirst { it.layoutId == LayoutId.Notifications }.measure(constraints)
+            measurables
+                .fastFirstOrNull { it.layoutId == LayoutId.Notifications }
+                ?.measure(constraints)
 
         val notificationsTop =
             calculateNotificationsTop(
@@ -84,45 +85,60 @@ class SingleShadeMeasurePolicy(
         onNotificationsTopChanged(notificationsTop)
 
         return layout(constraints.maxWidth, constraints.maxHeight) {
-            shadeHeaderPlaceable.placeRelative(x = insetsLeft, y = insetsTop)
-            quickSettingsPlaceable.placeRelative(
+            shadeHeaderPlaceable?.placeRelative(x = insetsLeft, y = insetsTop)
+            val statusBarHeaderHeight = shadeHeaderPlaceable?.height ?: 0
+            quickSettingsPlaceable?.placeRelative(
                 x = insetsLeft,
-                y = insetsTop + shadeHeaderPlaceable.height,
+                y = insetsTop + statusBarHeaderHeight,
             )
 
-            if (isMediaInRow) {
-                mediaPlaceable?.placeRelative(
-                    x = insetsLeft + constraintsWithCutout.maxWidth / 2,
-                    y = mediaOffset() + insetsTop + shadeHeaderPlaceable.height,
-                    zIndex = mediaZIndex(),
-                )
-            } else {
-                mediaPlaceable?.placeRelative(
-                    x = insetsLeft,
-                    y = insetsTop + shadeHeaderPlaceable.height + quickSettingsPlaceable.height,
-                    zIndex = mediaZIndex(),
-                )
+            if (mediaPlaceable != null) {
+                val quickSettingsHeight = quickSettingsPlaceable?.height ?: 0
+
+                if (isMediaInRow) {
+                    // mediaPlaceable height ranges from 0 to qsHeight. We want it to be centered
+                    // vertically when it's smaller than the QS
+                    val mediaCenteringOffset = (quickSettingsHeight - mediaPlaceable.height) / 2
+                    mediaPlaceable.placeRelative(
+                        x = insetsLeft + constraintsWithCutout.maxWidth / 2,
+                        y =
+                            insetsTop +
+                                statusBarHeaderHeight +
+                                mediaCenteringOffset +
+                                mediaOffset(),
+                        zIndex = mediaZIndex(),
+                    )
+                } else {
+                    mediaPlaceable.placeRelative(
+                        x = insetsLeft,
+                        y = insetsTop + statusBarHeaderHeight + quickSettingsHeight,
+                        zIndex = mediaZIndex(),
+                    )
+                }
             }
 
             // Notifications don't need to accommodate for horizontal insets
-            notificationsPlaceable.placeRelative(x = 0, y = notificationsTop)
+            notificationsPlaceable?.placeRelative(x = 0, y = notificationsTop)
         }
     }
 
     private fun calculateNotificationsTop(
-        statusBarHeaderPlaceable: Placeable,
-        quickSettingsPlaceable: Placeable,
+        statusBarHeaderPlaceable: Placeable?,
+        quickSettingsPlaceable: Placeable?,
         mediaPlaceable: Placeable?,
         insetsTop: Int,
         isMediaInRow: Boolean,
     ): Int {
         val mediaHeight = mediaPlaceable?.height ?: 0
+        val statusBarHeaderHeight = statusBarHeaderPlaceable?.height ?: 0
+        val quickSettingsHeight = quickSettingsPlaceable?.height ?: 0
+
         return insetsTop +
-            statusBarHeaderPlaceable.height +
+            statusBarHeaderHeight +
             if (isMediaInRow) {
-                max(quickSettingsPlaceable.height, mediaHeight)
+                max(quickSettingsHeight, mediaHeight)
             } else {
-                quickSettingsPlaceable.height + mediaHeight
+                quickSettingsHeight + mediaHeight
             }
     }
 

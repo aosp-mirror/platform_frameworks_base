@@ -26,19 +26,17 @@ import com.android.systemui.bouncer.ui.helper.calculateLayoutInternal
 
 /**
  * Returns the [BouncerSceneLayout] that should be used by the bouncer scene. If
- * [isSideBySideSupported] is `false`, then [BouncerSceneLayout.BESIDE_USER_SWITCHER] is replaced by
- * [BouncerSceneLayout.STANDARD_BOUNCER].
+ * [isOneHandedModeSupported] is `false`, then [BouncerSceneLayout.BESIDE_USER_SWITCHER] is replaced
+ * by [BouncerSceneLayout.STANDARD_BOUNCER].
  */
 @Composable
-fun calculateLayout(
-    isSideBySideSupported: Boolean,
-): BouncerSceneLayout {
+fun calculateLayout(isOneHandedModeSupported: Boolean): BouncerSceneLayout {
     val windowSizeClass = LocalWindowSizeClass.current
 
     return calculateLayoutInternal(
         width = windowSizeClass.widthSizeClass.toEnum(),
         height = windowSizeClass.heightSizeClass.toEnum(),
-        isSideBySideSupported = isSideBySideSupported,
+        isOneHandedModeSupported = isOneHandedModeSupported,
     )
 }
 

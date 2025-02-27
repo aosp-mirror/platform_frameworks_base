@@ -42,7 +42,7 @@
         android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
         android:text="@string/immersive_cling_title"
-        android:textColor="?androidprv:attr/materialColorOnSurface"
+        android:textColor="@androidprv:color/materialColorOnSurface"
         android:textSize="24sp"
         android:fontFamily="google-sans" />
 
@@ -54,7 +54,7 @@
         android:paddingTop="14dp"
         android:gravity="center_horizontal"
         android:text="@string/immersive_cling_description"
-        android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
+        android:textColor="@androidprv:color/materialColorOnSurfaceVariant"
         android:textSize="14sp"
         android:fontFamily="google-sans" />
 
@@ -72,7 +72,7 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:text="@string/immersive_cling_positive"
-        android:textColor="?androidprv:attr/materialColorOnPrimary"
+        android:textColor="@androidprv:color/materialColorOnPrimary"
         android:textAllCaps="false"
         android:textSize="14sp"
         android:textFontWeight="500"

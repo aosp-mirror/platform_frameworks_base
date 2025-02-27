@@ -205,6 +205,13 @@ int register_android_graphics_classes(JNIEnv *env) {
     jmethodID getPropertyMethod = GetStaticMethodIDOrDie(env, system, "getProperty",
                                                          "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
+    auto formatProperty = (jstring)env->CallStaticObjectMethod(
+            system, getPropertyMethod, env->NewStringUTF("method_binding_format"),
+            env->NewStringUTF(""));
+    const char* methodFormatChars = env->GetStringUTFChars(formatProperty, 0);
+    setJniMethodFormat(string(methodFormatChars));
+    env->ReleaseStringUTFChars(formatProperty, methodFormatChars);
+
     // Get the names of classes that need to register their native methods
     auto nativesClassesJString = (jstring)env->CallStaticObjectMethod(
             system, getPropertyMethod, env->NewStringUTF("graphics_native_classes"),

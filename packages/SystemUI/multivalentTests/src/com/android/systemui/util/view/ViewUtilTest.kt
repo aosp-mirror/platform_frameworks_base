@@ -105,6 +105,20 @@ class ViewUtilTest : SysuiTestCase() {
         assertThat(outRect.top).isEqualTo(VIEW_TOP)
         assertThat(outRect.bottom).isEqualTo(VIEW_BOTTOM)
     }
+
+    @Test
+    fun viewBoundsOnScreen_viewAnchoredAtOriginInWindow() {
+        // view is anchored at 0,0 in its window
+        view.setLeftTopRightBottom(0, 0, VIEW_RIGHT - VIEW_LEFT, VIEW_BOTTOM - VIEW_TOP)
+
+        val outRect = Rect()
+        view.viewBoundsOnScreen(outRect)
+
+        assertThat(outRect.left).isEqualTo(VIEW_LEFT)
+        assertThat(outRect.right).isEqualTo(VIEW_RIGHT)
+        assertThat(outRect.top).isEqualTo(VIEW_TOP)
+        assertThat(outRect.bottom).isEqualTo(VIEW_BOTTOM)
+    }
 }
 
 private const val VIEW_LEFT = 30

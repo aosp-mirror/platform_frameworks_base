@@ -17,6 +17,9 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.pm.UserInfo
+import android.platform.test.annotations.EnableFlags
+import android.view.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.SceneKey
@@ -27,6 +30,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.inputmethod.data.model.InputMethodModel
 import com.android.systemui.inputmethod.data.repository.fakeInputMethodRepository
 import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
@@ -67,11 +71,12 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     private val inputMethodInteractor by lazy { kosmos.inputMethodInteractor }
     private val isInputEnabled = MutableStateFlow(true)
 
-    private val underTest =
+    private val underTest by lazy {
         kosmos.passwordBouncerViewModelFactory.create(
             isInputEnabled = isInputEnabled,
             onIntentionalUserInput = {},
         )
+    }
 
     @Before
     fun setUp() {
@@ -344,6 +349,37 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             // focus should not be requested again
             assertThat(textInputFocusRequested).isFalse()
         }
+
+    @EnableFlags(com.android.systemui.Flags.FLAG_COMPOSE_BOUNCER)
+    @Test
+    fun consumeConfirmKeyEvents_toPreventItFromPropagating() =
+        testScope.runTest { verifyConfirmKeyEventsBehavior(keyUpEventConsumed = true) }
+
+    @EnableFlags(com.android.systemui.Flags.FLAG_COMPOSE_BOUNCER)
+    @EnableSceneContainer
+    @Test
+    fun noops_whenSceneContainerIsAlsoEnabled() =
+        testScope.runTest { verifyConfirmKeyEventsBehavior(keyUpEventConsumed = false) }
+
+    private fun verifyConfirmKeyEventsBehavior(keyUpEventConsumed: Boolean) {
+        assertThat(underTest.onKeyEvent(KeyEventType.KeyDown, KeyEvent.KEYCODE_DPAD_CENTER))
+            .isFalse()
+        assertThat(underTest.onKeyEvent(KeyEventType.KeyUp, KeyEvent.KEYCODE_DPAD_CENTER))
+            .isEqualTo(keyUpEventConsumed)
+
+        assertThat(underTest.onKeyEvent(KeyEventType.KeyDown, KeyEvent.KEYCODE_ENTER)).isFalse()
+        assertThat(underTest.onKeyEvent(KeyEventType.KeyUp, KeyEvent.KEYCODE_ENTER))
+            .isEqualTo(keyUpEventConsumed)
+
+        assertThat(underTest.onKeyEvent(KeyEventType.KeyDown, KeyEvent.KEYCODE_NUMPAD_ENTER))
+            .isFalse()
+        assertThat(underTest.onKeyEvent(KeyEventType.KeyUp, KeyEvent.KEYCODE_NUMPAD_ENTER))
+            .isEqualTo(keyUpEventConsumed)
+
+        // space is ignored.
+        assertThat(underTest.onKeyEvent(KeyEventType.KeyUp, KeyEvent.KEYCODE_SPACE)).isFalse()
+        assertThat(underTest.onKeyEvent(KeyEventType.KeyDown, KeyEvent.KEYCODE_SPACE)).isFalse()
+    }
 
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.currentScene)

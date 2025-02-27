@@ -19,79 +19,60 @@ import static com.android.internal.widget.remotecompose.core.operations.Utils.id
 
 import android.graphics.Path;
 import android.graphics.PathMeasure;
-import android.os.Build;
 
 import com.android.internal.widget.remotecompose.core.operations.PathData;
 
 public class FloatsToPath {
-    public static void genPath(Path retPath,
-                               float[] floatPath,
-                               float start,
-                               float stop) {
+    public static void genPath(Path retPath, float[] floatPath, float start, float stop) {
         int i = 0;
         Path path = new Path(); // todo this should be cached for performance
         while (i < floatPath.length) {
             switch (idFromNan(floatPath[i])) {
-                case PathData.MOVE: {
+                case PathData.MOVE:
                     i++;
                     path.moveTo(floatPath[i + 0], floatPath[i + 1]);
                     i += 2;
-                }
-                break;
-                case PathData.LINE: {
+                    break;
+                case PathData.LINE:
                     i += 3;
                     path.lineTo(floatPath[i + 0], floatPath[i + 1]);
                     i += 2;
-                }
-                break;
-                case PathData.QUADRATIC: {
+                    break;
+                case PathData.QUADRATIC:
                     i += 3;
                     path.quadTo(
+                            floatPath[i + 0], floatPath[i + 1], floatPath[i + 2], floatPath[i + 3]);
+                    i += 4;
+                    break;
+                case PathData.CONIC:
+                    i += 3;
+
+                    path.conicTo(
                             floatPath[i + 0],
                             floatPath[i + 1],
                             floatPath[i + 2],
-                            floatPath[i + 3]
-                    );
-                    i += 4;
+                            floatPath[i + 3],
+                            floatPath[i + 4]);
 
-                }
-                break;
-                case PathData.CONIC: {
-                    i += 3;
-                    if (Build.VERSION.SDK_INT >= 34) { // REMOVE IN PLATFORM
-                        path.conicTo(
-                                floatPath[i + 0], floatPath[i + 1],
-                                floatPath[i + 2], floatPath[i + 3],
-                                floatPath[i + 4]
-                        );
-                    }
                     i += 5;
-                }
-                break;
-                case PathData.CUBIC: {
+                    break;
+                case PathData.CUBIC:
                     i += 3;
                     path.cubicTo(
                             floatPath[i + 0], floatPath[i + 1],
                             floatPath[i + 2], floatPath[i + 3],
-                            floatPath[i + 4], floatPath[i + 5]
-                    );
+                            floatPath[i + 4], floatPath[i + 5]);
                     i += 6;
-                }
-                break;
-                case PathData.CLOSE: {
-
+                    break;
+                case PathData.CLOSE:
                     path.close();
                     i++;
-                }
-                break;
-                case PathData.DONE: {
+                    break;
+                case PathData.DONE:
                     i++;
-                }
-                break;
-                default: {
-                    System.err.println(" Odd command "
-                            + idFromNan(floatPath[i]));
-                }
+                    break;
+                default:
+                    System.err.println(" Odd command " + idFromNan(floatPath[i]));
             }
         }
 
@@ -104,8 +85,7 @@ public class FloatsToPath {
                 float len = measure.getLength();
                 float scaleStart = Math.max(start, 0f) * len;
                 float scaleStop = Math.min(stop, 1f) * len;
-                measure.getSegment(scaleStart, scaleStop, retPath,
-                        true);
+                measure.getSegment(scaleStart, scaleStop, retPath, true);
             }
         } else {
 

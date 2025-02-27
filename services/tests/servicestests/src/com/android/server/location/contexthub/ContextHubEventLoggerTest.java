@@ -128,8 +128,6 @@ public class ContextHubEventLoggerTest {
     }
 
     @Test
-    @EnableFlags({Flags.FLAG_RELIABLE_MESSAGE,
-                  Flags.FLAG_RELIABLE_MESSAGE_IMPLEMENTATION})
     public void testLogReliableMessageToNanoappStatus() {
         NanoAppMessage message1 = NanoAppMessage.createMessageToNanoApp(1, 0,
                 new byte[] {0x00, 0x11, 0x22, 0x33});

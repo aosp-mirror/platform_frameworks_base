@@ -49,6 +49,7 @@ java_library {
         "wm-flicker-common-assertions",
         "launcher-helper-lib",
         "launcher-aosp-tapl",
+        "com_android_wm_shell_flags_lib",
     ],
 }
 
@@ -67,116 +68,6 @@ android_test {
     ],
     data: ["trace_config/*"],
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// Begin cleanup after gcl merges
-
-filegroup {
-    name: "WMShellFlickerTestsSplitScreenGroup1-src",
-    srcs: [
-        "src/**/A*.kt",
-        "src/**/B*.kt",
-        "src/**/C*.kt",
-        "src/**/D*.kt",
-    ],
-}
-
-filegroup {
-    name: "WMShellFlickerTestsSplitScreenGroup2-src",
-    srcs: [
-        "src/**/E*.kt",
-    ],
-}
-
-filegroup {
-    name: "WMShellFlickerTestsSplitScreenGroup3-src",
-    srcs: [
-        "src/**/S*.kt",
-    ],
-}
-
-filegroup {
-    name: "WMShellFlickerTestsSplitScreenGroupOther-src",
-    srcs: [
-        "src/**/*.kt",
-    ],
-}
-
-android_test {
-    name: "WMShellFlickerTestsSplitScreenGroup1",
-    defaults: ["WMShellFlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    package_name: "com.android.wm.shell.flicker.splitscreen",
-    instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [
-        ":WMShellFlickerTestsSplitScreenGroup1-src",
-    ],
-    static_libs: [
-        "WMShellFlickerTestsBase",
-        "WMShellFlickerTestsSplitScreenBase",
-    ],
-    data: ["trace_config/*"],
-}
-
-android_test {
-    name: "WMShellFlickerTestsSplitScreenGroup2",
-    defaults: ["WMShellFlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    package_name: "com.android.wm.shell.flicker.splitscreen",
-    instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [
-        ":WMShellFlickerTestsSplitScreenGroup2-src",
-    ],
-    static_libs: [
-        "WMShellFlickerTestsBase",
-        "WMShellFlickerTestsSplitScreenBase",
-    ],
-    data: ["trace_config/*"],
-}
-
-android_test {
-    name: "WMShellFlickerTestsSplitScreenGroup3",
-    defaults: ["WMShellFlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    package_name: "com.android.wm.shell.flicker.splitscreen",
-    instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [
-        ":WMShellFlickerTestsSplitScreenGroup3-src",
-    ],
-    static_libs: [
-        "WMShellFlickerTestsBase",
-        "WMShellFlickerTestsSplitScreenBase",
-    ],
-    data: ["trace_config/*"],
-}
-
-android_test {
-    name: "WMShellFlickerTestsSplitScreenGroupOther",
-    defaults: ["WMShellFlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    package_name: "com.android.wm.shell.flicker.splitscreen",
-    instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [
-        ":WMShellFlickerTestsSplitScreenGroupOther-src",
-    ],
-    exclude_srcs: [
-        ":WMShellFlickerTestsSplitScreenGroup1-src",
-        ":WMShellFlickerTestsSplitScreenGroup2-src",
-        ":WMShellFlickerTestsSplitScreenGroup3-src",
-    ],
-    static_libs: [
-        "WMShellFlickerTestsBase",
-        "WMShellFlickerTestsSplitScreenBase",
-    ],
-    data: ["trace_config/*"],
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// End cleanup after gcl merges
 
 ////////////////////////////////////////////////////////////////////////////////
 // Begin breakdowns for FlickerTestsRotation module

@@ -33,9 +33,9 @@ inline bool letter_spacing_justification() {
 #endif  // __ANDROID__
 }
 
-inline bool typeface_redesign() {
+inline bool typeface_redesign_readonly() {
 #ifdef __ANDROID__
-    static bool flag = com_android_text_flags_typeface_redesign();
+    static bool flag = com_android_text_flags_typeface_redesign_readonly();
     return flag;
 #else
     return true;

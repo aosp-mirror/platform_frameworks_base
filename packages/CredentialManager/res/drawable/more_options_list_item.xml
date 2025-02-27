@@ -24,7 +24,7 @@
     <shape>
         <corners android:topLeftRadius="0dp" android:topRightRadius="0dp"
             android:bottomLeftRadius="4dp" android:bottomRightRadius="4dp"/>
-        <solid android:color="?androidprv:attr/materialColorSurfaceContainer"/>
-        <stroke android:color="?androidprv:attr/materialColorOutlineVariant" android:width="1dp"/>
+        <solid android:color="@androidprv:color/materialColorSurfaceContainer"/>
+        <stroke android:color="@androidprv:color/materialColorOutlineVariant" android:width="1dp"/>
     </shape>
 </inset>

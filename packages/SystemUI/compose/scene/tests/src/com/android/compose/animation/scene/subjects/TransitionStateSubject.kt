@@ -157,7 +157,7 @@ abstract class BaseTransitionSubject<T : TransitionState.Transition>(
         check("isUserInputOngoing").that(actual.isUserInputOngoing).isEqualTo(isUserInputOngoing)
     }
 
-    fun hasOverscrollSpec(): OverscrollSpec {
+    internal fun hasOverscrollSpec(): OverscrollSpec {
         check("currentOverscrollSpec").that(actual.currentOverscrollSpec).isNotNull()
         return actual.currentOverscrollSpec!!
     }

@@ -72,6 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID chiamante generalmente limitato. Prossima chiamata: non limitato"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID chiamante generalmente non limitato. Prossima chiamata: limitato"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID chiamante generalmente non limitato. Prossima chiamata: non limitato"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Questa app non è compatibile con 16 kB. Controllo allineamento APK non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Questa app non è compatibile con 16 kB. Controllo allineamento ELF non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Questa app non è compatibile con 16 kB. Controlli di allineamento APK ed ELF non riusciti. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Servizio non fornito."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Non è possibile modificare l\'impostazione ID chiamante."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"I dati sono stati trasferiti a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1156,6 +1159,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"tra <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"tra <xliff:g id="COUNT">%d</xliff:g> g"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"tra <xliff:g id="COUNT">%d</xliff:g> a"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuto fa}many{# di minuti fa}other{# minuti fa}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ora fa}many{# di ore fa}other{# ore fa}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# giorno fa}many{# di giorni fa}other{# giorni fa}}"</string>
@@ -1941,11 +1976,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fine settimana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Notte"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Non disturbare (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gestione: app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"On"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Off"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"Da <xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualsiasi calendario"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> sta disattivando alcuni suoni"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Si è verificato un problema interno con il dispositivo, che potrebbe essere instabile fino al ripristino dei dati di fabbrica."</string>
@@ -2132,11 +2170,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"La vibrazione sarà attiva per chiamate e notifiche"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"L\'audio di chiamate e notifiche sarà disattivato"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modifiche al sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Non disturbare"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novità: la modalità Non disturbare nasconde le notifiche"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tocca per avere ulteriori informazioni e modificare."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"L\'impostazione Non disturbare è cambiata"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tocca per controllare le notifiche bloccate."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Controlla le impostazioni di notifica"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"A partire da Android 13, le app che installi devono avere la tua autorizzazione per poter inviare notifiche. Tocca per cambiare questa autorizzazione per le app esistenti."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ricordamelo dopo"</string>
@@ -2432,7 +2465,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Invia e ricevi messaggi senza una rete mobile o Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Apri Messaggi"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Come funziona"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Attiva \"Seleziona rete automaticamente\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Attiva \"Seleziona rete automaticamente\" nelle Impostazioni in modo che lo smartphone possa trovare una rete compatibile con il satellite"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Attiva"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Indietro"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"In attesa…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"SOS satellitare è disponibile"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Puoi inviare messaggi ai servizi di emergenza se non disponi di una rete mobile o Wi-Fi. Google Messaggi deve essere l\'app di messaggistica predefinita."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"SOS satellitare non supportato"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"SOS satellitare non è supportato su questo dispositivo"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"SOS satellitare non configurato"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Assicurati di avere una connessione a internet attiva e prova a ripetere la configurazione"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS satellitare non disponibile"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS satellitare non è disponibile in questo paese o in questa regione"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"SOS satellitare non configurato"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Per inviare messaggi via satellite, imposta Google Messaggi come app di messaggistica predefinita"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS satellitare non disponibile"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Per verificare se SOS satellitare è disponibile in questo paese o in questa regione, attiva le impostazioni di localizzazione"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Messaggi via satellite disponibili"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Puoi inviare messaggi via satellite se non disponi di una rete mobile o Wi-Fi. Google Messaggi deve essere l\'app di messaggistica predefinita."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Messaggi via satellite non supportati"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"I messaggi via satellite non sono supportati su questo dispositivo"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Messaggi via satellite non configurati"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Assicurati di avere una connessione a internet attiva e prova a ripetere la configurazione"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Messaggi via satellite non disponibili"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"I messaggi via satellite non sono disponibili in questo paese o in questa regione"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Messaggi via satellite non configurati"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Per inviare messaggi via satellite, imposta Google Messaggi come app di messaggistica predefinita"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Messaggi via satellite non disponibili"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Per verificare se i messaggi via satellite sono disponibili in questo paese o in questa regione, attiva le impostazioni di localizzazione"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Riconfigura lo Sblocco con l\'Impronta"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> non può più essere riconosciuto."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> non possono più essere riconosciuti."</string>

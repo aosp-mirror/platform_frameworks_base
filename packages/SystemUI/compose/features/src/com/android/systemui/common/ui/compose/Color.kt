@@ -19,6 +19,7 @@ package com.android.systemui.common.ui.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import com.android.compose.theme.colorAttr
 
 /** Resolves [com.android.systemui.common.shared.model.Color] into [Color] */
@@ -28,5 +29,6 @@ fun com.android.systemui.common.shared.model.Color.toColor(): Color {
     return when (this) {
         is com.android.systemui.common.shared.model.Color.Attribute -> colorAttr(attribute)
         is com.android.systemui.common.shared.model.Color.Loaded -> Color(color)
+        is com.android.systemui.common.shared.model.Color.Resource -> colorResource(colorRes)
     }
 }

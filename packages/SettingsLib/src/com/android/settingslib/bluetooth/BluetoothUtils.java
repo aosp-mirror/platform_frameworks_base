@@ -1,6 +1,7 @@
 package com.android.settingslib.bluetooth;
 
 import static com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast.UNKNOWN_VALUE_PLACEHOLDER;
+import static com.android.settingslib.flags.Flags.audioSharingHysteresisModeFix;
 import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
 import android.annotation.SuppressLint;
@@ -64,6 +65,8 @@ public class BluetoothUtils {
 
     public static final int META_INT_ERROR = -1;
     public static final String BT_ADVANCED_HEADER_ENABLED = "bt_advanced_header_enabled";
+    public static final String DEVELOPER_OPTION_PREVIEW_KEY =
+            "bluetooth_le_audio_sharing_ui_preview_enabled";
     private static final int METADATA_FAST_PAIR_CUSTOMIZED_FIELDS = 25;
     private static final String KEY_HEARABLE_CONTROL_SLICE = "HEARABLE_CONTROL_SLICE_WITH_WIDTH";
     private static final Set<Integer> SA_PROFILES =
@@ -628,19 +631,32 @@ public class BluetoothUtils {
                 assistantProfile.getAllConnectedDevices().stream()
                         .map(deviceManager::findDevice)
                         .filter(Objects::nonNull)
-                        .map(CachedBluetoothDevice::getGroupId)
+                        .map(BluetoothUtils::getGroupId)
                         .collect(Collectors.toSet());
         Set<Integer> activeGroupIds =
                 leAudioProfile.getActiveDevices().stream()
                         .map(deviceManager::findDevice)
                         .filter(Objects::nonNull)
-                        .map(CachedBluetoothDevice::getGroupId)
+                        .map(BluetoothUtils::getGroupId)
                         .collect(Collectors.toSet());
-        int groupId = cachedDevice.getGroupId();
+        int groupId = getGroupId(cachedDevice);
         return activeGroupIds.size() == 1
                 && !activeGroupIds.contains(groupId)
                 && connectedGroupIds.size() == 2
                 && connectedGroupIds.contains(groupId);
+    }
+
+    /** Returns if the le audio sharing UI is available. */
+    public static boolean isAudioSharingUIAvailable(@Nullable Context context) {
+        return isAudioSharingEnabled() || (context != null && isAudioSharingPreviewEnabled(
+                context.getContentResolver()));
+    }
+
+    /** Returns if the le audio sharing hysteresis mode fix is available. */
+    @WorkerThread
+    public static boolean isAudioSharingHysteresisModeFixAvailable(@Nullable Context context) {
+        return (audioSharingHysteresisModeFix() && Flags.enableLeAudioSharing())
+                || (context != null && isAudioSharingPreviewEnabled(context.getContentResolver()));
     }
 
     /** Returns if the le audio sharing is enabled. */
@@ -653,7 +669,23 @@ public class BluetoothUtils {
                     && adapter.isLeAudioBroadcastAssistantSupported()
                             == BluetoothStatusCodes.FEATURE_SUPPORTED;
         } catch (IllegalStateException e) {
-            Log.d(TAG, "LE state is on, but there is no bluetooth service.", e);
+            Log.d(TAG, "Fail to check isAudioSharingEnabled, e = ", e);
+            return false;
+        }
+    }
+
+    /** Returns if the le audio sharing preview is enabled in developer option. */
+    public static boolean isAudioSharingPreviewEnabled(@Nullable ContentResolver contentResolver) {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        try {
+            return Flags.audioSharingDeveloperOption()
+                    && getAudioSharingPreviewValue(contentResolver)
+                    && adapter.isLeAudioBroadcastSourceSupported()
+                            == BluetoothStatusCodes.FEATURE_SUPPORTED
+                    && adapter.isLeAudioBroadcastAssistantSupported()
+                            == BluetoothStatusCodes.FEATURE_SUPPORTED;
+        } catch (IllegalStateException e) {
+            Log.d(TAG, "Fail to check isAudioSharingPreviewEnabled, e = ", e);
             return false;
         }
     }
@@ -709,10 +741,15 @@ public class BluetoothUtils {
     @WorkerThread
     public static boolean hasConnectedBroadcastSourceForBtDevice(
             @Nullable BluetoothDevice device, @Nullable LocalBluetoothManager localBtManager) {
+        if (localBtManager == null) {
+            Log.d(TAG, "Skip check hasConnectedBroadcastSourceForBtDevice due to arg is null");
+            return false;
+        }
+        if (isAudioSharingHysteresisModeFixAvailable(localBtManager.getContext())) {
+            return hasActiveLocalBroadcastSourceForBtDevice(device, localBtManager);
+        }
         LocalBluetoothLeBroadcastAssistant assistant =
-                localBtManager == null
-                        ? null
-                        : localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+                localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
         if (device == null || assistant == null) {
             Log.d(TAG, "Skip check hasConnectedBroadcastSourceForBtDevice due to arg is null");
             return false;
@@ -991,6 +1028,17 @@ public class BluetoothUtils {
                 contentResolver,
                 getPrimaryGroupIdUriForBroadcast(),
                 BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
+    }
+
+    /** Get develop option value for audio sharing preview. */
+    @WorkerThread
+    private static boolean getAudioSharingPreviewValue(@Nullable ContentResolver contentResolver) {
+        if (contentResolver == null) return false;
+        return Settings.Global.getInt(
+                contentResolver,
+                DEVELOPER_OPTION_PREVIEW_KEY,
+                0 // value off
+        ) == 1;
     }
 
     /** Get secondary {@link CachedBluetoothDevice} in broadcast. */

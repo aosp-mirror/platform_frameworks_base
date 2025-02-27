@@ -27,7 +27,6 @@ import android.os.UserHandle
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
-import androidx.activity.result.ActivityResultLauncher
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.dagger.CommunalModule.Companion.LAUNCHER_PACKAGE
 import com.android.systemui.communal.data.model.CommunalWidgetCategories
@@ -47,6 +46,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
@@ -83,7 +83,14 @@ constructor(
     private val accessibilityManager: AccessibilityManager,
     private val packageManager: PackageManager,
     @Named(LAUNCHER_PACKAGE) private val launcherPackage: String,
-) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
+    mediaCarouselController: MediaCarouselController,
+) :
+    BaseCommunalViewModel(
+        communalSceneInteractor,
+        communalInteractor,
+        mediaHost,
+        mediaCarouselController,
+    ) {
 
     private val logger = Logger(logBuffer, "CommunalEditModeViewModel")
 
@@ -107,9 +114,9 @@ constructor(
         allOf(
                 keyguardTransitionInteractor.isFinishedIn(
                     scene = Scenes.Gone,
-                    stateWithoutSceneContainer = KeyguardState.GONE
+                    stateWithoutSceneContainer = KeyguardState.GONE,
                 ),
-                communalInteractor.editModeOpen
+                communalInteractor.editModeOpen,
             )
             .filter { it }
 
@@ -128,23 +135,34 @@ constructor(
         componentName: ComponentName,
         user: UserHandle,
         rank: Int?,
-        configurator: WidgetConfigurator?
+        configurator: WidgetConfigurator?,
     ) {
         communalInteractor.addWidget(componentName, user, rank, configurator)
         metricsLogger.logAddWidget(componentName.flattenToString(), rank)
     }
 
-    override fun onDeleteWidget(
-        id: Int,
-        componentName: ComponentName,
-        rank: Int,
-    ) {
+    override fun onDeleteWidget(id: Int, componentName: ComponentName, rank: Int) {
         communalInteractor.deleteWidget(id)
         metricsLogger.logRemoveWidget(componentName.flattenToString(), rank)
     }
 
     override fun onReorderWidgets(widgetIdToRankMap: Map<Int, Int>) =
         communalInteractor.updateWidgetOrder(widgetIdToRankMap)
+
+    override fun onResizeWidget(
+        appWidgetId: Int,
+        spanY: Int,
+        widgetIdToRankMap: Map<Int, Int>,
+        componentName: ComponentName,
+        rank: Int,
+    ) {
+        communalInteractor.resizeWidget(appWidgetId, spanY, widgetIdToRankMap)
+        metricsLogger.logResizeWidget(
+            componentName = componentName.flattenToString(),
+            rank = rank,
+            spanY = spanY,
+        )
+    }
 
     override fun onReorderWidgetStart() {
         // Clear selection status
@@ -173,7 +191,7 @@ constructor(
         val announcementText =
             context.getString(
                 R.string.accessibility_announcement_communal_widget_added,
-                widgetLabel
+                widgetLabel,
             )
         accessibilityManager.sendAccessibilityEvent(
             AccessibilityEvent(AccessibilityEvent.TYPE_ANNOUNCEMENT).apply {
@@ -184,10 +202,10 @@ constructor(
 
     val isIdleOnCommunal: StateFlow<Boolean> = communalInteractor.isIdleOnCommunal
 
-    /** Launch the widget picker activity using the given {@link ActivityResultLauncher}. */
+    /** Launch the widget picker activity using the given startActivity method. */
     suspend fun onOpenWidgetPicker(
         resources: Resources,
-        activityLauncher: ActivityResultLauncher<Intent>
+        startActivity: (intent: Intent) -> Unit,
     ): Boolean =
         withContext(backgroundDispatcher) {
             val widgets = communalInteractor.widgetContent.first()
@@ -199,7 +217,7 @@ constructor(
                 }
             getWidgetPickerActivityIntent(resources, excludeList)?.let {
                 try {
-                    activityLauncher.launch(it)
+                    startActivity(it)
                     return@withContext true
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to launch widget picker activity", e)
@@ -210,21 +228,21 @@ constructor(
 
     private fun getWidgetPickerActivityIntent(
         resources: Resources,
-        excludeList: ArrayList<AppWidgetProviderInfo>
+        excludeList: ArrayList<AppWidgetProviderInfo>,
     ): Intent? {
         return Intent(Intent.ACTION_PICK).apply {
             setPackage(launcherPackage)
             putExtra(
                 EXTRA_DESIRED_WIDGET_WIDTH,
-                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_width)
+                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_width),
             )
             putExtra(
                 EXTRA_DESIRED_WIDGET_HEIGHT,
-                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_height)
+                resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_height),
             )
             putExtra(
                 AppWidgetManager.EXTRA_CATEGORY_FILTER,
-                CommunalWidgetCategories.defaultCategories
+                CommunalWidgetCategories.defaultCategories,
             )
 
             communalSettingsInteractor.workProfileUserDisallowedByDevicePolicy.value?.let {
@@ -234,7 +252,7 @@ constructor(
             putExtra(EXTRA_PICKER_TITLE, resources.getString(R.string.communal_widget_picker_title))
             putExtra(
                 EXTRA_PICKER_DESCRIPTION,
-                resources.getString(R.string.communal_widget_picker_description)
+                resources.getString(R.string.communal_widget_picker_description),
             )
             putParcelableArrayListExtra(EXTRA_ADDED_APP_WIDGETS_KEY, excludeList)
         }

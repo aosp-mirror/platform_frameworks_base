@@ -17,6 +17,7 @@
 #define LOG_TAG "OverlayProperties"
 // #define LOG_NDEBUG 0
 
+#include <android/gui/LutProperties.h>
 #include <android/gui/OverlayProperties.h>
 #include <binder/Parcel.h>
 #include <gui/SurfaceComposerClient.h>
@@ -35,6 +36,12 @@ static struct {
     jclass clazz;
     jmethodID ctor;
 } gOverlayPropertiesClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gLutPropertiesClassInfo;
+
 // ----------------------------------------------------------------------------
 // OverlayProperties lifecycle
 // ----------------------------------------------------------------------------
@@ -93,6 +100,36 @@ static jlong android_hardware_OverlayProperties_createDefault(JNIEnv* env, jobje
     overlayProperties->combinations.emplace_back(combination);
     overlayProperties->supportMixedColorSpaces = true;
     return reinterpret_cast<jlong>(overlayProperties);
+}
+
+static jobjectArray android_hardware_OverlayProperties_getLutProperties(JNIEnv* env, jobject thiz,
+                                                                        jlong nativeObject) {
+    gui::OverlayProperties* overlayProperties =
+            reinterpret_cast<gui::OverlayProperties*>(nativeObject);
+    if (!overlayProperties || !overlayProperties->lutProperties) {
+        return NULL;
+    }
+    auto& lutProperties = overlayProperties->lutProperties.value();
+    if (lutProperties.empty()) {
+        return NULL;
+    }
+    int32_t size = static_cast<int32_t>(lutProperties.size());
+    jobjectArray nativeLutProperties =
+            env->NewObjectArray(size, gLutPropertiesClassInfo.clazz, NULL);
+    if (nativeLutProperties == NULL) {
+        return NULL;
+    }
+    for (int32_t i = 0; i < size; i++) {
+        if (lutProperties[i].has_value()) {
+            auto& item = lutProperties[i].value();
+            jobject properties =
+                    env->NewObject(gLutPropertiesClassInfo.clazz, gLutPropertiesClassInfo.ctor,
+                                   static_cast<int32_t>(item.dimension), item.size,
+                                   item.samplingKeys.data());
+            env->SetObjectArrayElement(nativeLutProperties, i, properties);
+        }
+    }
+    return nativeLutProperties;
 }
 
 // ----------------------------------------------------------------------------
@@ -161,6 +198,8 @@ static const JNINativeMethod gMethods[] = {
     { "nReadOverlayPropertiesFromParcel", "(Landroid/os/Parcel;)J",
             (void*) android_hardware_OverlayProperties_read },
     {"nCreateDefault", "()J", (void*) android_hardware_OverlayProperties_createDefault },
+    {"nGetLutProperties", "(J)[Landroid/hardware/LutProperties;",
+            (void*) android_hardware_OverlayProperties_getLutProperties },
 };
 // clang-format on
 
@@ -171,5 +210,9 @@ int register_android_hardware_OverlayProperties(JNIEnv* env) {
     gOverlayPropertiesClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
     gOverlayPropertiesClassInfo.ctor =
             GetMethodIDOrDie(env, gOverlayPropertiesClassInfo.clazz, "<init>", "(J)V");
+    clazz = FindClassOrDie(env, "android/hardware/LutProperties");
+    gLutPropertiesClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
+    gLutPropertiesClassInfo.ctor =
+            GetMethodIDOrDie(env, gLutPropertiesClassInfo.clazz, "<init>", "(II[I)V");
     return err;
 }

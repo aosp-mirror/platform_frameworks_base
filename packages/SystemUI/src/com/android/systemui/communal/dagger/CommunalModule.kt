@@ -32,6 +32,9 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneTransitionIn
 import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.communal.shared.log.CommunalStatsLogProxyImpl
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelperImpl
+import com.android.systemui.communal.ui.compose.sceneTransitions
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.communal.util.CommunalColorsImpl
 import com.android.systemui.communal.widgets.CommunalWidgetModule
@@ -65,6 +68,7 @@ import kotlinx.coroutines.CoroutineScope
             CommunalSettingsRepositoryModule::class,
             CommunalSmartspaceRepositoryModule::class,
             CommunalStartableModule::class,
+            GlanceableHubWidgetManagerModule::class,
         ]
 )
 interface CommunalModule {
@@ -91,6 +95,11 @@ interface CommunalModule {
         impl: CommunalSceneTransitionInteractor
     ): CoreStartable
 
+    @Binds
+    fun bindGlanceableHubMultiUserHelper(
+        impl: GlanceableHubMultiUserHelperImpl
+    ): GlanceableHubMultiUserHelper
+
     companion object {
         const val LOGGABLE_PREFIXES = "loggable_prefixes"
         const val LAUNCHER_PACKAGE = "launcher_package"
@@ -105,20 +114,16 @@ interface CommunalModule {
                 SceneContainerConfig(
                     sceneKeys = listOf(CommunalScenes.Blank, CommunalScenes.Communal),
                     initialSceneKey = CommunalScenes.Blank,
+                    transitions = sceneTransitions,
                     navigationDistances =
-                        mapOf(
-                            CommunalScenes.Blank to 0,
-                            CommunalScenes.Communal to 1,
-                        ),
+                        mapOf(CommunalScenes.Blank to 0, CommunalScenes.Communal to 1),
                 )
             return SceneDataSourceDelegator(applicationScope, config)
         }
 
         @Provides
         @SysUISingleton
-        fun providesCommunalBackupUtils(
-            @Application context: Context,
-        ): CommunalBackupUtils {
+        fun providesCommunalBackupUtils(@Application context: Context): CommunalBackupUtils {
             return CommunalBackupUtils(context)
         }
 

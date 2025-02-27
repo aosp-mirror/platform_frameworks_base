@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.CompatScaleProvider.COMPAT_SCALE_MODE_SYSTEM_FIRST;

@@ -16,13 +16,10 @@
 
 package android.service.chooser;
 
-import android.annotation.FlaggedApi;
-
 /**
  * Specifies constants used by Chooser when interacting with the additional content provider,
  * see {@link android.content.Intent#EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI}.
  */
-@FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
 public interface AdditionalContentContract {
 
     interface Columns {

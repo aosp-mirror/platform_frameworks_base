@@ -24,6 +24,8 @@ import android.os.UidBatteryConsumer;
 
 import androidx.annotation.NonNull;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 class BatteryConsumerInfoHelper {
@@ -76,6 +78,8 @@ class BatteryConsumerInfoHelper {
         String packageWithHighestDrain = uidBatteryConsumer.getPackageWithHighestDrain();
         if (uid == Process.ROOT_UID) {
             info.label = "<root>";
+        } else if (uid < Process.FIRST_APPLICATION_UID) {
+            info.label = makeSystemUidLabel(uid);
         } else {
             String[] packages = packageManager.getPackagesForUid(uid);
             String primaryPackageName = null;
@@ -132,6 +136,23 @@ class BatteryConsumerInfoHelper {
             }
         }
         return info;
+    }
+
+    private static CharSequence makeSystemUidLabel(int uid) {
+        for (Field field : Process.class.getDeclaredFields()) {
+            final int modifiers = field.getModifiers();
+            if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)
+                    && field.getType().equals(int.class) && field.getName().endsWith("_UID")) {
+                try {
+                    if (uid == field.getInt(null)) {
+                        String label = field.getName();
+                        return label.substring(0, label.lastIndexOf("_UID"));
+                    }
+                } catch (IllegalAccessException ignored) {
+                }
+            }
+        }
+        return null;
     }
 
     private static BatteryConsumerInfo makeAggregateBatteryConsumerInfo(

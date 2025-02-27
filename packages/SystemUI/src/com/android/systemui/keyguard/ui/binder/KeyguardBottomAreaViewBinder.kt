@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
 import android.graphics.Rect
 import android.graphics.drawable.Animatable2
 import android.util.Size
@@ -37,7 +38,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.settingslib.Utils
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.view.LaunchableLinearLayout
@@ -382,25 +382,25 @@ object KeyguardBottomAreaViewBinder {
 
         view.isActivated = viewModel.isActivated
         view.drawable.setTint(
-            Utils.getColorAttrDefaultColor(
-                view.context,
+            view.context.getColor(
                 if (viewModel.isActivated) {
-                    com.android.internal.R.attr.materialColorOnPrimaryFixed
+                    com.android.internal.R.color.materialColorOnPrimaryFixed
                 } else {
-                    com.android.internal.R.attr.materialColorOnSurface
-                },
+                    com.android.internal.R.color.materialColorOnSurface
+                }
             )
         )
 
         view.backgroundTintList =
             if (!viewModel.isSelected) {
-                Utils.getColorAttr(
-                    view.context,
-                    if (viewModel.isActivated) {
-                        com.android.internal.R.attr.materialColorPrimaryFixed
-                    } else {
-                        com.android.internal.R.attr.materialColorSurfaceContainerHigh
-                    }
+                ColorStateList.valueOf(
+                    view.context.getColor(
+                        if (viewModel.isActivated) {
+                            com.android.internal.R.color.materialColorPrimaryFixed
+                        } else {
+                            com.android.internal.R.color.materialColorSurfaceContainerHigh
+                        }
+                    )
                 )
             } else {
                 null

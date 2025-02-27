@@ -22,7 +22,7 @@
         <inset android:inset="-5dp">
             <shape>
                 <corners android:radius="16dp"/>
-                <stroke android:width="3dp" android:color="?androidprv:attr/materialColorSecondaryFixed"/>
+                <stroke android:width="3dp" android:color="@androidprv:color/materialColorSecondaryFixed"/>
             </shape>
         </inset>
     </item>

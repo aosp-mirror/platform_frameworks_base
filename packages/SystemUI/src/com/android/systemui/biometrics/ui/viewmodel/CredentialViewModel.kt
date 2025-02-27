@@ -2,7 +2,6 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.biometrics.PromptContentView
 import android.text.InputType
 import com.android.internal.widget.LockPatternView
@@ -36,21 +35,17 @@ constructor(
     val header: Flow<CredentialHeaderViewModel> =
         combine(
             credentialInteractor.prompt.filterIsInstance<BiometricPromptRequest.Credential>(),
-            credentialInteractor.showTitleOnly
+            credentialInteractor.showTitleOnly,
         ) { request, showTitleOnly ->
-            val flagEnabled = customBiometricPrompt()
-            val showTitleOnlyForCredential = showTitleOnly && flagEnabled
             BiometricPromptHeaderViewModelImpl(
                 request,
                 user = request.userInfo,
                 title = request.title,
-                subtitle = if (showTitleOnlyForCredential) "" else request.subtitle,
-                contentView =
-                    if (flagEnabled && !showTitleOnlyForCredential) request.contentView else null,
-                description =
-                    if (flagEnabled && request.contentView != null) "" else request.description,
+                subtitle = if (showTitleOnly) "" else request.subtitle,
+                contentView = if (!showTitleOnly) request.contentView else null,
+                description = if (request.contentView != null) "" else request.description,
                 icon = applicationContext.asLockIcon(request.userInfo.deviceCredentialOwnerId),
-                showEmergencyCallButton = request.showEmergencyCallButton
+                showEmergencyCallButton = request.showEmergencyCallButton,
             )
         }
 
@@ -125,7 +120,7 @@ constructor(
     /** Check a pattern and update [validatedAttestation] or [remainingAttempts]. */
     suspend fun checkCredential(
         pattern: List<LockPatternView.Cell>,
-        header: CredentialHeaderViewModel
+        header: CredentialHeaderViewModel,
     ) = checkCredential(credentialInteractor.checkCredential(header.asRequest(), pattern = pattern))
 
     private suspend fun checkCredential(result: CredentialStatus) {

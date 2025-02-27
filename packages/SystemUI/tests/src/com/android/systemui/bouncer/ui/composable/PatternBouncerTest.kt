@@ -29,6 +29,7 @@ import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.motion.createSysUiComposeMotionTestRule
 import com.android.systemui.testKosmos
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.takeWhile
@@ -71,7 +72,7 @@ class PatternBouncerTest : SysuiTestCase() {
 
     @Test
     fun entryAnimation() =
-        motionTestRule.runTest {
+        motionTestRule.runTest(timeout = 30.seconds) {
             val motion =
                 recordMotion(
                     content = { play -> if (play) PatternBouncerUnderTest() },
@@ -89,7 +90,7 @@ class PatternBouncerTest : SysuiTestCase() {
 
     @Test
     fun animateFailure() =
-        motionTestRule.runTest {
+        motionTestRule.runTest(timeout = 30.seconds) {
             val failureAnimationMotionControl =
                 MotionControl(
                     delayReadyToPlay = {

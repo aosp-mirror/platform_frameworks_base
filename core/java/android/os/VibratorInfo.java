@@ -20,8 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
+import android.os.vibrator.Flags;
 import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
+import android.util.Pair;
 import android.util.Range;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -30,8 +32,11 @@ import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * A VibratorInfo describes the capabilities of a {@link Vibrator}.
@@ -59,6 +64,7 @@ public class VibratorInfo implements Parcelable {
     private final int mPwlePrimitiveDurationMax;
     private final int mPwleSizeMax;
     private final float mQFactor;
+    private final FrequencyProfileLegacy mFrequencyProfileLegacy;
     private final FrequencyProfile mFrequencyProfile;
     private final int mMaxEnvelopeEffectSize;
     private final int mMinEnvelopeEffectControlPointDurationMillis;
@@ -75,6 +81,7 @@ public class VibratorInfo implements Parcelable {
         mPwlePrimitiveDurationMax = in.readInt();
         mPwleSizeMax = in.readInt();
         mQFactor = in.readFloat();
+        mFrequencyProfileLegacy = FrequencyProfileLegacy.CREATOR.createFromParcel(in);
         mFrequencyProfile = FrequencyProfile.CREATOR.createFromParcel(in);
         mMaxEnvelopeEffectSize = in.readInt();
         mMinEnvelopeEffectControlPointDurationMillis = in.readInt();
@@ -86,8 +93,8 @@ public class VibratorInfo implements Parcelable {
                 baseVibratorInfo.mSupportedBraking, baseVibratorInfo.mSupportedPrimitives,
                 baseVibratorInfo.mPrimitiveDelayMax, baseVibratorInfo.mCompositionSizeMax,
                 baseVibratorInfo.mPwlePrimitiveDurationMax, baseVibratorInfo.mPwleSizeMax,
-                baseVibratorInfo.mQFactor, baseVibratorInfo.mFrequencyProfile,
-                baseVibratorInfo.mMaxEnvelopeEffectSize,
+                baseVibratorInfo.mQFactor, baseVibratorInfo.mFrequencyProfileLegacy,
+                baseVibratorInfo.mFrequencyProfile, baseVibratorInfo.mMaxEnvelopeEffectSize,
                 baseVibratorInfo.mMinEnvelopeEffectControlPointDurationMillis,
                 baseVibratorInfo.mMaxEnvelopeEffectControlPointDurationMillis);
     }
@@ -112,18 +119,31 @@ public class VibratorInfo implements Parcelable {
      * @param pwleSizeMax              The maximum number of primitives supported by a PWLE
      *                                 composition.
      * @param qFactor                  The vibrator quality factor.
-     * @param frequencyProfile         The description of the vibrator supported frequencies and max
+     * @param frequencyProfileLegacy   The description of the vibrator supported frequencies and max
      *                                 amplitude mappings.
+     * @param frequencyProfile         The description of the vibrator supported frequencies and
+     *                                 output acceleration mappings.
+     * @param maxEnvelopeEffectSize    The maximum number of control points supported for an
+     *                                 envelope effect.
+     * @param minEnvelopeEffectControlPointDurationMillis   The minimum duration supported
+     *                                                      between two control points within an
+     *                                                      envelope effect.
+     * @param maxEnvelopeEffectControlPointDurationMillis   The maximum duration supported
+     *                                                      between two control points within an
+     *                                                      envelope effect.
+     *
      * @hide
      */
     public VibratorInfo(int id, long capabilities, @Nullable SparseBooleanArray supportedEffects,
             @Nullable SparseBooleanArray supportedBraking,
             @NonNull SparseIntArray supportedPrimitives, int primitiveDelayMax,
             int compositionSizeMax, int pwlePrimitiveDurationMax, int pwleSizeMax,
-            float qFactor, @NonNull FrequencyProfile frequencyProfile,
-            int maxEnvelopeEffectSize, int minEnvelopeEffectControlPointDurationMillis,
+            float qFactor, @NonNull FrequencyProfileLegacy frequencyProfileLegacy,
+            @NonNull FrequencyProfile frequencyProfile, int maxEnvelopeEffectSize,
+            int minEnvelopeEffectControlPointDurationMillis,
             int maxEnvelopeEffectControlPointDurationMillis) {
         Preconditions.checkNotNull(supportedPrimitives);
+        Preconditions.checkNotNull(frequencyProfileLegacy);
         Preconditions.checkNotNull(frequencyProfile);
         mId = id;
         mCapabilities = capabilities;
@@ -135,6 +155,7 @@ public class VibratorInfo implements Parcelable {
         mPwlePrimitiveDurationMax = pwlePrimitiveDurationMax;
         mPwleSizeMax = pwleSizeMax;
         mQFactor = qFactor;
+        mFrequencyProfileLegacy = frequencyProfileLegacy;
         mFrequencyProfile = frequencyProfile;
         mMaxEnvelopeEffectSize = maxEnvelopeEffectSize;
         mMinEnvelopeEffectControlPointDurationMillis =
@@ -155,6 +176,7 @@ public class VibratorInfo implements Parcelable {
         dest.writeInt(mPwlePrimitiveDurationMax);
         dest.writeInt(mPwleSizeMax);
         dest.writeFloat(mQFactor);
+        mFrequencyProfileLegacy.writeToParcel(dest, flags);
         mFrequencyProfile.writeToParcel(dest, flags);
         dest.writeInt(mMaxEnvelopeEffectSize);
         dest.writeInt(mMinEnvelopeEffectControlPointDurationMillis);
@@ -205,6 +227,7 @@ public class VibratorInfo implements Parcelable {
                 && Objects.equals(mSupportedEffects, that.mSupportedEffects)
                 && Objects.equals(mSupportedBraking, that.mSupportedBraking)
                 && Objects.equals(mQFactor, that.mQFactor)
+                && Objects.equals(mFrequencyProfileLegacy, that.mFrequencyProfileLegacy)
                 && Objects.equals(mFrequencyProfile, that.mFrequencyProfile)
                 && mMaxEnvelopeEffectSize == that.mMaxEnvelopeEffectSize
                 && mMinEnvelopeEffectControlPointDurationMillis
@@ -216,7 +239,7 @@ public class VibratorInfo implements Parcelable {
     @Override
     public int hashCode() {
         int hashCode = Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
-                mQFactor, mFrequencyProfile);
+                mQFactor, mFrequencyProfileLegacy, mFrequencyProfile);
         for (int i = 0; i < mSupportedPrimitives.size(); i++) {
             hashCode = 31 * hashCode + mSupportedPrimitives.keyAt(i);
             hashCode = 31 * hashCode + mSupportedPrimitives.valueAt(i);
@@ -238,6 +261,7 @@ public class VibratorInfo implements Parcelable {
                 + ", mPwlePrimitiveDurationMax=" + mPwlePrimitiveDurationMax
                 + ", mPwleSizeMax=" + mPwleSizeMax
                 + ", mQFactor=" + mQFactor
+                + ", mFrequencyProfileLegacy=" + mFrequencyProfileLegacy
                 + ", mFrequencyProfile=" + mFrequencyProfile
                 + ", mMaxEnvelopeEffectSize=" + mMaxEnvelopeEffectSize
                 + ", mMinEnvelopeEffectControlPointDurationMillis="
@@ -262,6 +286,7 @@ public class VibratorInfo implements Parcelable {
         pw.println("pwlePrimitiveDurationMax = " + mPwlePrimitiveDurationMax);
         pw.println("pwleSizeMax = " + mPwleSizeMax);
         pw.println("q-factor = " + mQFactor);
+        pw.println("frequencyProfileLegacy = " + mFrequencyProfileLegacy);
         pw.println("frequencyProfile = " + mFrequencyProfile);
         pw.println("mMaxEnvelopeEffectSize = " + mMaxEnvelopeEffectSize);
         pw.println("mMinEnvelopeEffectControlPointDurationMillis = "
@@ -291,9 +316,7 @@ public class VibratorInfo implements Parcelable {
      * @return True if the hardware can control the frequency of the vibrations, otherwise false.
      */
     public boolean hasFrequencyControl() {
-        // We currently can only control frequency of the vibration using the compose PWLE method.
-        return hasCapability(
-                IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        return hasCapability(IVibrator.CAP_FREQUENCY_CONTROL);
     }
 
     /**
@@ -456,7 +479,8 @@ public class VibratorInfo implements Parcelable {
      * @return True if the hardware supports creating envelope effects, false otherwise.
      */
     public boolean areEnvelopeEffectsSupported() {
-        return hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
+        return hasCapability(
+                IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
     }
 
     /**
@@ -517,7 +541,10 @@ public class VibratorInfo implements Parcelable {
      * this vibrator is a composite of multiple physical devices.
      */
     public float getResonantFrequencyHz() {
-        return mFrequencyProfile.mResonantFrequencyHz;
+        if (Flags.normalizedPwleEffects()) {
+            return mFrequencyProfile.mResonantFrequencyHz;
+        }
+        return mFrequencyProfileLegacy.mResonantFrequencyHz;
     }
 
     /**
@@ -532,6 +559,17 @@ public class VibratorInfo implements Parcelable {
 
     /**
      * Gets the profile of supported frequencies, including the measurements of maximum relative
+     * output acceleration for supported vibration frequencies.
+     *
+     * <p>If the devices does not have frequency control then the profile should be empty.
+     */
+    @NonNull
+    public FrequencyProfileLegacy getFrequencyProfileLegacy() {
+        return mFrequencyProfileLegacy;
+    }
+
+    /**
+     * Gets the profile of supported frequencies, including the measurements of maximum
      * output acceleration for supported vibration frequencies.
      *
      * <p>If the devices does not have frequency control then the profile should be empty.
@@ -623,6 +661,304 @@ public class VibratorInfo implements Parcelable {
     }
 
     /**
+     * Describes the maximum output acceleration that can be achieved for each supported
+     * frequency in a specific vibrator.
+     *
+     * @hide
+     */
+    public static final class FrequencyProfile implements Parcelable {
+
+        private final float[] mFrequenciesHz;
+        private final float[] mOutputAccelerationsGs;
+        private final float mResonantFrequencyHz;
+        private final float mMaxOutputAccelerationGs;
+        private final float mMinFrequencyHz;
+        private final float mMaxFrequencyHz;
+
+        public FrequencyProfile(Parcel in) {
+            this(in.readFloat(), in.createFloatArray(), in.createFloatArray());
+        }
+
+        /**
+         * Default constructor.
+         *
+         * @param resonantFrequencyHz   The vibrator resonant frequency, in hertz.
+         * @param frequenciesHz         The supported vibration frequencies, in hertz.
+         * @param outputAccelerationsGs The maximum achievable output acceleration (in Gs) the
+         *                              device can reach at the supported frequencies.
+         */
+        public FrequencyProfile(float resonantFrequencyHz, float[] frequenciesHz,
+                float[] outputAccelerationsGs) {
+
+            mResonantFrequencyHz = resonantFrequencyHz;
+
+            boolean isValid = !Float.isNaN(resonantFrequencyHz)
+                    && (resonantFrequencyHz > 0)
+                    && (frequenciesHz != null && outputAccelerationsGs != null)
+                    && (frequenciesHz.length == outputAccelerationsGs.length)
+                    && (frequenciesHz.length > 0);
+
+            if (!isValid) {
+                mFrequenciesHz = null;
+                mOutputAccelerationsGs = null;
+                mMinFrequencyHz = Float.NaN;
+                mMaxFrequencyHz = Float.NaN;
+                mMaxOutputAccelerationGs = Float.NaN;
+                return;
+            }
+
+            TreeMap<Float, Float> frequencyToOutputAccelerationMap = new TreeMap<>();
+
+            for (int i = 0; i < frequenciesHz.length; i++) {
+                frequencyToOutputAccelerationMap.putIfAbsent(frequenciesHz[i],
+                        outputAccelerationsGs[i]);
+            }
+
+            float[] frequencies = new float[frequencyToOutputAccelerationMap.size()];
+            float[] accelerations = new float[frequencyToOutputAccelerationMap.size()];
+            float maxOutputAccelerationGs = 0;
+            int i = 0;
+            for (Map.Entry<Float, Float> entry : frequencyToOutputAccelerationMap.entrySet()) {
+                frequencies[i] = entry.getKey();
+                accelerations[i] = entry.getValue();
+                maxOutputAccelerationGs = Math.max(maxOutputAccelerationGs, entry.getValue());
+                i++;
+            }
+
+            mFrequenciesHz = frequencies;
+            mOutputAccelerationsGs = accelerations;
+            mMinFrequencyHz = mFrequenciesHz[0];
+            mMaxFrequencyHz = mFrequenciesHz[mFrequenciesHz.length - 1];
+            mMaxOutputAccelerationGs = maxOutputAccelerationGs;
+        }
+
+        /** Returns true if the supported frequency range is null. */
+        public boolean isEmpty() {
+            return mFrequenciesHz == null;
+        }
+
+        /**
+         * Returns a list of available frequencies.
+         */
+        @Nullable
+        public float[] getFrequenciesHz() {
+            return mFrequenciesHz;
+        }
+
+        /** Returns the list of available output accelerations */
+        @Nullable
+        public float[] getOutputAccelerationsGs() {
+            return mOutputAccelerationsGs;
+        }
+
+        /** Maximum output acceleration reachable in Gs when amplitude is 1.0f. */
+        public float getMaxOutputAccelerationGs() {
+            return mMaxOutputAccelerationGs;
+        }
+
+        /**
+         * Calculates the maximum output acceleration for a given frequency using linear
+         * interpolation.
+         *
+         * @param frequencyHz frequency, in hertz, for query.
+         * @return the maximum output acceleration for the given frequency.
+         */
+        public float getOutputAccelerationGs(float frequencyHz) {
+            if (mFrequenciesHz == null) {
+                return Float.NaN;
+            }
+
+            if (frequencyHz < mMinFrequencyHz || frequencyHz > mMaxFrequencyHz) {
+                // Outside supported frequency range, not able to vibrate at this frequency.
+                return 0;
+            }
+
+            int idx = Arrays.binarySearch(mFrequenciesHz, frequencyHz);
+            if (idx >= 0) {
+                return mOutputAccelerationsGs[idx];
+            }
+
+            // This indicates that the value was not found in the list. Adjust index of the
+            // insertion point to be at the lower bound.
+            idx = -idx - 2;
+
+            // Linearly interpolate the output acceleration based on the frequency.
+            return MathUtils.constrainedMap(
+                    mOutputAccelerationsGs[idx], mOutputAccelerationsGs[idx + 1],
+                    mFrequenciesHz[idx], mFrequenciesHz[idx + 1],
+                    frequencyHz);
+        }
+
+        /** The minimum frequency supported, in hertz. */
+        public float getMinFrequencyHz() {
+            return mMinFrequencyHz;
+        }
+
+        /** The maximum frequency supported, in hertz. */
+        public float getMaxFrequencyHz() {
+            return mMaxFrequencyHz;
+        }
+
+        /**
+         * Returns the frequency range that supports the specified minimum output
+         * acceleration.
+         *
+         * @return The frequency range, or null if the specified acceleration
+         *         is not achievable on the device.
+         */
+        @Nullable
+        public Range<Float> getFrequencyRangeHz(float minOutputAcceleration) {
+            if (mFrequenciesHz == null || mOutputAccelerationsGs == null
+                    || minOutputAcceleration > mMaxOutputAccelerationGs) {
+                return null; // No frequency range available
+            }
+
+            if (minOutputAcceleration <= 0) {
+                return new Range<>(mMinFrequencyHz, mMaxFrequencyHz);
+            }
+
+            float minFrequency = Float.NaN;
+            float maxFrequency = Float.NaN;
+            int lowerFrequencyBoundIndex = 0;
+            // Find the lower frequency bound
+            for (int i = 0; i < mOutputAccelerationsGs.length; i++) {
+                if (mOutputAccelerationsGs[i] >= minOutputAcceleration) {
+                    if (i == 0) {
+                        minFrequency = mMinFrequencyHz;
+                    } else {
+                        minFrequency = MathUtils.constrainedMap(
+                                mFrequenciesHz[i - 1], mFrequenciesHz[i],
+                                mOutputAccelerationsGs[i - 1], mOutputAccelerationsGs[i],
+                                minOutputAcceleration);
+                    }
+                    lowerFrequencyBoundIndex = i;
+                    break; // Found the lower bound
+                }
+            }
+
+            if (Float.isNaN(minFrequency)) {
+                // Lower bound was not found
+                return null;
+            }
+
+            // Find the upper frequency bound
+            for (int i = lowerFrequencyBoundIndex; i < mOutputAccelerationsGs.length; i++) {
+                if (mOutputAccelerationsGs[i] <= minOutputAcceleration) {
+                    maxFrequency = MathUtils.constrainedMap(
+                            mFrequenciesHz[i - 1], mFrequenciesHz[i],
+                            mOutputAccelerationsGs[i - 1], mOutputAccelerationsGs[i],
+                            minOutputAcceleration);
+                    break; // Found the upper bound
+                }
+            }
+
+            if (Float.isNaN(maxFrequency)) {
+                // If the upper bound was not found, the specified output acceleration is
+                // achievable at all remaining frequencies.
+                maxFrequency = mMaxFrequencyHz;
+            }
+
+            return new Range<>(minFrequency, maxFrequency);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeFloat(mResonantFrequencyHz);
+            dest.writeFloatArray(mFrequenciesHz);
+            dest.writeFloatArray(mOutputAccelerationsGs);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof FrequencyProfile that)) {
+                return false;
+            }
+            return Float.compare(mResonantFrequencyHz, that.mResonantFrequencyHz) == 0
+                    && Arrays.equals(mFrequenciesHz, that.mFrequenciesHz)
+                    && Arrays.equals(mOutputAccelerationsGs, that.mOutputAccelerationsGs);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mResonantFrequencyHz, Arrays.hashCode(mFrequenciesHz),
+                    Arrays.hashCode(mOutputAccelerationsGs));
+        }
+
+        @Override
+        public String toString() {
+            return "FrequencyProfile{"
+                    + "mResonantFrequency=" + mResonantFrequencyHz
+                    + ", mFrequenciesHz=" + Arrays.toString(mFrequenciesHz)
+                    + ", mOutputAccelerationsGs=" + Arrays.toString(mOutputAccelerationsGs)
+                    + ", mMinFrequencyHz=" + mMinFrequencyHz
+                    + ", mMaxFrequencyHz=" + mMaxFrequencyHz
+                    + ", mMaxOutputAccelerationGs=" + mMaxOutputAccelerationGs
+                    + '}';
+        }
+
+        @NonNull
+        public static final Creator<FrequencyProfile> CREATOR =
+                new Creator<FrequencyProfile>() {
+                    @Override
+                    public FrequencyProfile createFromParcel(Parcel in) {
+                        return new FrequencyProfile(in);
+                    }
+
+                    @Override
+                    public FrequencyProfile[] newArray(int size) {
+                        return new FrequencyProfile[size];
+                    }
+                };
+
+        private static void deduplicateAndSortList(List<Pair<Float, Float>> list) {
+            if (list == null || list.size() < 2) {
+                return; // Nothing to dedupe
+            }
+
+            list.sort(Comparator.comparing(pair -> pair.first));
+
+            // Remove duplicates from the list
+            int writeIndex = 1;
+            for (int i = 1; i < list.size(); i++) {
+                Pair<Float, Float> currentPair = list.get(i);
+                Pair<Float, Float> previousPair = list.get(writeIndex - 1);
+
+                if (currentPair.first.compareTo(previousPair.first) != 0) {
+                    list.set(writeIndex++, currentPair);
+                }
+            }
+            list.subList(writeIndex, list.size()).clear();
+        }
+
+        private static ArrayList<Pair<Float, Float>> extractFrequencyToOutputAccelerationData(
+                float[] frequencies, float[] outputAccelerations) {
+
+            if (frequencies == null || outputAccelerations == null
+                    || frequencies.length == 0
+                    || frequencies.length != outputAccelerations.length) {
+                return new ArrayList<>(); // Return empty list for invalid or mismatched data
+            }
+
+            ArrayList<Pair<Float, Float>> frequencyToOutputAccelerationList = new ArrayList<>(
+                    frequencies.length);
+            for (int i = 0; i < frequencies.length; i++) {
+                frequencyToOutputAccelerationList.add(
+                        new Pair<>(frequencies[i], outputAccelerations[i]));
+            }
+
+            return frequencyToOutputAccelerationList;
+        }
+    }
+
+    /**
      * Describes the maximum relative output acceleration that can be achieved for each supported
      * frequency in a specific vibrator.
      *
@@ -640,7 +976,7 @@ public class VibratorInfo implements Parcelable {
      *
      * @hide
      */
-    public static final class FrequencyProfile implements Parcelable {
+    public static final class FrequencyProfileLegacy implements Parcelable {
         @Nullable
         private final Range<Float> mFrequencyRangeHz;
         private final float mMinFrequencyHz;
@@ -648,7 +984,7 @@ public class VibratorInfo implements Parcelable {
         private final float mFrequencyResolutionHz;
         private final float[] mMaxAmplitudes;
 
-        FrequencyProfile(Parcel in) {
+        FrequencyProfileLegacy(Parcel in) {
             this(in.readFloat(), in.readFloat(), in.readFloat(), in.createFloatArray());
         }
 
@@ -664,7 +1000,7 @@ public class VibratorInfo implements Parcelable {
          *                              resolution.
          * @hide
          */
-        public FrequencyProfile(float resonantFrequencyHz, float minFrequencyHz,
+        public FrequencyProfileLegacy(float resonantFrequencyHz, float minFrequencyHz,
                 float frequencyResolutionHz, float[] maxAmplitudes) {
             mMinFrequencyHz = minFrequencyHz;
             mResonantFrequencyHz = resonantFrequencyHz;
@@ -776,10 +1112,10 @@ public class VibratorInfo implements Parcelable {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof FrequencyProfile)) {
+            if (!(o instanceof FrequencyProfileLegacy)) {
                 return false;
             }
-            FrequencyProfile that = (FrequencyProfile) o;
+            FrequencyProfileLegacy that = (FrequencyProfileLegacy) o;
             return Float.compare(mMinFrequencyHz, that.mMinFrequencyHz) == 0
                     && Float.compare(mResonantFrequencyHz, that.mResonantFrequencyHz) == 0
                     && Float.compare(mFrequencyResolutionHz, that.mFrequencyResolutionHz) == 0
@@ -796,7 +1132,7 @@ public class VibratorInfo implements Parcelable {
 
         @Override
         public String toString() {
-            return "FrequencyProfile{"
+            return "FrequencyProfileLegacy{"
                     + "mFrequencyRange=" + mFrequencyRangeHz
                     + ", mMinFrequency=" + mMinFrequencyHz
                     + ", mResonantFrequency=" + mResonantFrequencyHz
@@ -806,16 +1142,16 @@ public class VibratorInfo implements Parcelable {
         }
 
         @NonNull
-        public static final Creator<FrequencyProfile> CREATOR =
-                new Creator<FrequencyProfile>() {
+        public static final Creator<FrequencyProfileLegacy> CREATOR =
+                new Creator<FrequencyProfileLegacy>() {
                     @Override
-                    public FrequencyProfile createFromParcel(Parcel in) {
-                        return new FrequencyProfile(in);
+                    public FrequencyProfileLegacy createFromParcel(Parcel in) {
+                        return new FrequencyProfileLegacy(in);
                     }
 
                     @Override
-                    public FrequencyProfile[] newArray(int size) {
-                        return new FrequencyProfile[size];
+                    public FrequencyProfileLegacy[] newArray(int size) {
+                        return new FrequencyProfileLegacy[size];
                     }
                 };
     }
@@ -832,8 +1168,10 @@ public class VibratorInfo implements Parcelable {
         private int mPwlePrimitiveDurationMax;
         private int mPwleSizeMax;
         private float mQFactor = Float.NaN;
-        private FrequencyProfile mFrequencyProfile =
-                new FrequencyProfile(Float.NaN, Float.NaN, Float.NaN, null);
+        private FrequencyProfileLegacy mFrequencyProfileLegacy =
+                new FrequencyProfileLegacy(Float.NaN, Float.NaN, Float.NaN, null);
+        private FrequencyProfile mFrequencyProfile = new FrequencyProfile(Float.NaN, null,
+                null);
         private int mMaxEnvelopeEffectSize;
         private int mMinEnvelopeEffectControlPointDurationMillis;
         private int mMaxEnvelopeEffectControlPointDurationMillis;
@@ -908,6 +1246,16 @@ public class VibratorInfo implements Parcelable {
 
         /** Configure the vibrator frequency information like resonant frequency and bandwidth. */
         @NonNull
+        public Builder setFrequencyProfileLegacy(@NonNull FrequencyProfileLegacy frequencyProfile) {
+            mFrequencyProfileLegacy = frequencyProfile;
+            return this;
+        }
+
+        /**
+         * Configure the vibrator frequency information like resonant frequency and frequency to
+         * output acceleration data.
+         */
+        @NonNull
         public Builder setFrequencyProfile(@NonNull FrequencyProfile frequencyProfile) {
             mFrequencyProfile = frequencyProfile;
             return this;
@@ -950,8 +1298,9 @@ public class VibratorInfo implements Parcelable {
         public VibratorInfo build() {
             return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
                     mSupportedPrimitives, mPrimitiveDelayMax, mCompositionSizeMax,
-                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyProfile,
-                    mMaxEnvelopeEffectSize, mMinEnvelopeEffectControlPointDurationMillis,
+                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyProfileLegacy,
+                    mFrequencyProfile, mMaxEnvelopeEffectSize,
+                    mMinEnvelopeEffectControlPointDurationMillis,
                     mMaxEnvelopeEffectControlPointDurationMillis);
         }
 

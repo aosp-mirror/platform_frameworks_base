@@ -17,6 +17,7 @@
 package android.os.vibrator;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -45,6 +46,8 @@ public abstract class VibrationEffectSegment implements Parcelable {
     static final int PARCEL_TOKEN_PRIMITIVE = 2;
     static final int PARCEL_TOKEN_STEP = 3;
     static final int PARCEL_TOKEN_RAMP = 4;
+    static final int PARCEL_TOKEN_PWLE = 5;
+    static final int PARCEL_TOKEN_BASIC_PWLE = 6;
 
     /** Prevent subclassing from outside of this package */
     VibrationEffectSegment() {
@@ -58,10 +61,23 @@ public abstract class VibrationEffectSegment implements Parcelable {
      */
     public abstract long getDuration();
 
-   /**
-     * Checks if a given {@link Vibrator} can play this segment as intended. See
-     * {@link Vibrator#areVibrationFeaturesSupported(VibrationEffect)} for more information about
-     * what counts as supported by a vibrator, and what counts as not.
+    /**
+     * Gets the estimated duration of the segment for given vibrator, in milliseconds.
+     *
+     * <p>For segments with hardware-dependent constants (e.g. primitives), this returns the
+     * estimated duration based on the given {@link VibratorInfo}. For all other effects this will
+     * return the same as {@link #getDuration()}.
+     *
+     * @hide
+     */
+    public long getDuration(@Nullable VibratorInfo vibratorInfo) {
+        return getDuration();
+    }
+
+    /**
+     * Checks if a given {@link android.os.Vibrator} can play this segment as intended. See
+     * {@link android.os.Vibrator#areVibrationFeaturesSupported(VibrationEffect)} for more
+     * information about what counts as supported by a vibrator, and what counts as not.
      *
      * @hide
      */
@@ -209,6 +225,16 @@ public abstract class VibrationEffectSegment implements Parcelable {
                             return new PrebakedSegment(in);
                         case PARCEL_TOKEN_PRIMITIVE:
                             return new PrimitiveSegment(in);
+                        case PARCEL_TOKEN_PWLE:
+                            if (Flags.normalizedPwleEffects()) {
+                                return new PwleSegment(in);
+                            }
+                            // Fall through to default if the flag is not enabled.
+                        case PARCEL_TOKEN_BASIC_PWLE:
+                            if (Flags.normalizedPwleEffects()) {
+                                return new BasicPwleSegment(in);
+                            }
+                            // Fall through to default if the flag is not enabled.
                         default:
                             throw new IllegalStateException(
                                     "Unexpected vibration event type token in parcel.");

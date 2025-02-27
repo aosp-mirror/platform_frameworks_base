@@ -31,9 +31,7 @@ public class IntIntMap {
         mValues = new int[DEFAULT_CAPACITY];
     }
 
-    /**
-     * clear the map
-     */
+    /** clear the map */
     public void clear() {
         Arrays.fill(mKeys, NOT_PRESENT);
         Arrays.fill(mValues, 0);
@@ -77,8 +75,7 @@ public class IntIntMap {
         int index = findKey(key);
         if (index == -1) {
             return 0;
-        } else
-            return mValues[index];
+        } else return mValues[index];
     }
 
     /**

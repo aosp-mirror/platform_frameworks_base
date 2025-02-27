@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * This class listens to [SceneTransitionLayout] transitions and manages keyguard transition
@@ -73,7 +73,7 @@ constructor(
     private var progressJob: Job? = null
 
     private val currentToState: KeyguardState
-        get() = internalTransitionInteractor.currentTransitionInfoInternal.value.to
+        get() = internalTransitionInteractor.currentTransitionInfoInternal().to
 
     /**
      * The next keyguard state to trigger when exiting [CommunalScenes.Communal]. This is only used
@@ -197,7 +197,7 @@ constructor(
         val newTransition =
             TransitionInfo(
                 ownerName = this::class.java.simpleName,
-                from = internalTransitionInteractor.currentTransitionInfoInternal.value.to,
+                from = internalTransitionInteractor.currentTransitionInfoInternal().to,
                 to = state,
                 animator = null,
                 modeOnCanceled = TransitionModeOnCanceled.REVERSE,
@@ -273,7 +273,7 @@ constructor(
     }
 
     private suspend fun startTransitionToGlanceableHub() {
-        val currentState = internalTransitionInteractor.currentTransitionInfoInternal.value.to
+        val currentState = internalTransitionInteractor.currentTransitionInfoInternal().to
         val newTransition =
             TransitionInfo(
                 ownerName = this::class.java.simpleName,

@@ -191,4 +191,9 @@
     <item msgid="3079622119444911877">"Välja lülitatud"</item>
     <item msgid="3028994095749238254">"Sisse lülitatud"</item>
   </string-array>
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"Pole saadaval"</item>
+    <item msgid="6419996398343291862">"Väljas"</item>
+    <item msgid="5908720590832378783">"Sees"</item>
+  </string-array>
 </resources>

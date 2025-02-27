@@ -22,7 +22,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.statusbar.pipeline.shared.ui.model.InternetTileModel
 import java.util.function.Consumer
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Binds an [InternetTileModel] flow to a consumer for the internet tile to apply to its qs state

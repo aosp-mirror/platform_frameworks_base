@@ -22,6 +22,7 @@ import android.net.wifi.WifiManager
 import android.os.Handler
 import android.os.SimpleClock
 import androidx.lifecycle.Lifecycle
+import com.android.systemui.Flags.multiuserWifiPickerTrackerSupport
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.concurrency.ThreadFactory
@@ -41,7 +42,7 @@ import javax.inject.Inject
 class WifiPickerTrackerFactory
 @Inject
 constructor(
-    private val context: Context,
+    private val applicationContext: Context,
     private val wifiManager: WifiManager?,
     private val connectivityManager: ConnectivityManager,
     private val systemClock: SystemClock,
@@ -64,16 +65,23 @@ constructor(
      * @return a new [WifiPickerTracker] or null if [WifiManager] is null.
      */
     fun create(
+        userContext: Context,
         lifecycle: Lifecycle,
         listener: WifiPickerTrackerCallback,
         name: String,
     ): WifiPickerTracker? {
         return if (wifiManager == null) {
             null
-        } else
+        } else {
+            val contextToUse =
+                if (multiuserWifiPickerTrackerSupport()) {
+                    userContext
+                } else {
+                    applicationContext
+                }
             WifiPickerTracker(
                 lifecycle,
-                context,
+                contextToUse,
                 wifiManager,
                 connectivityManager,
                 mainHandler,
@@ -86,6 +94,7 @@ constructor(
                 SCAN_INTERVAL_MILLIS,
                 listener,
             )
+        }
     }
 
     companion object {

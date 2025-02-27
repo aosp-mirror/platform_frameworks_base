@@ -16,16 +16,20 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
+
+import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -38,6 +42,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
@@ -54,10 +59,20 @@ import org.mockito.MockitoSession;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-@RunWith(AndroidJUnit4.class)
+import java.util.List;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class HotspotTileTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+    }
 
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
@@ -73,6 +88,11 @@ public class HotspotTileTest extends SysuiTestCase {
     private TestableLooper mTestableLooper;
     private HotspotTile mTile;
     private QSTile.BooleanState mState = new QSTile.BooleanState();
+
+    public HotspotTileTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -144,7 +164,7 @@ public class HotspotTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, /* arg= */ null);
 
         assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_hotspot_icon_off));
+                .isEqualTo(createExpectedIcon(R.drawable.qs_hotspot_icon_off));
     }
 
     @Test
@@ -156,7 +176,7 @@ public class HotspotTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, /* arg= */ null);
 
         assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_hotspot_icon_search));
+                .isEqualTo(createExpectedIcon(R.drawable.qs_hotspot_icon_search));
     }
 
     @Test
@@ -168,6 +188,14 @@ public class HotspotTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, /* arg= */ null);
 
         assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_hotspot_icon_on));
+                .isEqualTo(createExpectedIcon(R.drawable.qs_hotspot_icon_on));
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 }

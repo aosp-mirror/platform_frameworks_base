@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;

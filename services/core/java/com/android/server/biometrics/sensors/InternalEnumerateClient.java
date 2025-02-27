@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.util.Slog;
 
@@ -46,6 +47,10 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
     // List of templates to remove from the HAL
     private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
     private final int mInitialEnrolledSize;
+    private final int[] mEnrolledIdsFrameworkArray;
+    private final List<Integer> mEnrolledIdsHalList = new ArrayList<>();
+    private boolean mIsDanglingFramework;
+    private boolean mIsDanglingHal;
 
     protected InternalEnumerateClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, int userId, @NonNull String owner,
@@ -60,14 +65,26 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
         mEnrolledList = enrolledList;
         mInitialEnrolledSize = mEnrolledList.size();
         mUtils = utils;
+        // Record ids from frameworks for metrics
+        mEnrolledIdsFrameworkArray = new int[mInitialEnrolledSize];
+        for (int i = 0; i < mInitialEnrolledSize; i++) {
+            mEnrolledIdsFrameworkArray[i] = mEnrolledList.get(i).getBiometricId();
+        }
     }
 
     @Override
     public void onEnumerationResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
+        if (identifier != null) {
+            // Record ids from hal for metrics
+            mEnrolledIdsHalList.add(identifier.getBiometricId());
+        }
         handleEnumeratedTemplate(identifier);
         if (remaining == 0) {
+            mIsDanglingHal = !mUnknownHALTemplates.isEmpty();
+            mIsDanglingFramework = !mEnrolledList.isEmpty();
             doTemplateCleanup();
+            logEnumerationResult();
             mCallback.onClientFinished(this, true /* success */);
         }
     }
@@ -123,7 +140,9 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
                     + identifier.getBiometricId() + " " + identifier.getName());
             mUtils.removeBiometricForUser(getContext(),
                     getTargetUserId(), identifier.getBiometricId());
-
+            getLogger().logOnUnEnrolled(getTargetUserId(),
+                    BiometricsProtoEnums.UNENROLL_REASON_DANGLING_FRAMEWORK,
+                    identifier.getBiometricId());
             getLogger().logUnknownEnrollmentInFramework();
         }
 
@@ -132,6 +151,32 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
             sendDanglingNotification(names);
         }
         mEnrolledList.clear();
+    }
+
+    private void logEnumerationResult() {
+        final int result;
+        if (mIsDanglingFramework && mIsDanglingHal) {
+            result = BiometricsProtoEnums.ENUMERATION_RESULT_DANGLING_BOTH;
+        } else if (mIsDanglingFramework) {
+            result = BiometricsProtoEnums.ENUMERATION_RESULT_DANGLING_FRAMEWORK;
+        } else if (mIsDanglingHal) {
+            result = BiometricsProtoEnums.ENUMERATION_RESULT_DANGLING_HAL;
+        } else {
+            result = BiometricsProtoEnums.ENUMERATION_RESULT_OK;
+        }
+
+        final int[] idsHalArray = listToArray(mEnrolledIdsHalList);
+        getLogger().logOnEnumerated(
+                getTargetUserId(), result, idsHalArray, mEnrolledIdsFrameworkArray);
+    }
+
+    private int[] listToArray(List<Integer> ids) {
+        final int size = ids.size();
+        int[] array = new int[size];
+        for (int i = 0; i < size; i++) {
+            array[i] = ids.get(i);
+        }
+        return array;
     }
 
     public List<BiometricAuthenticator.Identifier> getUnknownHALTemplates() {

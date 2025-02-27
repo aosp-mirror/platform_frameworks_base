@@ -20,6 +20,8 @@ import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_STARTED;
 
+import static com.android.wm.shell.draganddrop.DragTestUtils.createAppClipData;
+
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -30,9 +32,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.Context;
-import android.content.Intent;
 import android.os.RemoteException;
 import android.view.Display;
 import android.view.DragEvent;
@@ -128,7 +128,7 @@ public class DragAndDropControllerTest extends ShellTestCase {
         doReturn(display).when(dragLayout).getDisplay();
         doReturn(DEFAULT_DISPLAY).when(display).getDisplayId();
 
-        final ClipData clipData = createClipData();
+        final ClipData clipData = createAppClipData(MIMETYPE_APPLICATION_SHORTCUT);
         final DragEvent event = mock(DragEvent.class);
         doReturn(ACTION_DRAG_STARTED).when(event).getAction();
         doReturn(clipData).when(event).getClipData();
@@ -149,16 +149,5 @@ public class DragAndDropControllerTest extends ShellTestCase {
         mController.removeListener(mDragAndDropListener);
         mController.onDrag(dragLayout, event);
         verify(mDragAndDropListener, never()).onDragStarted();
-    }
-
-    private ClipData createClipData() {
-        ClipDescription clipDescription = new ClipDescription(MIMETYPE_APPLICATION_SHORTCUT,
-                new String[] { MIMETYPE_APPLICATION_SHORTCUT });
-        Intent i = new Intent();
-        i.putExtra(Intent.EXTRA_PACKAGE_NAME, "pkg");
-        i.putExtra(Intent.EXTRA_SHORTCUT_ID, "shortcutId");
-        i.putExtra(Intent.EXTRA_USER, android.os.Process.myUserHandle());
-        ClipData.Item item = new ClipData.Item(i);
-        return new ClipData(clipDescription, item);
     }
 }

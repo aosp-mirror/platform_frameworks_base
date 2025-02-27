@@ -54,7 +54,7 @@
         android:ellipsize="end"
         android:fontFamily="@*android:string/config_bodyFontFamily"
         android:textSize="@dimen/floating_toolbar_text_size"
-        android:textColor="?androidprv:attr/materialColorOnSurface"
+        android:textColor="@androidprv:color/materialColorOnSurface"
         android:background="@null"
         android:focusable="false"
         android:focusableInTouchMode="false"

@@ -16,12 +16,24 @@
 
 package com.android.systemui
 
+import android.content.Context
+import android.os.Handler
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.decor.FaceScanningProviderFactory
+import com.android.systemui.decor.FaceScanningProviderFactoryImpl
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
+import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
+import java.util.concurrent.Executor
+import javax.inject.Qualifier
+
+@Qualifier annotation class ScreenDecorationsThread
 
 @Module
 interface ScreenDecorationsModule {
@@ -35,4 +47,38 @@ interface ScreenDecorationsModule {
     @Binds
     @IntoSet
     fun bindScreenDecorationsConfigListener(impl: ScreenDecorations): ConfigurationListener
+
+    @Binds
+    @ScreenDecorationsThread
+    fun screenDecorationsExecutor(
+        @ScreenDecorationsThread delayableExecutor: DelayableExecutor
+    ): Executor
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        fun faceScanningProviderFactory(
+            creator: FaceScanningProviderFactoryImpl.Creator,
+            context: Context,
+        ): FaceScanningProviderFactory {
+            return creator.create(context)
+        }
+
+        @Provides
+        @SysUISingleton
+        @ScreenDecorationsThread
+        fun screenDecorationsHandler(threadFactory: ThreadFactory): Handler {
+            return threadFactory.buildHandlerOnNewThread("ScreenDecorations")
+        }
+
+        @Provides
+        @SysUISingleton
+        @ScreenDecorationsThread
+        fun screenDecorationsDelayableExecutor(
+            @ScreenDecorationsThread handler: Handler,
+            threadFactory: ThreadFactory,
+        ): DelayableExecutor {
+            return threadFactory.buildDelayableExecutorOnHandler(handler)
+        }
+    }
 }

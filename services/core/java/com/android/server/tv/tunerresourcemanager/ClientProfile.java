@@ -67,19 +67,19 @@ public final class ClientProfile {
     /**
      * The handle of the primary frontend resource
      */
-    private int mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+    private long mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
 
     /**
      * List of the frontend handles that are used by the current client.
      */
-    private Set<Integer> mUsingFrontendHandles = new HashSet<>();
+    private Set<Long> mUsingFrontendHandles = new HashSet<>();
 
     /**
      * List of the client ids that share frontend with the current client.
      */
     private Set<Integer> mShareFeClientIds = new HashSet<>();
 
-    private Set<Integer> mUsingDemuxHandles = new HashSet<>();
+    private Set<Long> mUsingDemuxHandles = new HashSet<>();
 
     /**
      * Client id sharee that has shared frontend with the current client.
@@ -89,7 +89,7 @@ public final class ClientProfile {
     /**
      * List of the Lnb handles that are used by the current client.
      */
-    private Set<Integer> mUsingLnbHandles = new HashSet<>();
+    private Set<Long> mUsingLnbHandles = new HashSet<>();
 
     /**
      * List of the Cas system ids that are used by the current client.
@@ -115,11 +115,18 @@ public final class ClientProfile {
      */
     private int mPriority;
 
+    /**
+     * If resource holder retains ownership of the resource in a challenge scenario then value is
+     * true.
+     */
+    private boolean mResourceOwnershipRetention;
+
     private ClientProfile(Builder builder) {
         this.mId = builder.mId;
         this.mTvInputSessionId = builder.mTvInputSessionId;
         this.mUseCase = builder.mUseCase;
         this.mProcessId = builder.mProcessId;
+        this.mResourceOwnershipRetention = builder.mResourceOwnershipRetention;
     }
 
     public int getId() {
@@ -136,6 +143,14 @@ public final class ClientProfile {
 
     public int getProcessId() {
         return mProcessId;
+    }
+
+    /**
+     * Returns true when the resource holder retains ownership of the resource in a challenge
+     * scenario.
+     */
+    public boolean resourceOwnershipRetentionEnabled() {
+        return mResourceOwnershipRetention;
     }
 
     /**
@@ -180,11 +195,24 @@ public final class ClientProfile {
     }
 
     /**
+     * Determines whether the resource holder retains ownership of the resource during a challenge
+     * scenario, when both resource holder and resource challenger have same processId and same
+     * priority.
+     *
+     * @param enabled Set to {@code true} to allow the resource holder to retain ownership,
+     *     or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
+     */
+    public void setResourceOwnershipRetention(boolean enabled) {
+        mResourceOwnershipRetention = enabled;
+    }
+
+    /**
      * Set when the client starts to use a frontend.
      *
      * @param frontendHandle being used.
      */
-    public void useFrontend(int frontendHandle) {
+    public void useFrontend(long frontendHandle) {
         mUsingFrontendHandles.add(frontendHandle);
     }
 
@@ -193,14 +221,14 @@ public final class ClientProfile {
      *
      * @param frontendHandle being used.
      */
-    public void setPrimaryFrontend(int frontendHandle) {
+    public void setPrimaryFrontend(long frontendHandle) {
         mPrimaryUsingFrontendHandle = frontendHandle;
     }
 
     /**
      * Get the primary frontend used by the client
      */
-    public int getPrimaryFrontend() {
+    public long getPrimaryFrontend() {
         return mPrimaryUsingFrontendHandle;
     }
 
@@ -222,7 +250,7 @@ public final class ClientProfile {
         mShareFeClientIds.remove(clientId);
     }
 
-    public Set<Integer> getInUseFrontendHandles() {
+    public Set<Long> getInUseFrontendHandles() {
         return mUsingFrontendHandles;
     }
 
@@ -253,14 +281,14 @@ public final class ClientProfile {
      *
      * @param demuxHandle the demux being used.
      */
-    public void useDemux(int demuxHandle) {
+    public void useDemux(long demuxHandle) {
         mUsingDemuxHandles.add(demuxHandle);
     }
 
     /**
      * Get the set of demux handles in use.
      */
-    public Set<Integer> getInUseDemuxHandles() {
+    public Set<Long> getInUseDemuxHandles() {
         return mUsingDemuxHandles;
     }
 
@@ -269,7 +297,7 @@ public final class ClientProfile {
      *
      * @param demuxHandle the demux handl being released.
      */
-    public void releaseDemux(int demuxHandle) {
+    public void releaseDemux(long demuxHandle) {
         mUsingDemuxHandles.remove(demuxHandle);
     }
 
@@ -278,11 +306,11 @@ public final class ClientProfile {
      *
      * @param lnbHandle being used.
      */
-    public void useLnb(int lnbHandle) {
+    public void useLnb(long lnbHandle) {
         mUsingLnbHandles.add(lnbHandle);
     }
 
-    public Set<Integer> getInUseLnbHandles() {
+    public Set<Long> getInUseLnbHandles() {
         return mUsingLnbHandles;
     }
 
@@ -291,7 +319,7 @@ public final class ClientProfile {
      *
      * @param lnbHandle being released.
      */
-    public void releaseLnb(int lnbHandle) {
+    public void releaseLnb(long lnbHandle) {
         mUsingLnbHandles.remove(lnbHandle);
     }
 
@@ -361,6 +389,7 @@ public final class ClientProfile {
         private String mTvInputSessionId;
         private int mUseCase;
         private int mProcessId;
+        private boolean mResourceOwnershipRetention = false;
 
         Builder(int id) {
             this.mId = id;
@@ -393,6 +422,18 @@ public final class ClientProfile {
           */
         public Builder processId(int processId) {
             this.mProcessId = processId;
+            return this;
+        }
+
+        /**
+         * Builder for {@link ClientProfile}.
+         *
+         * @param enabled the determining factor for resource ownership during challenger scenario.
+         *     The default behavior favors the resource challenger and grants them ownership of
+         *     the resource if resourceOwnershipRetention is not explicitly set to true.
+         */
+        public Builder resourceOwnershipRetention(boolean enabled) {
+            this.mResourceOwnershipRetention = enabled;
             return this;
         }
 

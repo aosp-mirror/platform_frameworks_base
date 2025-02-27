@@ -15,44 +15,83 @@
  */
 package com.android.internal.widget.remotecompose.core.documentation;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.util.ArrayList;
 
 public class OperationField {
-    int mType;
-    String mName;
-    String mDescription;
-    ArrayList<StringPair> mPossibleValues = new ArrayList<>();
+    final int mType;
+    @NonNull final String mName;
+    @NonNull final String mDescription;
+    @Nullable String mVarSize = null;
 
-    public OperationField(int type, String name, String description) {
+    @NonNull ArrayList<StringPair> mPossibleValues = new ArrayList<>();
+
+    public OperationField(int type, @NonNull String name, @NonNull String description) {
         mType = type;
         mName = name;
         mDescription = description;
     }
+
+    public OperationField(
+            int type, @NonNull String name, @Nullable String varSize, @NonNull String description) {
+        mType = type;
+        mName = name;
+        mDescription = description;
+        mVarSize = varSize;
+    }
+
     public int getType() {
         return mType;
     }
+
+    @NonNull
     public String getName() {
         return mName;
     }
+
+    @NonNull
     public String getDescription() {
         return mDescription;
     }
+
+    @NonNull
     public ArrayList<StringPair> getPossibleValues() {
         return mPossibleValues;
     }
-    public void possibleValue(String name, String value) {
+
+    public void possibleValue(@NonNull String name, @NonNull String value) {
         mPossibleValues.add(new StringPair(name, value));
     }
+
     public boolean hasEnumeratedValues() {
         return !mPossibleValues.isEmpty();
     }
+
+    @Nullable
+    public String getVarSize() {
+        return mVarSize;
+    }
+
     public int getSize() {
         switch (mType) {
-            case (Operation.BYTE) : return 1;
-            case (Operation.INT) : return 4;
-            case (Operation.FLOAT) : return 4;
-            case (Operation.LONG) : return 8;
-            default : return 0;
+            case DocumentedOperation.BYTE:
+                return 1;
+            case DocumentedOperation.INT:
+                return 4;
+            case DocumentedOperation.FLOAT:
+                return 4;
+            case DocumentedOperation.LONG:
+                return 8;
+            case DocumentedOperation.SHORT:
+                return 2;
+            case DocumentedOperation.INT_ARRAY:
+                return -1;
+            case DocumentedOperation.FLOAT_ARRAY:
+                return -1;
+            default:
+                return 0;
         }
     }
 }

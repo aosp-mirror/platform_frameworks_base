@@ -27,8 +27,10 @@ import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
-import android.app.ecm.EnhancedConfirmationManager;
+import android.app.admin.EnforcingAdmin;
 import android.app.admin.PackagePolicy;
+import android.app.admin.UnknownAuthority;
+import android.app.ecm.EnhancedConfirmationManager;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -43,6 +45,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManager.EnforcingUser;
+import android.security.advancedprotection.AdvancedProtectionManager;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -200,6 +203,14 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         final int restrictionSource = enforcingUser.getUserRestrictionSource();
         if (restrictionSource == UserManager.RESTRICTION_SOURCE_SYSTEM) {
             return null;
+        }
+
+        if (android.security.Flags.aapmApi()) {
+            EnforcingAdmin admin = dpm.getEnforcingAdmin(userId, userRestriction);
+            if (admin != null) {
+                return new EnforcedAdmin(admin.getComponentName(), userRestriction,
+                        admin.getUserHandle());
+            }
         }
 
         final EnforcedAdmin admin =
@@ -835,6 +846,22 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         }
         int profileId = getManagedProfileId(context, context.getUserId());
         return RestrictedLockUtils.getProfileOrDeviceOwner(context, UserHandle.of(profileId));
+    }
+
+    /**
+     * Checks if the identifier is enforced by advanced protection.
+     */
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    public static boolean isPolicyEnforcedByAdvancedProtection(Context context, String identifier,
+            int userId) {
+        if (!android.security.Flags.aapmApi()) return false;
+        if (identifier == null) return false;
+        EnforcingAdmin admin = context.getSystemService(DevicePolicyManager.class)
+                .getEnforcingAdmin(userId, identifier);
+        if (admin == null) return false;
+        return admin.getAuthority() instanceof UnknownAuthority authority
+                && AdvancedProtectionManager.ADVANCED_PROTECTION_SYSTEM_ENTITY.equals(
+                        authority.getName());
     }
 
     /**

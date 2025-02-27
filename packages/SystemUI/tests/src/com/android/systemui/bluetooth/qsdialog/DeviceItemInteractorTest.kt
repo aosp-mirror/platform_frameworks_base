@@ -27,6 +27,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.testKosmos
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
@@ -48,6 +49,7 @@ import org.mockito.junit.MockitoRule
 class DeviceItemInteractorTest : SysuiTestCase() {
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
+    private val kosmos = testKosmos()
 
     @Mock private lateinit var bluetoothTileDialogRepository: BluetoothTileDialogRepository
 
@@ -83,18 +85,6 @@ class DeviceItemInteractorTest : SysuiTestCase() {
     fun setUp() {
         dispatcher = UnconfinedTestDispatcher()
         testScope = TestScope(dispatcher)
-        interactor =
-            DeviceItemInteractor(
-                bluetoothTileDialogRepository,
-                audioManager,
-                adapter,
-                localBluetoothManager,
-                fakeSystemClock,
-                logger,
-                testScope.backgroundScope,
-                dispatcher
-            )
-
         `when`(deviceItem1.cachedBluetoothDevice).thenReturn(cachedDevice1)
         `when`(deviceItem2.cachedBluetoothDevice).thenReturn(cachedDevice2)
         `when`(cachedDevice1.address).thenReturn("ADDRESS")
@@ -108,9 +98,20 @@ class DeviceItemInteractorTest : SysuiTestCase() {
     fun testUpdateDeviceItems_noCachedDevice_returnEmpty() {
         testScope.runTest {
             `when`(bluetoothTileDialogRepository.cachedDevices).thenReturn(emptyList())
-            interactor.setDeviceItemFactoryListForTesting(
-                listOf(createFactory({ true }, deviceItem1))
-            )
+            interactor =
+                DeviceItemInteractor(
+                    bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
+                    audioManager,
+                    adapter,
+                    localBluetoothManager,
+                    fakeSystemClock,
+                    logger,
+                    listOf(createFactory({ true }, deviceItem1)),
+                    emptyList(),
+                    testScope.backgroundScope,
+                    dispatcher,
+                )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
             val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
@@ -125,9 +126,20 @@ class DeviceItemInteractorTest : SysuiTestCase() {
     fun testUpdateDeviceItems_hasCachedDevice_filterNotMatch_returnEmpty() {
         testScope.runTest {
             `when`(bluetoothTileDialogRepository.cachedDevices).thenReturn(listOf(cachedDevice1))
-            interactor.setDeviceItemFactoryListForTesting(
-                listOf(createFactory({ false }, deviceItem1))
-            )
+            interactor =
+                DeviceItemInteractor(
+                    bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
+                    audioManager,
+                    adapter,
+                    localBluetoothManager,
+                    fakeSystemClock,
+                    logger,
+                    listOf(createFactory({ false }, deviceItem1)),
+                    emptyList(),
+                    testScope.backgroundScope,
+                    dispatcher,
+                )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
             val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
@@ -142,9 +154,20 @@ class DeviceItemInteractorTest : SysuiTestCase() {
     fun testUpdateDeviceItems_hasCachedDevice_filterMatch_returnDeviceItem() {
         testScope.runTest {
             `when`(bluetoothTileDialogRepository.cachedDevices).thenReturn(listOf(cachedDevice1))
-            interactor.setDeviceItemFactoryListForTesting(
-                listOf(createFactory({ true }, deviceItem1))
-            )
+            interactor =
+                DeviceItemInteractor(
+                    bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
+                    audioManager,
+                    adapter,
+                    localBluetoothManager,
+                    fakeSystemClock,
+                    logger,
+                    listOf(createFactory({ true }, deviceItem1)),
+                    emptyList(),
+                    testScope.backgroundScope,
+                    dispatcher,
+                )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
             val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
@@ -159,9 +182,23 @@ class DeviceItemInteractorTest : SysuiTestCase() {
     fun testUpdateDeviceItems_hasCachedDevice_filterMatch_returnMultipleDeviceItem() {
         testScope.runTest {
             `when`(adapter.mostRecentlyConnectedDevices).thenReturn(null)
-            interactor.setDeviceItemFactoryListForTesting(
-                listOf(createFactory({ false }, deviceItem1), createFactory({ true }, deviceItem2))
-            )
+            interactor =
+                DeviceItemInteractor(
+                    bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
+                    audioManager,
+                    adapter,
+                    localBluetoothManager,
+                    fakeSystemClock,
+                    logger,
+                    listOf(
+                        createFactory({ false }, deviceItem1),
+                        createFactory({ true }, deviceItem2),
+                    ),
+                    emptyList(),
+                    testScope.backgroundScope,
+                    dispatcher,
+                )
 
             val latest by collectLastValue(interactor.deviceItemUpdate)
             val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
@@ -176,18 +213,32 @@ class DeviceItemInteractorTest : SysuiTestCase() {
     fun testUpdateDeviceItems_sortByDisplayPriority() {
         testScope.runTest {
             `when`(adapter.mostRecentlyConnectedDevices).thenReturn(null)
-            interactor.setDeviceItemFactoryListForTesting(
-                listOf(
-                    createFactory({ cachedDevice -> cachedDevice.device == device1 }, deviceItem1),
-                    createFactory({ cachedDevice -> cachedDevice.device == device2 }, deviceItem2)
+            interactor =
+                DeviceItemInteractor(
+                    bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
+                    audioManager,
+                    adapter,
+                    localBluetoothManager,
+                    fakeSystemClock,
+                    logger,
+                    listOf(
+                        createFactory(
+                            { cachedDevice -> cachedDevice.device == device1 },
+                            deviceItem1,
+                        ),
+                        createFactory(
+                            { cachedDevice -> cachedDevice.device == device2 },
+                            deviceItem2,
+                        ),
+                    ),
+                    listOf(
+                        DeviceItemType.SAVED_BLUETOOTH_DEVICE,
+                        DeviceItemType.CONNECTED_BLUETOOTH_DEVICE,
+                    ),
+                    testScope.backgroundScope,
+                    dispatcher,
                 )
-            )
-            interactor.setDisplayPriorityForTesting(
-                listOf(
-                    DeviceItemType.SAVED_BLUETOOTH_DEVICE,
-                    DeviceItemType.CONNECTED_BLUETOOTH_DEVICE
-                )
-            )
             `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
             `when`(deviceItem2.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
 
@@ -204,15 +255,29 @@ class DeviceItemInteractorTest : SysuiTestCase() {
     fun testUpdateDeviceItems_sameType_sortByRecentlyConnected() {
         testScope.runTest {
             `when`(adapter.mostRecentlyConnectedDevices).thenReturn(listOf(device2, device1))
-            interactor.setDeviceItemFactoryListForTesting(
-                listOf(
-                    createFactory({ cachedDevice -> cachedDevice.device == device1 }, deviceItem1),
-                    createFactory({ cachedDevice -> cachedDevice.device == device2 }, deviceItem2)
+            interactor =
+                DeviceItemInteractor(
+                    bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
+                    audioManager,
+                    adapter,
+                    localBluetoothManager,
+                    fakeSystemClock,
+                    logger,
+                    listOf(
+                        createFactory(
+                            { cachedDevice -> cachedDevice.device == device1 },
+                            deviceItem1,
+                        ),
+                        createFactory(
+                            { cachedDevice -> cachedDevice.device == device2 },
+                            deviceItem2,
+                        ),
+                    ),
+                    listOf(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE),
+                    testScope.backgroundScope,
+                    dispatcher,
                 )
-            )
-            interactor.setDisplayPriorityForTesting(
-                listOf(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
-            )
             `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
             `when`(deviceItem2.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
 
@@ -231,10 +296,20 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             `when`(bluetoothTileDialogRepository.cachedDevices)
                 .thenReturn(listOf(cachedDevice2, cachedDevice2, cachedDevice2, cachedDevice2))
             `when`(adapter.mostRecentlyConnectedDevices).thenReturn(null)
-            interactor.setDeviceItemFactoryListForTesting(
-                listOf(createFactory({ true }, deviceItem2))
-            )
-
+            interactor =
+                DeviceItemInteractor(
+                    bluetoothTileDialogRepository,
+                    kosmos.audioSharingInteractor,
+                    audioManager,
+                    adapter,
+                    localBluetoothManager,
+                    fakeSystemClock,
+                    logger,
+                    listOf(createFactory({ true }, deviceItem2)),
+                    emptyList(),
+                    testScope.backgroundScope,
+                    dispatcher,
+                )
             val latest by collectLastValue(interactor.deviceItemUpdate)
             val latestShowSeeAll by collectLastValue(interactor.showSeeAllUpdate)
             interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
@@ -246,13 +321,14 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
     private fun createFactory(
         isFilterMatchFunc: (CachedBluetoothDevice) -> Boolean,
-        deviceItem: DeviceItem
+        deviceItem: DeviceItem,
     ): DeviceItemFactory {
         return object : DeviceItemFactory() {
             override fun isFilterMatched(
                 context: Context,
                 cachedDevice: CachedBluetoothDevice,
-                audioManager: AudioManager
+                audioManager: AudioManager,
+                audioSharingAvailable: Boolean,
             ) = isFilterMatchFunc(cachedDevice)
 
             override fun create(context: Context, cachedDevice: CachedBluetoothDevice) = deviceItem

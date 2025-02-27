@@ -15,11 +15,13 @@
  */
 package com.android.keyguard;
 
+import static com.android.systemui.Flags.gsfBouncer;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.PowerManager;
@@ -153,11 +155,13 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
      * Reload colors from resources.
      **/
     public void reloadColors() {
-        int textColor = Utils.getColorAttr(getContext(), NUM_PAD_KEY)
-                .getDefaultColor();
+        int textColor = getContext().getColor(NUM_PAD_KEY);
         int klondikeColor = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary)
                 .getDefaultColor();
         mDigitText.setTextColor(textColor);
+        if (gsfBouncer()) {
+            mDigitText.setTypeface(Typeface.create("gsf-label-large-emphasized", Typeface.NORMAL));
+        }
         mKlondikeText.setTextColor(klondikeColor);
 
         if (mAnimator != null) mAnimator.reloadColors(getContext());

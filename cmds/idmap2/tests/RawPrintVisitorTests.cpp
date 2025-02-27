@@ -64,7 +64,7 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   (*idmap)->accept(&visitor);
 
   ASSERT_CONTAINS_REGEX(ADDRESS "504d4449  magic\n", stream.str());
-  ASSERT_CONTAINS_REGEX(ADDRESS "00000009  version\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "0000000a  version\n", stream.str());
   ASSERT_CONTAINS_REGEX(
       StringPrintf(ADDRESS "%s  target crc\n", android::idmap2::TestConstants::TARGET_CRC_STRING),
       stream.str());
@@ -113,7 +113,7 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
   (*idmap)->accept(&visitor);
 
   ASSERT_CONTAINS_REGEX(ADDRESS "504d4449  magic\n", stream.str());
-  ASSERT_CONTAINS_REGEX(ADDRESS "00000009  version\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "0000000a  version\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00001234  target crc\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00005678  overlay crc\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00000011  fulfilled policies: public|signature\n", stream.str());

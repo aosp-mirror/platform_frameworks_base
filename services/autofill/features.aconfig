@@ -2,6 +2,21 @@ package: "android.service.autofill"
 container: "system"
 
 flag {
+  name: "autofill_session_destroyed"
+  namespace: "autofill"
+  description: "Guards against new metrics definitions introduced in W"
+  bug: "342676602"
+}
+
+flag {
+  name: "autofill_w_metrics"
+  namespace: "autofill"
+  description: "Guards against new metrics definitions introduced in W"
+  bug: "342676602"
+  is_exported: true
+}
+
+flag {
   name: "autofill_credman_integration"
   namespace: "autofill"
   description: "Guards Autofill Framework against Autofill-Credman integration"
@@ -21,4 +36,27 @@ flag {
     namespace: "autofill"
     description: "Guards against Autofill-Credman Phase1 developer integration via new APIs"
     bug: "320730001"
+}
+
+flag {
+    name: "fill_dialog_improvements_impl"
+    is_exported: true
+    namespace: "autofill"
+    description: "Improvements for Fill Dialog for non-api changes"
+    bug: "336223371"
+}
+
+flag {
+    name: "fill_dialog_improvements"
+    is_exported: true
+    namespace: "autofill"
+    description: "Improvements for Fill Dialog, including deprecation of pre-trigger API's"
+    bug: "336223371"
+}
+
+flag {
+  name: "add_last_focused_id_to_fill_event_history"
+  namespace: "autofill"
+  description: "Adds focused id to each event that's part of the fill event history"
+  bug: "334141398"
 }

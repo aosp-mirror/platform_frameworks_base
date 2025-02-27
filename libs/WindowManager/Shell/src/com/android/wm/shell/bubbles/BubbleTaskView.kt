@@ -16,14 +16,11 @@
 
 package com.android.wm.shell.bubbles
 
-import android.app.ActivityTaskManager
 import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.content.ComponentName
-import android.os.RemoteException
-import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.wm.shell.Flags
 import com.android.wm.shell.taskview.TaskView
-import com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS
 import java.util.concurrent.Executor
 
 /**
@@ -45,6 +42,16 @@ class BubbleTaskView(val taskView: TaskView, executor: Executor) {
     var componentName: ComponentName? = null
       private set
 
+    /**
+     * Whether the task view is visible and has a surface. Note that this does not check the alpha
+     * value of the task view.
+     *
+     * When this is `true` it is safe to start showing the task view. Otherwise if this is `false`
+     * callers should wait for it to be visible which will be indicated either by a call to
+     * [TaskView.Listener.onTaskCreated] or [TaskView.Listener.onTaskVisibilityChanged]. */
+    var isVisible = false
+      private set
+
     /** [TaskView.Listener] for users of this class. */
     var delegateListener: TaskView.Listener? = null
 
@@ -64,9 +71,12 @@ class BubbleTaskView(val taskView: TaskView, executor: Executor) {
             this@BubbleTaskView.taskId = taskId
             isCreated = true
             componentName = name
+            // when the task is created it is visible
+            isVisible = true
         }
 
         override fun onTaskVisibilityChanged(taskId: Int, visible: Boolean) {
+            this@BubbleTaskView.isVisible = visible
             delegateListener?.onTaskVisibilityChanged(taskId, visible)
         }
 
@@ -89,21 +99,8 @@ class BubbleTaskView(val taskView: TaskView, executor: Executor) {
      * This should be called after all other cleanup animations have finished.
      */
     fun cleanup() {
-        if (taskId != INVALID_TASK_ID) {
-            // Ensure the task is removed from WM
-            if (ENABLE_SHELL_TRANSITIONS) {
-                taskView.removeTask()
-            } else {
-                try {
-                    ActivityTaskManager.getService().removeTask(taskId)
-                } catch (e: RemoteException) {
-                    Log.w(TAG, e.message ?: "")
-                }
-            }
+        if (Flags.enableTaskViewControllerCleanup() || taskId != INVALID_TASK_ID) {
+            taskView.removeTask()
         }
-    }
-
-    private companion object {
-        const val TAG = "BubbleTaskView"
     }
 }

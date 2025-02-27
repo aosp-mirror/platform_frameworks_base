@@ -13,60 +13,62 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<bookmarks>
+<bookmarks xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <!-- the key combinations for the following shortcuts must be in sync
          with the key combinations sent by the test in ModifierShortcutTests.java -->
     <bookmark
         role="android.app.role.BROWSER"
-        shortcut="b" />
+        androidprv:keycode="KEYCODE_B"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_CONTACTS"
-        shortcut="c" />
+        androidprv:keycode="KEYCODE_P"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_EMAIL"
-        shortcut="e" />
+        androidprv:keycode="KEYCODE_E"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_CALENDAR"
-        shortcut="k" />
+        androidprv:keycode="KEYCODE_C"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_MAPS"
-        shortcut="m" />
-    <bookmark
-        category="android.intent.category.APP_MUSIC"
-        shortcut="p" />
-    <bookmark
-        role="android.app.role.SMS"
-        shortcut="s" />
+        androidprv:keycode="KEYCODE_M"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_CALCULATOR"
-        shortcut="u" />
+        androidprv:keycode="KEYCODE_U"
+        androidprv:modifierState="META" />
 
     <bookmark
         role="android.app.role.BROWSER"
-        shortcut="b"
-        shift="true" />
+        androidprv:keycode="KEYCODE_B"
+        androidprv:modifierState="META|SHIFT" />
 
     <bookmark
         category="android.intent.category.APP_CONTACTS"
-        shortcut="c"
-        shift="true" />
+        androidprv:keycode="KEYCODE_P"
+        androidprv:modifierState="META|SHIFT" />
 
     <bookmark
         package="com.test"
         class="com.test.BookmarkTest"
-        shortcut="j"
-        shift="true" />
+        androidprv:keycode="KEYCODE_J"
+        androidprv:modifierState="META|SHIFT" />
 
     <!-- The following shortcuts will not be invoked by tests but are here to
          provide test coverage of parsing the different types of shortcut. -->
     <bookmark
         package="com.test"
         class="com.test.BookmarkTest"
-        shortcut="j" />
+        androidprv:keycode="KEYCODE_J"
+        androidprv:modifierState="META" />
     <bookmark
         package="com.test2"
         class="com.test.BookmarkTest"
-        shortcut="d" />
+        androidprv:keycode="KEYCODE_D"
+        androidprv:modifierState="META" />
 
 
     <!-- It's intended that this package/class will NOT resolve so we test the resolution
@@ -74,6 +76,7 @@
     <bookmark
         package="com.test3"
         class="com.test.BookmarkTest"
-        shortcut="f" />
+        androidprv:keycode="KEYCODE_F"
+        androidprv:modifierState="META" />
 
 </bookmarks>

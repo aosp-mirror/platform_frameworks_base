@@ -28,5 +28,5 @@ internal interface StatusBarStartablesModule {
     @IntoSet
     fun statusBarBoundsCalculator(
         statusBarBoundsProvider: StatusBarBoundsProvider
-    ): StatusBarFragmentComponent.Startable
+    ): HomeStatusBarComponent.Startable
 }

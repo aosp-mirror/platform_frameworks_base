@@ -22,6 +22,8 @@ import android.app.IAlarmListener;
 import android.app.IAlarmManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManagerInternal;
+import android.os.Binder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.PowerManagerInternal;
@@ -31,6 +33,9 @@ import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.util.SparseArray;
 import android.view.Display;
+
+import com.android.server.LocalServices;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -266,11 +271,18 @@ class PowerManagerShellCommand extends ShellCommand {
                         ServiceManager.getService(Context.ALARM_SERVICE));
             }
             try {
-                // This command is called by the shell, which has "com.android.shell" as package
-                // name.
-                pw.println("Schedule an alarm to wakeup in "
-                        + delayMillis + " ms, on behalf of shell.");
-                mAlarmManager.set("com.android.shell",
+                PackageManagerInternal packageManagerInternal =
+                        LocalServices.getService(PackageManagerInternal.class);
+                AndroidPackage callingPackage =
+                        packageManagerInternal.getPackage(Binder.getCallingUid());
+                if (callingPackage == null) {
+                    pw.println("Calling uid " + Binder.getCallingUid() + " is not an android"
+                        + " package. Cannot schedule a delayed wakeup on behalf of it.");
+                    return -1;
+                }
+                pw.println("Schedule an alarm to wakeup in " + delayMillis +
+                        " ms, on behalf of " + callingPackage.getPackageName());
+                mAlarmManager.set(callingPackage.getPackageName(),
                         AlarmManager.RTC_WAKEUP, wakeUpTime,
                         0, 0, AlarmManager.FLAG_PRIORITIZE,
                         null, mAlarmListener, "PowerManagerShellCommand", null, null);

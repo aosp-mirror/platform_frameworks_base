@@ -32,15 +32,18 @@ final class BackupRecord {
     final int userId;                      // user for which backup is performed
     final int backupMode;                  // full backup / incremental / restore
     @BackupDestination final int backupDestination; // see BackupAnnotations#BackupDestination
+    final boolean useRestrictedMode; // whether the app should be put into restricted backup mode
     ProcessRecord app;                     // where this agent is running or null
 
     // ----- Implementation -----
 
-    BackupRecord(ApplicationInfo _appInfo, int _backupMode, int _userId, int _backupDestination) {
+    BackupRecord(ApplicationInfo _appInfo, int _backupMode, int _userId, int _backupDestination,
+            boolean _useRestrictedMode) {
         appInfo = _appInfo;
         backupMode = _backupMode;
         userId = _userId;
         backupDestination = _backupDestination;
+        useRestrictedMode = _useRestrictedMode;
     }
 
     public String toString() {

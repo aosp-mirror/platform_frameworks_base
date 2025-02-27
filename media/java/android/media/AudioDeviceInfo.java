@@ -16,11 +16,16 @@
 
 package android.media;
 
+import static android.media.audio.Flags.FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE;
+import static android.media.audio.Flags.FLAG_SPEAKER_LAYOUT_API;
+
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.media.audio.Flags;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -192,6 +197,15 @@ public final class AudioDeviceInfo {
      */
     public static final int TYPE_DOCK_ANALOG = 31;
 
+    /**
+     * A device type describing a speaker group that supports multichannel contents. The speakers in
+     * the group are connected together using local network based protocols. The speaker group
+     * requires additional input of the physical positions of each individual speaker to provide a
+     * better experience on multichannel contents.
+     */
+    @FlaggedApi(FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE)
+    public static final int TYPE_MULTICHANNEL_GROUP = 32;
+
     /** @hide */
     @IntDef(flag = false, prefix = "TYPE", value = {
             TYPE_BUILTIN_EARPIECE,
@@ -224,7 +238,8 @@ public final class AudioDeviceInfo {
             TYPE_BLE_SPEAKER,
             TYPE_ECHO_REFERENCE,
             TYPE_BLE_BROADCAST,
-            TYPE_DOCK_ANALOG}
+            TYPE_DOCK_ANALOG,
+            TYPE_MULTICHANNEL_GROUP}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDeviceType {}
@@ -279,12 +294,14 @@ public final class AudioDeviceInfo {
             TYPE_AUX_LINE,
             TYPE_IP,
             TYPE_BUS,
+            TYPE_REMOTE_SUBMIX,
             TYPE_HEARING_AID,
             TYPE_BUILTIN_SPEAKER_SAFE,
             TYPE_BLE_HEADSET,
             TYPE_BLE_SPEAKER,
             TYPE_BLE_BROADCAST,
-            TYPE_DOCK_ANALOG}
+            TYPE_DOCK_ANALOG,
+            TYPE_MULTICHANNEL_GROUP}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDeviceTypeOut {}
@@ -312,6 +329,7 @@ public final class AudioDeviceInfo {
             case TYPE_AUX_LINE:
             case TYPE_IP:
             case TYPE_BUS:
+            case TYPE_REMOTE_SUBMIX:
             case TYPE_HEARING_AID:
             case TYPE_BUILTIN_SPEAKER_SAFE:
             case TYPE_BLE_HEADSET:
@@ -319,7 +337,13 @@ public final class AudioDeviceInfo {
             case TYPE_BLE_BROADCAST:
             case TYPE_DOCK_ANALOG:
                 return true;
+
             default:
+                if (Flags.enableMultichannelGroupDevice()) {
+                    if (type == TYPE_MULTICHANNEL_GROUP) {
+                        return true;
+                    }
+                }
                 return false;
         }
     }
@@ -524,6 +548,57 @@ public final class AudioDeviceInfo {
         return counts;
     }
 
+    /** @hide */
+    @IntDef(flag = true, prefix = "AudioFormat.CHANNEL_OUT_", value = {
+            AudioFormat.CHANNEL_INVALID,
+            AudioFormat.CHANNEL_OUT_DEFAULT,
+            AudioFormat.CHANNEL_OUT_FRONT_LEFT,
+            AudioFormat.CHANNEL_OUT_FRONT_RIGHT,
+            AudioFormat.CHANNEL_OUT_FRONT_CENTER,
+            AudioFormat.CHANNEL_OUT_LOW_FREQUENCY,
+            AudioFormat.CHANNEL_OUT_BACK_LEFT,
+            AudioFormat.CHANNEL_OUT_BACK_RIGHT,
+            AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER,
+            AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER,
+            AudioFormat.CHANNEL_OUT_BACK_CENTER,
+            AudioFormat.CHANNEL_OUT_SIDE_LEFT,
+            AudioFormat.CHANNEL_OUT_SIDE_RIGHT,
+            AudioFormat.CHANNEL_OUT_TOP_CENTER,
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT,
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_CENTER,
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT,
+            AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT,
+            AudioFormat.CHANNEL_OUT_TOP_BACK_CENTER,
+            AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT,
+            AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT,
+            AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT,
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT,
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_CENTER,
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT,
+            AudioFormat.CHANNEL_OUT_LOW_FREQUENCY_2,
+            AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT,
+            AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    @FlaggedApi(FLAG_SPEAKER_LAYOUT_API)
+    public @interface SpeakerLayoutChannelMask {}
+
+    /**
+     * @return A ChannelMask representing the speaker layout of a TYPE_BUILTIN_SPEAKER device.
+     *
+     * Valid only for speakers built-in to the device.
+     *
+     * The layout channel mask only indicates which speaker channels are present, the
+     * physical layout of the speakers should be informed by a standard for multi-channel
+     * sound playback systems, such as ITU-R BS.2051.
+     * @see AudioFormat
+     */
+    @FlaggedApi(FLAG_SPEAKER_LAYOUT_API)
+    @SpeakerLayoutChannelMask
+    public int getSpeakerLayoutChannelMask() {
+        return mPort.speakerLayoutChannelMask();
+    }
+
     /**
      * @return An array of audio encodings (e.g. {@link AudioFormat#ENCODING_PCM_16BIT},
      * {@link AudioFormat#ENCODING_PCM_FLOAT}) supported by the audio device.
@@ -663,6 +738,10 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BLE_HEADSET, TYPE_BLE_HEADSET);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BLE_SPEAKER, TYPE_BLE_SPEAKER);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BLE_BROADCAST, TYPE_BLE_BROADCAST);
+        if (Flags.enableMultichannelGroupDevice()) {
+            INT_TO_EXT_DEVICE_MAPPING.put(
+                    AudioSystem.DEVICE_OUT_MULTICHANNEL_GROUP, TYPE_MULTICHANNEL_GROUP);
+        }
 
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BUILTIN_MIC, TYPE_BUILTIN_MIC);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET, TYPE_BLUETOOTH_SCO);
@@ -719,6 +798,10 @@ public final class AudioDeviceInfo {
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BLE_HEADSET, AudioSystem.DEVICE_OUT_BLE_HEADSET);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BLE_SPEAKER, AudioSystem.DEVICE_OUT_BLE_SPEAKER);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BLE_BROADCAST, AudioSystem.DEVICE_OUT_BLE_BROADCAST);
+        if (Flags.enableMultichannelGroupDevice()) {
+            EXT_TO_INT_DEVICE_MAPPING.put(
+                    TYPE_MULTICHANNEL_GROUP, AudioSystem.DEVICE_OUT_MULTICHANNEL_GROUP);
+        }
 
         // privileges mapping to input device
         EXT_TO_INT_INPUT_DEVICE_MAPPING = new SparseIntArray();

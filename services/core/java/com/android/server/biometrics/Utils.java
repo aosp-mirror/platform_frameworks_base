@@ -147,7 +147,7 @@ public class Utils {
      * @return true if mandatory biometrics is requested
      */
     static boolean isMandatoryBiometricsRequested(@Authenticators.Types int authenticators) {
-        return (authenticators & Authenticators.MANDATORY_BIOMETRICS) != 0;
+        return (authenticators & Authenticators.IDENTITY_CHECK) != 0;
     }
 
     /**
@@ -257,7 +257,7 @@ public class Utils {
         if (Flags.mandatoryBiometrics()) {
             testBits = ~(Authenticators.DEVICE_CREDENTIAL
                     | Authenticators.BIOMETRIC_MIN_STRENGTH
-                    | Authenticators.MANDATORY_BIOMETRICS);
+                    | Authenticators.IDENTITY_CHECK);
         } else {
             testBits = ~(Authenticators.DEVICE_CREDENTIAL
                     | Authenticators.BIOMETRIC_MIN_STRENGTH);
@@ -329,8 +329,8 @@ public class Utils {
             case BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED:
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
                 break;
-            case BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE:
-                biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
+            case BiometricConstants.BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE:
+                biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE;
                 break;
             case BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS:
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
@@ -397,7 +397,7 @@ public class Utils {
             case BIOMETRIC_SENSOR_PRIVACY_ENABLED:
                 return BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED;
             case MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR:
-                return BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
+                return BiometricConstants.BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE;
             case BIOMETRIC_NOT_ENABLED_FOR_APPS:
                 if (Flags.mandatoryBiometrics()) {
                     return BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;

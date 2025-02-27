@@ -104,6 +104,7 @@ import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
 import com.android.systemui.util.kotlin.JavaAdapter;
@@ -186,16 +187,17 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private List<DecorProvider> mMockCutoutList;
     private final CameraProtectionLoader mCameraProtectionLoader =
             new CameraProtectionLoaderImpl(mContext);
+    private Handler mMainHandler;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        Handler mainHandler = new Handler(TestableLooper.get(this).getLooper());
+        mMainHandler = new Handler(TestableLooper.get(this).getLooper());
         mSecureSettings = new FakeSettings();
         mExecutor = new FakeExecutor(new FakeSystemClock());
         mThreadFactory = new FakeThreadFactory(mExecutor);
-        mThreadFactory.setHandler(mainHandler);
+        mThreadFactory.setHandler(mMainHandler);
 
         mWindowManager = mock(WindowManager.class);
         WindowMetrics metrics = mContext.getSystemService(WindowManager.class)
@@ -214,26 +216,26 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mMockTypedArray.length()).thenReturn(0);
         mPrivacyDotTopLeftDecorProvider = spy(new PrivacyDotCornerDecorProviderImpl(
                 R.id.privacy_dot_top_left_container,
-                DisplayCutout.BOUNDS_POSITION_TOP,
-                DisplayCutout.BOUNDS_POSITION_LEFT,
+                BOUNDS_POSITION_TOP,
+                BOUNDS_POSITION_LEFT,
                 R.layout.privacy_dot_top_left));
 
         mPrivacyDotTopRightDecorProvider = spy(new PrivacyDotCornerDecorProviderImpl(
                 R.id.privacy_dot_top_right_container,
-                DisplayCutout.BOUNDS_POSITION_TOP,
-                DisplayCutout.BOUNDS_POSITION_RIGHT,
+                BOUNDS_POSITION_TOP,
+                BOUNDS_POSITION_RIGHT,
                 R.layout.privacy_dot_top_right));
 
         mPrivacyDotBottomLeftDecorProvider = spy(new PrivacyDotCornerDecorProviderImpl(
                 R.id.privacy_dot_bottom_left_container,
-                DisplayCutout.BOUNDS_POSITION_BOTTOM,
-                DisplayCutout.BOUNDS_POSITION_LEFT,
+                BOUNDS_POSITION_BOTTOM,
+                BOUNDS_POSITION_LEFT,
                 R.layout.privacy_dot_bottom_left));
 
         mPrivacyDotBottomRightDecorProvider = spy(new PrivacyDotCornerDecorProviderImpl(
                 R.id.privacy_dot_bottom_right_container,
-                DisplayCutout.BOUNDS_POSITION_BOTTOM,
-                DisplayCutout.BOUNDS_POSITION_RIGHT,
+                BOUNDS_POSITION_BOTTOM,
+                BOUNDS_POSITION_RIGHT,
                 R.layout.privacy_dot_bottom_right));
 
         // Default no cutout
@@ -256,11 +258,10 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mLazyViewCapture, false);
         mScreenDecorations = spy(new ScreenDecorations(mContext, mSecureSettings,
                 mCommandRegistry, mUserTracker, mDisplayTracker, mDotViewController,
-                mThreadFactory,
                 mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
                 mFakeFacePropertyRepository, mJavaAdapter, mCameraProtectionLoader,
-                mViewCaptureAwareWindowManager) {
+                mViewCaptureAwareWindowManager, mMainHandler, mExecutor) {
             @Override
             public void start() {
                 super.start();
@@ -1272,10 +1273,10 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         ScreenDecorations screenDecorations = new ScreenDecorations(mContext,
                 mSecureSettings, mCommandRegistry, mUserTracker, mDisplayTracker,
                 mDotViewController,
-                mThreadFactory, mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
+                mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
                 mFakeFacePropertyRepository, mJavaAdapter, mCameraProtectionLoader,
-                mViewCaptureAwareWindowManager);
+                mViewCaptureAwareWindowManager, mMainHandler, mExecutor);
         screenDecorations.start();
         when(mContext.getDisplay()).thenReturn(mDisplay);
         when(mDisplay.getDisplayInfo(any())).thenAnswer(new Answer<Boolean>() {

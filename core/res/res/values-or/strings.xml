@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"କଲର୍ ଆଇଡି ଡିଫଲ୍ଟ ଭାବରେ ପ୍ରତିବନ୍ଧିତ। ପରବର୍ତ୍ତୀ କଲ୍: ପ୍ରତିବନ୍ଧିତ ନୁହେଁ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"କଲର୍ ଆଇଡି ଡିଫଲ୍ଟ ଭାବରେ ପ୍ରତିବନ୍ଧିତ ନୁହେଁ। ପରବର୍ତ୍ତୀ କଲ୍: ପ୍ରତିବନ୍ଧିତ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"କଲର୍ ଆଇଡି ଡିଫଲ୍ଟ ଭାବରେ ପ୍ରତିବନ୍ଧିତ ନୁହେଁ। ପରବର୍ତ୍ତୀ କଲ୍: ପ୍ରତିବନ୍ଧିତ ନୁହେଁ"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ଏହି ଆପ 16 KB କମ୍ପାଟିବଲ ନୁହେଁ। APK ଆଲାଇନମେଣ୍ଟ ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି। ପୃଷ୍ଠା ସାଇଜ କମ୍ପାଟିବଲ ମୋଡ ବ୍ୟବହାର କରି ଏହି ଆପକୁ ଚଲାଯିବ। ସର୍ବୋତ୍ତମ କମ୍ପାଟିବିଲିଟୀ ପାଇଁ ଦୟାକରି 16 KB ସପୋର୍ଟ ସହ ଆପ୍ଲିକେସନକୁ ପୁଣି କମ୍ପାଇଲ କରନ୍ତୁ। ଅଧିକ ସୂଚନା ପାଇଁ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;କୁ ଦେଖନ୍ତୁ"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ଏହି ଆପ 16 KB କମ୍ପାଟିବଲ ନୁହେଁ। ELF ଆଲାଇନମେଣ୍ଟ ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି। ପୃଷ୍ଠା ସାଇଜ କମ୍ପାଟିବଲ ମୋଡ ବ୍ୟବହାର କରି ଏହି ଆପକୁ ଚଲାଯିବ। ସର୍ବୋତ୍ତମ କମ୍ପାଟିବିଲିଟୀ ପାଇଁ ଦୟାକରି 16 KB ସପୋର୍ଟ ସହ ଆପ୍ଲିକେସନକୁ ପୁଣି କମ୍ପାଇଲ କରନ୍ତୁ। ଅଧିକ ସୂଚନା ପାଇଁ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;କୁ ଦେଖନ୍ତୁ"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ଏହି ଆପ 16 KB କମ୍ପାଟିବଲ ନୁହେଁ। APK ଏବଂ ELF ଆଲାଇନମେଣ୍ଟ ଯାଞ୍ଚଗୁଡ଼ିକ ବିଫଳ ହୋଇଛି। ପୃଷ୍ଠା ସାଇଜ କମ୍ପାଟିବଲ ମୋଡ ବ୍ୟବହାର କରି ଏହି ଆପକୁ ଚଲାଯିବ। ସର୍ବୋତ୍ତମ କମ୍ପାଟିବିଲିଟୀ ପାଇଁ ଦୟାକରି 16 KB ସପୋର୍ଟ ସହ ଆପ୍ଲିକେସନକୁ ପୁଣି କମ୍ପାଇଲ କରନ୍ତୁ। ଅଧିକ ସୂଚନା ପାଇଁ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;କୁ ଦେଖନ୍ତୁ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ସେବାର ସୁବିଧା ନାହିଁ।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ଆପଣ କଲର୍‍ ID ସେଟିଙ୍ଗ ବଦଳାଇପାରିବେ ନାହିଁ।"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g>କୁ ଡାଟା ସ୍ୱିଚ କରାଯାଇଛି"</string>
@@ -1155,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> ଘଣ୍ଟାରେ"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> ଦିନରେ"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> ବର୍ଷରେ"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# ମିନିଟ ପୂର୍ବେ}other{# ମିନିଟ ପୂର୍ବେ}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ଘଣ୍ଟା ପୂର୍ବେ}other{# ଘଣ୍ଟା ପୂର୍ବେ}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ଦିନ ପୂର୍ବେ}other{# ଦିନ ପୂର୍ବେ}}"</string>
@@ -1665,7 +1700,7 @@
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ହେଡଫୋନ୍‍"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"ସିଷ୍ଟମ"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଡିଓ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ବ୍ଲୁଟୁଥ ଅଡିଓ"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ୱେୟାର୍‍ଲେସ୍‍ ଡିସ୍‍ପ୍ଲେ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ଡିଭାଇସ୍‍ ସଂଯୋଗ କରନ୍ତୁ"</string>
@@ -1940,11 +1975,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ସପ୍ତାହାନ୍ତ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ଇଭେଣ୍ଟ"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ଶୋଇବା"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ଚାଲୁ ଅଛି"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ବନ୍ଦ ଅଛି"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>ରୁ <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ଯେକୌଣସି କ୍ୟାଲେଣ୍ଡର୍‌"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> କିଛି ସାଉଣ୍ଡକୁ ମ୍ୟୁଟ୍ କରୁଛି"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ଏକ ସମସ୍ୟା ରହିଛି ଏବଂ ଆପଣ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଅସ୍ଥିର ରହିପାରେ।"</string>
@@ -2131,11 +2169,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଭାଇବ୍ରେଟ୍ ହେବ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ନିଃଶବ୍ଦ କରିଦିଆଯିବ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ସିଷ୍ଟମ୍‌ରେ ପରିବର୍ତ୍ତନ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ନୂଆ: \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ମୋଡ୍‌ ଅନ୍‌ ଥିବା ଯୋଗୁଁ ବିଜ୍ଞପ୍ତି ଲୁଚାଇ ଦିଆଯାଉଛି"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ଅଧିକ ଜାଣିବାକୁ ଟ୍ୟାପ୍‌ କରନ୍ତୁ ଏବଂ ବଦଳାନ୍ତୁ।"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"’ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ’ ବଦଳିଯାଇଛି"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ବିଜ୍ଞପ୍ତି ସେଟିଂସକୁ ସମୀକ୍ଷା କରନ୍ତୁ"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13ଠାରୁ, ଆପଣ ଇନଷ୍ଟଲ କରୁଥିବା ଆପ୍ସ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ପଠାଇବା ପାଇଁ ଆପଣଙ୍କ ଅନୁମତି ଆବଶ୍ୟକ କରେ। ପୂର୍ବରୁ ଥିବା ଆପ୍ସ ପାଇଁ ଏହି ଅନୁମତିକୁ ପରିବର୍ତ୍ତନ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ମୋତେ ପରେ ରିମାଇଣ୍ଡ କର"</string>
@@ -2431,7 +2464,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ଏକ ମୋବାଇଲ କିମ୍ବା ୱାଇ-ଫାଇ ନେଟୱାର୍କ ବିନା ମେସେଜ ପଠାନ୍ତୁ ଏବଂ ପାଆନ୍ତୁ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ଖୋଲନ୍ତୁ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ଏହା କିପରି କାମ କରେ"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"ସ୍ୱତଃ ନେଟୱାର୍କକୁ ଚୟନ କରନ୍ତୁ\"କୁ ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"ସେଟିଂସରେ \"ସ୍ୱତଃ ନେଟୱାର୍କକୁ ଚୟନ କରନ୍ତୁ\"କୁ ଚାଲୁ କରନ୍ତୁ, ଯାହା ଫଳରେ ଆପଣଙ୍କ ଫୋନ ସେଟେଲାଇଟ ସହିତ କାର୍ଯ୍ୟ କରୁଥିବା ଏକ ନେଟୱାର୍କକୁ ଖୋଜିପାରିବ"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"ପଛକୁ ଫେରନ୍ତୁ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ବାକି ଅଛି…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"ବର୍ତ୍ତମାନ ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ଅଛି"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"କୌଣସି ମୋବାଇଲ କିମ୍ବା ୱାଇ-ଫାଇ ନେଟୱାର୍କ ନଥିଲେ ଆପଣ ଜରୁରୀକାଳୀନ ସେବାଗୁଡ଼ିକୁ ମେସେଜ କରିପାରିବେ। Google Messages ଆପଣଙ୍କର ଡିଫଲ୍ଟ ମେସେଜିଂ ଆପ ହେବା ଆବଶ୍ୟକ।"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ସେଟେଲାଇଟ SOS ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"ଏହି ଡିଭାଇସରେ ସେଟେଲାଇଟ SOS ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ସେଟେଲାଇଟ SOS ସେଟ ଅପ କରାଯାଇନାହିଁ"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"ଆପଣ ଇଣ୍ଟର୍ନେଟ ସହ କନେକ୍ଟ ଅଛନ୍ତି ବୋଲି ସୁନିଶ୍ଚିତ କରି ପୁଣି ସେଟଅପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"ଏହି ଦେଶ କିମ୍ବା ଅଞ୍ଚଳରେ ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ସେଟେଲାଇଟ SOS ସେଟ ଅପ କରାଯାଇନାହିଁ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"ସେଟେଲାଇଟ ମାଧ୍ୟମରେ ମେସେଜ କରିବା ପାଇଁ Google Messagesକୁ ଆପଣଙ୍କର ଡିଫଲ୍ଟ ମେସେଜିଂ ଆପ ଭାବେ ସେଟ କରନ୍ତୁ"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ଏହି ଦେଶ କିମ୍ବା ଅଞ୍ଚଳରେ ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ଅଛି ନା ନାହିଁ ତାହା ଯାଞ୍ଚ କରିବାକୁ ଲୋକେସନ ସେଟିଂସ ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ଅଛି"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"କୌଣସି ମୋବାଇଲ କିମ୍ବା ୱାଇ-ଫାଇ ନେଟୱାର୍କ ନଥିଲେ ଆପଣ ସେଟେଲାଇଟ ମାଧ୍ୟମରେ ମେସେଜ କରିପାରିବେ। Google Messages ଆପଣଙ୍କର ଡିଫଲ୍ଟ ମେସେଜିଂ ଆପ ହେବା ଆବଶ୍ୟକ।"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"ସେଟେଲାଇଟ ମେସେଜିଂ ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ଏହି ଡିଭାଇସରେ ସେଟେଲାଇଟ ମେସେଜିଂ ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"ସେଟେଲାଇଟ ମେସେଜିଂ ସେଟ ଅପ କରାଯାଇନାହିଁ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"ଆପଣ ଇଣ୍ଟର୍ନେଟ ସହ କନେକ୍ଟ ଅଛନ୍ତି ବୋଲି ସୁନିଶ୍ଚିତ କରି ପୁଣି ସେଟଅପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ଏହି ଦେଶ କିମ୍ବା ଅଞ୍ଚଳରେ ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"ସେଟେଲାଇଟ ମେସେଜିଂ ସେଟ ଅପ କରାଯାଇନାହିଁ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"ସେଟେଲାଇଟ ମାଧ୍ୟମରେ ମେସେଜ କରିବା ପାଇଁ Google Messagesକୁ ଆପଣଙ୍କର ଡିଫଲ୍ଟ ମେସେଜିଂ ଆପ ଭାବେ ସେଟ କରନ୍ତୁ"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ଏହି ଦେଶ କିମ୍ବା ଅଞ୍ଚଳରେ ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ଅଛି ନା ନାହିଁ ତାହା ଯାଞ୍ଚ କରିବାକୁ ଲୋକେସନ ସେଟିଂସ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>କୁ ଆଉ ଚିହ୍ନଟ କରାଯାଇପାରିବ ନାହିଁ।"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ଏବଂ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>କୁ ଆଉ ଚିହ୍ନଟ କରାଯାଇପାରିବ ନାହିଁ।"</string>

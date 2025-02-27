@@ -30,11 +30,10 @@ import kotlinx.coroutines.flow.mapLatest
 @OptIn(ExperimentalCoroutinesApi::class)
 class StatusBarUserChipViewModel
 @Inject
-constructor(
-    interactor: UserSwitcherInteractor,
-) {
+constructor(private val interactor: UserSwitcherInteractor) {
     /** Whether the status bar chip ui should be available */
-    val chipEnabled: Boolean = interactor.isStatusBarUserChipEnabled
+    val chipEnabled: Boolean
+        get() = interactor.isStatusBarUserChipEnabled
 
     /** Whether or not the chip should be showing, based on the number of users */
     val isChipVisible: Flow<Boolean> =

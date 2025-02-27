@@ -32,7 +32,10 @@ interface BubbleExpandedViewManager {
     fun isStackExpanded(): Boolean
     fun isShowingAsBubbleBar(): Boolean
     fun hideCurrentInputMethod()
-    fun updateBubbleBarLocation(location: BubbleBarLocation)
+    fun updateBubbleBarLocation(
+        location: BubbleBarLocation,
+        @BubbleBarLocation.UpdateSource source: Int,
+    )
 
     companion object {
         /**
@@ -82,8 +85,11 @@ interface BubbleExpandedViewManager {
                     controller.hideCurrentInputMethod()
                 }
 
-                override fun updateBubbleBarLocation(location: BubbleBarLocation) {
-                    controller.bubbleBarLocation = location
+                override fun updateBubbleBarLocation(
+                    location: BubbleBarLocation,
+                    @BubbleBarLocation.UpdateSource source: Int,
+                ) {
+                    controller.setBubbleBarLocation(location, source)
                 }
             }
         }

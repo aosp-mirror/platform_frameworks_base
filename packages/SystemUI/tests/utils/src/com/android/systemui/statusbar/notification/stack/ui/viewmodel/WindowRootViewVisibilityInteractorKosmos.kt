@@ -25,7 +25,7 @@ import com.android.systemui.scene.data.repository.windowRootViewVisibilityReposi
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
-import com.android.systemui.statusbar.policy.headsUpManager
+import com.android.systemui.statusbar.notification.headsup.headsUpManager
 
 val Kosmos.windowRootViewVisibilityInteractor by Fixture {
     WindowRootViewVisibilityInteractor(

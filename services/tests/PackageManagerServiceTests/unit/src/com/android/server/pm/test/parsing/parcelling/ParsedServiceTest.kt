@@ -30,5 +30,6 @@ class ParsedServiceTest : ParsedMainComponentTest(ParsedService::class, ParsedSe
     override val mainComponentSubclassBaseParams = listOf(
         ParsedService::getForegroundServiceType,
         ParsedService::getPermission,
+        ParsedService::getIntentMatchingFlags,
     )
 }

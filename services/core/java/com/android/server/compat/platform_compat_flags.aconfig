@@ -1,0 +1,10 @@
+package: "com.android.server.compat"
+container: "system"
+
+flag {
+    name: "system_uid_target_system_sdk"
+    namespace: "app_compat"
+    description: "Compat framework feature flag for forcing all system uid apps to target system sdk"
+    bug: "29702703"
+    is_fixed_read_only: true
+}

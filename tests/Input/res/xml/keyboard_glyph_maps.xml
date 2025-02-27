@@ -19,4 +19,8 @@
         androidprv:glyphMap="@xml/test_glyph_map"
         androidprv:vendorId="0x1234"
         androidprv:productId="0x3456" />
+    <keyboard-glyph-map
+        androidprv:glyphMap="@xml/test_glyph_map2"
+        androidprv:vendorId="0x1235"
+        androidprv:productId="0x3457" />
 </keyboard-glyph-maps>

@@ -65,8 +65,43 @@ constructor(
             .waitForAndVerify()
     }
 
+    fun startSingleAppMediaProjectionWithExtraIntent(
+        wmHelper: WindowManagerStateHelper,
+        targetApp: StandardAppHelper
+    ) {
+        clickStartMediaProjectionWithExtraIntentButton()
+        chooseSingleAppOption()
+        startScreenSharing()
+        selectTargetApp(targetApp.appName)
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .withHomeActivityVisible()
+            .waitForAndVerify()
+    }
+
+    fun startSingleAppMediaProjectionFromRecents(
+        wmHelper: WindowManagerStateHelper,
+        targetApp: StandardAppHelper,
+        recentTasksIndex: Int = 0,
+    ) {
+        clickStartMediaProjectionButton()
+        chooseSingleAppOption()
+        startScreenSharing()
+        selectTargetAppRecent(recentTasksIndex)
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .withWindowSurfaceAppeared(targetApp)
+            .waitForAndVerify()
+    }
+
     private fun clickStartMediaProjectionButton() {
         findObject(By.res(packageName, START_MEDIA_PROJECTION_BUTTON_ID)).also { it.click() }
+    }
+
+    private fun clickStartMediaProjectionWithExtraIntentButton() {
+        findObject(By.res(packageName, START_MEDIA_PROJECTION_NEW_INTENT_BUTTON_ID)).also { it.click() }
     }
 
     private fun chooseEntireScreenOption() {
@@ -90,6 +125,13 @@ constructor(
         }
 
         findObject(By.text(targetAppName)).also { it.click() }
+    }
+
+    private fun selectTargetAppRecent(recentTasksIndex: Int) {
+        // Scroll to to find target app to launch then click app icon it to start capture
+        val recentsTasksRecycler =
+            findObject(By.res(SYSTEMUI_PACKAGE, MEDIA_PROJECTION_RECENT_TASKS))
+        recentsTasksRecycler.children[recentTasksIndex].also{ it.click() }
     }
 
     private fun chooseSingleAppOption() {
@@ -116,8 +158,10 @@ constructor(
         const val TIMEOUT: Long = 5000L
         const val ACCEPT_RESOURCE_ID: String = "android:id/button1"
         const val START_MEDIA_PROJECTION_BUTTON_ID: String = "button_start_mp"
+        const val START_MEDIA_PROJECTION_NEW_INTENT_BUTTON_ID: String = "button_start_mp_new_intent"
         val SCREEN_SHARE_OPTIONS_PATTERN: Pattern =
             Pattern.compile("$SYSTEMUI_PACKAGE:id/screen_share_mode_(options|spinner)")
+        const val MEDIA_PROJECTION_RECENT_TASKS: String = "media_projection_recent_tasks_recycler"
         const val ENTIRE_SCREEN_STRING_RES_NAME: String =
             "screen_share_permission_dialog_option_entire_screen"
         const val SINGLE_APP_STRING_RES_NAME: String =

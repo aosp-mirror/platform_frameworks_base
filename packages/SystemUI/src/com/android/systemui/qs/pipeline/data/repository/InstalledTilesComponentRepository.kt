@@ -30,8 +30,8 @@ import androidx.annotation.GuardedBy
 import com.android.systemui.common.data.repository.PackageChangeRepository
 import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.isComponentActuallyEnabled
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -54,7 +54,7 @@ interface InstalledTilesComponentRepository {
 class InstalledTilesComponentRepositoryImpl
 @Inject
 constructor(
-    @Application private val applicationContext: Context,
+    @ShadeDisplayAware private val context: Context,
     @Background private val backgroundScope: CoroutineScope,
     private val packageChangeRepository: PackageChangeRepository
 ) : InstalledTilesComponentRepository {
@@ -77,10 +77,10 @@ constructor(
              * context.
              */
             val packageManager =
-                if (applicationContext.userId == userId) {
-                    applicationContext.packageManager
+                if (context.userId == userId) {
+                    context.packageManager
                 } else {
-                    applicationContext
+                    context
                         .createContextAsUser(
                             UserHandle.of(userId),
                             /* flags */ 0,

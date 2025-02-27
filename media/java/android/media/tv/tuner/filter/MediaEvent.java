@@ -17,12 +17,14 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.BytesLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.media.AudioPresentation;
 import android.media.MediaCodec.LinearBlock;
+import android.media.tv.flags.Flags;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,12 +59,16 @@ public class MediaEvent extends FilterEvent {
     private final int mScIndexMask;
     private final AudioDescriptor mExtraMetaData;
     private final List<AudioPresentation> mAudioPresentations;
+    private final int mNumDataPieces;
+    private final int mIndexInDataGroup;
+    private final int mDataGroupId;
 
     // This constructor is used by JNI code only
     private MediaEvent(int streamId, boolean isPtsPresent, long pts, boolean isDtsPresent, long dts,
             long dataLength, long offset, LinearBlock buffer, boolean isSecureMemory, long dataId,
             int mpuSequenceNumber, boolean isPrivateData, int scIndexMask,
-            AudioDescriptor extraMetaData, List<AudioPresentation> audioPresentations) {
+            AudioDescriptor extraMetaData, List<AudioPresentation> audioPresentations,
+            int numDataPieces, int indexInDataGroup, int dataGroupId) {
         mStreamId = streamId;
         mIsPtsPresent = isPtsPresent;
         mPts = pts;
@@ -78,6 +84,9 @@ public class MediaEvent extends FilterEvent {
         mScIndexMask = scIndexMask;
         mExtraMetaData = extraMetaData;
         mAudioPresentations = audioPresentations;
+        mNumDataPieces = numDataPieces;
+        mIndexInDataGroup = indexInDataGroup;
+        mDataGroupId = dataGroupId;
     }
 
     /**
@@ -232,6 +241,67 @@ public class MediaEvent extends FilterEvent {
     @NonNull
     public List<AudioPresentation> getAudioPresentations() {
         return mAudioPresentations == null ? Collections.emptyList() : mAudioPresentations;
+    }
+
+    /**
+     * Gets the number of data pieces into which the original data was split.
+     *
+     * <p>The {@link #getNumDataPieces()}, {@link #getIndexInDataGroup()} and
+     * {@link #getDataGroupId()} methods should be used together to reassemble the original data if
+     * it was split into pieces. Use {@link #getLinearBlock()} to get the memory where the data
+     * pieces are stored.
+     *
+     * @return 0 or 1 if this MediaEvent object contains the complete data; otherwise the number of
+     *         pieces into which the original data was split.
+     * @see #getIndexInDataGroup()
+     * @see #getDataGroupId()
+     * @see #getLinearBlock()
+     */
+    @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
+    @IntRange(from = 0)
+    public int getNumDataPieces() {
+        return mNumDataPieces;
+    }
+
+    /**
+     * Gets the index of the data piece. The index in the data group indicates the order in which
+     * this {@link MediaEvent}'s data piece should be reassembled. The result should be within the
+     * range [0, {@link #getNumDataPieces()}).
+     *
+     * <p>The {@link #getNumDataPieces()}, {@link #getIndexInDataGroup()} and
+     * {@link #getDataGroupId()} methods should be used together to reassemble the original data if
+     * it was split into pieces. Use {@link #getLinearBlock()} to get the memory where the data
+     * pieces are stored.
+     *
+     * @return The index in the data group.
+     * @see #getNumDataPieces()
+     * @see #getDataGroupId()
+     * @see #getLinearBlock()
+     */
+    @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
+    @IntRange(from = 0)
+    public int getIndexInDataGroup() {
+        return mIndexInDataGroup;
+    }
+
+    /**
+     * Gets the group ID for reassembling the complete data. {@link MediaEvent}s that have the same
+     * data group ID contain different pieces of the same data. This value should be ignored if
+     * {@link #getNumDataPieces()} returns 0 or 1.
+     *
+     * <p>The {@link #getNumDataPieces()}, {@link #getIndexInDataGroup()} and
+     * {@link #getDataGroupId()} methods should be used together to reassemble the original data if
+     * it was split into pieces. Use {@link #getLinearBlock()} to get the memory where the data
+     * pieces are stored.
+     *
+     * @return The data group ID.
+     * @see #getNumDataPieces()
+     * @see #getIndexInDataGroup()
+     * @see #getLinearBlock()
+     */
+    @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
+    public int getDataGroupId() {
+        return mDataGroupId;
     }
 
     /**

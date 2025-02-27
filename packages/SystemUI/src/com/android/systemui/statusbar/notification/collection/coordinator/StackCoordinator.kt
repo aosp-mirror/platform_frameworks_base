@@ -43,8 +43,7 @@ internal constructor(
     private val groupExpansionManagerImpl: GroupExpansionManagerImpl,
     private val renderListInteractor: RenderNotificationListInteractor,
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
-    private val sensitiveNotificationProtectionController:
-        SensitiveNotificationProtectionController,
+    private val sensitiveNotificationProtectionController: SensitiveNotificationProtectionController,
 ) : Coordinator {
 
     override fun attach(pipeline: NotifPipeline) {
@@ -52,7 +51,7 @@ internal constructor(
         groupExpansionManagerImpl.attach(pipeline)
     }
 
-    fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
+    private fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
         traceSection("StackCoordinator.onAfterRenderList") {
             val notifStats = calculateNotifStats(entries)
             if (FooterViewRefactor.isEnabled) {
@@ -78,13 +77,13 @@ internal constructor(
             val isSilent = section.bucket == BUCKET_SILENT
             // NOTE: NotificationEntry.isClearable will internally check group children to ensure
             //  the group itself definitively clearable.
-            val isClearable = !isSensitiveContentProtectionActive && entry.isClearable
-                    && !entry.isSensitive.value
+            val isClearable =
+                !isSensitiveContentProtectionActive && entry.isClearable && !entry.isSensitive.value
             when {
                 isSilent && isClearable -> hasClearableSilentNotifs = true
                 isSilent && !isClearable -> hasNonClearableSilentNotifs = true
                 !isSilent && isClearable -> hasClearableAlertingNotifs = true
-                !isSilent && !isClearable -> hasNonClearableAlertingNotifs = true
+                else -> hasNonClearableAlertingNotifs = true
             }
         }
         return NotifStats(
@@ -92,7 +91,7 @@ internal constructor(
             hasNonClearableAlertingNotifs = hasNonClearableAlertingNotifs,
             hasClearableAlertingNotifs = hasClearableAlertingNotifs,
             hasNonClearableSilentNotifs = hasNonClearableSilentNotifs,
-            hasClearableSilentNotifs = hasClearableSilentNotifs
+            hasClearableSilentNotifs = hasClearableSilentNotifs,
         )
     }
 }

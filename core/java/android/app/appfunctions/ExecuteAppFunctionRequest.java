@@ -27,7 +27,16 @@ import android.os.Parcelable;
 
 import java.util.Objects;
 
-/** A request to execute an app function. */
+/**
+ * A request to execute an app function.
+ *
+ * <p>The {@link ExecuteAppFunctionRequest#getParameters()} contains the parameters for the function
+ * to be executed in a GenericDocument. Structured classes defined in the AppFunction SDK can be
+ * converted into GenericDocuments.
+ *
+ * <p>The {@link ExecuteAppFunctionRequest#getExtras()} provides any extra metadata for the request.
+ * Structured APIs can be exposed in the SDK by packing and unpacking this Bundle.
+ */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 public final class ExecuteAppFunctionRequest implements Parcelable {
     @NonNull
@@ -50,12 +59,12 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
                 }
             };
 
-    /** Returns the package name of the app that hosts the function. */
+    /** Returns the package name of the app that hosts/owns the function. */
     @NonNull private final String mTargetPackageName;
 
     /**
-     * Returns the unique string identifier of the app function to be executed. TODO(b/357551503):
-     * Document how callers can get the available function identifiers.
+     * The unique string identifier of the app function to be executed. This identifier is used to
+     * execute a specific app function.
      */
     @NonNull private final String mFunctionIdentifier;
 
@@ -69,8 +78,6 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
      *
      * <p>The document may have missing parameters. Developers are advised to implement defensive
      * handling measures.
-     *
-     * <p>TODO(b/357551503): Document how function parameters can be obtained for function execution
      */
     @NonNull private final GenericDocumentWrapper mParameters;
 
@@ -91,7 +98,19 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
         return mTargetPackageName;
     }
 
-    /** Returns the unique string identifier of the app function to be executed. */
+    /**
+     * Returns the unique string identifier of the app function to be executed.
+     *
+     * <p>When there is a package change or the device starts up, the metadata of available
+     * functions is indexed by AppSearch. AppSearch stores the indexed information as {@code
+     * AppFunctionStaticMetadata} document.
+     *
+     * <p>The ID can be obtained by querying the {@code AppFunctionStaticMetadata} documents from
+     * AppSearch.
+     *
+     * <p>If the {@code functionId} provided is invalid, the caller will get an invalid argument
+     * response.
+     */
     @NonNull
     public String getFunctionIdentifier() {
         return mFunctionIdentifier;
@@ -101,18 +120,30 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
      * Returns the function parameters. The key is the parameter name, and the value is the
      * parameter value.
      *
-     * <p>The bundle may have missing parameters. Developers are advised to implement defensive
-     * handling measures.
+     * <p>The {@link GenericDocument} may have missing parameters. Developers are advised to
+     * implement defensive handling measures.
+     *
+     * @see AppFunctionManager on how to determine the expected parameters.
      */
     @NonNull
     public GenericDocument getParameters() {
         return mParameters.getValue();
     }
 
-    /** Returns the additional data relevant to this function execution. */
+    /** Returns the additional metadata for this function execution request. */
     @NonNull
     public Bundle getExtras() {
         return mExtras;
+    }
+
+    /**
+     * Returns the size of the request in bytes.
+     *
+     * @hide
+     */
+    public int getRequestDataSize() {
+        return mTargetPackageName.getBytes().length + mFunctionIdentifier.getBytes().length
+                + mParameters.getDataSize() + mExtras.getSize();
     }
 
     @Override
@@ -137,19 +168,31 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
         @NonNull
         private GenericDocument mParameters = new GenericDocument.Builder<>("", "", "").build();
 
+        /**
+         * Creates a new instance of this builder class.
+         *
+         * @param targetPackageName The package name of the target app providing the app function to
+         *     invoke.
+         * @param functionIdentifier The identifier used by the {@link AppFunctionService} from the
+         *     target app to uniquely identify the function to be invoked.
+         */
         public Builder(@NonNull String targetPackageName, @NonNull String functionIdentifier) {
             mTargetPackageName = Objects.requireNonNull(targetPackageName);
             mFunctionIdentifier = Objects.requireNonNull(functionIdentifier);
         }
 
-        /** Sets the additional data relevant to this function execution. */
+        /** Sets the additional metadata for this function execution request. */
         @NonNull
         public Builder setExtras(@NonNull Bundle extras) {
             mExtras = Objects.requireNonNull(extras);
             return this;
         }
 
-        /** Sets the function parameters. */
+        /**
+         * Sets the function parameters.
+         *
+         * @see #ExecuteAppFunctionRequest#getParameters()
+         */
         @NonNull
         public Builder setParameters(@NonNull GenericDocument parameters) {
             Objects.requireNonNull(parameters);

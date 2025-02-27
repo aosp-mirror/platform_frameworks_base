@@ -28,6 +28,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
@@ -68,6 +69,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
     private val clockShouldBeCentered = MutableStateFlow(false)
     private val hasCustomWeatherDataDisplay = MutableStateFlow(false)
     private val isWeatherVisibleFlow = MutableStateFlow(false)
+    private val isShadeLayoutWide = MutableStateFlow(false)
 
     @Before
     fun setup() {
@@ -80,7 +82,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
                 keyguardSmartspaceInteractor,
                 lockscreenSmartspaceController,
                 keyguardUnlockAnimationController,
-                blueprintInteractor
+                blueprintInteractor,
             )
         constraintLayout = ConstraintLayout(mContext)
         whenever(lockscreenSmartspaceController.buildAndConnectView(any()))
@@ -93,6 +95,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
         whenever(keyguardClockViewModel.clockShouldBeCentered).thenReturn(clockShouldBeCentered)
         whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
         whenever(keyguardSmartspaceViewModel.isWeatherVisible).thenReturn(isWeatherVisibleFlow)
+        whenever(keyguardSmartspaceViewModel.isShadeLayoutWide).thenReturn(isShadeLayoutWide)
         constraintSet = ConstraintSet()
     }
 
@@ -125,6 +128,26 @@ class SmartspaceSectionTest : SysuiTestCase() {
     }
 
     @Test
+    fun testConstraintsWhenShadeLayoutIsNotWide() {
+        underTest.addViews(constraintLayout)
+        underTest.applyConstraints(constraintSet)
+
+        val smartspaceConstraints = constraintSet.getConstraint(smartspaceView.id)
+        assertThat(smartspaceConstraints.layout.endToEnd).isEqualTo(ConstraintSet.PARENT_ID)
+    }
+
+    @Test
+    fun testConstraintsWhenShadeLayoutIsWide() {
+        isShadeLayoutWide.value = true
+
+        underTest.addViews(constraintLayout)
+        underTest.applyConstraints(constraintSet)
+
+        val smartspaceConstraints = constraintSet.getConstraint(smartspaceView.id)
+        assertThat(smartspaceConstraints.layout.endToEnd).isEqualTo(R.id.split_shade_guideline)
+    }
+
+    @Test
     fun testConstraintsWhenNotHasCustomWeatherDataDisplay() {
         whenever(keyguardSmartspaceViewModel.isDateWeatherDecoupled).thenReturn(true)
         underTest.addViews(constraintLayout)
@@ -135,7 +158,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
         assertThat(smartspaceConstraints.layout.topToBottom).isEqualTo(dateView.id)
 
         val dateConstraints = constraintSet.getConstraint(dateView.id)
-        assertThat(dateConstraints.layout.topToBottom).isEqualTo(R.id.lockscreen_clock_view)
+        assertThat(dateConstraints.layout.topToBottom).isEqualTo(customR.id.lockscreen_clock_view)
     }
 
     @Test
@@ -160,6 +183,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
         assertThat(constraintSet.getVisibility(weatherView.id)).isEqualTo(GONE)
         assertThat(constraintSet.getVisibility(dateView.id)).isEqualTo(VISIBLE)
     }
+
     @Test
     fun testCustomDateWeatherVisibility() {
         hasCustomWeatherDataDisplay.value = true

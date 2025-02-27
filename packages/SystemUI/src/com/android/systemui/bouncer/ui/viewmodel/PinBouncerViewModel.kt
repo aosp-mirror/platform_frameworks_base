@@ -50,7 +50,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Holds UI state and handles user input for the PIN code bouncer UI. */
 class PinBouncerViewModel
@@ -251,7 +251,7 @@ constructor(
      *
      * @return `true` when the [KeyEvent] was consumed as user input on bouncer; `false` otherwise.
      */
-    fun onKeyEvent(type: KeyEventType, keyCode: Int): Boolean {
+    override fun onKeyEvent(type: KeyEventType, keyCode: Int): Boolean {
         return when (type) {
             KeyEventType.KeyUp -> {
                 if (isConfirmKey(keyCode)) {

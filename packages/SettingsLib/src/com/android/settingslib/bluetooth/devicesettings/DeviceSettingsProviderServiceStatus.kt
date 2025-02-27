@@ -21,7 +21,7 @@ import android.os.Parcel
 import android.os.Parcelable
 
 /**
- * A data class representing a device settings item in bluetooth device details config.
+ * A data class representing a device settings provider service status.
  *
  * @property enabled Whether the service is enabled.
  * @property extras Extra bundle

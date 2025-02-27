@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/privacy_dialog_summary"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
+                android:textColor="@androidprv:color/materialColorOnSurfaceVariant"
                 android:gravity="center"
                 android:layout_marginBottom="20dp"/>
         </LinearLayout>

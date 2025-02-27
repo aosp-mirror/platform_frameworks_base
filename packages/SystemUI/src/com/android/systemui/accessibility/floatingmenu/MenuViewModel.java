@@ -17,7 +17,6 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import android.content.Context;
-import android.view.accessibility.AccessibilityManager;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -43,10 +42,9 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
     private final MutableLiveData<Position> mPercentagePositionData = new MutableLiveData<>();
     private final MenuInfoRepository mInfoRepository;
 
-    MenuViewModel(Context context, AccessibilityManager accessibilityManager,
-            SecureSettings secureSettings) {
-        mInfoRepository = new MenuInfoRepository(context,
-                accessibilityManager, /* settingsContentsChanged= */ this, secureSettings);
+    MenuViewModel(Context context, SecureSettings secureSettings) {
+        mInfoRepository = new MenuInfoRepository(context, /* settingsContentsChanged= */ this,
+                secureSettings);
     }
 
     @Override

@@ -30,6 +30,7 @@ import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
@@ -52,6 +53,7 @@ constructor(
     private val indicationController: KeyguardIndicationController,
     private val keyguardBlueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
     private val keyguardQuickAffordanceViewBinder: KeyguardQuickAffordanceViewBinder,
+    private val keyguardInteractor: KeyguardInteractor,
 ) : BaseShortcutSection() {
 
     // Amount to increase the bottom margin by to avoid colliding with inset
@@ -117,7 +119,7 @@ constructor(
                 BOTTOM,
                 PARENT_ID,
                 BOTTOM,
-                verticalOffsetMargin + safeInsetBottom
+                verticalOffsetMargin + safeInsetBottom,
             )
 
             constrainWidth(R.id.end_button, width)
@@ -128,7 +130,7 @@ constructor(
                 BOTTOM,
                 PARENT_ID,
                 BOTTOM,
-                verticalOffsetMargin + safeInsetBottom
+                verticalOffsetMargin + safeInsetBottom,
             )
 
             // The constraint set visibility for start and end button are default visible, set to
@@ -136,5 +138,13 @@ constructor(
             setVisibilityMode(R.id.start_button, VISIBILITY_MODE_IGNORE)
             setVisibilityMode(R.id.end_button, VISIBILITY_MODE_IGNORE)
         }
+
+        val shortcutAbsoluteTopInScreen =
+            (resources.displayMetrics.heightPixels -
+                    (verticalOffsetMargin + safeInsetBottom) -
+                    height)
+                .toFloat()
+
+        keyguardInteractor.setShortcutAbsoluteTop(shortcutAbsoluteTopInScreen)
     }
 }

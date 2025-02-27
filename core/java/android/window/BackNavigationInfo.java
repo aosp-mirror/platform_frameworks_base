@@ -16,6 +16,8 @@
 
 package android.window;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+
 import android.annotation.AnimRes;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
@@ -85,6 +87,13 @@ public final class BackNavigationInfo implements Parcelable {
      */
     public static final String KEY_GESTURE_FINISHED = "GestureFinished";
 
+    /**
+     * Touch gestured has transferred to embedded window, Shell should pilfer pointers so the
+     * embedded won't receive motion events.
+     * @hide
+     */
+    public static final String KEY_TOUCH_GESTURE_TRANSFERRED = "TouchGestureTransferred";
+
 
     /**
      * Defines the type of back destinations a back even can lead to. This is used to define the
@@ -117,7 +126,8 @@ public final class BackNavigationInfo implements Parcelable {
     @NonNull
     private final Rect mTouchableRegion;
 
-    private final boolean mAppProgressGenerationAllowed;
+    private boolean mAppProgressGenerationAllowed;
+    private final int mFocusedTaskId;
 
     /**
      * Create a new {@link BackNavigationInfo} instance.
@@ -135,7 +145,8 @@ public final class BackNavigationInfo implements Parcelable {
             @Nullable CustomAnimationInfo customAnimationInfo,
             int letterboxColor,
             @Nullable Rect touchableRegion,
-            boolean appProgressGenerationAllowed) {
+            boolean appProgressGenerationAllowed,
+            int focusedTaskId) {
         mType = type;
         mOnBackNavigationDone = onBackNavigationDone;
         mOnBackInvokedCallback = onBackInvokedCallback;
@@ -145,6 +156,7 @@ public final class BackNavigationInfo implements Parcelable {
         mLetterboxColor = letterboxColor;
         mTouchableRegion = new Rect(touchableRegion);
         mAppProgressGenerationAllowed = appProgressGenerationAllowed;
+        mFocusedTaskId = focusedTaskId;
     }
 
     private BackNavigationInfo(@NonNull Parcel in) {
@@ -157,6 +169,7 @@ public final class BackNavigationInfo implements Parcelable {
         mLetterboxColor = in.readInt();
         mTouchableRegion = in.readTypedObject(Rect.CREATOR);
         mAppProgressGenerationAllowed = in.readBoolean();
+        mFocusedTaskId = in.readInt();
     }
 
     /** @hide */
@@ -171,6 +184,7 @@ public final class BackNavigationInfo implements Parcelable {
         dest.writeInt(mLetterboxColor);
         dest.writeTypedObject(mTouchableRegion, flags);
         dest.writeBoolean(mAppProgressGenerationAllowed);
+        dest.writeInt(mFocusedTaskId);
     }
 
     /**
@@ -235,6 +249,22 @@ public final class BackNavigationInfo implements Parcelable {
      */
     public boolean isAppProgressGenerationAllowed() {
         return mAppProgressGenerationAllowed;
+    }
+
+    /**
+     * @return The focused task id when back gesture start.
+     * @hide
+     */
+    public int getFocusedTaskId() {
+        return mFocusedTaskId;
+    }
+
+    /**
+     * Force disable app to intercept back progress event.
+     * @hide
+     */
+    public void disableAppProgressGenerationAllowed() {
+        mAppProgressGenerationAllowed = false;
     }
 
     /**
@@ -435,6 +465,7 @@ public final class BackNavigationInfo implements Parcelable {
         private int mLetterboxColor = Color.TRANSPARENT;
         private Rect mTouchableRegion;
         private boolean mAppProgressGenerationAllowed;
+        private int mFocusedTaskId = INVALID_TASK_ID;
 
         /**
          * @see BackNavigationInfo#getType()
@@ -527,6 +558,14 @@ public final class BackNavigationInfo implements Parcelable {
         }
 
         /**
+         * @param focusedTaskId The current focused taskId when back gesture start.
+         */
+        public Builder setFocusedTaskId(int focusedTaskId) {
+            mFocusedTaskId = focusedTaskId;
+            return this;
+        }
+
+        /**
          * Builds and returns an instance of {@link BackNavigationInfo}
          */
         public BackNavigationInfo build() {
@@ -537,7 +576,8 @@ public final class BackNavigationInfo implements Parcelable {
                     mCustomAnimationInfo,
                     mLetterboxColor,
                     mTouchableRegion,
-                    mAppProgressGenerationAllowed);
+                    mAppProgressGenerationAllowed,
+                    mFocusedTaskId);
         }
     }
 }

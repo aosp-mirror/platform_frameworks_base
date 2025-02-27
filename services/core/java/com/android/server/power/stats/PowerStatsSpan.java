@@ -25,6 +25,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.MonotonicClock;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
@@ -50,7 +51,7 @@ import java.util.Set;
 /**
  * Contains power stats of various kinds, aggregated over a time span.
  */
-public class PowerStatsSpan {
+public class PowerStatsSpan implements AutoCloseable {
     private static final String TAG = "PowerStatsStore";
 
     /**
@@ -145,6 +146,40 @@ public class PowerStatsSpan {
 
         void addTimeFrame(TimeFrame timeFrame) {
             mTimeFrames.add(timeFrame);
+        }
+
+        long getStartTime() {
+            long startTime = Long.MAX_VALUE;
+            for (int i = 0; i < mTimeFrames.size(); i++) {
+                TimeFrame timeFrame = mTimeFrames.get(i);
+                if (timeFrame.startTime < startTime) {
+                    startTime = timeFrame.startTime;
+                }
+            }
+            return startTime != Long.MAX_VALUE ? startTime : 0;
+        }
+
+        long getStartMonotonicTime() {
+            long startTime = Long.MAX_VALUE;
+            for (int i = 0; i < mTimeFrames.size(); i++) {
+                TimeFrame timeFrame = mTimeFrames.get(i);
+                if (timeFrame.startMonotonicTime < startTime) {
+                    startTime = timeFrame.startMonotonicTime;
+                }
+            }
+            return startTime != Long.MAX_VALUE ? startTime : MonotonicClock.UNDEFINED;
+        }
+
+        long getEndMonotonicTime() {
+            long maxTime = Long.MIN_VALUE;
+            for (int i = 0; i < mTimeFrames.size(); i++) {
+                TimeFrame timeFrame = mTimeFrames.get(i);
+                long endTime = timeFrame.startMonotonicTime + timeFrame.duration;
+                if (endTime > maxTime) {
+                    maxTime = endTime;
+                }
+            }
+            return maxTime != Long.MIN_VALUE ? maxTime : MonotonicClock.UNDEFINED;
         }
 
         void addSection(String sectionType) {
@@ -285,6 +320,13 @@ public class PowerStatsSpan {
          */
         public void dump(IndentingPrintWriter ipw) {
             ipw.println(mType);
+        }
+
+        /**
+         * Closes the section, releasing any resources it held. Once closed, the Section
+         * should not be used.
+         */
+        public void close() {
         }
     }
 
@@ -447,6 +489,12 @@ public class PowerStatsSpan {
             ipw.println(section.mType);
             section.dump(ipw);
             ipw.decreaseIndent();
+        }
+    }
+    @Override
+    public void close() {
+        for (int i = 0; i < mSections.size(); i++) {
+            mSections.get(i).close();
         }
     }
 }

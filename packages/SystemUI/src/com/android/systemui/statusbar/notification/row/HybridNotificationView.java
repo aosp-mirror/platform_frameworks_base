@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.notification.row;
 import static android.app.Notification.COLOR_INVALID;
 
 import android.annotation.Nullable;
+import android.app.Flags;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -73,6 +73,25 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
         return mTextView;
     }
 
+    /**
+     * Get layout resource for this view based on {@param isConversation}.
+     */
+    public static int getLayoutResource(boolean isConversation) {
+        if (Flags.notificationsRedesignTemplates()) {
+            if (isConversation) {
+                return R.layout.notification_2025_hybrid_conversation;
+            } else {
+                return R.layout.notification_2025_hybrid;
+            }
+        } else {
+            if (isConversation) {
+                return R.layout.hybrid_conversation_notification;
+            } else {
+                return R.layout.hybrid_notification;
+            }
+        }
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -95,16 +114,9 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
     }
 
     private void resolveThemeTextColors() {
-        try (TypedArray ta = mContext.getTheme().obtainStyledAttributes(
-                android.R.style.Theme_DeviceDefault_DayNight, new int[]{
-                        com.android.internal.R.attr.materialColorOnSurface,
-                        com.android.internal.R.attr.materialColorOnSurfaceVariant
-                })) {
-            if (ta != null) {
-                mPrimaryTextColor = ta.getColor(0, mPrimaryTextColor);
-                mSecondaryTextColor = ta.getColor(1, mSecondaryTextColor);
-            }
-        }
+        mPrimaryTextColor = mContext.getColor(com.android.internal.R.color.materialColorOnSurface);
+        mSecondaryTextColor = mContext.getColor(
+                com.android.internal.R.color.materialColorOnSurfaceVariant);
     }
 
     public void bind(@Nullable CharSequence title, @Nullable CharSequence text,

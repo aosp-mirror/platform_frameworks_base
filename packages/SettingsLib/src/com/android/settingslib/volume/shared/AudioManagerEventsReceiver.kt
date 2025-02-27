@@ -24,6 +24,7 @@ import android.media.AudioManager
 import android.util.Log
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import com.android.settingslib.volume.shared.model.AudioStream
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharedFlow
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
@@ -44,6 +46,7 @@ interface AudioManagerEventsReceiver {
 class AudioManagerEventsReceiverImpl(
     private val context: Context,
     coroutineScope: CoroutineScope,
+    backgroundCoroutineContext: CoroutineContext,
 ) : AudioManagerEventsReceiver {
 
     private val allActions: Collection<String>
@@ -79,6 +82,7 @@ class AudioManagerEventsReceiverImpl(
             .filterNotNull()
             .filter { intent -> allActions.contains(intent.action) }
             .mapNotNull { it.toAudioManagerEvent() }
+            .flowOn(backgroundCoroutineContext)
             .shareIn(coroutineScope, SharingStarted.WhileSubscribed())
 
     private fun Intent.toAudioManagerEvent(): AudioManagerEvent? {

@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 
 import com.android.internal.util.Preconditions;
@@ -106,7 +107,9 @@ public final class PerformanceHintManager {
      * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public static class Session implements Closeable {
-        private long mNativeSessionPtr;
+        /** @hide */
+        @UnsupportedAppUsage
+        public long mNativeSessionPtr;
 
         /** @hide */
         public Session(long nativeSessionPtr) {

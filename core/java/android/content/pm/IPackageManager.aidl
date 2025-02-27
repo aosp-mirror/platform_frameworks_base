@@ -848,4 +848,12 @@ interface IPackageManager {
     int getAppMetadataSource(String packageName, int userId);
 
     ComponentName getDomainVerificationAgent(int userId);
+
+    void setPageSizeAppCompatFlagsSettingsOverride(in String packageName, boolean enabled);
+
+    boolean isPageSizeCompatEnabled(in String packageName);
+
+    String getPageSizeCompatWarningMessage(in String packageName);
+
+    List<String> getAllApexDirectories();
 }

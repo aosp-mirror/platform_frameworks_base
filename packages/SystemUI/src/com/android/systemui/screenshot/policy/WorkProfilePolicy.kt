@@ -28,7 +28,6 @@ import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult.NotMatc
 import com.android.systemui.screenshot.policy.CaptureType.IsolatedTask
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import javax.inject.Inject
-import kotlinx.coroutines.flow.first
 
 /**
  * Condition: When the top visible task (excluding PIP mode) belongs to a work user.
@@ -37,10 +36,8 @@ import kotlinx.coroutines.flow.first
  */
 class WorkProfilePolicy
 @Inject
-constructor(
-    private val profileTypes: ProfileTypeRepository,
-    private val context: Context,
-) : CapturePolicy {
+constructor(private val profileTypes: ProfileTypeRepository, private val context: Context) :
+    CapturePolicy {
 
     override suspend fun check(content: DisplayContentModel): PolicyResult {
         // The systemUI notification shade isn't a work app, skip.
@@ -65,21 +62,17 @@ constructor(
                 .map { it to it.childTasksTopDown().first() }
                 .firstOrNull { (_, child) ->
                     profileTypes.getProfileType(child.userId) == ProfileType.WORK
-                }
-                ?: return NotMatched(
-                    policy = NAME,
-                    reason = WORK_TASK_NOT_TOP,
-                )
+                } ?: return NotMatched(policy = NAME, reason = WORK_TASK_NOT_TOP)
 
         // If matched, return parameters needed to modify the request.
         return PolicyResult.Matched(
             policy = NAME,
             reason = WORK_TASK_IS_TOP,
-            CaptureParameters(
+            LegacyCaptureParameters(
                 type = IsolatedTask(taskId = childTask.id, taskBounds = childTask.bounds),
                 component = childTask.componentName ?: rootTask.topActivity,
                 owner = UserHandle.of(childTask.userId),
-            )
+            ),
         )
     }
 

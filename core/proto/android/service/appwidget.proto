@@ -20,6 +20,8 @@ package android.service.appwidget;
 option java_multiple_files = true;
 option java_outer_classname = "AppWidgetServiceProto";
 
+import "frameworks/base/core/proto/android/widget/remoteviews.proto";
+
 // represents the object holding the dump info of the app widget service
 message AppWidgetServiceDumpProto {
     repeated WidgetProto widgets = 1; // the array of bound widgets
@@ -37,4 +39,15 @@ message WidgetProto {
     optional int32 maxWidth = 8;
     optional int32 maxHeight = 9;
     optional bool restoreCompleted = 10;
+}
+
+// represents a set of widget previews for a particular provider
+message GeneratedPreviewsProto {
+    repeated Preview previews = 1;
+
+    // represents a particular RemoteViews preview, which may be set for multiple categories
+    message Preview {
+        repeated int32 widget_categories = 1;
+        optional android.widget.RemoteViewsProto views = 2;
+    }
 }

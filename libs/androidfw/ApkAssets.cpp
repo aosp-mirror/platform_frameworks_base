@@ -40,20 +40,21 @@ ApkAssets::ApkAssets(PrivateConstructorUtil, std::unique_ptr<Asset> resources_as
 }
 
 ApkAssetsPtr ApkAssets::Load(const std::string& path, package_property_t flags) {
-  return Load(ZipAssetsProvider::Create(path, flags), flags);
+  return LoadImpl(ZipAssetsProvider::Create(path, flags), flags);
 }
 
 ApkAssetsPtr ApkAssets::LoadFromFd(base::unique_fd fd, const std::string& debug_name,
                                    package_property_t flags, off64_t offset, off64_t len) {
-  return Load(ZipAssetsProvider::Create(std::move(fd), debug_name, offset, len), flags);
+  return LoadImpl(ZipAssetsProvider::Create(std::move(fd), debug_name, offset, len), flags);
 }
 
-ApkAssetsPtr ApkAssets::Load(std::unique_ptr<AssetsProvider> assets, package_property_t flags) {
+ApkAssetsPtr ApkAssets::LoadImpl(std::unique_ptr<AssetsProvider>&& assets,
+                                 package_property_t flags) {
   return LoadImpl(std::move(assets), flags, nullptr /* idmap_asset */, nullptr /* loaded_idmap */);
 }
 
-ApkAssetsPtr ApkAssets::LoadTable(std::unique_ptr<Asset> resources_asset,
-                                  std::unique_ptr<AssetsProvider> assets,
+ApkAssetsPtr ApkAssets::LoadTable(std::unique_ptr<Asset>&& resources_asset,
+                                  std::unique_ptr<AssetsProvider>&& assets,
                                   package_property_t flags) {
   if (resources_asset == nullptr) {
     return {};
@@ -97,10 +98,10 @@ ApkAssetsPtr ApkAssets::LoadOverlay(const std::string& idmap_path, package_prope
                   std::move(loaded_idmap));
 }
 
-ApkAssetsPtr ApkAssets::LoadImpl(std::unique_ptr<AssetsProvider> assets,
+ApkAssetsPtr ApkAssets::LoadImpl(std::unique_ptr<AssetsProvider>&& assets,
                                  package_property_t property_flags,
-                                 std::unique_ptr<Asset> idmap_asset,
-                                 std::unique_ptr<LoadedIdmap> loaded_idmap) {
+                                 std::unique_ptr<Asset>&& idmap_asset,
+                                 std::unique_ptr<LoadedIdmap>&& loaded_idmap) {
   if (assets == nullptr) {
     return {};
   }
@@ -119,11 +120,11 @@ ApkAssetsPtr ApkAssets::LoadImpl(std::unique_ptr<AssetsProvider> assets,
                   std::move(idmap_asset), std::move(loaded_idmap));
 }
 
-ApkAssetsPtr ApkAssets::LoadImpl(std::unique_ptr<Asset> resources_asset,
-                                 std::unique_ptr<AssetsProvider> assets,
+ApkAssetsPtr ApkAssets::LoadImpl(std::unique_ptr<Asset>&& resources_asset,
+                                 std::unique_ptr<AssetsProvider>&& assets,
                                  package_property_t property_flags,
-                                 std::unique_ptr<Asset> idmap_asset,
-                                 std::unique_ptr<LoadedIdmap> loaded_idmap) {
+                                 std::unique_ptr<Asset>&& idmap_asset,
+                                 std::unique_ptr<LoadedIdmap>&& loaded_idmap) {
   if (assets == nullptr ) {
     return {};
   }

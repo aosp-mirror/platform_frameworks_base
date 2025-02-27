@@ -41,7 +41,7 @@ class VolumeLogger @Inject constructor(@VolumeLog private val logBuffer: LogBuff
                 str1 = audioStream.toString()
                 int1 = volume
             },
-            { "Set volume: stream=$str1 volume=$int1" }
+            { "Set volume: stream=$str1 volume=$int1" },
         )
     }
 
@@ -53,7 +53,7 @@ class VolumeLogger @Inject constructor(@VolumeLog private val logBuffer: LogBuff
                 str1 = audioStream.toString()
                 int1 = model.volume
             },
-            { "Volume update received: stream=$str1 volume=$int1" }
+            { "Volume update received: stream=$str1 volume=$int1" },
         )
     }
 
@@ -62,7 +62,7 @@ class VolumeLogger @Inject constructor(@VolumeLog private val logBuffer: LogBuff
             TAG,
             LogLevel.DEBUG,
             { bool1 = state },
-            { "Audio sharing state update: state=$bool1" }
+            { "Audio sharing state update: state=$bool1" },
         )
     }
 
@@ -71,7 +71,7 @@ class VolumeLogger @Inject constructor(@VolumeLog private val logBuffer: LogBuff
             TAG,
             LogLevel.DEBUG,
             { int1 = groupId },
-            { "Secondary group id in audio sharing update: groupId=$int1" }
+            { "Secondary group id in audio sharing update: groupId=$int1" },
         )
     }
 
@@ -80,11 +80,23 @@ class VolumeLogger @Inject constructor(@VolumeLog private val logBuffer: LogBuff
             TAG,
             LogLevel.DEBUG,
             { str1 = map.toString() },
-            { "Volume map update: map=$str1" }
+            { "Volume map update: map=$str1" },
         )
     }
 
     override fun onSetDeviceVolumeRequested(volume: Int) {
         logBuffer.log(TAG, LogLevel.DEBUG, { int1 = volume }, { "Set device volume: volume=$int1" })
+    }
+
+    override fun onAudioSharingAvailabilityRequestedError(requestFrom: String, e: String) {
+        logBuffer.log(
+            TAG,
+            LogLevel.WARNING,
+            {
+                str1 = requestFrom
+                str1 = e
+            },
+            { "$str1, fail to check audio sharing availability: e=$str2" },
+        )
     }
 }

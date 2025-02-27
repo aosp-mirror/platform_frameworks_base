@@ -43,6 +43,7 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeDisplayAware;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +70,7 @@ public class TileQueryHelper {
 
     @Inject
     public TileQueryHelper(
-            Context context,
+            @ShadeDisplayAware Context context,
             UserTracker userTracker,
             @Main Executor mainExecutor,
             @Background Executor bgExecutor

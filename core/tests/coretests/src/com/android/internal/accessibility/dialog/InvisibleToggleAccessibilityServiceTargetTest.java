@@ -33,12 +33,7 @@ import android.content.pm.ParceledListSlice;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
-import android.provider.Settings;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.Flags;
 import android.view.accessibility.IAccessibilityManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -67,8 +62,6 @@ import java.util.List;
  */
 @RunWith(AndroidJUnit4.class)
 public class InvisibleToggleAccessibilityServiceTargetTest {
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
     @Mock
@@ -117,7 +110,6 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void onCheckedChanged_true_callA11yManagerToUpdateShortcuts() throws Exception {
         mSut.onCheckedChanged(true);
 
@@ -130,7 +122,6 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
     public void onCheckedChanged_false_callA11yManagerToUpdateShortcuts() throws Exception {
         mSut.onCheckedChanged(false);
         verify(mAccessibilityManagerService).enableShortcutsForTargets(
@@ -139,87 +130,5 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
                 mListCaptor.capture(),
                 anyInt());
         assertThat(mListCaptor.getValue()).containsExactly(ALWAYS_ON_SERVICE_COMPONENT_NAME);
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
-    public void onCheckedChanged_turnOnShortcut_hasOtherShortcut_serviceKeepsOn() {
-        enableA11yService(/* enable= */ true);
-        addShortcutForA11yService(
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, /* add= */ false);
-        addShortcutForA11yService(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* add= */ true);
-
-        mSut.onCheckedChanged(/* isChecked= */ true);
-
-        assertA11yServiceState(/* enabled= */ true);
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
-    public void onCheckedChanged_turnOnShortcut_noOtherShortcut_shouldTurnOnService() {
-        enableA11yService(/* enable= */ false);
-        addShortcutForA11yService(
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, /* add= */ false);
-        addShortcutForA11yService(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* add= */ false);
-
-        mSut.onCheckedChanged(/* isChecked= */ true);
-
-        assertA11yServiceState(/* enabled= */ true);
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
-    public void onCheckedChanged_turnOffShortcut_hasOtherShortcut_serviceKeepsOn() {
-        enableA11yService(/* enable= */ true);
-        addShortcutForA11yService(
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, /* add= */ true);
-        addShortcutForA11yService(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* add= */ true);
-
-        mSut.onCheckedChanged(/* isChecked= */ false);
-
-        assertA11yServiceState(/* enabled= */ true);
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_MIGRATE_ENABLE_SHORTCUTS)
-    public void onCheckedChanged_turnOffShortcut_noOtherShortcut_shouldTurnOffService() {
-        enableA11yService(/* enable= */ true);
-        addShortcutForA11yService(
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, /* add= */ true);
-        addShortcutForA11yService(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* add= */ false);
-
-        mSut.onCheckedChanged(/* isChecked= */ false);
-
-        assertA11yServiceState(/* enabled= */ false);
-    }
-
-    private void enableA11yService(boolean enable) {
-        Settings.Secure.putString(
-                mContextSpy.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                enable ? ALWAYS_ON_SERVICE_COMPONENT_NAME : "");
-    }
-
-    private void addShortcutForA11yService(String shortcutKey, boolean add) {
-        Settings.Secure.putString(
-                mContextSpy.getContentResolver(),
-                shortcutKey,
-                add ? ALWAYS_ON_SERVICE_COMPONENT_NAME : "");
-    }
-
-    private void assertA11yServiceState(boolean enabled) {
-        if (enabled) {
-            assertThat(
-                    Settings.Secure.getString(
-                            mContextSpy.getContentResolver(),
-                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
-            ).contains(ALWAYS_ON_SERVICE_COMPONENT_NAME);
-        } else {
-            assertThat(
-                    Settings.Secure.getString(
-                            mContextSpy.getContentResolver(),
-                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
-            ).doesNotContain(ALWAYS_ON_SERVICE_COMPONENT_NAME);
-        }
     }
 }

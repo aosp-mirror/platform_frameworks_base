@@ -51,9 +51,13 @@ import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DelegateTransitionAnimatorController;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
+import com.android.systemui.statusbar.core.StatusBarRootModernization;
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.window.StatusBarWindowModule.InternalWindowViewInflater;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
@@ -64,6 +68,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * Encapsulates all logic for the status bar window state management.
@@ -74,13 +79,15 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
 
     private final Context mContext;
     private final ViewCaptureAwareWindowManager mWindowManager;
+    private final StatusBarConfigurationController mStatusBarConfigurationController;
     private final IWindowManager mIWindowManager;
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
+    private final Executor mMainExecutor;
     private int mBarHeight = -1;
     private final State mCurrentState = new State();
     private boolean mIsAttached;
 
-    private final ViewGroup mStatusBarWindowView;
+    private final StatusBarWindowView mStatusBarWindowView;
     private final FragmentService mFragmentService;
     // The container in which we should run launch animations started from the status bar and
     //   expanding into the opening window.
@@ -94,14 +101,18 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
             @Assisted Context context,
             @InternalWindowViewInflater StatusBarWindowViewInflater statusBarWindowViewInflater,
             @Assisted ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
+            @Assisted StatusBarConfigurationController statusBarConfigurationController,
             IWindowManager iWindowManager,
-            StatusBarContentInsetsProvider contentInsetsProvider,
+            @Assisted StatusBarContentInsetsProvider contentInsetsProvider,
             FragmentService fragmentService,
-            Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider) {
+            Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
+            @Main Executor mainExecutor) {
         mContext = context;
         mWindowManager = viewCaptureAwareWindowManager;
+        mStatusBarConfigurationController = statusBarConfigurationController;
         mIWindowManager = iWindowManager;
         mContentInsetsProvider = contentInsetsProvider;
+        mMainExecutor = mainExecutor;
         mStatusBarWindowView = statusBarWindowViewInflater.inflate(context);
         mFragmentService = fragmentService;
         mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
@@ -141,6 +152,10 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
 
     @Override
     public void attach() {
+        if (StatusBarConnectedDisplays.isEnabled()) {
+            mStatusBarWindowView.setStatusBarConfigurationController(
+                    mStatusBarConfigurationController);
+        }
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
@@ -155,6 +170,19 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
         calculateStatusBarLocationsForAllRotations();
         mIsAttached = true;
         apply(mCurrentState);
+    }
+
+    @Override
+    public void stop() {
+        StatusBarConnectedDisplays.assertInNewMode();
+
+        mWindowManager.removeView(mStatusBarWindowView);
+
+        if (StatusBarRootModernization.isEnabled()) {
+            return;
+        }
+        // Fragment transactions need to happen on the main thread.
+        mMainExecutor.execute(() -> mFragmentService.removeAndDestroy(mStatusBarWindowView));
     }
 
     @Override
@@ -354,11 +382,15 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
     }
 
     @AssistedFactory
-    public interface Factory {
+    public interface Factory extends StatusBarWindowController.Factory {
         /** Creates a new instance. */
+        @NonNull
+        @Override
         StatusBarWindowControllerImpl create(
-                Context context,
-                ViewCaptureAwareWindowManager viewCaptureAwareWindowManager);
+                @NonNull Context context,
+                @NonNull ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
+                @NonNull StatusBarConfigurationController statusBarConfigurationController,
+                @NonNull StatusBarContentInsetsProvider contentInsetsProvider);
     }
 
 }

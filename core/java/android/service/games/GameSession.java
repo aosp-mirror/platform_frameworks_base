@@ -516,6 +516,8 @@ public abstract class GameSession {
                         options,
                         future);
 
+        trampolineIntent.collectExtraIntentKeys();
+
         try {
             int result = ActivityTaskManager.getService().startActivityFromGameSession(
                     mContext.getIApplicationThread(), mContext.getPackageName(), "GameSession",

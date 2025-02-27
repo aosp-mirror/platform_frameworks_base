@@ -24,9 +24,9 @@ import android.util.Log;
 
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
-import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.res.R;
 import com.android.systemui.util.InitializationChecker;
+import com.android.wm.shell.dagger.WMComponent;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.shared.ShellTransitions;

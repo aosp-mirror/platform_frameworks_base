@@ -480,7 +480,7 @@ public class MagnificationProcessorTest {
         if (config.getMode() == MAGNIFICATION_MODE_FULLSCREEN) {
             mFullScreenMagnificationControllerStub.resetAndStubMethods();
             mMockFullScreenMagnificationController.setScaleAndCenter(displayId, config.getScale(),
-                    config.getCenterX(), config.getCenterY(), false, SERVICE_ID);
+                    config.getCenterX(), config.getCenterY(), true, false, SERVICE_ID);
             mMagnificationManagerStub.deactivateIfNeed();
         } else if (config.getMode() == MAGNIFICATION_MODE_WINDOW) {
             mMagnificationManagerStub.resetAndStubMethods();
@@ -529,6 +529,9 @@ public class MagnificationProcessorTest {
                 mCenterY = invocation.getArgument(3);
                 return true;
             };
+            doAnswer(enableMagnificationStubAnswer).when(
+                    mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY), anyFloat(),
+                    anyFloat(), anyFloat(), anyBoolean(), anyBoolean(), eq(SERVICE_ID));
             doAnswer(enableMagnificationStubAnswer).when(
                     mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY), anyFloat(),
                     anyFloat(), anyFloat(), anyBoolean(), eq(SERVICE_ID));

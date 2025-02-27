@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConstraintSet xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/volume_dialog_constraint_set">
+
+    <Constraint
+        android:id="@id/volume_dialog_main_slider_container"
+        android:layout_width="@dimen/volume_dialog_slider_width"
+        android:layout_height="@dimen/volume_dialog_slider_height"
+        android:layout_marginEnd="@dimen/volume_dialog_components_spacing"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
+</ConstraintSet>

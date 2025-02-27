@@ -34,7 +34,7 @@ import org.junit.runners.Parameterized
 /**
  * Test cold launching an app from launcher
  *
- * To run this test: `atest FlickerTests:OpenTransferSplashscreenAppFromLauncherTransition`
+ * To run this test: `atest FlickerTestsAppLaunch:OpenTransferSplashscreenAppFromLauncherTransition`
  *
  * Actions:
  * ```

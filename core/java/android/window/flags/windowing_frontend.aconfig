@@ -9,6 +9,16 @@ flag {
 }
 
 flag {
+  name: "reset_draw_state_on_client_invisible"
+  namespace: "windowing_frontend"
+  description: "Reset draw state if the client is notified to be invisible"
+  bug: "373023636"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "wait_for_transition_on_display_switch"
     namespace: "windowing_frontend"
     description: "Waits for Shell transition to start before unblocking the screen after display switch"
@@ -39,6 +49,17 @@ flag {
 }
 
 flag {
+  name: "respect_animation_clip"
+  namespace: "windowing_frontend"
+  description: "Fix missing clip transformation of animation"
+  bug: "376601866"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "edge_to_edge_by_default"
   namespace: "windowing_frontend"
   description: "Make app go edge-to-edge by default when targeting SDK 35 or greater"
@@ -51,6 +72,14 @@ flag {
   namespace: "windowing_frontend"
   description: "Make app go edge-to-edge when targeting SDK level 35 or greater"
   bug: "309578419"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "disable_opt_out_edge_to_edge"
+  namespace: "windowing_frontend"
+  description: "Deprecate and disable windowOptOutEdgeToEdgeEnforcement"
+  bug: "377864165"
   is_fixed_read_only: true
 }
 
@@ -111,6 +140,17 @@ flag {
 }
 
 flag {
+    name: "remove_activity_starter_dream_callback"
+    namespace: "windowing_frontend"
+    description: "Avoid a race with DreamManagerService callbacks for isDreaming by checking Activity state directly"
+    bug: "366452352"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+    is_fixed_read_only: true
+}
+
+flag {
     name: "supports_multi_instance_system_ui"
     is_exported: true
     namespace: "multitasking"
@@ -120,12 +160,21 @@ flag {
 }
 
 flag {
-  name: "delegate_unhandled_drags"
-  is_exported: true
-  namespace: "multitasking"
-  description: "Enables delegating unhandled drags to SystemUI"
-  bug: "320797628"
-  is_fixed_read_only: true
+    name: "delegate_unhandled_drags"
+    is_exported: true
+    namespace: "multitasking"
+    description: "Enables delegating unhandled drags to SystemUI"
+    bug: "320797628"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "supports_drag_assistant_to_multiwindow"
+    is_exported: true
+    namespace: "multitasking"
+    description: "Enables support for dragging the assistant into multiwindow"
+    bug: "371206207"
+    is_fixed_read_only: true
 }
 
 flag {
@@ -148,6 +197,23 @@ flag {
   namespace: "windowing_frontend"
   description: "The orientation, aspect ratio, resizability of activity will follow system behavior by default"
   bug: "357141415"
+}
+
+flag {
+  name: "show_app_handle_large_screens"
+  namespace: "windowing_frontend"
+  description: "Show the app handle and the app menu also on large screens that don't enable desktop mode"
+  bug: "377689543"
+}
+
+flag {
+  name: "filter_irrelevant_input_device_change"
+  namespace: "windowing_frontend"
+  description: "Recompute display configuration only for necessary input device changes"
+  bug: "368461853"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -218,6 +284,16 @@ flag {
 }
 
 flag {
+  name: "system_ui_post_animation_end"
+  namespace: "windowing_frontend"
+  description: "Run AnimatorListener#onAnimationEnd on next frame for SystemUI"
+  bug: "300035126"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "system_ui_immersive_confirmation_dialog"
   namespace: "windowing_frontend"
   description: "Enable the implementation of the immersive confirmation dialog on system UI side by default"
@@ -276,4 +352,112 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "ensure_keyguard_does_transition_starting"
+  namespace: "windowing_frontend"
+  description: "Ensure that keyguard is the one starting transitions, instead of delegating to Core"
+  bug: "364930619"
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "predictive_back_priority_system_navigation_observer"
+    namespace: "systemui"
+    description: "PRIORITY_SYSTEM_NAVIGATION_OBSERVER predictive back API extension"
+    is_fixed_read_only: true
+    bug: "362938401"
+    is_exported: true
+}
+
+flag {
+    name: "predictive_back_timestamp_api"
+    namespace: "systemui"
+    description: "expose timestamp in BackEvent (API extension)"
+    is_fixed_read_only: true
+    bug: "362938401"
+    is_exported: true
+}
+
+flag {
+    name: "predictive_back_swipe_edge_none_api"
+    namespace: "systemui"
+    description: "EDGE_NONE swipeEdge option in BackEvent"
+    is_fixed_read_only: true
+    bug: "362938401"
+    is_exported: true
+}
+
+flag {
+  name: "unify_back_navigation_transition"
+  namespace: "windowing_frontend"
+  description: "Always create predictive back transition when start back gesture animation"
+  bug: "372230928"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "defer_predictive_animation_if_no_snapshot"
+  namespace: "windowing_frontend"
+  description: "If no snapshot for previous window, start animation until the client has draw."
+  bug: "374621014"
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "disallow_app_progress_embedded_window"
+  namespace: "windowing_frontend"
+  description: "Pilfer pointers when app transfer input gesture to embedded window."
+  bug: "365504126"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "predictive_back_system_override_callback"
+    namespace: "windowing_frontend"
+    description: "Provide pre-make predictive back API extension"
+    is_fixed_read_only: true
+    bug: "362938401"
+    is_exported: true
+}
+
+flag {
+  name: "record_task_snapshots_before_shutdown"
+  namespace: "windowing_frontend"
+  description: "Record task snapshots before shutdown"
+  bug: "376821232"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "predictive_back_three_button_nav"
+    namespace: "systemui"
+    description: "Enable Predictive Back Animation for 3-button-nav"
+    bug: "373544911"
+}
+
+flag {
+    name: "predictive_back_default_enable_sdk_36"
+    namespace: "systemui"
+    description: "Enable Predictive Back by default with targetSdk>=36"
+    is_fixed_read_only: true
+    bug: "376407910"
+}
+
+flag {
+  name: "relative_insets"
+  namespace: "windowing_frontend"
+  description: "Support insets definition and calculation relative to task bounds."
+  bug: "277292497"
+  is_fixed_read_only: true
 }

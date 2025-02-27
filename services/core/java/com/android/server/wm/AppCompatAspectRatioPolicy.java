@@ -70,7 +70,7 @@ class AppCompatAspectRatioPolicy {
         mAppCompatAspectRatioState.reset();
     }
 
-    float getDesiredAspectRatio(@NonNull Configuration newParentConfig,
+    private float getDesiredAspectRatio(@NonNull Configuration newParentConfig,
             @NonNull Rect parentBounds) {
         final float letterboxAspectRatioOverride =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides()
@@ -113,22 +113,28 @@ class AppCompatAspectRatioPolicy {
         if (mTransparentPolicy.isRunning()) {
             return mTransparentPolicy.getInheritedMinAspectRatio();
         }
+
         final ActivityInfo info = mActivityRecord.info;
-        if (info.applicationInfo == null) {
-            return info.getMinAspectRatio();
+
+        // If in camera compat mode, aspect ratio from the camera compat policy has priority over
+        // the default aspect ratio.
+        if (AppCompatCameraPolicy.shouldCameraCompatControlAspectRatio(mActivityRecord)) {
+            return Math.max(AppCompatCameraPolicy.getCameraCompatMinAspectRatio(mActivityRecord),
+                    info.getMinAspectRatio());
         }
+
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides();
         if (aspectRatioOverrides.shouldApplyUserMinAspectRatioOverride()) {
             return aspectRatioOverrides.getUserMinAspectRatio();
         }
-        final DisplayContent displayContent = mActivityRecord.getDisplayContent();
-        final boolean shouldOverrideMinAspectRatioForCamera = displayContent != null
-                && displayContent.mAppCompatCameraPolicy.shouldOverrideMinAspectRatioForCamera(
-                        mActivityRecord);
         if (!aspectRatioOverrides.shouldOverrideMinAspectRatio()
-                && !shouldOverrideMinAspectRatioForCamera) {
-            return info.getMinAspectRatio();
+                && !AppCompatCameraPolicy.shouldOverrideMinAspectRatioForCamera(mActivityRecord)) {
+            final float minAspectRatio = info.getMinAspectRatio();
+            if (minAspectRatio == 0 || mActivityRecord.isUniversalResizeable()) {
+                return 0;
+            }
+            return minAspectRatio;
         }
 
         if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
@@ -170,7 +176,11 @@ class AppCompatAspectRatioPolicy {
         if (mTransparentPolicy.isRunning()) {
             return mTransparentPolicy.getInheritedMaxAspectRatio();
         }
-        return mActivityRecord.info.getMaxAspectRatio();
+        final float maxAspectRatio = mActivityRecord.info.getMaxAspectRatio();
+        if (maxAspectRatio == 0 || mActivityRecord.isUniversalResizeable()) {
+            return 0;
+        }
+        return maxAspectRatio;
     }
 
     @Nullable

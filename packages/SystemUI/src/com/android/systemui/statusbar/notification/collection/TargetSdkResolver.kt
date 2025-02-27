@@ -23,35 +23,37 @@ import android.content.pm.PackageManager
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import javax.inject.Inject
 
 @SysUISingleton
-class TargetSdkResolver @Inject constructor(
-    private val context: Context
-) {
+class TargetSdkResolver @Inject constructor(@Application private val context: Context) {
     fun initialize(collection: CommonNotifCollection) {
-        collection.addCollectionListener(object : NotifCollectionListener {
-            override fun onEntryBind(entry: NotificationEntry, sbn: StatusBarNotification) {
-                entry.targetSdk = resolveNotificationSdk(sbn)
+        collection.addCollectionListener(
+            object : NotifCollectionListener {
+                override fun onEntryBind(entry: NotificationEntry, sbn: StatusBarNotification) {
+                    entry.targetSdk = resolveNotificationSdk(sbn)
+                }
             }
-        })
+        )
     }
 
     private fun resolveNotificationSdk(sbn: StatusBarNotification): Int {
-        val applicationInfo = getApplicationInfoFromExtras(sbn.notification)
+        val applicationInfo =
+            getApplicationInfoFromExtras(sbn.notification)
                 ?: getApplicationInfoFromPackageManager(sbn)
 
         return applicationInfo?.targetSdkVersion ?: 0
     }
 
     private fun getApplicationInfoFromExtras(notification: Notification): ApplicationInfo? =
-            notification.extras.getParcelable(
-                    Notification.EXTRA_BUILDER_APPLICATION_INFO,
-                    ApplicationInfo::class.java
-            )
+        notification.extras.getParcelable(
+            Notification.EXTRA_BUILDER_APPLICATION_INFO,
+            ApplicationInfo::class.java,
+        )
 
     private fun getApplicationInfoFromPackageManager(sbn: StatusBarNotification): ApplicationInfo? {
         val pmUser = CentralSurfaces.getPackageManagerForUser(context, sbn.user.identifier)

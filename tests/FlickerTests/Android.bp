@@ -41,13 +41,13 @@ java_defaults {
         "platform-test-annotations",
         "wm-flicker-common-app-helpers",
         "wm-shell-flicker-utils",
+        "systemui-tapl",
     ],
     data: [":FlickerTestApp"],
 }
 
 java_library {
     name: "wm-flicker-common-assertions",
-    platform_apis: true,
     optimize: {
         enabled: false,
     },

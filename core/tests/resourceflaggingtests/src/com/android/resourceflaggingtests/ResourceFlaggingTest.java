@@ -24,11 +24,13 @@ import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.FileUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -78,6 +80,16 @@ public class ResourceFlaggingTest {
     }
 
     @Test
+    public void testNegatedDisabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool5)).isTrue();
+    }
+
+    @Test
+    public void testNegatedEnabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool6)).isTrue();
+    }
+
+    @Test
     public void testFlagEnabledDifferentCompilationUnit() {
         assertThat(mResources.getBoolean(R.bool.bool3)).isTrue();
     }
@@ -94,12 +106,71 @@ public class ResourceFlaggingTest {
     }
 
     @Test
+    public void testDirectoryEnabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool8)).isTrue();
+    }
+
+    @Test
+    public void testDirectoryDisabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool7)).isTrue();
+    }
+
+    @Test
+    public void testDirectoryNegatedEnabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool9)).isTrue();
+    }
+
+    @Test
+    public void testDirectoryNegatedDisabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool10)).isTrue();
+    }
+
+    @Test
     public void testLayoutWithDisabledElements() {
         LinearLayout ll = (LinearLayout) getLayoutInflater().inflate(R.layout.layout1, null);
         assertThat(ll).isNotNull();
         assertThat((View) ll.findViewById(R.id.text1)).isNotNull();
         assertThat((View) ll.findViewById(R.id.disabled_text)).isNull();
         assertThat((View) ll.findViewById(R.id.text2)).isNotNull();
+    }
+
+    @Test
+    public void testEnabledFlagLayoutOverrides() {
+        LinearLayout ll = (LinearLayout) getLayoutInflater().inflate(R.layout.layout3, null);
+        assertThat(ll).isNotNull();
+        assertThat((View) ll.findViewById(R.id.text1)).isNotNull();
+        assertThat(((TextView) ll.findViewById(R.id.text1)).getText()).isEqualTo("foobar");
+    }
+
+    @Test(expected = Resources.NotFoundException.class)
+    public void testDisabledLayout() {
+        getLayoutInflater().inflate(R.layout.layout2, null);
+    }
+
+    @Test(expected = Resources.NotFoundException.class)
+    public void testDisabledDrawable() {
+        mResources.getDrawable(R.drawable.removedpng);
+    }
+
+    @Test
+    public void testDisabledStyleDoesntOverride() {
+        TypedArray ta = mResources.newTheme().obtainStyledAttributes(
+                R.style.style1, new int[] { android.R.attr.windowIsTranslucent});
+        assertThat(ta.getBoolean(0, false)).isTrue();
+    }
+
+    @Test
+    public void testEnabledStyleDoesOverride() {
+        TypedArray ta = mResources.newTheme().obtainStyledAttributes(
+                R.style.style2, new int[] { android.R.attr.windowIsTranslucent});
+        assertThat(ta.getBoolean(0, false)).isTrue();
+    }
+
+    @Test
+    public void testEnabledStyleItemDoesOverride() {
+        TypedArray ta = mResources.newTheme().obtainStyledAttributes(
+                R.style.style3, new int[] { android.R.attr.windowIsTranslucent});
+        assertThat(ta.getBoolean(0, false)).isTrue();
     }
 
     private LayoutInflater getLayoutInflater() {

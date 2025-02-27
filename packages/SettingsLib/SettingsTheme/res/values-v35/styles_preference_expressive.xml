@@ -36,33 +36,34 @@
     <style name="SettingsLibPreference.SwitchPreference" parent="SettingsSwitchPreference.SettingsLib"/>
 
     <style name="SettingsLibPreference.Expressive">
-        <item name="android:layout">@layout/settingslib_expressive_preference</item>
+        <item name="layout">@layout/settingslib_expressive_preference</item>
     </style>
 
     <style name="SettingsLibPreference.Category.Expressive">
     </style>
 
     <style name="SettingsLibPreference.CheckBoxPreference.Expressive">
-        <item name="android:layout">@layout/settingslib_expressive_preference</item>
+        <item name="layout">@layout/settingslib_expressive_preference</item>
     </style>
 
     <style name="SettingsLibPreference.SwitchPreferenceCompat.Expressive">
-        <item name="android:layout">@layout/settingslib_expressive_preference</item>
+        <item name="layout">@layout/settingslib_expressive_preference</item>
         <item name="android:widgetLayout">@layout/settingslib_expressive_preference_switch</item>
     </style>
 
     <style name="SettingsLibPreference.SeekBarPreference.Expressive"/>
 
     <style name="SettingsLibPreference.PreferenceScreen.Expressive">
-        <item name="android:layout">@layout/settingslib_expressive_preference</item>
+        <item name="layout">@layout/settingslib_expressive_preference</item>
     </style>
 
     <style name="SettingsLibPreference.DialogPreference.Expressive">
+        <item name="layout">@layout/settingslib_expressive_preference</item>
     </style>
 
     <style name="SettingsLibPreference.DialogPreference.EditTextPreference.Expressive">
-        <item name="android:layout">@layout/settingslib_expressive_preference</item>
-        <item name="android:dialogLayout">@layout/settingslib_preference_dialog_edittext</item>
+        <item name="layout">@layout/settingslib_expressive_preference</item>
+        <item name="dialogLayout">@layout/settingslib_preference_dialog_edittext</item>
     </style>
 
     <style name="SettingsLibPreference.DropDown.Expressive">

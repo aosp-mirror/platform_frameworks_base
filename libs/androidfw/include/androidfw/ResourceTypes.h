@@ -48,7 +48,7 @@
 namespace android {
 
 constexpr const uint32_t kIdmapMagic = 0x504D4449u;
-constexpr const uint32_t kIdmapCurrentVersion = 0x00000009u;
+constexpr const uint32_t kIdmapCurrentVersion = 0x0000000Au;
 
 // This must never change.
 constexpr const uint32_t kFabricatedOverlayMagic = 0x4f525246; // FRRO (big endian)

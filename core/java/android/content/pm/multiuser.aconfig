@@ -47,13 +47,6 @@ flag {
 }
 
 flag {
-    name: "start_user_before_scheduled_alarms"
-    namespace: "multiuser"
-    description: "Persist list of users with alarms scheduled and wakeup stopped users before alarms are due"
-    bug: "314907186"
-}
-
-flag {
     name: "add_ui_for_sounds_from_background_users"
     namespace: "multiuser"
     description: "Allow foreground user to dismiss sounds that are coming from background users"
@@ -65,6 +58,23 @@ flag {
     namespace: "multiuser"
     description: "Update multiuser settings UI"
     bug: "298008926"
+}
+
+flag {
+    name: "multiuser_widget"
+    namespace: "multiuser"
+    description: "Implement the Multiuser Widget"
+    bug: "365748524"
+}
+
+flag {
+    name: "multiple_alarm_notifications_support"
+    namespace: "multiuser"
+    description: "Implement handling of multiple simultaneous alarms/timers on bg users"
+    bug: "367615180"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -191,16 +201,6 @@ flag {
 }
 
 flag {
-    name: "cache_profile_parent"
-    namespace: "multiuser"
-    description: "Cache getProfileParent to avoid unnecessary binder calls"
-    bug: "350417399"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "fix_disabling_of_mu_toggle_when_restriction_applied"
     namespace: "multiuser"
     description: "When no_user_switch is set but no EnforcedAdmin is present, the toggle has to be disabled"
@@ -211,6 +211,62 @@ flag {
 }
 
 flag {
+    name: "property_invalidated_cache_bypass_mismatched_uids"
+    namespace: "multiuser"
+    description: "Bypass the cache when the process UID does not match the binder UID."
+    bug: "373752556"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+
+flag {
+    name: "cache_profile_parent_read_only"
+    namespace: "multiuser"
+    description: "Cache getProfileParent to avoid unnecessary binder calls"
+    bug: "350417399"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_profile_ids_read_only"
+    namespace: "multiuser"
+    description: "Cache getProfileIds to avoid unnecessary binder calls"
+    bug: "350421409"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_profile_type_read_only"
+    namespace: "multiuser"
+    description: "Cache getProfileType to avoid unnecessary binder calls"
+    bug: "350417403"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_profiles_read_only"
+    namespace: "multiuser"
+    description: "Cache getProfiles to avoid unnecessary binder calls"
+    bug: "350419395"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
     name: "cache_quiet_mode_state"
     namespace: "multiuser"
     description: "Optimise quiet mode state retrieval"
@@ -218,6 +274,17 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "cache_user_properties_correctly_read_only"
+    namespace: "multiuser"
+    description: "UserProperties cache needs to take into account who the callingUid is."
+    bug: "369198539"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
 }
 
 flag {
@@ -242,10 +309,65 @@ flag {
 }
 
 flag {
+    name: "invalidate_cache_on_users_changed_read_only"
+    namespace: "multiuser"
+    description: "Invalidate the cache when users are added or removed to improve caches."
+    bug: "372383485"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
     name: "caches_not_invalidated_at_start_read_only"
     namespace: "multiuser"
     description: "PIC need to be invalidated at start in order to work properly."
     bug: "356167673"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_user_info_read_only"
+    namespace: "multiuser"
+    description: "Cache UserInfo to avoid unnecessary binder calls"
+    bug: "161915546"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_user_start_realtime_read_only"
+    namespace: "multiuser"
+    description: "Cache getUserStartRealtime to avoid unnecessary binder calls"
+    bug: "350416205"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_user_unlock_realtime_read_only"
+    namespace: "multiuser"
+    description: "Cache getUserUnlockRealtime to avoid unnecessary binder calls"
+    bug: "350421407"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_user_restrictions_read_only"
+    namespace: "multiuser"
+    description: "Cache hasUserRestriction to avoid unnecessary binder calls"
+    bug: "350419621"
     metadata {
         purpose: PURPOSE_BUGFIX
   }
@@ -438,11 +560,38 @@ flag {
   }
 }
 
-
 flag {
     name: "caching_development_improvements"
     namespace: "multiuser"
     description: "System API to simplify caching implamentations"
     bug: "364947162"
     is_fixed_read_only: true
+}
+
+flag {
+  name: "show_custom_unlock_title_inside_private_profile"
+  namespace: "profile_experiences"
+  description: "When private space is unlocked show dynamic title in unlock factor screens based on lock factor set for the profile"
+  bug: "323835257"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "ignore_restrictions_when_deleting_private_profile"
+  namespace: "profile_experiences"
+  description: "Ignore any user restrictions when deleting private profiles."
+  bug: "350953833"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "add_launcher_user_config"
+    namespace: "profile_experiences"
+    description: "Add support for LauncherUserInfo configs"
+    bug: "346553745"
+    is_exported: true
 }

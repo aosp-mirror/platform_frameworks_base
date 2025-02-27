@@ -17,24 +17,42 @@
 package com.android.systemui.keyboard.shortcut.shared.model
 
 sealed interface ShortcutCategoryType {
-    data object System : ShortcutCategoryType
+    val isTrusted: Boolean
+    val includeInCustomization: Boolean
 
-    data object MultiTasking : ShortcutCategoryType
+    data object System : ShortcutCategoryType {
+        override val isTrusted: Boolean = true
+        override val includeInCustomization: Boolean = true
+    }
 
-    data object InputMethodEditor : ShortcutCategoryType
+    data object MultiTasking : ShortcutCategoryType {
+        override val isTrusted: Boolean = true
+        override val includeInCustomization: Boolean = true
+    }
 
-    data object AppCategories : ShortcutCategoryType
+    data object InputMethodEditor : ShortcutCategoryType {
+        override val isTrusted: Boolean = false
+        override val includeInCustomization: Boolean = false
+    }
 
-    data class CurrentApp(val packageName: String) : ShortcutCategoryType
+    data object AppCategories : ShortcutCategoryType {
+        override val isTrusted: Boolean = true
+        override val includeInCustomization: Boolean = true
+    }
+
+    data class CurrentApp(val packageName: String) : ShortcutCategoryType {
+        override val isTrusted: Boolean = false
+        override val includeInCustomization: Boolean = false
+    }
 }
 
 data class ShortcutCategory(
     val type: ShortcutCategoryType,
-    val subCategories: List<ShortcutSubCategory>
+    val subCategories: List<ShortcutSubCategory>,
 ) {
     constructor(
         type: ShortcutCategoryType,
-        vararg subCategories: ShortcutSubCategory
+        vararg subCategories: ShortcutSubCategory,
     ) : this(type, subCategories.asList())
 }
 

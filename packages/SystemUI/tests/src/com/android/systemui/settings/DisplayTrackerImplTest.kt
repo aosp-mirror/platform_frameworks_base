@@ -17,7 +17,7 @@
 package com.android.systemui.settings
 
 import android.hardware.display.DisplayManager
-import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS
+import android.hardware.display.DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS
 import android.hardware.display.DisplayManagerGlobal
 import android.os.Handler
 import android.testing.AndroidTestingRunner
@@ -59,14 +59,14 @@ class DisplayTrackerImplTest : SysuiTestCase() {
                 DisplayManagerGlobal.getInstance(),
                 Display.DEFAULT_DISPLAY,
                 DisplayInfo(),
-                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS,
             )
         mSecondaryDisplay =
             Display(
                 DisplayManagerGlobal.getInstance(),
                 Display.DEFAULT_DISPLAY + 1,
                 DisplayInfo(),
-                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS,
             )
 
         `when`(displayManager.displays).thenReturn(arrayOf(mDefaultDisplay, mSecondaryDisplay))
@@ -94,7 +94,12 @@ class DisplayTrackerImplTest : SysuiTestCase() {
     fun registerBrightnessCallback_registersDisplayListener() {
         tracker.addBrightnessChangeCallback(TestCallback(), executor)
         verify(displayManager)
-            .registerDisplayListener(any(), any(), eq(EVENT_FLAG_DISPLAY_BRIGHTNESS))
+            .registerDisplayListener(
+                any(),
+                any(),
+                eq(0L),
+                eq(PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS),
+            )
     }
 
     @Test

@@ -41,16 +41,13 @@ import android.view.InputDevice;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.test.input.MockInputManagerRule;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.MockitoRule;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -70,43 +67,34 @@ public class InputDeviceSensorManagerTest {
 
     private static final int DEVICE_ID = 1000;
 
-    @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+    @Rule
+    public final MockInputManagerRule mInputManagerRule = new MockInputManagerRule();
 
     private InputManager mInputManager;
     private IInputSensorEventListener mIInputSensorEventListener;
     private final Object mLock = new Object();
 
-    @Mock private IInputManager mIInputManagerMock;
-    private InputManagerGlobal.TestSession mInputManagerGlobalSession;
-
     @Before
     public void setUp() throws Exception {
         final Context context = spy(
                 new ContextWrapper(InstrumentationRegistry.getInstrumentation().getContext()));
-        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mIInputManagerMock);
         mInputManager = new InputManager(context);
         when(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(mInputManager);
 
-        when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{DEVICE_ID});
+        when(mInputManagerRule.getMock().getInputDeviceIds()).thenReturn(new int[]{DEVICE_ID});
 
-        when(mIInputManagerMock.getInputDevice(eq(DEVICE_ID))).thenReturn(
+        when(mInputManagerRule.getMock().getInputDevice(eq(DEVICE_ID))).thenReturn(
                 createInputDeviceWithSensor(DEVICE_ID));
 
-        when(mIInputManagerMock.getSensorList(eq(DEVICE_ID))).thenReturn(new InputSensorInfo[] {
-                createInputSensorInfo(DEVICE_ID, Sensor.TYPE_ACCELEROMETER),
-                createInputSensorInfo(DEVICE_ID, Sensor.TYPE_GYROSCOPE)});
+        when(mInputManagerRule.getMock().getSensorList(eq(DEVICE_ID))).thenReturn(
+                new InputSensorInfo[]{
+                        createInputSensorInfo(DEVICE_ID, Sensor.TYPE_ACCELEROMETER),
+                        createInputSensorInfo(DEVICE_ID, Sensor.TYPE_GYROSCOPE)});
 
-        when(mIInputManagerMock.enableSensor(eq(DEVICE_ID), anyInt(), anyInt(), anyInt()))
+        when(mInputManagerRule.getMock().enableSensor(eq(DEVICE_ID), anyInt(), anyInt(), anyInt()))
                 .thenReturn(true);
 
-        when(mIInputManagerMock.registerSensorListener(any())).thenReturn(true);
-    }
-
-    @After
-    public void tearDown() {
-        if (mInputManagerGlobalSession != null) {
-            mInputManagerGlobalSession.close();
-        }
+        when(mInputManagerRule.getMock().registerSensorListener(any())).thenReturn(true);
     }
 
     private class InputTestSensorEventListener implements SensorEventListener {
@@ -175,13 +163,13 @@ public class InputDeviceSensorManagerTest {
 
         SensorManager sensorManager = device.getSensorManager();
         List<Sensor> accelList = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
-        verify(mIInputManagerMock).getSensorList(eq(DEVICE_ID));
+        verify(mInputManagerRule.getMock()).getSensorList(eq(DEVICE_ID));
         assertEquals(1, accelList.size());
         assertEquals(DEVICE_ID, accelList.get(0).getId());
         assertEquals(Sensor.TYPE_ACCELEROMETER, accelList.get(0).getType());
 
         List<Sensor> gyroList = sensorManager.getSensorList(Sensor.TYPE_GYROSCOPE);
-        verify(mIInputManagerMock).getSensorList(eq(DEVICE_ID));
+        verify(mInputManagerRule.getMock()).getSensorList(eq(DEVICE_ID));
         assertEquals(1, gyroList.size());
         assertEquals(DEVICE_ID, gyroList.get(0).getId());
         assertEquals(Sensor.TYPE_GYROSCOPE, gyroList.get(0).getType());
@@ -197,11 +185,11 @@ public class InputDeviceSensorManagerTest {
 
         List<Sensor> gameRotationList = sensorManager.getSensorList(
                 Sensor.TYPE_GAME_ROTATION_VECTOR);
-        verify(mIInputManagerMock).getSensorList(eq(DEVICE_ID));
+        verify(mInputManagerRule.getMock()).getSensorList(eq(DEVICE_ID));
         assertEquals(0, gameRotationList.size());
 
         List<Sensor> gravityList = sensorManager.getSensorList(Sensor.TYPE_GRAVITY);
-        verify(mIInputManagerMock).getSensorList(eq(DEVICE_ID));
+        verify(mInputManagerRule.getMock()).getSensorList(eq(DEVICE_ID));
         assertEquals(0, gravityList.size());
     }
 
@@ -218,13 +206,13 @@ public class InputDeviceSensorManagerTest {
             mIInputSensorEventListener = invocation.getArgument(0);
             assertNotNull(mIInputSensorEventListener);
             return true;
-        }).when(mIInputManagerMock).registerSensorListener(any());
+        }).when(mInputManagerRule.getMock()).registerSensorListener(any());
 
         InputTestSensorEventListener listener = new InputTestSensorEventListener();
         assertTrue(sensorManager.registerListener(listener, sensor,
                 SensorManager.SENSOR_DELAY_NORMAL));
-        verify(mIInputManagerMock).registerSensorListener(any());
-        verify(mIInputManagerMock).enableSensor(eq(DEVICE_ID), eq(sensor.getType()),
+        verify(mInputManagerRule.getMock()).registerSensorListener(any());
+        verify(mInputManagerRule.getMock()).enableSensor(eq(DEVICE_ID), eq(sensor.getType()),
                 anyInt(), anyInt());
 
         float[] values = new float[] {0.12f, 9.8f, 0.2f};
@@ -240,7 +228,7 @@ public class InputDeviceSensorManagerTest {
         }
 
         sensorManager.unregisterListener(listener);
-        verify(mIInputManagerMock).disableSensor(eq(DEVICE_ID), eq(sensor.getType()));
+        verify(mInputManagerRule.getMock()).disableSensor(eq(DEVICE_ID), eq(sensor.getType()));
     }
 
 }

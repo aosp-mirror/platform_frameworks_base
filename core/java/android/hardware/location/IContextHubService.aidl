@@ -18,16 +18,21 @@ package android.hardware.location;
 
 // Declare any non-default types here with import statements
 import android.app.PendingIntent;
+import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.IContextHubEndpoint;
+import android.hardware.contexthub.IContextHubEndpointCallback;
+import android.hardware.contexthub.IContextHubEndpointDiscoveryCallback;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
-import android.hardware.location.NanoApp;
-import android.hardware.location.NanoAppBinary;
-import android.hardware.location.NanoAppFilter;
-import android.hardware.location.NanoAppInstanceInfo;
+import android.hardware.location.HubInfo;
 import android.hardware.location.IContextHubCallback;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.IContextHubTransactionCallback;
+import android.hardware.location.NanoApp;
+import android.hardware.location.NanoAppBinary;
+import android.hardware.location.NanoAppFilter;
+import android.hardware.location.NanoAppInstanceInfo;
 
 /**
  * @hide
@@ -82,6 +87,10 @@ interface IContextHubService {
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     List<ContextHubInfo> getContextHubs();
 
+    // Returns a list of HubInfo objects of available hubs (including ContextHub and VendorHub)
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    List<HubInfo> getHubs();
+
     // Loads a nanoapp at the specified hub (new API)
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     void loadNanoAppOnHub(
@@ -117,4 +126,28 @@ interface IContextHubService {
     // Enables or disables test mode
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     boolean setTestMode(in boolean enable);
+
+    // Finds all endpoints that has a specific ID
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    List<HubEndpointInfo> findEndpoints(long endpointId);
+
+    // Finds all endpoints that has a specific service
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    List<HubEndpointInfo> findEndpointsWithService(String service);
+
+    // Register an endpoint with the context hub
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    IContextHubEndpoint registerEndpoint(in HubEndpointInfo pendingEndpointInfo, in IContextHubEndpointCallback callback);
+
+    // Register an endpoint discovery callback (id)
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    void registerEndpointDiscoveryCallbackId(long endpointId, in IContextHubEndpointDiscoveryCallback callback);
+
+    // Register an endpoint discovery callback (descriptor)
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    void registerEndpointDiscoveryCallbackDescriptor(String serviceDescriptor, in IContextHubEndpointDiscoveryCallback callback);
+
+    // Unregister an endpoint with the context hub
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    void unregisterEndpointDiscoveryCallback(in IContextHubEndpointDiscoveryCallback callback);
 }

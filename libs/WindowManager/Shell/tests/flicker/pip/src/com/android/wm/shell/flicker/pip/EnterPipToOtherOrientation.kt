@@ -19,6 +19,7 @@ package com.android.wm.shell.flicker.pip
 import android.app.Activity
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresFlagsDisabled
 import android.tools.Rotation
 import android.tools.flicker.assertions.FlickerTest
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
@@ -30,8 +31,10 @@ import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
+import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
+import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.pip.common.PipTransition
 import com.android.wm.shell.flicker.pip.common.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.common.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
@@ -46,7 +49,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip while changing orientation (from app in landscape to pip window in portrait)
  *
- * To run this test: `atest WMShellFlickerTestsPip2:EnterPipToOtherOrientation`
+ * To run this test: `atest WMShellFlickerTestsPip:EnterPipToOtherOrientation`
  *
  * Actions:
  * ```
@@ -68,7 +71,9 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(flicker) {
+    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
     private val testApp = FixedOrientationAppHelper(instrumentation)
     private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)

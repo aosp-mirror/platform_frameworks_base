@@ -23,7 +23,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 private val TAG = BouncerMessageAuditLogger::class.simpleName!!
 

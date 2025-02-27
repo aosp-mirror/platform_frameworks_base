@@ -117,7 +117,23 @@ public class InsetsSourceConsumerTest {
         mConsumer.setControl(
                 new InsetsSourceControl(ID_STATUS_BAR, statusBars(), mLeash,
                         true /* initialVisible */, new Point(), Insets.NONE),
-                new int[1], new int[1]);
+                new int[1], new int[1], new int[1]);
+    }
+
+    @Test
+    public void testSetControl_cancelAnimation() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final InsetsSourceControl newControl = new InsetsSourceControl(mConsumer.getControl());
+
+            // Change the side of the insets hint.
+            newControl.setInsetsHint(Insets.of(0, 0, 0, 100));
+
+            int[] cancelTypes = {0};
+            mConsumer.setControl(newControl, new int[1], new int[1], cancelTypes);
+
+            assertEquals(statusBars(), cancelTypes[0]);
+        });
+
     }
 
     @Test
@@ -180,7 +196,7 @@ public class InsetsSourceConsumerTest {
     @Test
     public void testRestore() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mConsumer.setControl(null, new int[1], new int[1]);
+            mConsumer.setControl(null, new int[1], new int[1], new int[1]);
             mSurfaceParamsApplied = false;
             mController.setRequestedVisibleTypes(0 /* visibleTypes */, statusBars());
             assertFalse(mSurfaceParamsApplied);
@@ -188,7 +204,7 @@ public class InsetsSourceConsumerTest {
             mConsumer.setControl(
                     new InsetsSourceControl(ID_STATUS_BAR, statusBars(), mLeash,
                             true /* initialVisible */, new Point(), Insets.NONE),
-                    new int[1], hideTypes);
+                    new int[1], hideTypes, new int[1]);
             assertEquals(statusBars(), hideTypes[0]);
             assertFalse(mRemoveSurfaceCalled);
         });
@@ -198,7 +214,7 @@ public class InsetsSourceConsumerTest {
     public void testRestore_noAnimation() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.setRequestedVisibleTypes(0 /* visibleTypes */, statusBars());
-            mConsumer.setControl(null, new int[1], new int[1]);
+            mConsumer.setControl(null, new int[1], new int[1], new int[1]);
             mLeash = new SurfaceControl.Builder(mSession)
                     .setName("testSurface")
                     .build();
@@ -207,7 +223,7 @@ public class InsetsSourceConsumerTest {
             mConsumer.setControl(
                     new InsetsSourceControl(ID_STATUS_BAR, statusBars(), mLeash,
                             false /* initialVisible */, new Point(), Insets.NONE),
-                    new int[1], hideTypes);
+                    new int[1], hideTypes, new int[1]);
             assertTrue(mRemoveSurfaceCalled);
             assertEquals(0, hideTypes[0]);
         });
@@ -235,7 +251,8 @@ public class InsetsSourceConsumerTest {
 
             // Initial IME insets source control with its leash.
             imeConsumer.setControl(new InsetsSourceControl(ID_IME, ime(), mLeash,
-                    false /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
+                    false /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1],
+                    new int[1]);
             mSurfaceParamsApplied = false;
 
             // Verify when the app requests controlling show IME animation, the IME leash
@@ -244,7 +261,8 @@ public class InsetsSourceConsumerTest {
                     null /* interpolator */, null /* cancellationSignal */, null /* listener */);
             assertEquals(ANIMATION_TYPE_USER, insetsController.getAnimationType(ime()));
             imeConsumer.setControl(new InsetsSourceControl(ID_IME, ime(), mLeash,
-                    true /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
+                    true /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1],
+                    new int[1]);
             assertFalse(mSurfaceParamsApplied);
         });
     }

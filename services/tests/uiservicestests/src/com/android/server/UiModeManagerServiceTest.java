@@ -118,6 +118,7 @@ import org.mockito.Spy;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -232,7 +233,8 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
                 any(AlarmManager.OnAlarmListener.class), any(Handler.class));
 
         doAnswer(inv -> {
-            mCustomListener = () -> {};
+            mCustomListener = () -> {
+            };
             return null;
         }).when(mAlarmManager).cancel(eq(mCustomListener));
         when(mContext.getSystemService(eq(Context.POWER_SERVICE)))
@@ -1321,7 +1323,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void enableCarMode_failsForBogusPackageName() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-            .thenReturn(TestInjector.DEFAULT_CALLING_UID + 1);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID + 1);
 
         assertThrows(SecurityException.class, () -> mService.enableCarMode(0, 0, PACKAGE_NAME));
         assertThat(mService.getCurrentModeType()).isNotEqualTo(Configuration.UI_MODE_TYPE_CAR);
@@ -1343,19 +1345,19 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void disableCarMode_failsForBogusPackageName() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-            .thenReturn(TestInjector.DEFAULT_CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.enableCarMode(0, 0, PACKAGE_NAME);
         assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-            .thenReturn(TestInjector.DEFAULT_CALLING_UID + 1);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID + 1);
 
         assertThrows(SecurityException.class,
-            () -> mService.disableCarModeByCallingPackage(0, PACKAGE_NAME));
+                () -> mService.disableCarModeByCallingPackage(0, PACKAGE_NAME));
         assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
 
         // Clean up
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-            .thenReturn(TestInjector.DEFAULT_CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.disableCarModeByCallingPackage(0, PACKAGE_NAME);
         assertThat(mService.getCurrentModeType()).isNotEqualTo(Configuration.UI_MODE_TYPE_CAR);
     }
@@ -1460,9 +1462,12 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
-    private void testAttentionModeThemeOverlay(boolean modeNight) throws RemoteException {
+    // Test the attention mode overlay with all the possible attention modes and the initial night
+    // mode state. Also tests if the attention mode is turned off when the night mode is toggled by
+    // the user.
+    private void testAttentionModeThemeOverlay(boolean initialNightMode) throws RemoteException {
         //setup
-        if (modeNight) {
+        if (initialNightMode) {
             mService.setNightMode(MODE_NIGHT_YES);
             assertTrue(mUiManagerService.getConfiguration().isNightModeActive());
         } else {
@@ -1470,23 +1475,32 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             assertFalse(mUiManagerService.getConfiguration().isNightModeActive());
         }
 
-        // attention modes with expected night modes
-        Map<Integer, Boolean> modes = Map.of(
-                MODE_ATTENTION_THEME_OVERLAY_OFF, modeNight,
-                MODE_ATTENTION_THEME_OVERLAY_DAY, false,
-                MODE_ATTENTION_THEME_OVERLAY_NIGHT, true
-        );
+        // Attention modes with expected night modes.
+        // Important to keep modes.put(MODE_ATTENTION_THEME_OVERLAY_OFF, initialNightMode) in the
+        // first position, hence LinkedHashMap.
+        Map<Integer, Boolean> modes = new LinkedHashMap<>();
+        modes.put(MODE_ATTENTION_THEME_OVERLAY_OFF, initialNightMode);
+        modes.put(MODE_ATTENTION_THEME_OVERLAY_DAY, false);
+        modes.put(MODE_ATTENTION_THEME_OVERLAY_NIGHT, true);
 
         // test
-        for (int aMode : modes.keySet()) {
+        for (int attentionMode : modes.keySet()) {
             try {
-                mService.setAttentionModeThemeOverlay(aMode);
+                mService.setAttentionModeThemeOverlay(attentionMode);
 
                 int appliedAMode = mService.getAttentionModeThemeOverlay();
-                boolean nMode = modes.get(aMode);
+                boolean expectedNightMode = modes.get(attentionMode);
 
-                assertEquals(aMode, appliedAMode);
-                assertEquals(isNightModeActivated(), nMode);
+                assertEquals(attentionMode, appliedAMode);
+                assertEquals(expectedNightMode, isNightModeActivated());
+
+                // If attentionMode is active, flip the night mode and assets
+                // the attention mode is disabled
+                if (attentionMode != MODE_ATTENTION_THEME_OVERLAY_OFF) {
+                    mService.setNightModeActivated(!expectedNightMode);
+                    assertEquals(MODE_ATTENTION_THEME_OVERLAY_OFF,
+                            mService.getAttentionModeThemeOverlay());
+                }
             } catch (RemoteException e) {
                 fail("Error communicating with server: " + e.getMessage());
             }
@@ -1551,7 +1565,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         private final int callingUid;
 
         public TestInjector() {
-          this(DEFAULT_CALLING_UID);
+            this(DEFAULT_CALLING_UID);
         }
 
         public TestInjector(int callingUid) {

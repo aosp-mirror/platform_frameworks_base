@@ -977,11 +977,19 @@ public final class BackgroundInstallControlServiceTest {
         assertEquals(USER_ID_1, UserHandle.getUserId(uid));
 
         mPackageListObserver.onPackageRemoved(PACKAGE_NAME_1, uid);
+        // Test that notifyAllCallbacks doesn't trigger for non-background-installed package
+        mPackageListObserver.onPackageRemoved(PACKAGE_NAME_3, uid);
         mTestLooper.dispatchAll();
 
         assertEquals(1, packages.size());
         assertFalse(packages.contains(USER_ID_1, PACKAGE_NAME_1));
         assertTrue(packages.contains(USER_ID_2, PACKAGE_NAME_2));
+
+        verify(mCallbackHelper)
+                .notifyAllCallbacks(
+                        USER_ID_1,
+                        PACKAGE_NAME_1,
+                        BackgroundInstallControlService.INSTALL_EVENT_TYPE_UNINSTALL);
     }
 
     @Test

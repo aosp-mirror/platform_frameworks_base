@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.annotation.StringRes
+import androidx.compose.ui.input.key.KeyEventType
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
@@ -121,6 +122,13 @@ sealed class AuthMethodBouncerViewModel(
 
     /** Invoked after a successful authentication. */
     protected open fun onSuccessfulAuthentication() = Unit
+
+    /**
+     * Invoked for any key events on the bouncer.
+     *
+     * @return whether the event was consumed by this method and should not be propagated further.
+     */
+    open fun onKeyEvent(type: KeyEventType, keyCode: Int): Boolean = false
 
     /** Perform authentication result haptics */
     private fun performAuthenticationHapticFeedback(result: AuthenticationResult) {

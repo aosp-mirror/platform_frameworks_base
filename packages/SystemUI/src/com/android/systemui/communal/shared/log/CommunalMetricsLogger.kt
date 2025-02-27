@@ -30,6 +30,7 @@ constructor(
     @Named(LOGGABLE_PREFIXES) private val loggablePrefixes: List<String>,
     private val statsLogProxy: StatsLogProxy,
 ) {
+
     /** Logs an add widget event for metrics. No-op if widget is not loggable. */
     fun logAddWidget(componentName: String, rank: Int?) {
         if (!componentName.isLoggable()) {
@@ -69,11 +70,21 @@ constructor(
         )
     }
 
+    fun logResizeWidget(componentName: String, rank: Int, spanY: Int = 0) {
+        if (!componentName.isLoggable()) {
+            return
+        }
+
+        statsLogProxy.writeCommunalHubWidgetEventReported(
+            SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED__ACTION__RESIZE,
+            componentName,
+            rank = rank,
+            spanY = spanY,
+        )
+    }
+
     /** Logs loggable widgets and the total widget count as a [StatsEvent]. */
-    fun logWidgetsSnapshot(
-        statsEvents: MutableList<StatsEvent>,
-        componentNames: List<String>,
-    ) {
+    fun logWidgetsSnapshot(statsEvents: MutableList<StatsEvent>, componentNames: List<String>) {
         val loggableComponentNames = componentNames.filter { it.isLoggable() }.toTypedArray()
         statsEvents.add(
             statsLogProxy.buildCommunalHubSnapshotStatsEvent(
@@ -95,6 +106,7 @@ constructor(
             action: Int,
             componentName: String,
             rank: Int,
+            spanY: Int = 0,
         )
 
         /** Builds a [SysUiStatsLog.COMMUNAL_HUB_SNAPSHOT] stats event. */
@@ -112,12 +124,14 @@ class CommunalStatsLogProxyImpl @Inject constructor() : CommunalMetricsLogger.St
         action: Int,
         componentName: String,
         rank: Int,
+        spanY: Int,
     ) {
         SysUiStatsLog.write(
             SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED,
             action,
             componentName,
             rank,
+            spanY,
         )
     }
 

@@ -17,6 +17,6 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <item android:state_focused="true" android:color="?androidprv:attr/materialColorSecondary" />
+    <item android:state_focused="true" android:color="@androidprv:color/materialColorSecondary" />
     <item android:color="@color/transparent" />
 </selector>

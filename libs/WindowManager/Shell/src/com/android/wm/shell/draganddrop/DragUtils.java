@@ -125,25 +125,35 @@ public class DragUtils {
         StringJoiner str = new StringJoiner("|");
         if ((dragFlags & DRAG_FLAG_GLOBAL) != 0) {
             str.add("GLOBAL");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_URI_READ) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_URI_READ) != 0) {
             str.add("GLOBAL_URI_READ");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_URI_WRITE) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_URI_WRITE) != 0) {
             str.add("GLOBAL_URI_WRITE");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION) != 0) {
             str.add("GLOBAL_PERSISTABLE_URI_PERMISSION");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION) != 0) {
             str.add("GLOBAL_PREFIX_URI_PERMISSION");
-        } else if ((dragFlags & DRAG_FLAG_OPAQUE) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_OPAQUE) != 0) {
             str.add("OPAQUE");
-        } else if ((dragFlags & DRAG_FLAG_ACCESSIBILITY_ACTION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_ACCESSIBILITY_ACTION) != 0) {
             str.add("ACCESSIBILITY_ACTION");
-        } else if ((dragFlags & DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION) != 0) {
             str.add("REQUEST_SURFACE_FOR_RETURN_ANIMATION");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_SAME_APPLICATION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_SAME_APPLICATION) != 0) {
             str.add("GLOBAL_SAME_APPLICATION");
-        } else if ((dragFlags & DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG) != 0) {
             str.add("START_INTENT_SENDER_ON_UNHANDLED_DRAG");
-        } else if ((dragFlags & DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START) != 0) {
             str.add("HIDE_CALLING_TASK_ON_DRAG_START");
         }
         return str.toString();

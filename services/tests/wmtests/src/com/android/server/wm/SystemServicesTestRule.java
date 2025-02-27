@@ -78,6 +78,8 @@ import android.view.SurfaceControl;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -183,6 +185,8 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void setUp() {
+        ProtoLog.init(WmProtoLogGroups.values());
+
         if (mOnBeforeServicesCreated != null) {
             mOnBeforeServicesCreated.run();
         }

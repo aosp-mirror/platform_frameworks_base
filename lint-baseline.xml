@@ -11265,4 +11265,15 @@
             column="24"/>
     </issue>
 
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="INetworkScoreCache permission check should be converted to @EnforcePermission annotation"
+        errorLine1="        mContext.enforceCallingOrSelfPermission(permission.DUMP, TAG);"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/wifi/java/src/android/net/wifi/WifiNetworkScoreCache.java"
+            line="250"
+            column="9"/>
+    </issue>
+
 </issues>

@@ -1,0 +1,384 @@
+{
+  "frame_ids": [
+    0,
+    16,
+    32,
+    48,
+    64,
+    80,
+    96,
+    112,
+    128,
+    144,
+    160,
+    176,
+    192,
+    208,
+    224,
+    240,
+    256,
+    272,
+    288,
+    304
+  ],
+  "features": [
+    {
+      "name": "bounds",
+      "type": "rect",
+      "data_points": [
+        {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0
+        },
+        {
+          "left": 104,
+          "top": 285,
+          "right": 215,
+          "bottom": 414
+        },
+        {
+          "left": 92,
+          "top": 252,
+          "right": 227,
+          "bottom": 447
+        },
+        {
+          "left": 77,
+          "top": 213,
+          "right": 242,
+          "bottom": 486
+        },
+        {
+          "left": 63,
+          "top": 175,
+          "right": 256,
+          "bottom": 524
+        },
+        {
+          "left": 50,
+          "top": 141,
+          "right": 269,
+          "bottom": 558
+        },
+        {
+          "left": 40,
+          "top": 112,
+          "right": 279,
+          "bottom": 587
+        },
+        {
+          "left": 31,
+          "top": 88,
+          "right": 288,
+          "bottom": 611
+        },
+        {
+          "left": 23,
+          "top": 68,
+          "right": 296,
+          "bottom": 631
+        },
+        {
+          "left": 18,
+          "top": 53,
+          "right": 301,
+          "bottom": 646
+        },
+        {
+          "left": 13,
+          "top": 41,
+          "right": 306,
+          "bottom": 658
+        },
+        {
+          "left": 10,
+          "top": 31,
+          "right": 309,
+          "bottom": 667
+        },
+        {
+          "left": 7,
+          "top": 24,
+          "right": 312,
+          "bottom": 673
+        },
+        {
+          "left": 5,
+          "top": 18,
+          "right": 314,
+          "bottom": 678
+        },
+        {
+          "left": 4,
+          "top": 13,
+          "right": 315,
+          "bottom": 681
+        },
+        {
+          "left": 3,
+          "top": 10,
+          "right": 316,
+          "bottom": 684
+        },
+        {
+          "left": 2,
+          "top": 7,
+          "right": 317,
+          "bottom": 685
+        },
+        {
+          "left": 1,
+          "top": 5,
+          "right": 318,
+          "bottom": 687
+        },
+        {
+          "left": 1,
+          "top": 4,
+          "right": 318,
+          "bottom": 688
+        },
+        {
+          "left": 0,
+          "top": 3,
+          "right": 319,
+          "bottom": 688
+        }
+      ]
+    },
+    {
+      "name": "corner_radii",
+      "type": "cornerRadii",
+      "data_points": [
+        null,
+        {
+          "top_left_x": 9.492916,
+          "top_left_y": 9.492916,
+          "top_right_x": 9.492916,
+          "top_right_y": 9.492916,
+          "bottom_right_x": 18.985832,
+          "bottom_right_y": 18.985832,
+          "bottom_left_x": 18.985832,
+          "bottom_left_y": 18.985832
+        },
+        {
+          "top_left_x": 8.381761,
+          "top_left_y": 8.381761,
+          "top_right_x": 8.381761,
+          "top_right_y": 8.381761,
+          "bottom_right_x": 16.763521,
+          "bottom_right_y": 16.763521,
+          "bottom_left_x": 16.763521,
+          "bottom_left_y": 16.763521
+        },
+        {
+          "top_left_x": 7.07397,
+          "top_left_y": 7.07397,
+          "top_right_x": 7.07397,
+          "top_right_y": 7.07397,
+          "bottom_right_x": 14.14794,
+          "bottom_right_y": 14.14794,
+          "bottom_left_x": 14.14794,
+          "bottom_left_y": 14.14794
+        },
+        {
+          "top_left_x": 5.7880254,
+          "top_left_y": 5.7880254,
+          "top_right_x": 5.7880254,
+          "top_right_y": 5.7880254,
+          "bottom_right_x": 11.576051,
+          "bottom_right_y": 11.576051,
+          "bottom_left_x": 11.576051,
+          "bottom_left_y": 11.576051
+        },
+        {
+          "top_left_x": 4.6295347,
+          "top_left_y": 4.6295347,
+          "top_right_x": 4.6295347,
+          "top_right_y": 4.6295347,
+          "bottom_right_x": 9.259069,
+          "bottom_right_y": 9.259069,
+          "bottom_left_x": 9.259069,
+          "bottom_left_y": 9.259069
+        },
+        {
+          "top_left_x": 3.638935,
+          "top_left_y": 3.638935,
+          "top_right_x": 3.638935,
+          "top_right_y": 3.638935,
+          "bottom_right_x": 7.27787,
+          "bottom_right_y": 7.27787,
+          "bottom_left_x": 7.27787,
+          "bottom_left_y": 7.27787
+        },
+        {
+          "top_left_x": 2.8209057,
+          "top_left_y": 2.8209057,
+          "top_right_x": 2.8209057,
+          "top_right_y": 2.8209057,
+          "bottom_right_x": 5.6418114,
+          "bottom_right_y": 5.6418114,
+          "bottom_left_x": 5.6418114,
+          "bottom_left_y": 5.6418114
+        },
+        {
+          "top_left_x": 2.1620893,
+          "top_left_y": 2.1620893,
+          "top_right_x": 2.1620893,
+          "top_right_y": 2.1620893,
+          "bottom_right_x": 4.3241787,
+          "bottom_right_y": 4.3241787,
+          "bottom_left_x": 4.3241787,
+          "bottom_left_y": 4.3241787
+        },
+        {
+          "top_left_x": 1.6414614,
+          "top_left_y": 1.6414614,
+          "top_right_x": 1.6414614,
+          "top_right_y": 1.6414614,
+          "bottom_right_x": 3.2829227,
+          "bottom_right_y": 3.2829227,
+          "bottom_left_x": 3.2829227,
+          "bottom_left_y": 3.2829227
+        },
+        {
+          "top_left_x": 1.2361269,
+          "top_left_y": 1.2361269,
+          "top_right_x": 1.2361269,
+          "top_right_y": 1.2361269,
+          "bottom_right_x": 2.4722538,
+          "bottom_right_y": 2.4722538,
+          "bottom_left_x": 2.4722538,
+          "bottom_left_y": 2.4722538
+        },
+        {
+          "top_left_x": 0.92435074,
+          "top_left_y": 0.92435074,
+          "top_right_x": 0.92435074,
+          "top_right_y": 0.92435074,
+          "bottom_right_x": 1.8487015,
+          "bottom_right_y": 1.8487015,
+          "bottom_left_x": 1.8487015,
+          "bottom_left_y": 1.8487015
+        },
+        {
+          "top_left_x": 0.68693924,
+          "top_left_y": 0.68693924,
+          "top_right_x": 0.68693924,
+          "top_right_y": 0.68693924,
+          "bottom_right_x": 1.3738785,
+          "bottom_right_y": 1.3738785,
+          "bottom_left_x": 1.3738785,
+          "bottom_left_y": 1.3738785
+        },
+        {
+          "top_left_x": 0.5076904,
+          "top_left_y": 0.5076904,
+          "top_right_x": 0.5076904,
+          "top_right_y": 0.5076904,
+          "bottom_right_x": 1.0153809,
+          "bottom_right_y": 1.0153809,
+          "bottom_left_x": 1.0153809,
+          "bottom_left_y": 1.0153809
+        },
+        {
+          "top_left_x": 0.3733511,
+          "top_left_y": 0.3733511,
+          "top_right_x": 0.3733511,
+          "top_right_y": 0.3733511,
+          "bottom_right_x": 0.7467022,
+          "bottom_right_y": 0.7467022,
+          "bottom_left_x": 0.7467022,
+          "bottom_left_y": 0.7467022
+        },
+        {
+          "top_left_x": 0.27331638,
+          "top_left_y": 0.27331638,
+          "top_right_x": 0.27331638,
+          "top_right_y": 0.27331638,
+          "bottom_right_x": 0.54663277,
+          "bottom_right_y": 0.54663277,
+          "bottom_left_x": 0.54663277,
+          "bottom_left_y": 0.54663277
+        },
+        {
+          "top_left_x": 0.19925308,
+          "top_left_y": 0.19925308,
+          "top_right_x": 0.19925308,
+          "top_right_y": 0.19925308,
+          "bottom_right_x": 0.39850616,
+          "bottom_right_y": 0.39850616,
+          "bottom_left_x": 0.39850616,
+          "bottom_left_y": 0.39850616
+        },
+        {
+          "top_left_x": 0.14470005,
+          "top_left_y": 0.14470005,
+          "top_right_x": 0.14470005,
+          "top_right_y": 0.14470005,
+          "bottom_right_x": 0.2894001,
+          "bottom_right_y": 0.2894001,
+          "bottom_left_x": 0.2894001,
+          "bottom_left_y": 0.2894001
+        },
+        {
+          "top_left_x": 0.10470486,
+          "top_left_y": 0.10470486,
+          "top_right_x": 0.10470486,
+          "top_right_y": 0.10470486,
+          "bottom_right_x": 0.20940971,
+          "bottom_right_y": 0.20940971,
+          "bottom_left_x": 0.20940971,
+          "bottom_left_y": 0.20940971
+        },
+        {
+          "top_left_x": 0.07550812,
+          "top_left_y": 0.07550812,
+          "top_right_x": 0.07550812,
+          "top_right_y": 0.07550812,
+          "bottom_right_x": 0.15101624,
+          "bottom_right_y": 0.15101624,
+          "bottom_left_x": 0.15101624,
+          "bottom_left_y": 0.15101624
+        }
+      ]
+    },
+    {
+      "name": "alpha",
+      "type": "int",
+      "data_points": [
+        0,
+        45,
+        126,
+        190,
+        228,
+        246,
+        253,
+        255,
+        255,
+        255,
+        249,
+        226,
+        192,
+        153,
+        112,
+        72,
+        34,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "\/\/metadata": {
+    "goldenRepoPath": "frameworks\/base\/packages\/SystemUI\/tests\/goldens\/backgroundAnimation_whenLaunching_withSpring.json",
+    "goldenIdentifier": "backgroundAnimation_whenLaunching_withSpring",
+    "testClassName": "TransitionAnimatorTest",
+    "testMethodName": "backgroundAnimation_whenLaunching[true]",
+    "deviceLocalPath": "\/data\/user\/0\/com.android.systemui.tests\/files\/platform_screenshots",
+    "result": "FAILED",
+    "videoLocation": "TransitionAnimatorTest\/backgroundAnimation_whenLaunching_withSpring.actual.mp4"
+  }
+}

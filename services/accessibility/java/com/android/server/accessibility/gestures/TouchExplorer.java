@@ -240,10 +240,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     private void clear(MotionEvent event, int policyFlags) {
-        if (mState.isTouchExploring() || Flags.sendHoverEventsBasedOnEventStream()) {
-            // If a touch exploration gesture is in progress send events for its end.
-            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-        }
+        sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
         mDraggingPointerId = INVALID_POINTER_ID;
         // Send exit to any pointers that we have delivered as part of delegating or dragging.
         mDispatcher.sendUpForInjectedDownPointers(event, policyFlags);
@@ -562,10 +559,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
         // clear any hover events that might have been queued and never sent.
         mSendHoverEnterAndMoveDelayed.clear();
         mSendHoverExitDelayed.cancel();
-        // If a touch exploration gesture is in progress send events for its end.
-        if (mState.isTouchExploring() || Flags.sendHoverEventsBasedOnEventStream()) {
-            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-        }
+        sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
         if (mState.isClear()) {
             if (!mSendHoverEnterAndMoveDelayed.isPending()) {
                 // Queue a delayed transition to STATE_TOUCH_EXPLORING.
@@ -1599,9 +1593,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
             if (mEvents.size() == 0) {
                 return;
             }
-            if (Flags.sendHoverEventsBasedOnEventStream()) {
-                sendHoverExitAndTouchExplorationGestureEndIfNeeded(mPolicyFlags);
-            }
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(mPolicyFlags);
             // Send an accessibility event to announce the touch exploration start.
             mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_START);
             if (isSendMotionEventsEnabled()) {

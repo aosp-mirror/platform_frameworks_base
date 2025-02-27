@@ -18,6 +18,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle">
-    <solid android:color="?androidprv:attr/materialColorSurfaceBright"/>
+    <solid android:color="@androidprv:color/materialColorSurfaceBright"/>
     <corners android:radius="16dp"/>
 </shape>

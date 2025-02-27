@@ -16,10 +16,9 @@
 
 package com.android.systemui.util.kotlin
 
-import com.android.app.tracing.coroutines.createCoroutineTracingContext
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.dagger.qualifiers.Tracing
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -27,7 +26,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Providers for various application-wide coroutines-related constructs. */
 @Module
@@ -35,16 +33,15 @@ class GlobalCoroutinesModule {
     @Provides
     @Singleton
     @Application
-    fun applicationScope(
-        @Main dispatcherContext: CoroutineContext,
-    ): CoroutineScope = CoroutineScope(dispatcherContext + createCoroutineTracingContext("ApplicationScope"))
+    fun applicationScope(@Main dispatcherContext: CoroutineContext): CoroutineScope =
+        CoroutineScope(dispatcherContext + newTracingContext("ApplicationScope"))
 
     @Provides
     @Singleton
     @Main
     @Deprecated(
         "Use @Main CoroutineContext instead",
-        ReplaceWith("mainCoroutineContext()", "kotlin.coroutines.CoroutineContext")
+        ReplaceWith("mainCoroutineContext()", "kotlin.coroutines.CoroutineContext"),
     )
     fun mainDispatcher(): CoroutineDispatcher = Dispatchers.Main.immediate
 

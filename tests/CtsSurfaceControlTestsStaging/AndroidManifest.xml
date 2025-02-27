@@ -18,12 +18,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="android.view.surfacecontroltests">
 
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER"/>
+    <uses-permission android:name="android.permission.OBSERVE_PICTURE_PROFILES"/>
+
     <application android:debuggable="true" android:testOnly="true">
         <uses-library android:name="android.test.runner"/>
         <activity
             android:name=".GraphicsActivity"
             android:exported="false">
         </activity>
+        <activity android:name=".SurfaceControlPictureProfileTestActivity"
+                  android:exported="true"
+                  android:turnScreenOn="true"
+                  android:showWhenLocked="true"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

@@ -16,7 +16,7 @@
 
 package com.android.server.display.brightness.clamper;
 
-import static com.android.server.display.brightness.clamper.BrightnessPowerClamper.PowerChangeListener;
+import static com.android.server.display.brightness.clamper.BrightnessPowerModifier.PowerChangeListener;
 
 import android.annotation.Nullable;
 import android.hardware.power.stats.EnergyConsumer;

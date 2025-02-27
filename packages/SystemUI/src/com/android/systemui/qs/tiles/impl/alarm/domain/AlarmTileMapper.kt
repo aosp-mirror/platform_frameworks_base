@@ -19,12 +19,12 @@ package com.android.systemui.qs.tiles.impl.alarm.domain
 import android.content.res.Resources
 import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.alarm.domain.model.AlarmTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.time.SystemClock
 import java.time.Instant
 import java.time.LocalDateTime
@@ -36,7 +36,7 @@ import javax.inject.Inject
 class AlarmTileMapper
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val theme: Theme,
     private val clock: SystemClock,
 ) : QSTileDataToStateMapper<AlarmTileModel> {
@@ -45,6 +45,7 @@ constructor(
         val formatter24Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("E HH:mm")
         val formatterDateOnly: DateTimeFormatter = DateTimeFormatter.ofPattern("E MMM d")
     }
+
     override fun map(config: QSTileConfig, data: AlarmTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             when (data) {
@@ -54,13 +55,13 @@ constructor(
                     val alarmDateTime =
                         LocalDateTime.ofInstant(
                             Instant.ofEpochMilli(data.alarmClockInfo.triggerTime),
-                            TimeZone.getDefault().toZoneId()
+                            TimeZone.getDefault().toZoneId(),
                         )
 
                     val nowDateTime =
                         LocalDateTime.ofInstant(
                             Instant.ofEpochMilli(clock.currentTimeMillis()),
-                            TimeZone.getDefault().toZoneId()
+                            TimeZone.getDefault().toZoneId(),
                         )
 
                     // Edge case: If it's 8:00:30 right now and alarm is requested for next week at
@@ -84,7 +85,7 @@ constructor(
                 }
             }
             iconRes = R.drawable.ic_alarm
-            icon = { Icon.Loaded(resources.getDrawable(iconRes!!, theme), null) }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             contentDescription = label
             supportedActions = setOf(QSTileState.UserAction.CLICK)

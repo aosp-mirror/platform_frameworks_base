@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.map
 
 class FakeScreenBrightnessRepository(
     initialBrightnessInfo: BrightnessInfo =
-        BrightnessInfo(0f, 0f, 1f, HIGH_BRIGHTNESS_MODE_OFF, 1f, BRIGHTNESS_MAX_REASON_NONE)
+        BrightnessInfo(0f, 0f, 1f, HIGH_BRIGHTNESS_MODE_OFF, 1f, BRIGHTNESS_MAX_REASON_NONE),
 ) : ScreenBrightnessRepository {
 
     private val brightnessInfo = MutableStateFlow(initialBrightnessInfo)
@@ -36,6 +36,8 @@ class FakeScreenBrightnessRepository(
     override val linearBrightness = brightnessInfo.map { LinearBrightness(it.brightness) }
     override val minLinearBrightness = brightnessInfo.map { LinearBrightness(it.brightnessMinimum) }
     override val maxLinearBrightness = brightnessInfo.map { LinearBrightness(it.brightnessMaximum) }
+    override val isBrightnessOverriddenByWindow =
+        MutableStateFlow(initialBrightnessInfo.isBrightnessOverrideByWindow).asStateFlow()
 
     override suspend fun getMinMaxLinearBrightness(): Pair<LinearBrightness, LinearBrightness> {
         return minMaxLinearBrightness()

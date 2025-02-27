@@ -27,6 +27,8 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.format.ScreenPowerStatsLayout;
 
+import java.util.Arrays;
+
 public class ScreenPowerStatsCollector extends PowerStatsCollector {
     private static final String TAG = "ScreenPowerStatsCollector";
 
@@ -115,6 +117,9 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        Arrays.fill(mPowerStats.stats, 0);
+        mPowerStats.uidStats.clear();
+
         mConsumedEnergyHelper.collectConsumedEnergy(mPowerStats, mLayout);
 
         for (int display = 0; display < mDisplayCount; display++) {
@@ -141,8 +146,6 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
             }
             mLastDozeTime[display] = screenDozeTimeMs;
         }
-
-        mPowerStats.uidStats.clear();
 
         mScreenUsageTimeRetriever.retrieveTopActivityTimes((uid, topActivityTimeMs) -> {
             long topActivityDuration = topActivityTimeMs - mLastTopActivityTime.get(uid);

@@ -198,4 +198,27 @@ object CustomizationProviderContract {
             const val VALUE = "value"
         }
     }
+
+    object RuntimeValuesTable {
+        const val TABLE_NAME = "runtime_values"
+        val URI: Uri = BASE_URI.buildUpon().path(TABLE_NAME).build()
+
+        /**
+         * This key corresponds to an Int value, where `1` means `true` and `0` means `false`.
+         *
+         * Whether the shade layout should be wide (true) or narrow (false).
+         *
+         * In a wide layout, notifications and quick settings each take up only half the screen
+         * width (whether they are shown at the same time or not). In a narrow layout, they can each
+         * be as wide as the entire screen.
+         */
+        const val KEY_IS_SHADE_LAYOUT_WIDE = "is_shade_layout_wide"
+
+        object Columns {
+            /** String. Unique ID for the value. */
+            const val NAME = "name"
+            /** Type depends on the key name. */
+            const val VALUE = "value"
+        }
+    }
 }

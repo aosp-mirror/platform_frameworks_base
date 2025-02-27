@@ -116,7 +116,7 @@ constructor(
 
     fun logUpdateLockScreenUserLockedMsg(
         userId: Int,
-        userUnlocked: Boolean,
+        userStorageUnlocked: Boolean,
         encryptedOrLockdown: Boolean,
     ) {
         buffer.log(
@@ -124,12 +124,12 @@ constructor(
             LogLevel.DEBUG,
             {
                 int1 = userId
-                bool1 = userUnlocked
+                bool1 = userStorageUnlocked
                 bool2 = encryptedOrLockdown
             },
             {
                 "updateLockScreenUserLockedMsg userId=$int1 " +
-                    "userUnlocked:$bool1 encryptedOrLockdown:$bool2"
+                    "userStorageUnlocked:$bool1 encryptedOrLockdown:$bool2"
             }
         )
     }

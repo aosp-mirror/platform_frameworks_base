@@ -1,5 +1,4 @@
 {
-  // TODO: b/324945360 - Re-enable on presubmit after fixing failures
   "postsubmit": [
     {
       "name": "AccessibilityMenuServiceTests"

@@ -21,6 +21,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
@@ -61,6 +62,7 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
             @NonNull PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<PipPerfHintController> pipPerfHintControllerOptional,
+            @NonNull RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
@@ -68,8 +70,9 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
         super(context, syncTransactionQueue, pipTransitionState, pipBoundsState,
                 pipDisplayLayoutState, boundsHandler, pipMenuController, pipAnimationController,
                 surfaceTransactionHelper, tvPipTransition, pipParamsChangedForwarder,
-                splitScreenOptional, pipPerfHintControllerOptional, displayController,
-                pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+                splitScreenOptional, pipPerfHintControllerOptional, Optional.empty(),
+                rootTaskDisplayAreaOrganizer, displayController, pipUiEventLogger,
+                shellTaskOrganizer, mainExecutor);
         mTvPipTransition = tvPipTransition;
     }
 

@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"پیش‌فرض شناسه تماس‌گیرنده روی محدود است. تماس بعدی: بدون محدودیت"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"پیش‌فرض شناسه تماس‌گیرنده روی غیرمحدود است. تماس بعدی: محدود"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"پیش‌فرض شناسه تماس‌گیرنده روی غیرمحدود است. تماس بعدی: بدون محدودیت"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"‏این برنامه با صفحه ۱۶ کیلوبایتی سازگار نیست. بررسی تراز APK ناموفق بود. این برنامه بااستفاده از حالت سازگار اندازه صفحه اجرا خواهد شد. برای بهترین سازگاری، لطفاً برنامه را با پشتیبانی از صفحه ۱۶ کیلوبایتی دوباره ترجمه کنید. برای اطلاعات بیشتر، به &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; مراجعه کنید"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏این برنامه با صفحه ۱۶ کیلوبایتی سازگار نیست. بررسی تراز ELF ناموفق بود. این برنامه بااستفاده از حالت سازگار اندازه صفحه اجرا خواهد شد. برای بهترین سازگاری، لطفاً برنامه را با پشتیبانی از صفحه ۱۶ کیلوبایتی دوباره ترجمه کنید. برای اطلاعات بیشتر، به &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; مراجعه کنید"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏این برنامه با صفحه ۱۶ کیلوبایتی سازگار نیست. بررسی‌های تراز APK و ELF ناموفق بود. این برنامه بااستفاده از حالت سازگار اندازه صفحه اجرا خواهد شد. برای بهترین سازگاری، لطفاً برنامه را با پشتیبانی از صفحه ۱۶ کیلوبایتی دوباره ترجمه کنید. برای اطلاعات بیشتر، به &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; مراجعه کنید"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"سرویس دارای مجوز نیست."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‏شما می‎توانید تنظیم شناسه تماس‌گیرنده را تغییر دهید."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"داده به <xliff:g id="CARRIERDISPLAY">%s</xliff:g> تغییر کرد"</string>
@@ -1155,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"تا <xliff:g id="COUNT">%d</xliff:g> ساعت دیگر"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"تا <xliff:g id="COUNT">%d</xliff:g> روز دیگر"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"تا <xliff:g id="COUNT">%d</xliff:g> سال دیگر"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# دقیقه قبل}one{# دقیقه قبل}other{# دقیقه قبل}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ساعت قبل}one{# ساعت قبل}other{# ساعت قبل}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# روز قبل}one{# روز قبل}other{# روز قبل}}"</string>
@@ -1940,11 +1975,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"آخر هفته"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"رویداد"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"خوابیدن"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"مزاحم نشوید (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"تحت‌مدیریت <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"روشن"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"خاموش"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"، "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"‫<xliff:g id="START">%1$s</xliff:g> تا <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>، <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"هر تقویمی"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> درحال قطع کردن بعضی از صداهاست"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"دستگاهتان یک مشکل داخلی دارد، و ممکن است تا زمانی که بازنشانی داده‌های کارخانه انجام نگیرد، بی‌ثبات بماند."</string>
@@ -2131,11 +2169,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"دستگاهتان برای تماس‌ها و اعلان‌ها می‌لرزد"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"دستگاهتان برای تماس‌ها و اعلان‌ها بی‌صدا خواهد شد"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"تغییرات سیستم"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"مزاحم نشوید"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"جدید: «مزاحم نشوید» اعلان‌ها را پنهان می‌کند"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"برای اطلاعات بیشتر و تغییر دادن، تک‌ضرب بزنید."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«مزاحم نشوید» تغییر کرده است"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"برای بررسی موارد مسدودشده تک‌ضرب بزنید."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"مرور تنظیمات اعلان"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"‏از Android نسخه ۱۳ به بعد، برنامه‌هایی که نصب می‌کنید برای ارسال اعلان به اجازه شما نیاز دارند. برای تغییر دادن این اجازه در برنامه‌های موجود، تک‌ضرب بزنید."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"بعداً یادآوری شود"</string>
@@ -2431,7 +2464,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏ارسال و دریافت پیام بدون شبکه تلفن همراه یا Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"باز کردن «پیام‌نگار»"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"روش کار"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"روشن کردن «انتخاب خودکار شبکه»"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"برای اینکه تلفنتان بتواند شبکه‌ای که با ماهواره کار می‌کند پیدا کند، «انتخاب خودکار شبکه» را در «تنظیمات» روشن کنید"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"روشن کردن"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"برگشتن"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"درحال تعلیق…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"«درخواست کمک ماهواره‌ای» اکنون دردسترس است"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"‏اگر شبکه Wi-Fi یا تلفن همراه وجود ندارد، می‌توانید به خدمات اضطراری پیام ارسال کنید. «پیام‌نگار Google» باید برنامه پیام‌رسانی پیش‌فرض شما باشد."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"«درخواست کمک ماهواره‌ای» پشتیبانی نمی‌شود"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"«درخواست کمک ماهواره‌ای» در این دستگاه پشتیبانی نمی‌شود"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"«درخواست کمک ماهواره‌ای» راه‌اندازی نشده است"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"مطمئن شوید به اینترنت متصل هستید و دوباره راه‌اندازی را امتحان کنید"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"«درخواست کمک ماهواره‌ای» دردسترس نیست"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"«درخواست کمک ماهواره‌ای» در این کشور یا منطقه دردسترس نیست"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"درخواست کمک ماهواره‌ای راه‌اندازی نمی‌شود"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"‏برای ارسال پیام ازطریق ماهواره، «پیام‌نگار Google» را به‌عنوان برنامه پیام‌رسانی پیش‌فرض تنظیم کنید"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"«درخواست کمک ماهواره‌ای» دردسترس نیست"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"برای بررسی دردسترس بودن «درخواست کمک ماهواره‌ای» در این کشور یا منطقه، تنظیمات مکان را روشن کنید"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"پیام‌رسانی ماهواره‌ای دردسترس است"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"‏اگر شبکه تلفن همراه یا Wi-Fi وجود ندارد، می‌توانید ازطریق ماهواره پیام ارسال کنید. «پیام‌نگار Google» باید برنامه پیام‌رسانی پیش‌فرض شما باشد."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"پیام‌رسانی ماهواره‌ای پشتیبانی نمی‌شود"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"پیام‌رسانی ماهواره‌ای در این دستگاه پشتیبانی نمی‌شود"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"پیام‌رسانی ماهواره‌ای راه‌اندازی نمی‌شود"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"مطمئن شوید به اینترنت متصل هستید و دوباره راه‌اندازی را امتحان کنید"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"پیام‌رسانی ماهواره‌ای دردسترس نیست"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"پیام‌رسانی ماهواره‌ای در این کشور یا منطقه دردسترس نیست"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"پیام‌رسانی ماهواره‌ای راه‌اندازی نمی‌شود"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"‏برای ارسال پیام ازطریق ماهواره، «پیام‌نگار Google» را به‌عنوان برنامه پیام‌رسانی پیش‌فرض تنظیم کنید"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"پیام‌رسانی ماهواره‌ای دردسترس نیست"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"برای بررسی دردسترس بودن پیام‌رسانی ماهواره‌ای در این کشور یا منطقه، تنظیمات مکان را فعال کنید"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"‫<xliff:g id="FINGERPRINT">%s</xliff:g> دیگر قابل‌شناسایی نیست."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"‫<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> و <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> دیگر قابل‌شناسایی نیستند."</string>

@@ -18,15 +18,20 @@ package com.android.systemui.unfold
 
 import android.content.Context
 import android.content.res.Resources
+import android.hardware.devicestate.DeviceStateManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
+import com.android.systemui.defaultDeviceState
+import com.android.systemui.deviceStateManager
 import com.android.systemui.display.data.repository.DeviceStateRepository
 import com.android.systemui.display.data.repository.DeviceStateRepository.DeviceState
+import com.android.systemui.foldedDeviceStateList
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.power.shared.model.WakeSleepReason
@@ -39,10 +44,10 @@ import com.android.systemui.unfold.DisplaySwitchLatencyTracker.Companion.FOLDABL
 import com.android.systemui.unfold.DisplaySwitchLatencyTracker.DisplaySwitchLatencyEvent
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
+import com.android.systemui.unfoldedDeviceState
 import com.android.systemui.util.animation.data.repository.AnimationStatusRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
@@ -63,6 +68,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -78,8 +84,14 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
     private val animationStatusRepository = mock<AnimationStatusRepository>()
     private val keyguardInteractor = mock<KeyguardInteractor>()
     private val displaySwitchLatencyLogger = mock<DisplaySwitchLatencyLogger>()
+    private val kosmos = Kosmos()
+    private val deviceStateManager = kosmos.deviceStateManager
+    private val closedDeviceState = kosmos.foldedDeviceStateList.first()
+    private val openDeviceState = kosmos.unfoldedDeviceState
+    private val defaultDeviceState = kosmos.defaultDeviceState
+    private val nonEmptyClosedDeviceStatesArray: IntArray =
+        IntArray(2) { closedDeviceState.identifier }
 
-    private val nonEmptyClosedDeviceStatesArray: IntArray = IntArray(2) { 0 }
     private val testDispatcher: TestDispatcher = StandardTestDispatcher()
     private val testScope: TestScope = TestScope(testDispatcher)
     private val isAsleep = MutableStateFlow(false)
@@ -95,9 +107,9 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
             configurationController,
             context,
             testScope.backgroundScope,
-            mock()
+            mock(),
         )
-    private val configurationInteractor = ConfigurationInteractor(configurationRepository)
+    private val configurationInteractor = ConfigurationInteractorImpl(configurationRepository)
     private val unfoldTransitionProgressProvider = FakeUnfoldTransitionProvider()
     private val unfoldTransitionRepository =
         UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
@@ -108,6 +120,10 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         whenever(mockContext.resources).thenReturn(resources)
+        whenever(mockContext.getSystemService(DeviceStateManager::class.java))
+            .thenReturn(deviceStateManager)
+        whenever(deviceStateManager.supportedDeviceStates)
+            .thenReturn(listOf(closedDeviceState, openDeviceState))
         whenever(resources.getIntArray(R.array.config_foldedDeviceStates))
             .thenReturn(nonEmptyClosedDeviceStatesArray)
         whenever(foldStateRepository.state).thenReturn(deviceState)
@@ -128,7 +144,8 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 testDispatcher.asExecutor(),
                 testScope.backgroundScope,
                 displaySwitchLatencyLogger,
-                systemClock
+                systemClock,
+                deviceStateManager,
             )
     }
 
@@ -157,7 +174,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 DisplaySwitchLatencyEvent(
                     latencyMs = 250,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN
+                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -182,7 +199,8 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                     testDispatcher.asExecutor(),
                     testScope.backgroundScope,
                     displaySwitchLatencyLogger,
-                    systemClock
+                    systemClock,
+                    deviceStateManager,
                 )
             areAnimationEnabled.emit(true)
 
@@ -208,7 +226,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 DisplaySwitchLatencyEvent(
                     latencyMs = 50,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN
+                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -241,7 +259,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 DisplaySwitchLatencyEvent(
                     latencyMs = 50,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN
+                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -271,7 +289,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                 DisplaySwitchLatencyEvent(
                     latencyMs = 200,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
-                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED
+                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -292,7 +310,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
             lastWakefulnessEvent.emit(
                 WakefulnessModel(
                     internalWakefulnessState = WakefulnessState.ASLEEP,
-                    lastSleepReason = WakeSleepReason.FOLD
+                    lastSleepReason = WakeSleepReason.FOLD,
                 )
             )
             screenPowerState.emit(ScreenPowerState.SCREEN_OFF)
@@ -308,7 +326,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                     latencyMs = 200,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                     toFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toState = SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__AOD
+                    toState = SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__AOD,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }
@@ -321,6 +339,8 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
             deviceState.emit(DeviceState.UNFOLDED)
             whenever(resources.getIntArray(R.array.config_foldedDeviceStates))
                 .thenReturn(IntArray(0))
+            whenever(deviceStateManager.supportedDeviceStates)
+                .thenReturn(listOf(defaultDeviceState))
 
             displaySwitchLatencyTracker.start()
             deviceState.emit(DeviceState.HALF_FOLDED)
@@ -352,7 +372,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
             lastWakefulnessEvent.emit(
                 WakefulnessModel(
                     internalWakefulnessState = WakefulnessState.ASLEEP,
-                    lastSleepReason = WakeSleepReason.FOLD
+                    lastSleepReason = WakeSleepReason.FOLD,
                 )
             )
             screenPowerState.emit(ScreenPowerState.SCREEN_OFF)
@@ -365,7 +385,7 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
                     latencyMs = 0,
                     fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
                     toFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
-                    toState = SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__SCREEN_OFF
+                    toState = SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__SCREEN_OFF,
                 )
             assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
         }

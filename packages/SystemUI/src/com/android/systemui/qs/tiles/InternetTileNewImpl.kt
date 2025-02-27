@@ -20,7 +20,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.widget.Switch
+import android.widget.Button
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
@@ -28,11 +28,14 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tiles.dialog.InternetDetailsViewModel
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
 import com.android.systemui.qs.tiles.dialog.WifiStateWorker
 import com.android.systemui.res.R
@@ -68,7 +71,7 @@ constructor(
         metricsLogger,
         statusBarStateController,
         activityStarter,
-        qsLogger
+        qsLogger,
     ) {
     private var model: InternetTileModel = viewModel.tileModel.value
 
@@ -90,6 +93,9 @@ constructor(
     }
 
     override fun handleClick(expandable: Expandable?) {
+        if (QsDetailedView.isEnabled) {
+            return
+        }
         mainHandler.post {
             internetDialogManager.create(
                 aboveStatusBar = true,
@@ -100,7 +106,11 @@ constructor(
         }
     }
 
-    override fun secondaryClick(expandable: Expandable?) {
+    override fun getDetailsViewModel(): TileDetailsViewModel {
+        return InternetDetailsViewModel { longClick(null) }
+    }
+
+    override fun handleSecondaryClick(expandable: Expandable?) {
         // TODO(b/358352265): Figure out the correct action for the secondary click
         // Toggle wifi
         wifiStateWorker.isWifiEnabled = !wifiStateWorker.isWifiEnabled
@@ -108,7 +118,7 @@ constructor(
 
     override fun handleUpdateState(state: QSTile.BooleanState, arg: Any?) {
         state.label = mContext.resources.getString(R.string.quick_settings_internet_label)
-        state.expandedAccessibilityClassName = Switch::class.java.name
+        state.expandedAccessibilityClassName = Button::class.java.name
 
         model.applyTo(state, mContext)
     }

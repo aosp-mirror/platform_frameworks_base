@@ -16,9 +16,13 @@
 
 package android.accounts;
 
+import static android.Manifest.permission.COPY_ACCOUNTS;
+import static android.Manifest.permission.REMOVE_ACCOUNTS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.admin.flags.Flags.FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED;
 
 import android.annotation.BroadcastBehavior;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,6 +30,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.Size;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
@@ -1312,7 +1317,8 @@ public class AccountManager {
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
      * <p>This method requires the caller to have a signature match with the
-     * authenticator that manages the specified account.
+     * authenticator that manages the specified account, be a profile owner or have the
+     * {@link android.Manifest.permission#REMOVE_ACCOUNTS} permission.
      *
      * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
      * MANAGE_ACCOUNTS permission is needed for those platforms. See docs for
@@ -1344,6 +1350,8 @@ public class AccountManager {
      * </ul>
      */
     @UserHandleAware
+    @RequiresPermission(value = REMOVE_ACCOUNTS, conditional = true)
+    @FlaggedApi(FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
     public AccountManagerFuture<Bundle> removeAccount(final Account account,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
         return removeAccountAsUser(account, activity, callback, handler, mContext.getUser());
@@ -2019,9 +2027,15 @@ public class AccountManager {
      * succeeded.
      * @hide
      */
+    @SuppressLint("SamShouldBeLast")
+    @NonNull
+    @SystemApi
+    @RequiresPermission(anyOf = {COPY_ACCOUNTS, INTERACT_ACROSS_USERS_FULL})
+    @FlaggedApi(FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
     public AccountManagerFuture<Boolean> copyAccountToUser(
-            final Account account, final UserHandle fromUser, final UserHandle toUser,
-            AccountManagerCallback<Boolean> callback, Handler handler) {
+            @NonNull final Account account, @NonNull final UserHandle fromUser,
+            @NonNull final UserHandle toUser, @Nullable AccountManagerCallback<Boolean> callback,
+            @Nullable Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (toUser == null || fromUser == null) {
             throw new IllegalArgumentException("fromUser and toUser cannot be null");

@@ -43,7 +43,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -337,10 +336,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         Drawable person =  mIconFactory.getBaseIconDrawable(mShortcutInfo);
         if (person == null) {
             person = mContext.getDrawable(R.drawable.ic_person).mutate();
-            TypedArray ta = mContext.obtainStyledAttributes(
-                    new int[]{com.android.internal.R.attr.materialColorPrimary});
-            int colorPrimary = ta.getColor(0, 0);
-            ta.recycle();
+            int colorPrimary = mContext.getColor(com.android.internal.R.color.materialColorPrimary);
             person.setTint(colorPrimary);
         }
         ImageView image = findViewById(R.id.conversation_icon);

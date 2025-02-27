@@ -18,6 +18,7 @@ package com.android.wm.shell.shared.pip;
 
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -63,8 +64,19 @@ public abstract class PipContentOverlay {
      * @param currentBounds {@link Rect} of the current animation bounds.
      * @param fraction progress of the animation ranged from 0f to 1f.
      */
-    public abstract void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
-            Rect currentBounds, float fraction);
+    public void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
+            Rect currentBounds, float fraction) {}
+
+    /**
+     * Animates the internal {@link #mLeash} by a given fraction for a config-at-end transition.
+     * @param atomicTx {@link SurfaceControl.Transaction} to operate, you should not explicitly
+     *                 call apply on this transaction, it should be applied on the caller side.
+     * @param scale scaling to apply onto the overlay.
+     * @param fraction progress of the animation ranged from 0f to 1f.
+     * @param endBounds the final bounds PiP is animating into.
+     */
+    public void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
+            float scale, float fraction, Rect endBounds) {}
 
     /** A {@link PipContentOverlay} uses solid color. */
     public static final class PipColorOverlay extends PipContentOverlay {
@@ -159,26 +171,34 @@ public abstract class PipContentOverlay {
 
         private final Context mContext;
         private final int mAppIconSizePx;
-        private final Rect mAppBounds;
+        /**
+         * The bounds of the application window relative to the task leash.
+         */
+        private final Rect mRelativeAppBounds;
         private final int mOverlayHalfSize;
         private final Matrix mTmpTransform = new Matrix();
         private final float[] mTmpFloat9 = new float[9];
 
         private Bitmap mBitmap;
 
-        public PipAppIconOverlay(Context context, Rect appBounds, Rect destinationBounds,
-                Drawable appIcon, int appIconSizePx) {
+        // TODO(b/356277166): add non-match_parent support on PIP2.
+        /**
+         * @param context the {@link Context} that contains the icon information
+         * @param relativeAppBounds the bounds of the app window frame relative to the task leash
+         * @param destinationBounds the bounds for rhe PIP task
+         * @param appIcon the app icon {@link Drawable}
+         * @param appIconSizePx the icon dimension in pixel
+         */
+        public PipAppIconOverlay(@NonNull Context context, @NonNull Rect relativeAppBounds,
+                @NonNull Rect destinationBounds, @NonNull Drawable appIcon, int appIconSizePx) {
             mContext = context;
             final int maxAppIconSizePx = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP,
                     MAX_APP_ICON_SIZE_DP, context.getResources().getDisplayMetrics());
             mAppIconSizePx = Math.min(maxAppIconSizePx, appIconSizePx);
 
-            final int overlaySize = getOverlaySize(appBounds, destinationBounds);
+            final int overlaySize = getOverlaySize(relativeAppBounds, destinationBounds);
             mOverlayHalfSize = overlaySize >> 1;
-
-            // When the activity is in the secondary split, make sure the scaling center is not
-            // offset.
-            mAppBounds = new Rect(0, 0, appBounds.width(), appBounds.height());
+            mRelativeAppBounds = relativeAppBounds;
 
             mBitmap = Bitmap.createBitmap(overlaySize, overlaySize, Bitmap.Config.ARGB_8888);
             prepareAppIconOverlay(appIcon);
@@ -195,9 +215,9 @@ public abstract class PipContentOverlay {
          * the overlay will be drawn with the max size of the start and end bounds in different
          * rotation.
          */
-        public static int getOverlaySize(Rect appBounds, Rect destinationBounds) {
-            final int appWidth = appBounds.width();
-            final int appHeight = appBounds.height();
+        public static int getOverlaySize(Rect overlayBounds, Rect destinationBounds) {
+            final int appWidth = overlayBounds.width();
+            final int appHeight = overlayBounds.height();
 
             return Math.max(Math.max(appWidth, appHeight),
                     Math.max(destinationBounds.width(), destinationBounds.height())) + 1;
@@ -219,15 +239,15 @@ public abstract class PipContentOverlay {
             mTmpTransform.reset();
             // In order for the overlay to always cover the pip window, the overlay may have a
             // size larger than the pip window. Make sure that app icon is at the center.
-            final int appBoundsCenterX = mAppBounds.centerX();
-            final int appBoundsCenterY = mAppBounds.centerY();
+            final int appBoundsCenterX = mRelativeAppBounds.centerX();
+            final int appBoundsCenterY = mRelativeAppBounds.centerY();
             mTmpTransform.setTranslate(
                     appBoundsCenterX - mOverlayHalfSize,
                     appBoundsCenterY - mOverlayHalfSize);
             // Scale back the bitmap with the pivot point at center.
             final float scale = Math.min(
-                    (float) mAppBounds.width() / currentBounds.width(),
-                    (float) mAppBounds.height() / currentBounds.height());
+                    (float) mRelativeAppBounds.width() / currentBounds.width(),
+                    (float) mRelativeAppBounds.height() / currentBounds.height());
             mTmpTransform.postScale(scale, scale, appBoundsCenterX, appBoundsCenterY);
             atomicTx.setMatrix(mLeash, mTmpTransform, mTmpFloat9)
                     .setAlpha(mLeash, fraction < 0.5f ? 0 : (fraction - 0.5f) * 2);

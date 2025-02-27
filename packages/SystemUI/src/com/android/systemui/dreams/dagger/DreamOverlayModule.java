@@ -30,8 +30,10 @@ import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayContainerView;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.touch.TouchInsetManager;
 
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 
@@ -53,6 +55,13 @@ public abstract class DreamOverlayModule {
             "dream_in_complications_translation_y";
     public static final String DREAM_IN_TRANSLATION_Y_DURATION =
             "dream_in_complications_translation_y_duration";
+
+    /**
+     * Window root view is used to send touches to the scene container. Declaring as optional as it
+     * may not be present on all SysUI variants.
+     */
+    @BindsOptionalOf
+    abstract WindowRootView bindWindowRootView();
 
     /** */
     @Provides

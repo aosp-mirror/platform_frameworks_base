@@ -24,6 +24,8 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.format.EnergyConsumerPowerStatsLayout;
 
+import java.util.Arrays;
+
 public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
 
     public interface Injector {
@@ -105,6 +107,7 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        Arrays.fill(mPowerStats.stats, 0);
         mPowerStats.uidStats.clear();
 
         if (!mConsumedEnergyHelper.collectConsumedEnergy(mPowerStats, mLayout)) {

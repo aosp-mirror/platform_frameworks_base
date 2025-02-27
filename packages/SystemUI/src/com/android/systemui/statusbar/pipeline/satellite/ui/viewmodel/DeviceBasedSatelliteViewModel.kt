@@ -77,75 +77,86 @@ constructor(
 
     // This adds a 10 seconds delay before showing the icon
     private val shouldShowIconForOosAfterHysteresis: StateFlow<Boolean> =
-        interactor.areAllConnectionsOutOfService
-            .flatMapLatest { shouldShow ->
-                if (shouldShow) {
-                    logBuffer.log(
-                        TAG,
-                        LogLevel.INFO,
-                        { long1 = DELAY_DURATION.inWholeSeconds },
-                        { "Waiting $long1 seconds before showing the satellite icon" }
+        if (interactor.isOpportunisticSatelliteIconEnabled) {
+                interactor.areAllConnectionsOutOfService
+                    .flatMapLatest { shouldShow ->
+                        if (shouldShow) {
+                            logBuffer.log(
+                                TAG,
+                                LogLevel.INFO,
+                                { long1 = DELAY_DURATION.inWholeSeconds },
+                                { "Waiting $long1 seconds before showing the satellite icon" },
+                            )
+                            delay(DELAY_DURATION)
+                            flowOf(true)
+                        } else {
+                            flowOf(false)
+                        }
+                    }
+                    .distinctUntilChanged()
+                    .logDiffsForTable(
+                        tableLog,
+                        columnPrefix = "vm",
+                        columnName = COL_VISIBLE_FOR_OOS,
+                        initialValue = false,
                     )
-                    delay(DELAY_DURATION)
-                    flowOf(true)
-                } else {
-                    flowOf(false)
-                }
+            } else {
+                flowOf(false)
             }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "vm",
-                columnName = COL_VISIBLE_FOR_OOS,
-                initialValue = false,
-            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     private val canShowIcon =
-        combine(
-            interactor.isSatelliteAllowed,
-            interactor.isSatelliteProvisioned,
-        ) { allowed, provisioned ->
+        combine(interactor.isSatelliteAllowed, interactor.isSatelliteProvisioned) {
+            allowed,
+            provisioned ->
             allowed && provisioned
         }
 
     private val showIcon =
-        canShowIcon
-            .flatMapLatest { canShow ->
-                if (!canShow) {
-                    flowOf(false)
-                } else {
-                    combine(
-                        shouldShowIconForOosAfterHysteresis,
-                        interactor.connectionState,
-                        interactor.isWifiActive,
-                        airplaneModeRepository.isAirplaneMode,
-                    ) { showForOos, connectionState, isWifiActive, isAirplaneMode ->
-                        if (isWifiActive || isAirplaneMode) {
-                            false
+        if (interactor.isOpportunisticSatelliteIconEnabled) {
+                canShowIcon
+                    .flatMapLatest { canShow ->
+                        if (!canShow) {
+                            flowOf(false)
                         } else {
-                            showForOos ||
-                                connectionState == SatelliteConnectionState.On ||
-                                connectionState == SatelliteConnectionState.Connected
+                            combine(
+                                shouldShowIconForOosAfterHysteresis,
+                                interactor.isAnyConnectionNtn,
+                                interactor.connectionState,
+                                interactor.isWifiActive,
+                                airplaneModeRepository.isAirplaneMode,
+                            ) { showForOos, anyNtn, connectionState, isWifiActive, isAirplaneMode ->
+                                // anyNtn means that there is some mobile network using ntn, and the
+                                // mobile icon will show its own satellite icon
+                                if (isWifiActive || isAirplaneMode || anyNtn) {
+                                    false
+                                } else {
+                                    // Show for out of service (which has a hysteresis), or ignore
+                                    // the hysteresis if we're already connected
+                                    showForOos ||
+                                        connectionState == SatelliteConnectionState.On ||
+                                        connectionState == SatelliteConnectionState.Connected
+                                }
+                            }
                         }
                     }
-                }
+                    .distinctUntilChanged()
+                    .logDiffsForTable(
+                        tableLog,
+                        columnPrefix = "vm",
+                        columnName = COL_VISIBLE,
+                        initialValue = false,
+                    )
+            } else {
+                flowOf(false)
             }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "vm",
-                columnName = COL_VISIBLE,
-                initialValue = false,
-            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val icon: StateFlow<Icon?> =
-        combine(
-                showIcon,
-                interactor.connectionState,
-                interactor.signalStrength,
-            ) { shouldShow, state, signalStrength ->
+        combine(showIcon, interactor.connectionState, interactor.signalStrength) {
+                shouldShow,
+                state,
+                signalStrength ->
                 if (shouldShow) {
                     SatelliteIconModel.fromConnectionState(state, signalStrength)
                 } else {
@@ -155,10 +166,7 @@ constructor(
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     override val carrierText: StateFlow<String?> =
-        combine(
-                showIcon,
-                interactor.connectionState,
-            ) { shouldShow, connectionState ->
+        combine(showIcon, interactor.connectionState) { shouldShow, connectionState ->
                 logBuffer.log(
                     TAG,
                     LogLevel.INFO,
@@ -166,7 +174,7 @@ constructor(
                         bool1 = shouldShow
                         str1 = connectionState.name
                     },
-                    { "Updating carrier text. shouldShow=$bool1 connectionState=$str1" }
+                    { "Updating carrier text. shouldShow=$bool1 connectionState=$str1" },
                 )
                 if (shouldShow) {
                     when (connectionState) {

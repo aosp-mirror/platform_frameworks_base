@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.ExternalVibration;
@@ -23,6 +24,7 @@ import android.os.ExternalVibrationScale;
 import android.os.IBinder;
 import android.os.VibrationAttributes;
 import android.os.vibrator.Flags;
+import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -31,24 +33,46 @@ import com.android.internal.util.FrameworkStatsLog;
  */
 final class ExternalVibrationSession extends Vibration
         implements VibrationSession, IBinder.DeathRecipient {
+    private static final String TAG = "ExternalVibrationSession";
 
+    /** Calls into VibratorManager functionality needed for playing an {@link ExternalVibration}. */
+    interface VibratorManagerHooks {
+
+        /**
+         * Tells the manager that the external vibration is finished and the vibrators can now be
+         * used for another vibration.
+         */
+        void onExternalVibrationReleased(long vibrationId);
+    }
+
+    private final long mSessionId = VibrationSession.nextSessionId();
     private final ExternalVibration mExternalVibration;
     private final ExternalVibrationScale mScale = new ExternalVibrationScale();
+    private final VibratorManagerHooks mManagerHooks;
 
-    @Nullable
-    private Runnable mBinderDeathCallback;
-
-    ExternalVibrationSession(ExternalVibration externalVibration) {
-        super(externalVibration.getToken(), new CallerInfo(
+    ExternalVibrationSession(ExternalVibration externalVibration,
+            VibratorManagerHooks managerHooks) {
+        super(new CallerInfo(
                 externalVibration.getVibrationAttributes(), externalVibration.getUid(),
                 // TODO(b/249785241): Find a way to link ExternalVibration to a VirtualDevice
                 // instead of using DEVICE_ID_INVALID here and relying on the UID checks.
                 Context.DEVICE_ID_INVALID, externalVibration.getPackage(), null));
         mExternalVibration = externalVibration;
+        mManagerHooks = managerHooks;
     }
 
     public ExternalVibrationScale getScale() {
         return mScale;
+    }
+
+    @Override
+    public long getSessionId() {
+        return mSessionId;
+    }
+
+    @Override
+    public long getCreateUptimeMillis() {
+        return stats.getCreateUptimeMillis();
     }
 
     @Override
@@ -57,19 +81,16 @@ final class ExternalVibrationSession extends Vibration
     }
 
     @Override
-    public VibrationSession.DebugInfo getDebugInfo() {
-        return new Vibration.DebugInfoImpl(getStatus(), stats, /* playedEffect= */ null,
-                /* originalEffect= */ null, mScale.scaleLevel, mScale.adaptiveHapticsScale,
-                callerInfo);
+    public IBinder getCallerToken() {
+        return mExternalVibration.getToken();
     }
 
     @Override
-    public VibrationStats.StatsInfo getStatsInfo(long completionUptimeMillis) {
-        return new VibrationStats.StatsInfo(
-                mExternalVibration.getUid(),
-                FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__EXTERNAL,
-                mExternalVibration.getVibrationAttributes().getUsage(), getStatus(), stats,
-                completionUptimeMillis);
+    public VibrationSession.DebugInfo getDebugInfo() {
+        return new Vibration.DebugInfoImpl(getStatus(), callerInfo,
+                FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__EXTERNAL, stats,
+                /* playedEffect= */ null, /* originalEffect= */ null, mScale.scaleLevel,
+                mScale.adaptiveHapticsScale);
     }
 
     @Override
@@ -82,46 +103,63 @@ final class ExternalVibrationSession extends Vibration
     }
 
     @Override
-    public void linkToDeath(Runnable callback) {
-        synchronized (this) {
-            mBinderDeathCallback = callback;
-        }
+    public boolean wasEndRequested() {
+        // End request is immediate, so just check if vibration has already ended.
+        return hasEnded();
+    }
+
+    @Override
+    public boolean linkToDeath() {
         mExternalVibration.linkToDeath(this);
+        return true;
     }
 
     @Override
     public void unlinkToDeath() {
         mExternalVibration.unlinkToDeath(this);
-        synchronized (this) {
-            mBinderDeathCallback = null;
-        }
     }
 
     @Override
     public void binderDied() {
-        synchronized (this) {
-            if (mBinderDeathCallback != null) {
-                mBinderDeathCallback.run();
-            }
-        }
+        Slog.d(TAG, "Binder died, cancelling external vibration...");
+        requestEnd(Status.CANCELLED_BINDER_DIED);
     }
 
     @Override
     void end(EndInfo endInfo) {
         super.end(endInfo);
         if (stats.hasStarted()) {
+            // Notify external client that this vibration should stop sending data to the vibrator.
+            mExternalVibration.mute();
             // External vibration doesn't have feedback from total time the vibrator was playing
             // with non-zero amplitude, so we use the duration between start and end times of
             // the vibration as the time the vibrator was ON, since the haptic channels are
             // open for this duration and can receive vibration waveform data.
             stats.reportVibratorOn(stats.getEndUptimeMillis() - stats.getStartUptimeMillis());
+            // Notify the manager that external client has released the vibrator control.
+            mManagerHooks.onExternalVibrationReleased(id);
         }
     }
 
     @Override
-    public void notifyEnded() {
-        // Notify external client that this vibration should stop sending data to the vibrator.
-        mExternalVibration.mute();
+    public void requestEnd(@NonNull Status status, @Nullable CallerInfo endedBy,
+            boolean immediate) {
+        end(new EndInfo(status, endedBy));
+    }
+
+    @Override
+    public void notifyVibratorCallback(int vibratorId, long vibrationId) {
+        // ignored, external control does not expect callbacks from the vibrator
+    }
+
+    @Override
+    public void notifySyncedVibratorsCallback(long vibrationId) {
+        // ignored, external control does not expect callbacks from the vibrator manager for sync
+    }
+
+    @Override
+    public void notifySessionCallback() {
+        // ignored, external control does not expect callbacks from the vibrator manager for session
     }
 
     boolean isHoldingSameVibration(ExternalVibration vib) {
@@ -142,5 +180,16 @@ final class ExternalVibrationSession extends Vibration
         }
         mScale.adaptiveHapticsScale = scaler.getAdaptiveHapticsScale(usage);
         stats.reportAdaptiveScale(mScale.adaptiveHapticsScale);
+    }
+
+    @Override
+    public String toString() {
+        return "ExternalVibrationSession{"
+                + "sessionId=" + mSessionId
+                + ", vibrationId=" + id
+                + ", callerInfo=" + callerInfo
+                + ", externalVibration=" + mExternalVibration
+                + ", scale=" + mScale
+                + '}';
     }
 }

@@ -12,7 +12,6 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.util.LatencyTracker
-import com.android.settingslib.Utils
 import com.android.systemui.navigationbar.gestural.BackPanelController.DelayedOnAnimationEndListener
 
 private const val TAG = "BackPanel"
@@ -46,7 +45,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
     private var arrowLength =
         AnimatedFloat(
             name = "arrowLength",
-            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS,
         )
 
     /**
@@ -56,7 +55,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
     var arrowHeight =
         AnimatedFloat(
             name = "arrowHeight",
-            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ROTATION_DEGREES
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ROTATION_DEGREES,
         )
 
     val backgroundWidth =
@@ -89,7 +88,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         AnimatedFloat(
             name = "scale",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_SCALE,
-            minimumValue = 0f
+            minimumValue = 0f,
         )
 
     val scalePivotX =
@@ -111,7 +110,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
             name = "arrowAlpha",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ALPHA,
             minimumValue = 0f,
-            maximumValue = 1f
+            maximumValue = 1f,
         )
 
     val backgroundAlpha =
@@ -119,7 +118,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
             name = "backgroundAlpha",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ALPHA,
             minimumValue = 0f,
-            maximumValue = 1f
+            maximumValue = 1f,
         )
 
     private val allAnimatedFloat =
@@ -133,7 +132,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
             scale,
             horizontalTranslation,
             arrowAlpha,
-            backgroundAlpha
+            backgroundAlpha,
         )
 
     /**
@@ -156,22 +155,20 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
                 Configuration.UI_MODE_NIGHT_YES
 
         arrowPaint.color =
-            Utils.getColorAttrDefaultColor(
-                context,
+            context.getColor(
                 if (isDeviceInNightTheme) {
-                    com.android.internal.R.attr.materialColorOnSecondaryContainer
+                    com.android.internal.R.color.materialColorOnSecondaryContainer
                 } else {
-                    com.android.internal.R.attr.materialColorOnSecondaryFixed
+                    com.android.internal.R.color.materialColorOnSecondaryFixed
                 }
             )
 
         arrowBackgroundPaint.color =
-            Utils.getColorAttrDefaultColor(
-                context,
+            context.getColor(
                 if (isDeviceInNightTheme) {
-                    com.android.internal.R.attr.materialColorSecondaryContainer
+                    com.android.internal.R.color.materialColorSecondaryContainer
                 } else {
-                    com.android.internal.R.attr.materialColorSecondaryFixedDim
+                    com.android.internal.R.color.materialColorSecondaryFixedDim
                 }
             )
     }
@@ -242,7 +239,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         fun stretchTo(
             stretchAmount: Float,
             startingVelocity: Float? = null,
-            springForce: SpringForce? = null
+            springForce: SpringForce? = null,
         ) {
             animation.apply {
                 startingVelocity?.let {
@@ -303,7 +300,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
 
     fun addAnimationEndListener(
         animatedFloat: AnimatedFloat,
-        endListener: DelayedOnAnimationEndListener
+        endListener: DelayedOnAnimationEndListener,
     ): Boolean {
         return if (animatedFloat.isRunning) {
             animatedFloat.addEndListener(endListener)
@@ -327,43 +324,43 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         backgroundHeightStretchAmount: Float,
         edgeCornerStretchAmount: Float,
         farCornerStretchAmount: Float,
-        fullyStretchedDimens: EdgePanelParams.BackIndicatorDimens
+        fullyStretchedDimens: EdgePanelParams.BackIndicatorDimens,
     ) {
         horizontalTranslation.stretchBy(
             finalPosition = fullyStretchedDimens.horizontalTranslation,
-            amount = horizontalTranslationStretchAmount
+            amount = horizontalTranslationStretchAmount,
         )
         arrowLength.stretchBy(
             finalPosition = fullyStretchedDimens.arrowDimens.length,
-            amount = arrowStretchAmount
+            amount = arrowStretchAmount,
         )
         arrowHeight.stretchBy(
             finalPosition = fullyStretchedDimens.arrowDimens.height,
-            amount = arrowStretchAmount
+            amount = arrowStretchAmount,
         )
         arrowAlpha.stretchBy(
             finalPosition = fullyStretchedDimens.arrowDimens.alpha,
-            amount = arrowAlphaStretchAmount
+            amount = arrowAlphaStretchAmount,
         )
         backgroundAlpha.stretchBy(
             finalPosition = fullyStretchedDimens.backgroundDimens.alpha,
-            amount = backgroundAlphaStretchAmount
+            amount = backgroundAlphaStretchAmount,
         )
         backgroundWidth.stretchBy(
             finalPosition = fullyStretchedDimens.backgroundDimens.width,
-            amount = backgroundWidthStretchAmount
+            amount = backgroundWidthStretchAmount,
         )
         backgroundHeight.stretchBy(
             finalPosition = fullyStretchedDimens.backgroundDimens.height,
-            amount = backgroundHeightStretchAmount
+            amount = backgroundHeightStretchAmount,
         )
         backgroundEdgeCornerRadius.stretchBy(
             finalPosition = fullyStretchedDimens.backgroundDimens.edgeCornerRadius,
-            amount = edgeCornerStretchAmount
+            amount = edgeCornerStretchAmount,
         )
         backgroundFarCornerRadius.stretchBy(
             finalPosition = fullyStretchedDimens.backgroundDimens.farCornerRadius,
-            amount = farCornerStretchAmount
+            amount = farCornerStretchAmount,
         )
     }
 
@@ -381,7 +378,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         arrowAlpha.stretchTo(
             stretchAmount = 0f,
             startingVelocity = startingVelocity,
-            springForce = springForce
+            springForce = springForce,
         )
     }
 
@@ -403,7 +400,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
     /** Updates resting arrow and background size not accounting for stretch */
     internal fun setRestingDimens(
         restingParams: EdgePanelParams.BackIndicatorDimens,
-        animate: Boolean = true
+        animate: Boolean = true,
     ) {
         horizontalTranslation.updateRestingPosition(restingParams.horizontalTranslation)
         scale.updateRestingPosition(restingParams.scale)
@@ -417,11 +414,11 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         backgroundHeight.updateRestingPosition(restingParams.backgroundDimens.height, animate)
         backgroundEdgeCornerRadius.updateRestingPosition(
             restingParams.backgroundDimens.edgeCornerRadius,
-            animate
+            animate,
         )
         backgroundFarCornerRadius.updateRestingPosition(
             restingParams.backgroundDimens.farCornerRadius,
-            animate
+            animate,
         )
     }
 
@@ -483,11 +480,11 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
                     topLeft = edgeCorner,
                     bottomLeft = edgeCorner,
                     topRight = farCorner,
-                    bottomRight = farCorner
+                    bottomRight = farCorner,
                 )
         canvas.drawPath(
             arrowBackground,
-            arrowBackgroundPaint.apply { alpha = (255 * backgroundAlpha.pos).toInt() }
+            arrowBackgroundPaint.apply { alpha = (255 * backgroundAlpha.pos).toInt() },
         )
 
         val dx = arrowLength.pos
@@ -498,7 +495,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         val arrowOffset = (backgroundWidth - dx) / 2
         canvas.translate(
             /* dx= */ arrowOffset,
-            /* dy= */ 0f /* pass 0 for the y position since the canvas was already translated */
+            /* dy= */ 0f, /* pass 0 for the y position since the canvas was already translated */
         )
 
         val arrowPointsAwayFromEdge = !arrowsPointLeft.xor(isLeftPanel)
@@ -532,7 +529,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         topLeft: Float = 0f,
         topRight: Float = 0f,
         bottomRight: Float = 0f,
-        bottomLeft: Float = 0f
+        bottomLeft: Float = 0f,
     ): Path =
         Path().apply {
             val corners =
@@ -544,7 +541,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
                     bottomRight,
                     bottomRight,
                     bottomLeft,
-                    bottomLeft
+                    bottomLeft,
                 )
             addRoundRect(this@toPathWithRoundCorners, corners, Path.Direction.CW)
         }

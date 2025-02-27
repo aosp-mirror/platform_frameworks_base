@@ -45,6 +45,8 @@ import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
@@ -85,6 +87,7 @@ public class DozeParameters implements
     private final BatteryController mBatteryController;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final DozeInteractor mDozeInteractor;
+    private final KeyguardTransitionInteractor mTransitionInteractor;
     private final FoldAodAnimationController mFoldAodAnimationController;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private final UserTracker mUserTracker;
@@ -134,6 +137,7 @@ public class DozeParameters implements
             StatusBarStateController statusBarStateController,
             UserTracker userTracker,
             DozeInteractor dozeInteractor,
+            KeyguardTransitionInteractor transitionInteractor,
             SecureSettings secureSettings) {
         mResources = resources;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
@@ -148,6 +152,7 @@ public class DozeParameters implements
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mUserTracker = userTracker;
         mDozeInteractor = dozeInteractor;
+        mTransitionInteractor = transitionInteractor;
         mSecureSettings = secureSettings;
 
         keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
@@ -353,6 +358,9 @@ public class DozeParameters implements
      * delayed for a few seconds. This might be useful to play animations without reducing FPS.
      */
     public boolean shouldDelayDisplayDozeTransition() {
+        if (mTransitionInteractor.getTransitionState().getValue().getTo() == KeyguardState.AOD) {
+            return true;
+        }
         return willAnimateFromLockScreenToAod()
                 || mScreenOffAnimationController.shouldDelayDisplayDozeTransition();
     }

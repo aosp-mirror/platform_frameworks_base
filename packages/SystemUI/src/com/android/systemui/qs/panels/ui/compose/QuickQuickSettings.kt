@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.util.fastMap
@@ -29,6 +31,7 @@ import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
 import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.Tile
+import com.android.systemui.qs.panels.ui.viewmodel.BounceableTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
 import com.android.systemui.qs.shared.ui.ElementKeys.toElementKey
 import com.android.systemui.res.R
@@ -38,16 +41,20 @@ fun SceneScope.QuickQuickSettings(
     viewModel: QuickQuickSettingsViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val sizedTiles by
-        viewModel.tileViewModels.collectAsStateWithLifecycle(initialValue = emptyList())
+
+    val sizedTiles = viewModel.tileViewModels
     val tiles = sizedTiles.fastMap { it.tile }
+    val bounceables = remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }
+    val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
 
     DisposableEffect(tiles) {
         val token = Any()
         tiles.forEach { it.startListening(token) }
         onDispose { tiles.forEach { it.stopListening(token) } }
     }
-    val columns by viewModel.columns.collectAsStateWithLifecycle()
+    val columns = viewModel.columns
+    var cellIndex = 0
     Box(modifier = modifier) {
         GridAnchor()
         VerticalSpannedGrid(
@@ -58,10 +65,18 @@ fun SceneScope.QuickQuickSettings(
             modifier = Modifier.sysuiResTag("qqs_tile_layout"),
         ) { spanIndex ->
             val it = sizedTiles[spanIndex]
+            val column = cellIndex % columns
+            cellIndex += it.width
             Tile(
                 tile = it.tile,
                 iconOnly = it.isIcon,
                 modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                squishiness = { squishiness },
+                coroutineScope = scope,
+                bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                tileHapticsViewModelFactoryProvider = viewModel.tileHapticsViewModelFactoryProvider,
+                // There should be no QuickQuickSettings when the details view is enabled.
+                detailsViewModel = null,
             )
         }
     }

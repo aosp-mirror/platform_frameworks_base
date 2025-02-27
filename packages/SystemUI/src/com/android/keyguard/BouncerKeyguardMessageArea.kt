@@ -25,7 +25,6 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.View
 import com.android.app.animation.Interpolators
-import com.android.settingslib.Utils
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.TITLE
 
 /** Displays security messages for the keyguard bouncer. */
@@ -71,12 +70,12 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun onThemeChanged() {
-        mDefaultColorState = getColorInStyle() ?: Utils.getColorAttr(context, TITLE)
+        mDefaultColorState = getColorInStyle() ?: ColorStateList.valueOf(context.getColor(TITLE))
         super.onThemeChanged()
     }
 
     override fun reloadColor() {
-        mDefaultColorState = getColorInStyle() ?: Utils.getColorAttr(context, TITLE)
+        mDefaultColorState = getColorInStyle() ?: ColorStateList.valueOf(context.getColor(TITLE))
         super.reloadColor()
     }
 

@@ -169,18 +169,21 @@ public final class UiccAccessRule implements Parcelable {
     }
 
     private final byte[] mCertificateHash;
+    private final int mCertificateHashHashCode;
     private final @Nullable String mPackageName;
     // This bit is not currently used, but reserved for future use.
     private final long mAccessType;
 
     public UiccAccessRule(byte[] certificateHash, @Nullable String packageName, long accessType) {
         this.mCertificateHash = certificateHash;
+        this.mCertificateHashHashCode = getCertificateHashHashCode(this.mCertificateHash);
         this.mPackageName = packageName;
         this.mAccessType = accessType;
     }
 
     UiccAccessRule(Parcel in) {
         mCertificateHash = in.createByteArray();
+        mCertificateHashHashCode = getCertificateHashHashCode(mCertificateHash);
         mPackageName = in.readString();
         mAccessType = in.readLong();
     }
@@ -247,7 +250,7 @@ public final class UiccAccessRule implements Parcelable {
     public int getCarrierPrivilegeStatus(Signature signature, String packageName) {
         byte[] certHash256 = getCertHash(signature, "SHA-256");
         // Check SHA-256 first as it's the new standard.
-        if (matches(certHash256, packageName)) {
+        if (hasMatchingCertificateHashAndPackageName(certHash256, packageName)) {
             return TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
         }
 
@@ -255,7 +258,7 @@ public final class UiccAccessRule implements Parcelable {
         // in the near future when GPD_SPE_068 fully replaces GPD_SPE_013.
         if (this.mCertificateHash.length == 20) {
             byte[] certHash = getCertHash(signature, "SHA-1");
-            if (matches(certHash, packageName)) {
+            if (hasMatchingCertificateHashAndPackageName(certHash, packageName)) {
                 return TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
             }
         }
@@ -267,13 +270,39 @@ public final class UiccAccessRule implements Parcelable {
      * Returns true if the given certificate and package name match this rule's values.
      * @hide
      */
-    public boolean matches(@Nullable String certHash, @Nullable String packageName) {
-        return matches(IccUtils.hexStringToBytes(certHash), packageName);
+    public boolean hasMatchingCertificateHashAndPackageName(
+            @Nullable String certHash, @Nullable String packageName) {
+        return hasMatchingCertificateHashAndPackageName(
+                IccUtils.hexStringToBytes(certHash), packageName);
     }
 
-    private boolean matches(byte[] certHash, String packageName) {
+    /**
+     * Returns true if the given certificate and package name match this rule's values.
+     * @hide
+     */
+    public boolean hasMatchingCertificateHashAndPackageName(
+            @Nullable byte[] certHash, @Nullable String packageName) {
         return certHash != null && Arrays.equals(this.mCertificateHash, certHash) &&
                 (TextUtils.isEmpty(this.mPackageName) || this.mPackageName.equals(packageName));
+    }
+
+    /**
+     * Returns true if the given certificate hash hash
+     * and package name both match this rules' values.
+     *
+     * @hide
+     */
+    public boolean hasMatchingCertificateHashHashAndPackageName(
+            int certHashHashCode, String packageName) {
+        return certHashHashCode == this.mCertificateHashHashCode
+                && (TextUtils.isEmpty(this.mPackageName) || this.mPackageName.equals(packageName));
+    }
+
+    /**
+     * @hide
+     */
+    public static int getCertificateHashHashCode(byte[] certHash) {
+        return Arrays.hashCode(certHash);
     }
 
     @Override

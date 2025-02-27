@@ -309,7 +309,7 @@ public class FingerprintEnrollClientTest {
         client.onEnrollResult(new Fingerprint("fingerprint", 1 /* faceId */, 20 /* deviceId */), 0);
 
         verify(mBiometricLogger).logOnEnrolled(anyInt(), anyLong(), anyBoolean(),
-                eq(BiometricsProtoEnums.ENROLLMENT_SOURCE_SUW));
+                eq(BiometricsProtoEnums.ENROLLMENT_SOURCE_SUW), eq(1));
     }
 
     private void showHideOverlay(

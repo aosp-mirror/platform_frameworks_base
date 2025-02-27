@@ -17,9 +17,12 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+
+import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -63,6 +66,37 @@ final class DisplayRotationImmersiveAppCompatPolicy {
         mDisplayRotation = displayRotation;
         mAppCompatConfiguration = appCompatConfiguration;
         mDisplayContent = displayContent;
+    }
+
+    /**
+     * Returns {@code true} if the orientation update should be skipped and it will update when
+     * transition is done. This is to keep the orientation which was preserved by
+     * {@link #isRotationLockEnforced} from being changed by a transient launch (i.e. recents).
+     */
+    boolean deferOrientationUpdate() {
+        if (mDisplayRotation.getUserRotation() != USER_ROTATION_FREE
+                || mDisplayRotation.getLastOrientation() != SCREEN_ORIENTATION_UNSPECIFIED) {
+            return false;
+        }
+        final WindowOrientationListener orientationListener =
+                mDisplayRotation.getOrientationListener();
+        if (orientationListener == null
+                || orientationListener.getProposedRotation() == mDisplayRotation.getRotation()) {
+            return false;
+        }
+        // The above conditions mean that isRotationLockEnforced might have taken effect:
+        // Auto-rotation is enabled and the proposed rotation is not applied.
+        // Then the update should defer until the transition idle to avoid disturbing animation.
+        if (!mDisplayContent.mTransitionController.hasTransientLaunch(mDisplayContent)) {
+            return false;
+        }
+        mDisplayContent.mTransitionController.mStateValidators.add(() -> {
+            if (!isRotationLockEnforcedLocked(orientationListener.getProposedRotation())) {
+                mDisplayContent.mWmService.updateRotation(false /* alwaysSendConfiguration */,
+                        false /* forceRelayout */);
+            }
+        });
+        return true;
     }
 
     /**

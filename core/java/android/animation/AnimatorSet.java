@@ -1227,7 +1227,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         }
 
         if (finished) {
-            endAnimation();
+            endAnimation(true /* fromLastFrame */);
             return true;
         }
         return false;
@@ -1442,6 +1442,12 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     }
 
     private void endAnimation() {
+        endAnimation(false /* fromLastFrame */);
+    }
+
+    private void endAnimation(boolean fromLastFrame) {
+        final boolean postNotifyEndListener = sPostNotifyEndListenerEnabled && mListeners != null
+                && fromLastFrame && mTotalDuration > 0;
         mStarted = false;
         mLastFrameTime = -1;
         mFirstFrame = -1;
@@ -1453,7 +1459,12 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
 
         // No longer receive callbacks
         removeAnimationCallback();
-        notifyEndListeners(mReversing);
+        notifyEndListenersFromEndAnimation(mReversing, postNotifyEndListener);
+    }
+
+    @Override
+    void completeEndAnimation(boolean isReversing, String notifyListenerTraceName) {
+        super.completeEndAnimation(isReversing, notifyListenerTraceName);
         removeAnimationEndListener();
         mSelfPulse = true;
         mReversing = false;

@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.IContentProvider;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.util.Log;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,6 +54,7 @@ import java.util.Map;
  * </div>
  */
 public class MockContentResolver extends ContentResolver {
+    private static final String TAG = "MockContentResolver";
     Map<String, ContentProvider> mProviders;
 
     /**
@@ -105,6 +107,7 @@ public class MockContentResolver extends ContentResolver {
         if (provider != null) {
             return provider.getIContentProvider();
         } else {
+            Log.w(TAG, "Provider does not exist: " + name);
             return null;
         }
     }

@@ -37,6 +37,7 @@ import android.telephony.TelephonyManager.EmergencyCallbackModeType;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.MediaQualityStatus;
+import android.telephony.satellite.NtnSignalStrength;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
@@ -1671,14 +1672,22 @@ public class PhoneStateListener {
         }
 
         /** @hide */
-        public final void onCallBackModeStarted(
-                @TelephonyManager.EmergencyCallbackModeType int type) {
+        public final void onCallbackModeStarted(
+                @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis,
+                int subId) {
             // not support. Can't override. Use TelephonyCallback.
         }
 
         /** @hide */
-        public final void onCallBackModeStopped(@EmergencyCallbackModeType int type,
-                @EmergencyCallbackModeStopReason int reason) {
+        public final void onCallbackModeRestarted(
+                @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis,
+                int subId) {
+            // not support. Can't override. Use TelephonyCallback.
+        }
+
+        /** @hide */
+        public final void onCallbackModeStopped(@EmergencyCallbackModeType int type,
+                @EmergencyCallbackModeStopReason int reason, int subId) {
             // not support. Can't override. Use TelephonyCallback.
         }
 
@@ -1691,6 +1700,25 @@ public class PhoneStateListener {
         }
 
         public final void onCarrierRoamingNtnEligibleStateChanged(boolean eligible) {
+            // not supported on the deprecated interface - Use TelephonyCallback instead
+        }
+
+        public final void onCarrierRoamingNtnAvailableServicesChanged(
+                @NetworkRegistrationInfo.ServiceType int[] availableServices) {
+            // not supported on the deprecated interface - Use TelephonyCallback instead
+        }
+
+        public final void onCarrierRoamingNtnSignalStrengthChanged(
+                @NonNull NtnSignalStrength ntnSignalStrength) {
+            // not supported on the deprecated interface - Use TelephonyCallback instead
+        }
+
+        public final void onSecurityAlgorithmsChanged(SecurityAlgorithmUpdate update) {
+            // not supported on the deprecated interface - Use TelephonyCallback instead
+        }
+
+        public final void onCellularIdentifierDisclosedChanged(
+                CellularIdentifierDisclosure disclosure) {
             // not supported on the deprecated interface - Use TelephonyCallback instead
         }
     }
