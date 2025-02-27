@@ -1883,6 +1883,42 @@ BootstrapMethods:
 InnerClasses:
   public static #x= #x of #x;          // Nested=class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested of class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
   public static final #x= #x of #x;    // Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester.class
+  Compiled from "TinyFrameworkMethodCallReplace.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ConstructorTester
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 1, attributes: 3
+Constant pool:
+{
+  public int i;
+    descriptor: I
+    flags: (0x0001) ACC_PUBLIC
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ConstructorTester(int);
+    descriptor: (I)V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=2, locals=2, args_size=2
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: aload_0
+         x: iload_1
+         x: putfield      #x                  // Field i:I
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester;
+            0      10     1     i   I
+}
+SourceFile: "TinyFrameworkMethodCallReplace.java"
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
+InnerClasses:
+  public static #x= #x of #x;           // ConstructorTester=class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester of class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo.class
   Compiled from "TinyFrameworkMethodCallReplace.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo
@@ -1891,7 +1927,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallR
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 0, methods: 3, attributes: 3
+  interfaces: 0, fields: 0, methods: 4, attributes: 3
 Constant pool:
 {
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo();
@@ -1937,10 +1973,28 @@ Constant pool:
         Start  Length  Slot  Name   Signature
             0       4     0     a   I
             0       4     1     b   I
+
+  public static com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ConstructorTester newConstructorTester(int);
+    descriptor: (I)Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: new           #x                 // class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester
+         x: dup
+         x: iload_0
+         x: iconst_1
+         x: iadd
+         x: invokespecial #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester."<init>":(I)V
+        x: areturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      11     0     i   I
 }
 SourceFile: "TinyFrameworkMethodCallReplace.java"
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
 InnerClasses:
+  public static #x= #x of #x;          // ConstructorTester=class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester of class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
   public static #x= #x of #x;          // ReplaceTo=class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo of class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace.class
   Compiled from "TinyFrameworkMethodCallReplace.java"
@@ -1950,7 +2004,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallR
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 0, methods: 5, attributes: 5
+  interfaces: 0, fields: 0, methods: 6, attributes: 5
 Constant pool:
 {
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace();
@@ -2008,6 +2062,21 @@ Constant pool:
          x: ireturn
       LineNumberTable:
 
+  public static com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ConstructorTester constructorReplaceTester(int);
+    descriptor: (I)Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester
+         x: dup
+         x: iload_0
+         x: invokespecial #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester."<init>":(I)V
+         x: areturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       9     0     i   I
+
   private static int originalAdd(int, int);
     descriptor: (II)I
     flags: (0x000a) ACC_PRIVATE, ACC_STATIC
@@ -2046,6 +2115,7 @@ RuntimeInvisibleAnnotations:
     android.hosttest.annotation.HostSideTestWholeClassKeep
 NestMembers:
   com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo
+  com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester
 BootstrapMethods:
   x: #x REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
     Method arguments:
@@ -2053,8 +2123,9 @@ BootstrapMethods:
       #x REF_invokeStatic com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace.lambda$nonStaticMethodCallReplaceTester$0:(Ljava/util/concurrent/atomic/AtomicBoolean;)V
       #x ()V
 InnerClasses:
+  public static #x= #x of #x;          // ConstructorTester=class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ConstructorTester of class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
   public static #x= #x of #x;          // ReplaceTo=class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo of class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
-  public static final #x= #x of #x;    // Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles
+  public static final #x= #x of #x;   // Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNative.class
   Compiled from "TinyFrameworkNative.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative

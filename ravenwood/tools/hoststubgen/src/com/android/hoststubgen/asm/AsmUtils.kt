@@ -268,15 +268,42 @@ fun writeByteCodeToReturn(methodDescriptor: String, writer: MethodVisitor) {
 }
 
 /**
+ * Write bytecode to pop the 2 uninitialized instances out of the stack
+ * after performing constructor redirection.
+ */
+fun adjustStackForConstructorRedirection(writer: MethodVisitor) {
+    // Stack: { uninitialized, uninitialized, obj }
+    writer.visitInsn(Opcodes.SWAP)
+    // Stack: { uninitialized, obj, uninitialized }
+    writer.visitInsn(Opcodes.POP)
+    // Stack: { uninitialized, obj }
+    writer.visitInsn(Opcodes.SWAP)
+    // Stack: { obj, uninitialized }
+    writer.visitInsn(Opcodes.POP)
+    // Stack: { obj }
+
+    // We end up with only the desired object on the stack
+}
+
+/**
  * Given a method descriptor, insert an [argType] as the first argument to it.
  */
 fun prependArgTypeToMethodDescriptor(methodDescriptor: String, classInternalName: String): String {
     val returnType = Type.getReturnType(methodDescriptor)
     val argTypes = Type.getArgumentTypes(methodDescriptor).toMutableList()
 
-    argTypes.add(0, Type.getType("L" + classInternalName + ";"))
+    argTypes.add(0, Type.getType("L$classInternalName;"))
 
     return Type.getMethodDescriptor(returnType, *argTypes.toTypedArray())
+}
+
+/**
+ * Given a method descriptor, change the return type to [classInternalName].
+ */
+fun changeMethodDescriptorReturnType(methodDescriptor: String, classInternalName: String): String {
+    val argTypes = Type.getArgumentTypes(methodDescriptor)
+    val returnType = Type.getType("L$classInternalName;")
+    return Type.getMethodDescriptor(returnType, *argTypes)
 }
 
 /**

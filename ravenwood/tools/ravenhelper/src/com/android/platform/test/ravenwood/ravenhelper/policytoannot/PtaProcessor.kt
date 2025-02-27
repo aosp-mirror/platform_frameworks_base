@@ -449,7 +449,6 @@ private class TextPolicyToAnnotationConverter(
             methodName: String,
             methodDesc: String,
             replaceSpec: TextFilePolicyMethodReplaceFilter.MethodCallReplaceSpec,
-            policy: FilterPolicyWithReason
         ) {
             // This can't be converted to an annotation.
             classHasMember = true
