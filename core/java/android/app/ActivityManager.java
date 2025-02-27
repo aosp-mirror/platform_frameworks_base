@@ -550,35 +550,35 @@ public class ActivityManager {
     public static final int START_ASSISTANT_NOT_ACTIVE_SESSION = FIRST_START_FATAL_ERROR_CODE + 11;
 
     /**
-     * Result for IActivityManaqer.startActivity: the activity was started
+     * Result for IActivityManager.startActivity: the activity was started
      * successfully as normal.
      * @hide
      */
     public static final int START_SUCCESS = FIRST_START_SUCCESS_CODE;
 
     /**
-     * Result for IActivityManaqer.startActivity: the caller asked that the Intent not
+     * Result for IActivityManager.startActivity: the caller asked that the Intent not
      * be executed if it is the recipient, and that is indeed the case.
      * @hide
      */
     public static final int START_RETURN_INTENT_TO_CALLER = FIRST_START_SUCCESS_CODE + 1;
 
     /**
-     * Result for IActivityManaqer.startActivity: activity was started or brought forward in an
+     * Result for IActivityManager.startActivity: activity was started or brought forward in an
      * existing task which was brought to the foreground.
      * @hide
      */
     public static final int START_TASK_TO_FRONT = FIRST_START_SUCCESS_CODE + 2;
 
     /**
-     * Result for IActivityManaqer.startActivity: activity wasn't really started, but
+     * Result for IActivityManager.startActivity: activity wasn't really started, but
      * the given Intent was given to the existing top activity.
      * @hide
      */
     public static final int START_DELIVERED_TO_TOP = FIRST_START_SUCCESS_CODE + 3;
 
     /**
-     * Result for IActivityManaqer.startActivity: request was canceled because
+     * Result for IActivityManager.startActivity: request was canceled because
      * app switches are temporarily canceled to ensure the user's last request
      * (such as pressing home) is performed.
      * @hide
@@ -586,7 +586,7 @@ public class ActivityManager {
     public static final int START_SWITCHES_CANCELED = FIRST_START_NON_FATAL_ERROR_CODE;
 
     /**
-     * Result for IActivityManaqer.startActivity: a new activity was attempted to be started
+     * Result for IActivityManager.startActivity: a new activity was attempted to be started
      * while in Lock Task Mode.
      * @hide
      */
@@ -594,55 +594,55 @@ public class ActivityManager {
             FIRST_START_NON_FATAL_ERROR_CODE + 1;
 
     /**
-     * Result for IActivityManaqer.startActivity: a new activity start was aborted. Never returned
+     * Result for IActivityManager.startActivity: a new activity start was aborted. Never returned
      * externally.
      * @hide
      */
     public static final int START_ABORTED = FIRST_START_NON_FATAL_ERROR_CODE + 2;
 
     /**
-     * Flag for IActivityManaqer.startActivity: do special start mode where
+     * Flag for IActivityManager.startActivity: do special start mode where
      * a new activity is launched only if it is needed.
      * @hide
      */
     public static final int START_FLAG_ONLY_IF_NEEDED = 1<<0;
 
     /**
-     * Flag for IActivityManaqer.startActivity: launch the app for
+     * Flag for IActivityManager.startActivity: launch the app for
      * debugging.
      * @hide
      */
     public static final int START_FLAG_DEBUG = 1<<1;
 
     /**
-     * Flag for IActivityManaqer.startActivity: launch the app for
+     * Flag for IActivityManager.startActivity: launch the app for
      * allocation tracking.
      * @hide
      */
     public static final int START_FLAG_TRACK_ALLOCATION = 1<<2;
 
     /**
-     * Flag for IActivityManaqer.startActivity: launch the app with
+     * Flag for IActivityManager.startActivity: launch the app with
      * native debugging support.
      * @hide
      */
     public static final int START_FLAG_NATIVE_DEBUGGING = 1<<3;
 
     /**
-     * Flag for IActivityManaqer.startActivity: launch the app for
+     * Flag for IActivityManager.startActivity: launch the app for
      * debugging and suspend threads.
      * @hide
      */
     public static final int START_FLAG_DEBUG_SUSPEND = 1 << 4;
 
     /**
-     * Result for IActivityManaqer.broadcastIntent: success!
+     * Result for IActivityManager.broadcastIntent: success!
      * @hide
      */
     public static final int BROADCAST_SUCCESS = 0;
 
     /**
-     * Result for IActivityManaqer.broadcastIntent: attempt to broadcast
+     * Result for IActivityManager.broadcastIntent: attempt to broadcast
      * a sticky intent without appropriate permission.
      * @hide
      */
@@ -656,20 +656,20 @@ public class ActivityManager {
     public static final int BROADCAST_FAILED_USER_STOPPED = -2;
 
     /**
-     * Type for IActivityManaqer.getIntentSender: this PendingIntent type is unknown.
+     * Type for IActivityManager.getIntentSender: this PendingIntent type is unknown.
      * @hide
      */
     public static final int INTENT_SENDER_UNKNOWN = 0;
 
     /**
-     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * Type for IActivityManager.getIntentSender: this PendingIntent is
      * for a sendBroadcast operation.
      * @hide
      */
     public static final int INTENT_SENDER_BROADCAST = 1;
 
     /**
-     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * Type for IActivityManager.getIntentSender: this PendingIntent is
      * for a startActivity operation.
      * @hide
      */
@@ -677,21 +677,21 @@ public class ActivityManager {
     public static final int INTENT_SENDER_ACTIVITY = 2;
 
     /**
-     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * Type for IActivityManager.getIntentSender: this PendingIntent is
      * for an activity result operation.
      * @hide
      */
     public static final int INTENT_SENDER_ACTIVITY_RESULT = 3;
 
     /**
-     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * Type for IActivityManager.getIntentSender: this PendingIntent is
      * for a startService operation.
      * @hide
      */
     public static final int INTENT_SENDER_SERVICE = 4;
 
     /**
-     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * Type for IActivityManager.getIntentSender: this PendingIntent is
      * for a startForegroundService operation.
      * @hide
      */
