@@ -334,16 +334,14 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     }
 
     private void commitUidPendingState(int uid) {
-        int pendingUidState = mPendingUidStates.get(uid,
-                mUidStates.get(uid, MIN_PRIORITY_UID_STATE));
-        int pendingCapability = mPendingCapability.get(uid,
-                mCapability.get(uid, PROCESS_CAPABILITY_NONE));
-        boolean pendingAppWidgetVisible = mPendingAppWidgetVisible.get(uid,
-                mAppWidgetVisible.get(uid, false));
 
         int uidState = mUidStates.get(uid, MIN_PRIORITY_UID_STATE);
         int capability = mCapability.get(uid, PROCESS_CAPABILITY_NONE);
         boolean appWidgetVisible = mAppWidgetVisible.get(uid, false);
+
+        int pendingUidState = mPendingUidStates.get(uid, uidState);
+        int pendingCapability = mPendingCapability.get(uid, capability);
+        boolean pendingAppWidgetVisible = mPendingAppWidgetVisible.get(uid, appWidgetVisible);
 
         boolean foregroundChange = uidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
                 != pendingUidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
