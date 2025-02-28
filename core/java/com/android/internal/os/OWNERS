@@ -2,6 +2,7 @@ per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 per-file *Cpu* = file:CPU_OWNERS
 per-file *Binder* = file:BINDER_OWNERS
+per-file *DebugStore* = file:DEBUG_STORE_OWNERS
 per-file *BinaryTransparency* = file:/core/java/android/transparency/OWNERS
 
 # BatteryStats
