@@ -1136,12 +1136,19 @@ public final class ActivityThread extends ClientTransactionHandler
                 CompatibilityInfo compatInfo, int resultCode, String data, Bundle extras,
                 boolean ordered, boolean assumeDelivered, int sendingUser, int processState,
                 int sendingUid, String sendingPackage) {
+            long debugStoreId = -1;
+            if (DEBUG_STORE_ENABLED) {
+                debugStoreId = DebugStore.recordScheduleReceiver();
+            }
             updateProcessState(processState, false);
             ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
                     ordered, false, assumeDelivered, mAppThread.asBinder(), sendingUser,
                     sendingUid, sendingPackage);
             r.info = info;
             sendMessage(H.RECEIVER, r);
+            if (DEBUG_STORE_ENABLED) {
+                DebugStore.recordEventEnd(debugStoreId);
+            }
         }
 
         public final void scheduleReceiverList(List<ReceiverInfo> info) throws RemoteException {
@@ -1485,6 +1492,10 @@ public final class ActivityThread extends ClientTransactionHandler
                 boolean sticky, boolean assumeDelivered, int sendingUser, int processState,
                 int sendingUid, String sendingPackage)
                 throws RemoteException {
+            long debugStoreId = -1;
+            if (DEBUG_STORE_ENABLED) {
+                debugStoreId = DebugStore.recordScheduleRegisteredReceiver();
+            }
             updateProcessState(processState, false);
 
             // We can't modify IIntentReceiver due to UnsupportedAppUsage, so
@@ -1508,6 +1519,9 @@ public final class ActivityThread extends ClientTransactionHandler
                 }
                 receiver.performReceive(intent, resultCode, dataStr, extras, ordered, sticky,
                         sendingUser);
+            }
+            if (DEBUG_STORE_ENABLED) {
+                DebugStore.recordEventEnd(debugStoreId);
             }
         }
 
@@ -2496,8 +2510,15 @@ public final class ActivityThread extends ClientTransactionHandler
             switch (msg.what) {
                 case BIND_APPLICATION:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "bindApplication");
+                    if (DEBUG_STORE_ENABLED) {
+                        debugStoreId =
+                                DebugStore.recordHandleBindApplication();
+                    }
                     AppBindData data = (AppBindData)msg.obj;
                     handleBindApplication(data);
+                    if (DEBUG_STORE_ENABLED) {
+                        DebugStore.recordEventEnd(debugStoreId);
+                    }
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case EXIT_APPLICATION:
@@ -2520,7 +2541,8 @@ public final class ActivityThread extends ClientTransactionHandler
                     ReceiverData receiverData = (ReceiverData) msg.obj;
                     if (DEBUG_STORE_ENABLED) {
                         debugStoreId =
-                                DebugStore.recordBroadcastHandleReceiver(receiverData.intent);
+                            DebugStore.recordBroadcastReceive(
+                                receiverData.intent, System.identityHashCode(receiverData));
                     }
 
                     try {
