@@ -312,7 +312,7 @@ private:
     };
 
     // Need at least 4 because we do quad buffer. Add a few more for good measure.
-    RingBuffer<SwapHistory, 7> mSwapHistory;
+    RingBuffer<SwapHistory, 8> mSwapHistory;
     // Frame numbers start at 1, 0 means uninitialized
     uint64_t mFrameNumber = 0;
     int64_t mDamageId = 0;

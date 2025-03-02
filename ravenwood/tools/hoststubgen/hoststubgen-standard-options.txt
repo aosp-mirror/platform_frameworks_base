@@ -20,6 +20,9 @@
 --keep-class-annotation
     android.hosttest.annotation.HostSideTestWholeClassKeep
 
+--partially-allowed-annotation
+    android.hosttest.annotation.HostSideTestPartiallyAllowlisted
+
 --throw-annotation
     android.hosttest.annotation.HostSideTestThrow
 

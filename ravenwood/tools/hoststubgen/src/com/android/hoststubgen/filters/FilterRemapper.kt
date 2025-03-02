@@ -15,6 +15,7 @@
  */
 package com.android.hoststubgen.filters
 
+import com.android.hoststubgen.log
 import org.objectweb.asm.commons.Remapper
 
 /**
@@ -23,19 +24,25 @@ import org.objectweb.asm.commons.Remapper
 class FilterRemapper(val filter: OutputFilter) : Remapper() {
     private val cache = mutableMapOf<String, String>()
 
-    override fun mapType(typeInternalName: String?): String? {
+
+    override fun map(typeInternalName: String?): String? {
         if (typeInternalName == null) {
             return null
         }
 
         cache[typeInternalName]?.let {
+            // log.d("Cached rename from $typeInternalName to $it")
             return it
         }
 
-        var mapped = filter.remapType(typeInternalName) ?: typeInternalName
+        var mapped = filter.remapType(typeInternalName)
+        if (mapped != null) {
+            log.d("Renaming type $typeInternalName to $mapped")
+        } else {
+            // log.d("Not renaming type $typeInternalName")
+        }
+        mapped = mapped ?: typeInternalName
         cache[typeInternalName] = mapped
         return mapped
     }
-
-    // TODO Do we need to implement mapPackage(), etc too?
 }

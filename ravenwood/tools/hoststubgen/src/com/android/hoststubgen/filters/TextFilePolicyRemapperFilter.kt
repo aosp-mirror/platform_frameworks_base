@@ -15,7 +15,6 @@
  */
 package com.android.hoststubgen.filters
 
-import com.android.hoststubgen.log
 import java.util.regex.Pattern
 
 /**
@@ -34,17 +33,12 @@ class TextFilePolicyRemapperFilter(
         val typeInternalNamePrefix: String,
     )
 
-    private val cache = mutableMapOf<String, String>()
-
     override fun remapType(className: String): String? {
-        var mapped: String = className
         typeRenameSpecs.forEach {
             if (it.typeInternalNamePattern.matcher(className).matches()) {
-                mapped = it.typeInternalNamePrefix + className
-                log.d("Renaming type $className to $mapped")
+                return it.typeInternalNamePrefix + className
             }
         }
-        cache[className] = mapped
-        return mapped
+        return null
     }
 }

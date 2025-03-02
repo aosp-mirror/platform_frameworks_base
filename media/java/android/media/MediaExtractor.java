@@ -375,6 +375,9 @@ public final class MediaExtractor {
     /**
      * Extract DRM initialization data if it exists
      *
+     * <p>If the media contains a PSSH box, only PSSH version 0 is supported. The result for media
+     * with other PSSH versions is undefined.
+     *
      * @return DRM initialization data in the content, or {@code null}
      * if no recognizable DRM format is found;
      * @see DrmInitData
@@ -460,6 +463,10 @@ public final class MediaExtractor {
 
     /**
      * Get the PSSH info if present.
+     *
+     * <p>This method only supports version 0 PSSH boxes. The result for other versions is
+     * undefined.
+     *
      * @return a map of uuid-to-bytes, with the uuid specifying
      * the crypto scheme, and the bytes being the data specific to that scheme.
      * This can be {@code null} if the source does not contain PSSH info.

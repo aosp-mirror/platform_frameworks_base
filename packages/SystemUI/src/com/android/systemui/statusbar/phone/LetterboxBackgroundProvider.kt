@@ -23,7 +23,6 @@ import android.os.Handler
 import android.os.RemoteException
 import android.view.IWindowManager
 import com.android.systemui.CoreStartable
-import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -40,7 +39,7 @@ constructor(
     @Background private val backgroundExecutor: Executor,
     private val wallpaperManager: WallpaperManager,
     @Main private val mainHandler: Handler,
-) : CoreStartable, Dumpable {
+) : CoreStartable {
     @ColorInt
     var letterboxBackgroundColor: Int = Color.BLACK
         private set

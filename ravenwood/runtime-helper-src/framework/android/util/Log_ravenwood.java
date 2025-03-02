@@ -21,7 +21,6 @@ import android.util.Log.Level;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.RuntimeInit;
 import com.android.ravenwood.RavenwoodRuntimeNative;
-import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
@@ -164,7 +163,7 @@ public class Log_ravenwood {
      * Return the "real" {@code System.out} if it's been swapped by {@code RavenwoodRuleImpl}, so
      * that we don't end up in a recursive loop.
      */
-    private static PrintStream getRealOut() {
+    public static PrintStream getRealOut() {
         if (RuntimeInit.sOut$ravenwood != null) {
             return RuntimeInit.sOut$ravenwood;
         } else {

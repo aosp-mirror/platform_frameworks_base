@@ -26,10 +26,12 @@ import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class RavenwoodCommonUtils {
@@ -328,5 +330,71 @@ public class RavenwoodCommonUtils {
     @Nullable
     public static <T> T withDefault(@Nullable T value, @Nullable T def) {
         return value != null ? value : def;
+    }
+
+    /**
+     * Utility for calling a method with reflections. Used to call a method by name.
+     * Note, this intentionally does _not_ support non-public methods, as we generally
+     * shouldn't violate java visibility in ravenwood.
+     *
+     * @param <TTHIS> class owning the method.
+     */
+    public static class ReflectedMethod<TTHIS> {
+        private final Class<TTHIS> mThisClass;
+        private final Method mMethod;
+
+        private ReflectedMethod(Class<TTHIS> thisClass, Method method) {
+            mThisClass = thisClass;
+            mMethod = method;
+        }
+
+        /** Factory method. */
+        @SuppressWarnings("unchecked")
+        public static <TTHIS> ReflectedMethod<TTHIS> reflectMethod(
+                @NonNull Class<TTHIS> clazz, @NonNull String methodName,
+                @NonNull Class<?>... argTypes) {
+            try {
+                return new ReflectedMethod(clazz, clazz.getMethod(methodName, argTypes));
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Factory method. */
+        @SuppressWarnings("unchecked")
+        public static <TTHIS> ReflectedMethod<TTHIS> reflectMethod(
+                @NonNull String className, @NonNull String methodName,
+                @NonNull Class<?>... argTypes) {
+            try {
+                return reflectMethod((Class<TTHIS>) Class.forName(className), methodName, argTypes);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Call the instance method */
+        @SuppressWarnings("unchecked")
+        public <RET> RET call(@NonNull TTHIS thisObject, @NonNull Object... args) {
+            try {
+                return (RET) mMethod.invoke(Objects.requireNonNull(thisObject), args);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Call the static method */
+        @SuppressWarnings("unchecked")
+        public <RET> RET callStatic(@NonNull Object... args) {
+            try {
+                return (RET) mMethod.invoke(null, args);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /** Handy method to create an array */
+    public static <T> T[] arr(@NonNull T... objects) {
+        return objects;
     }
 }
