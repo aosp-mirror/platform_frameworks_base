@@ -33,9 +33,6 @@ android_test {
         "test-apps/DisplayManagerTestApp/src/**/*.java",
     ],
 
-    kotlincflags: [
-        "-Werror",
-    ],
     static_libs: [
         "a11ychecker",
         "aatf",

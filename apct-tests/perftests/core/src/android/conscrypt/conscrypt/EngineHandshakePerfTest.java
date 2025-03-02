@@ -87,11 +87,13 @@ public final class EngineHandshakePerfTest {
         }
     }
 
+
     public Collection getParams() {
         final List<Object[]> params = new ArrayList<>();
         for (BufferType bufferType : BufferType.values()) {
-            params.add(new Object[] {new Config(bufferType,
-                "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", 100)});
+            for (String cipher : ConscryptParams.ciphers) {
+                params.add(new Object[] {new Config(bufferType, cipher, 100)});
+            }
         }
         return params;
     }

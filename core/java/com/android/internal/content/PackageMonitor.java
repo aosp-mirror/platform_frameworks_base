@@ -36,6 +36,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.WeaklyReferencedCallback;
 import com.android.internal.os.BackgroundThread;
 
 import java.lang.ref.WeakReference;
@@ -46,6 +47,7 @@ import java.util.concurrent.Executor;
  * Helper class for monitoring the state of packages: adding, removing,
  * updating, and disappearing and reappearing on the SD card.
  */
+@WeaklyReferencedCallback
 public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     static final String TAG = "PackageMonitor";
 

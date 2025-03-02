@@ -22,6 +22,7 @@ import android.content.Context
 import android.graphics.drawable.Icon
 import android.media.session.MediaController
 import android.media.session.PlaybackState
+import android.os.BadParcelableException
 import android.util.Log
 import com.android.systemui.Flags.mediaControlsPostsOptimization
 import com.android.systemui.biometrics.Utils.toBitmap
@@ -109,7 +110,12 @@ private fun areCustomActionsEqual(
     }
     if (firstAction.extras != null) {
         firstAction.extras.keySet().forEach { key ->
-            if (firstAction.extras[key] != secondAction.extras[key]) {
+            try {
+                if (firstAction.extras[key] != secondAction.extras[key]) {
+                    return false
+                }
+            } catch (e: BadParcelableException) {
+                Log.e(TAG, "Cannot unparcel extras", e)
                 return false
             }
         }

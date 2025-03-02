@@ -23,12 +23,9 @@ import static org.junit.Assume.assumeTrue;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Bundle;
 import android.platform.test.annotations.RavenwoodTestRunnerInitializing;
 import android.platform.test.annotations.internal.InnerRunner;
 import android.util.Log;
-
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
@@ -285,11 +282,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
     private boolean onBefore(Description description, Scope scope, Order order) {
         Log.v(TAG, "onBefore: description=" + description + ", " + scope + ", " + order);
 
-        if (scope == Scope.Instance && order == Order.Outer) {
-            // Start of a test method.
-            mState.enterTestMethod(description);
-        }
-
         final var classDescription = getDescription();
 
         // Class-level annotations are checked by the runner already, so we only check
@@ -299,6 +291,12 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
                 return false;
             }
         }
+
+        if (scope == Scope.Instance && order == Order.Outer) {
+            // Start of a test method.
+            mState.enterTestMethod(description);
+        }
+
         return true;
     }
 
@@ -314,8 +312,7 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
 
         if (scope == Scope.Instance && order == Order.Outer) {
             // End of a test method.
-            mState.exitTestMethod();
-
+            mState.exitTestMethod(description);
         }
 
         // If RUN_DISABLED_TESTS is set, and the method did _not_ throw, make it an error.

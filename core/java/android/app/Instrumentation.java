@@ -190,6 +190,7 @@ public class Instrumentation {
      * @param arguments Any additional arguments that were supplied when the 
      *                  instrumentation was started.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public void onCreate(Bundle arguments) {
     }
 

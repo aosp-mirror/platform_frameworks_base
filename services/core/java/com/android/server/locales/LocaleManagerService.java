@@ -48,7 +48,6 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
-import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FrameworkStatsLog;
@@ -101,7 +100,6 @@ public class LocaleManagerService extends SystemService {
 
     private LocaleManagerBackupHelper mBackupHelper;
 
-    @KeepForWeakReference
     private final PackageMonitor mPackageMonitor;
 
     private final Object mWriteLock = new Object();

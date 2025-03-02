@@ -1,6 +1,5 @@
 mattgilbride@google.com
 azharaa@google.com
-jsharkey@google.com
 
 per-file *CallingSettingsNonUserGetterMethods* = file:/packages/SettingsProvider/OWNERS
 per-file *RegisterReceiverFlagDetector* = jacobhobbie@google.com

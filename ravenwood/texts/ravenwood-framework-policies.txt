@@ -50,8 +50,10 @@ class android.net.UriCodec keepclass  # no-pta
 class android.telephony.PinResult keepclass  # no-pta
 
 # Just enough to support mocking, no further functionality
-class android.content.BroadcastReceiver keep  # no-pta
-    method <init> ()V keep
+class android.content.BroadcastReceiver allow-annotation
+    method <init> ()V allow-annotation
+
+# TODO: Convert the following policies to "allow-annotation".
 class android.content.Context keep  # no-pta
     method <init> ()V keep
     method getSystemService (Ljava/lang/Class;)Ljava/lang/Object; keep  # no-pta
@@ -63,3 +65,22 @@ class android.text.ClipboardManager keep  # no-pta
 # Just enough to allow ResourcesManager to run
 class android.hardware.display.DisplayManagerGlobal keep # no-pta
     method getInstance ()Landroid/hardware/display/DisplayManagerGlobal; ignore # no-pta
+
+# Bare minimum to support running ImageDecoderTest
+class android.graphics.drawable.Drawable$ConstantState keepclass # no-pta
+class android.graphics.drawable.BitmapDrawable$BitmapState keepclass # no-pta
+class android.graphics.drawable.BitmapDrawable keep # no-pta
+    method <init> (Landroid/content/res/Resources;Landroid/graphics/Bitmap;)V keep
+    method init * keep
+    method updateLocalState * keep
+    method computeBitmapSize * keep
+    method getIntrinsicWidth * keep
+    method getIntrinsicHeight * keep
+    method getBitmap * keep
+class android.graphics.drawable.Drawable keep # no-pta
+    method <init> ()V keep
+    method resolveDensity * keep
+    method updateBlendModeFilter * ignore
+
+class android.os.StrictMode keep # no-pta
+    method noteSlowCall (Ljava/lang/String;)V ignore

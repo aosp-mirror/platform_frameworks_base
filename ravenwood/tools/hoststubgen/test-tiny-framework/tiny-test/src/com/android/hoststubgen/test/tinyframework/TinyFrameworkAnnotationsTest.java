@@ -19,6 +19,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 
+import com.android.hoststubgen.test.tinyframework.TinyFrameworkPartiallyAllowlisted.PartiallyAllowlisted;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -60,5 +62,20 @@ public class TinyFrameworkAnnotationsTest {
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("not yet supported");
         tfc.unsupportedMethod();
+    }
+
+    @Test
+    public void testPartiallyAllowed() {
+        assertThat(PartiallyAllowlisted.foo2(1)).isEqualTo(3);
+        assertThrows(NoSuchMethodError.class, () -> PartiallyAllowlisted.foo1(1));
+
+        // Just make sure the following classes don't exist.
+        assertThrows(ClassNotFoundException.class,
+                () -> Class.forName("com.android.hoststubgen.test.tinyframework"
+                        + ".TinyFrameworkPartiallyAllowlisted.PartialWithWholeClass_bad"));
+        assertThrows(ClassNotFoundException.class,
+                () -> Class.forName("com.android.hoststubgen.test.tinyframework"
+                        + ".TinyFrameworkPartiallyAllowlisted.PartiallyAllowlistedWithoutAnnot_bad"
+                ));
     }
 }

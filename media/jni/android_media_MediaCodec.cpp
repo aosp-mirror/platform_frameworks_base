@@ -2990,11 +2990,16 @@ static void extractMemoryFromContext(
         }
         *memory = context->toHidlMemory();
     }
-    if (context->mBlock == nullptr || context->mReadWriteMapping == nullptr) {
-        ALOGW("extractMemoryFromContext: Cannot extract memory as C2Block is not created/mapped");
+    if (context->mBlock == nullptr) {
+        // this should be ok as we may only have IMemory/hidlMemory
+        // e.g. video codecs may only have IMemory and no mBlock
         return;
     }
-    if (context->mReadWriteMapping->error() != C2_OK) {
+
+    // if we have mBlock and memory, then we will copy data from mBlock to hidlMemory
+    // e.g. audio codecs may only have mBlock and wanted to decrypt using hidlMemory
+    // and also wanted to re-use mBlock
+    if (context->mReadWriteMapping == nullptr || context->mReadWriteMapping->error() != C2_OK) {
         ALOGW("extractMemoryFromContext: failed to map C2Block (%d)",
                 context->mReadWriteMapping->error());
         return;

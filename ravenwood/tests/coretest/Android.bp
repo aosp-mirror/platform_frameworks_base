@@ -33,3 +33,34 @@ android_ravenwood_test {
     },
     auto_gen_config: true,
 }
+
+// Same as RavenwoodCoreTest, but it excludes tests using platform-parametric-runner-lib,
+// because that modules has too many dependencies and slow to build incrementally.
+android_ravenwood_test {
+    name: "RavenwoodCoreTest-light",
+
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+
+        // This library should be removed by Ravenizer
+        "mockito-target-minus-junit4",
+    ],
+    libs: [
+        // We access internal private classes
+        "ravenwood-junit-impl",
+    ],
+    srcs: [
+        "test/**/*.java",
+        "test/**/*.kt",
+    ],
+
+    exclude_srcs: [
+        "test/com/android/ravenwoodtest/runnercallbacktests/*",
+    ],
+    ravenizer: {
+        strip_mockito: true,
+    },
+    auto_gen_config: true,
+}

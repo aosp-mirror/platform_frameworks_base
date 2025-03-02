@@ -35,7 +35,7 @@ set -e
 # We add this line to each methods found.
 # Note, if we used a single @, that'd be handled as an at file. Use
 # the double-at instead.
-annotation="@@android.platform.test.annotations.DisabledOnRavenwood"
+annotation="@@android.platform.test.annotations.DisabledOnRavenwood(reason = \"bulk-disabled by script\")"
 while getopts "t:" opt; do
 case "$opt" in
     t)
