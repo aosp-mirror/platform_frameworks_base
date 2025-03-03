@@ -49,8 +49,8 @@ class DpOffsetSubject(metadata: FailureMetadata, private val actual: DpOffset) :
         val DefaultTolerance = Dp(.5f)
 
         fun dpOffsets() =
-            Factory<DpOffsetSubject, DpOffset> { metadata, actual ->
-                DpOffsetSubject(metadata, actual)
+            Factory { metadata, actual: DpOffset? ->
+                DpOffsetSubject(metadata, actual!!)
             }
     }
 }
