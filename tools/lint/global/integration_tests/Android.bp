@@ -65,9 +65,4 @@ python_test_host {
         "AndroidGlobalLintTestNoAidl_py",
         "AndroidGlobalLintTestMissingAnnotation_py",
     ],
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }

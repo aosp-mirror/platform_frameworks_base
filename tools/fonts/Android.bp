@@ -23,11 +23,6 @@ package {
 
 python_defaults {
     name: "fonts_python_defaults",
-    version: {
-        py3: {
-            embedded_launcher: true,
-        },
-    },
 }
 
 python_binary_host {
