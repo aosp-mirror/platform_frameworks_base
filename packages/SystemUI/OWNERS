@@ -125,3 +125,6 @@ silvajordan@google.com
 uwaisashraf@google.com
 vinayjoglekar@google.com
 willosborn@google.com
+
+per-file *.mk,{**/,}Android.bp = set noparent
+per-file *.mk,{**/,}Android.bp = file:BUILD_OWNERS
