@@ -22,6 +22,6 @@ enum class FeatureFlag(val onByDefault: Boolean, val desc: String = "") {
     CONST_DEFS(true, "@Int/StringDef's based on declared static constants"),
     FOR_EACH_FIELD(false, "forEachField((name, value) -> ...)");
 
-    val kebabCase = name.toLowerCase().replace("_", "-")
-    val upperCamelCase = name.split("_").map { it.toLowerCase().capitalize() }.joinToString("")
+    val kebabCase = name.lowercase().replace("_", "-")
+    val upperCamelCase = name.split("_").map { it.lowercase().capitalize() }.joinToString("")
 }
