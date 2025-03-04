@@ -158,6 +158,7 @@ public class SettingsState {
 
     private static final List<String> sAconfigTextProtoFilesOnDevice = List.of(
             "/system/etc/aconfig_flags.pb",
+            "/system_ext/etc/aconfig_flags.pb",
             "/product/etc/aconfig_flags.pb",
             "/vendor/etc/aconfig_flags.pb");
 
