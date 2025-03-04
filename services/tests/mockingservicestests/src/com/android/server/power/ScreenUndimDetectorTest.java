@@ -23,7 +23,6 @@ import static android.hardware.display.DisplayManagerInternal.DisplayPowerReques
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 import static android.view.Display.DEFAULT_DISPLAY_GROUP;
 
-import static com.android.server.power.ScreenUndimDetector.DEFAULT_MAX_DURATION_BETWEEN_UNDIMS_MILLIS;
 import static com.android.server.power.ScreenUndimDetector.KEY_KEEP_SCREEN_ON_ENABLED;
 import static com.android.server.power.ScreenUndimDetector.KEY_MAX_DURATION_BETWEEN_UNDIMS_MILLIS;
 import static com.android.server.power.ScreenUndimDetector.KEY_UNDIMS_REQUIRED;
@@ -48,6 +47,7 @@ import org.junit.runners.JUnit4;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for {@link com.android.server.power.ScreenUndimDetector}
@@ -60,7 +60,8 @@ public class ScreenUndimDetectorTest {
                     POLICY_DIM,
                     POLICY_BRIGHT);
     private static final int OTHER_DISPLAY_GROUP = DEFAULT_DISPLAY_GROUP + 1;
-
+    private static final long DEFAULT_MAX_DURATION_BETWEEN_UNDIMS_MILLIS =
+            TimeUnit.MINUTES.toMillis(5);
     @ClassRule
     public static final TestableContext sContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
@@ -87,7 +88,8 @@ public class ScreenUndimDetectorTest {
     @Before
     public void setup() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-
+        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                KEY_KEEP_SCREEN_ON_ENABLED, Boolean.TRUE.toString(), false /*makeDefault*/);
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_UNDIMS_REQUIRED,
                 Integer.toString(1), false /*makeDefault*/);
@@ -107,10 +109,10 @@ public class ScreenUndimDetectorTest {
 
     @Test
     public void recordScreenPolicy_disabledByFlag_noop() {
+        setup();
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_KEEP_SCREEN_ON_ENABLED, Boolean.FALSE.toString(), false /*makeDefault*/);
         mScreenUndimDetector.readValuesFromDeviceConfig();
-
         mScreenUndimDetector.recordScreenPolicy(DEFAULT_DISPLAY_GROUP, POLICY_DIM);
         mScreenUndimDetector.recordScreenPolicy(DEFAULT_DISPLAY_GROUP, POLICY_BRIGHT);
 
