@@ -24,7 +24,7 @@ import com.google.common.truth.Correspondence
 object FakeUiEvent {
     val EVENT_ID =
         Correspondence.transforming<FakeUiEvent, Int>(
-            { it?.eventId },
+            { it.eventId },
             "has a eventId of",
         )
 }

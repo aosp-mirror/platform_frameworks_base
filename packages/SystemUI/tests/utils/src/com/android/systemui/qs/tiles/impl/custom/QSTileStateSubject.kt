@@ -64,7 +64,7 @@ private constructor(failureMetadata: FailureMetadata, subject: QSTileState?) :
     companion object {
 
         /** Returns a factory to be used with [Truth.assertAbout]. */
-        fun states(): Factory<QSTileStateSubject, QSTileState?> {
+        fun states(): Factory<QSTileStateSubject, QSTileState> {
             return Factory { failureMetadata: FailureMetadata, subject: QSTileState? ->
                 QSTileStateSubject(failureMetadata, subject)
             }
