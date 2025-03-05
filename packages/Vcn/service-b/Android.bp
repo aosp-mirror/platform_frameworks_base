@@ -29,7 +29,10 @@ filegroup {
             "vcn-location-flag/platform/com/android/server/vcn/VcnLocation.java",
         ],
     }),
-    visibility: ["//frameworks/base/services/core"],
+    visibility: [
+        "//frameworks/base/services/core",
+        "//packages/modules/Connectivity/service-t",
+    ],
 }
 
 // TODO: b/374174952 This library is only used in "service-connectivity-b-platform"

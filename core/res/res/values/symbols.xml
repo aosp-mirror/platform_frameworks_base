@@ -4312,6 +4312,11 @@
   <!-- For Attention Service -->
   <java-symbol type="integer" name="config_attentionMaximumExtension" />
 
+  <java-symbol type="bool" name="config_defaultPreventScreenTimeoutEnabled" />
+  <java-symbol type="integer" name="config_defaultPreventScreenTimeoutForMillis" />
+  <java-symbol type="integer" name="config_defaultMaxDurationBetweenUndimsMillis" />
+  <java-symbol type="integer" name="config_defaultUndimsRequired" />
+
   <java-symbol type="string" name="config_incidentReportApproverPackage" />
   <java-symbol type="array" name="config_restrictedImagesServices" />
 

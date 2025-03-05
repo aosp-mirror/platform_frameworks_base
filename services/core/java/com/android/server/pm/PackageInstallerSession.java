@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_INSTA
 import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_UPDATED_BY_DO;
 import static android.content.pm.DataLoaderType.INCREMENTAL;
 import static android.content.pm.DataLoaderType.STREAMING;
+import static android.content.pm.Flags.cloudCompilationVerification;
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_OK;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_STATUS_UNSET;
@@ -3570,6 +3571,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             CollectionUtils.addAll(stagedSplitTypes, apk.getSplitTypes());
         }
 
+        if (cloudCompilationVerification()) {
+            verifySdmSignatures(artManagedFilePaths, mSigningDetails);
+        }
+
         if (removeSplitList.size() > 0) {
             if (pkgInfo == null) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
@@ -3934,6 +3939,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             File targetArtManagedFile = new File(
                     ArtManagedInstallFileHelper.getTargetPathForApk(path, targetFile.getPath()));
             stageFileLocked(artManagedFile, targetArtManagedFile);
+            if (!artManagedFile.equals(targetArtManagedFile)) {
+                // The file has been renamed. Update the list to reflect the change.
+                for (int i = 0; i < artManagedFilePaths.size(); ++i) {
+                    if (artManagedFilePaths.get(i).equals(path)) {
+                        artManagedFilePaths.set(i, targetArtManagedFile.getAbsolutePath());
+                    }
+                }
+            }
         }
     }
 
@@ -4259,6 +4272,37 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Verifies the signatures of SDM files.
+     *
+     * SDM is a file format that contains the cloud compilation artifacts. As a requirement, the SDM
+     * file should be signed with the same key as the APK.
+     *
+     * TODO(b/377474232): Move this logic to ART Service.
+     */
+    private static void verifySdmSignatures(List<String> artManagedFilePaths,
+            SigningDetails expectedSigningDetails) throws PackageManagerException {
+        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        for (String path : artManagedFilePaths) {
+            if (!path.endsWith(".sdm")) {
+                continue;
+            }
+            // SDM is a format introduced in Android 16, so we don't need to support older
+            // signature schemes.
+            int minSignatureScheme = SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3;
+            ParseResult<SigningDetails> verified =
+                    ApkSignatureVerifier.verify(input, path, minSignatureScheme);
+            if (verified.isError()) {
+                throw new PackageManagerException(
+                        INSTALL_FAILED_INVALID_APK, "Failed to verify SDM signatures");
+            }
+            if (!expectedSigningDetails.signaturesMatchExactly(verified.getResult())) {
+                throw new PackageManagerException(
+                        INSTALL_FAILED_INVALID_APK, "SDM signatures are inconsistent with APK");
+            }
+        }
     }
 
     /**
