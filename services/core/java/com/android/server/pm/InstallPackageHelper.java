@@ -1151,7 +1151,8 @@ final class InstallPackageHelper {
                 return;
             }
             request.setKeepArtProfile(true);
-            DexOptHelper.performDexoptIfNeeded(request, mDexManager, mContext, null);
+            // TODO(b/388159696): Use performDexoptIfNeededAsync.
+            DexOptHelper.performDexoptIfNeeded(request, mDexManager, null /* installLock */);
         }
     }
 
@@ -2789,8 +2790,8 @@ final class InstallPackageHelper {
                                     | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                 }
 
-                DexOptHelper.performDexoptIfNeeded(installRequest, mDexManager, mContext,
-                        mPm.mInstallLock.getRawLock());
+                DexOptHelper.performDexoptIfNeeded(
+                        installRequest, mDexManager, mPm.mInstallLock.getRawLock());
             }
         }
         PackageManagerServiceUtils.waitForNativeBinariesExtractionForIncremental(
