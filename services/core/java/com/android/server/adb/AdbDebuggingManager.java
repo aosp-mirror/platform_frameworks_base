@@ -130,8 +130,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class AdbDebuggingManager {
     private static final String TAG = AdbDebuggingManager.class.getSimpleName();
-    private static final boolean DEBUG = false;
-    private static final boolean MDNS_DEBUG = false;
 
     private static final String ADBD_SOCKET = "adbd";
     private static final String ADB_DIRECTORY = "misc/adb";
@@ -156,8 +154,6 @@ public class AdbDebuggingManager {
     @Nullable private final File mUserKeyFile;
     @Nullable private final File mTempKeysFile;
 
-    private static final String WIFI_PERSISTENT_CONFIG_PROPERTY =
-            "persist.adb.tls_server.enable";
     private static final String WIFI_PERSISTENT_GUID =
             "persist.adb.wifi.guid";
     private static final int PAIRING_CODE_LENGTH = 6;
@@ -261,12 +257,10 @@ public class AdbDebuggingManager {
             mHandler.sendMessage(msg);
 
             boolean paired = native_pairing_wait();
-            if (DEBUG) {
-                if (mPublicKey != null) {
-                    Slog.i(TAG, "Pairing succeeded key=" + mPublicKey);
-                } else {
-                    Slog.i(TAG, "Pairing failed");
-                }
+            if (mPublicKey != null) {
+                Slog.i(TAG, "Pairing succeeded key=" + mPublicKey);
+            } else {
+                Slog.i(TAG, "Pairing failed");
             }
 
             mNsdManager.unregisterService(this);
@@ -307,7 +301,7 @@ public class AdbDebuggingManager {
 
         @Override
         public void onServiceRegistered(NsdServiceInfo serviceInfo) {
-            if (MDNS_DEBUG) Slog.i(TAG, "Registered pairing service: " + serviceInfo);
+            Slog.i(TAG, "Registered pairing service: " + serviceInfo);
         }
 
         @Override
@@ -319,7 +313,7 @@ public class AdbDebuggingManager {
 
         @Override
         public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-            if (MDNS_DEBUG) Slog.i(TAG, "Unregistered pairing service: " + serviceInfo);
+            Slog.i(TAG, "Unregistered pairing service: " + serviceInfo);
         }
 
         @Override
@@ -354,7 +348,7 @@ public class AdbDebuggingManager {
 
         @Override
         public void run() {
-            if (DEBUG) Slog.d(TAG, "Starting adb port property poller");
+            Slog.d(TAG, "Starting adb port property poller");
             // Once adbwifi is enabled, we poll the service.adb.tls.port
             // system property until we get the port, or -1 on failure.
             // Let's also limit the polling to 10 seconds, just in case
@@ -390,7 +384,7 @@ public class AdbDebuggingManager {
 
     class PortListenerImpl implements AdbConnectionPortListener {
         public void onPortReceived(int port) {
-            if (DEBUG) Slog.d(TAG, "Received tls port=" + port);
+            Slog.d(TAG, "Received tls port=" + port);
             Message msg = mHandler.obtainMessage(port > 0
                      ? AdbDebuggingHandler.MSG_SERVER_CONNECTED
                      : AdbDebuggingHandler.MSG_SERVER_DISCONNECTED);
@@ -419,11 +413,11 @@ public class AdbDebuggingManager {
 
         @Override
         public void run() {
-            if (DEBUG) Slog.d(TAG, "Entering thread");
+            Slog.d(TAG, "Entering thread");
             while (true) {
                 synchronized (this) {
                     if (mStopped) {
-                        if (DEBUG) Slog.d(TAG, "Exiting thread");
+                        Slog.d(TAG, "Exiting thread");
                         return;
                     }
                     try {
@@ -448,7 +442,7 @@ public class AdbDebuggingManager {
                         LocalSocketAddress.Namespace.RESERVED);
                 mInputStream = null;
 
-                if (DEBUG) Slog.d(TAG, "Creating socket");
+                Slog.d(TAG, "Creating socket");
                 mSocket = new LocalSocket(LocalSocket.SOCKET_SEQPACKET);
                 mSocket.connect(address);
 
@@ -549,7 +543,7 @@ public class AdbDebuggingManager {
         }
 
         private void closeSocketLocked() {
-            if (DEBUG) Slog.d(TAG, "Closing socket");
+            Slog.d(TAG, "Closing socket");
             try {
                 if (mOutputStream != null) {
                     mOutputStream.close();
@@ -859,7 +853,7 @@ public class AdbDebuggingManager {
 
         private void startAdbDebuggingThread() {
             ++mAdbEnabledRefCount;
-            if (DEBUG) Slog.i(TAG, "startAdbDebuggingThread ref=" + mAdbEnabledRefCount);
+            Slog.i(TAG, "startAdbDebuggingThread ref=" + mAdbEnabledRefCount);
             if (mAdbEnabledRefCount > 1) {
                 return;
             }
@@ -875,7 +869,7 @@ public class AdbDebuggingManager {
 
         private void stopAdbDebuggingThread() {
             --mAdbEnabledRefCount;
-            if (DEBUG) Slog.i(TAG, "stopAdbDebuggingThread ref=" + mAdbEnabledRefCount);
+            Slog.i(TAG, "stopAdbDebuggingThread ref=" + mAdbEnabledRefCount);
             if (mAdbEnabledRefCount > 0) {
                 return;
             }
@@ -1093,7 +1087,7 @@ public class AdbDebuggingManager {
                     intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
                     mContext.registerReceiver(mBroadcastReceiver, intentFilter);
 
-                    SystemProperties.set(WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
+                    SystemProperties.set(AdbService.WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
                     mConnectionPortPoller =
                             new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
                     mConnectionPortPoller.start();
@@ -1101,7 +1095,7 @@ public class AdbDebuggingManager {
                     startAdbDebuggingThread();
                     mAdbWifiEnabled = true;
 
-                    if (DEBUG) Slog.i(TAG, "adb start wireless adb");
+                    Slog.i(TAG, "adb start wireless adb");
                     break;
                 }
                 case MSG_ADBDWIFI_DISABLE:
@@ -1143,7 +1137,7 @@ public class AdbDebuggingManager {
                     intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
                     mContext.registerReceiver(mBroadcastReceiver, intentFilter);
 
-                    SystemProperties.set(WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
+                    SystemProperties.set(AdbService.WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
                     mConnectionPortPoller =
                             new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
                     mConnectionPortPoller.start();
@@ -1151,7 +1145,7 @@ public class AdbDebuggingManager {
                     startAdbDebuggingThread();
                     mAdbWifiEnabled = true;
 
-                    if (DEBUG) Slog.i(TAG, "adb start wireless adb");
+                    Slog.i(TAG, "adb start wireless adb");
                     break;
                 case MSG_ADBWIFI_DENY:
                     Settings.Global.putInt(mContentResolver,
@@ -1259,7 +1253,7 @@ public class AdbDebuggingManager {
                     break;
                 }
                 case MSG_ADBD_SOCKET_CONNECTED: {
-                    if (DEBUG) Slog.d(TAG, "adbd socket connected");
+                    Slog.d(TAG, "adbd socket connected");
                     if (mAdbWifiEnabled) {
                         // In scenarios where adbd is restarted, the tls port may change.
                         mConnectionPortPoller =
@@ -1269,7 +1263,7 @@ public class AdbDebuggingManager {
                     break;
                 }
                 case MSG_ADBD_SOCKET_DISCONNECTED: {
-                    if (DEBUG) Slog.d(TAG, "adbd socket disconnected");
+                    Slog.d(TAG, "adbd socket disconnected");
                     if (mConnectionPortPoller != null) {
                         mConnectionPortPoller.cancelAndWait();
                         mConnectionPortPoller = null;
@@ -1477,7 +1471,7 @@ public class AdbDebuggingManager {
         }
 
         private void updateUIPairCode(String code) {
-            if (DEBUG) Slog.i(TAG, "updateUIPairCode: " + code);
+            Slog.i(TAG, "updateUIPairCode: " + code);
 
             Intent intent = new Intent(AdbManager.WIRELESS_DEBUG_PAIRING_RESULT_ACTION);
             intent.putExtra(AdbManager.WIRELESS_PAIRING_CODE_EXTRA, code);
