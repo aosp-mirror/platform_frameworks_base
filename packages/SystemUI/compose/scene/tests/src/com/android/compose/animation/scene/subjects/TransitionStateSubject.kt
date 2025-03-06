@@ -101,8 +101,8 @@ private constructor(metadata: FailureMetadata, private val actual: TransitionSta
     }
 
     companion object {
-        fun transitionStates() = Factory { metadata, actual: TransitionState ->
-            TransitionStateSubject(metadata, actual)
+        fun transitionStates() = Factory { metadata, actual: TransitionState? ->
+            TransitionStateSubject(metadata, actual!!)
         }
     }
 }
@@ -191,8 +191,8 @@ private constructor(metadata: FailureMetadata, actual: TransitionState.Transitio
 
     companion object {
         fun sceneTransitions() =
-            Factory { metadata, actual: TransitionState.Transition.ChangeScene ->
-                SceneTransitionSubject(metadata, actual)
+            Factory { metadata, actual: TransitionState.Transition.ChangeScene? ->
+                SceneTransitionSubject(metadata, actual!!)
             }
     }
 }
@@ -212,8 +212,8 @@ private constructor(
 
     companion object {
         fun showOrHideOverlayTransitions() =
-            Factory { metadata, actual: TransitionState.Transition.ShowOrHideOverlay ->
-                ShowOrHideOverlayTransitionSubject(metadata, actual)
+            Factory { metadata, actual: TransitionState.Transition.ShowOrHideOverlay? ->
+                ShowOrHideOverlayTransitionSubject(metadata, actual!!)
             }
     }
 }
@@ -231,8 +231,8 @@ private constructor(metadata: FailureMetadata, actual: TransitionState.Transitio
 
     companion object {
         fun replaceOverlayTransitions() =
-            Factory { metadata, actual: TransitionState.Transition.ReplaceOverlay ->
-                ReplaceOverlayTransitionSubject(metadata, actual)
+            Factory { metadata, actual: TransitionState.Transition.ReplaceOverlay? ->
+                ReplaceOverlayTransitionSubject(metadata, actual!!)
             }
     }
 }
