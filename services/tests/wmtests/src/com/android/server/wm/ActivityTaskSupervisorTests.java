@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
@@ -68,13 +69,15 @@ import java.util.concurrent.TimeUnit;
  * Tests for the {@link ActivityTaskSupervisor} class.
  *
  * Build/Install/Run:
- *  atest WmTests:ActivityTaskSupervisorTests
+ * atest WmTests:ActivityTaskSupervisorTests
  */
 @MediumTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityTaskSupervisorTests extends WindowTestsBase {
     private static final long TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
+    private static final int DEFAULT_CALLING_PID = -1;
+    private static final int DEFAULT_CALLING_UID = -1;
 
     /**
      * Ensures that an activity is removed from the stopping activities list once it is resumed.
@@ -103,7 +106,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 .setCreateTask(true).build();
         final ConditionVariable condition = new ConditionVariable();
         final WaitResult taskToFrontWait = new WaitResult();
-        final ComponentName[] launchedComponent = { null };
+        final ComponentName[] launchedComponent = {null};
         // Create a new thread so the waiting method in test can be notified.
         new Thread(() -> {
             synchronized (mAtm.mGlobalLock) {
@@ -381,7 +384,8 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
                 anyInt(), any());
 
-        mSupervisor.startActivityFromRecents(-1, -1, activity.getRootTaskId(), safeOptions);
+        mSupervisor.startActivityFromRecents(DEFAULT_CALLING_PID, DEFAULT_CALLING_UID,
+                activity.getRootTaskId(), safeOptions);
 
         assertThat(activity.mLaunchCookie).isEqualTo(launchCookie);
         verify(mAtm).moveTaskToFrontLocked(any(), eq(null), anyInt(), anyInt(), eq(safeOptions));
@@ -398,9 +402,59 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
                 anyInt(), any());
 
-        mSupervisor.startActivityFromRecents(-1, -1, activity.getRootTaskId(), safeOptions);
+        mSupervisor.startActivityFromRecents(DEFAULT_CALLING_PID, DEFAULT_CALLING_UID,
+                activity.getRootTaskId(), safeOptions);
 
         assertThat(activity.mLaunchCookie).isNull();
         verify(mAtm).moveTaskToFrontLocked(any(), eq(null), anyInt(), anyInt(), eq(safeOptions));
+    }
+
+        /** Verifies that launch from recents doesn't set the launch cookie on the activity. */
+    @Test
+    public void testStartActivityFromRecents_inMultiWindowRootTask_homeNotMoved() {
+        final Task multiWindowRootTask = new TaskBuilder(mSupervisor).setWindowingMode(
+                WINDOWING_MODE_MULTI_WINDOW).setOnTop(true).build();
+
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setParentTask(
+                multiWindowRootTask).setCreateTask(true).build();
+
+        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
+                ActivityOptions.makeBasic().toBundle(),
+                Binder.getCallingPid(), Binder.getCallingUid());
+
+        doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
+                anyInt(), any());
+
+        mSupervisor.startActivityFromRecents(DEFAULT_CALLING_PID, DEFAULT_CALLING_UID,
+                activity.getRootTaskId(), safeOptions);
+
+        verify(mAtm).moveTaskToFrontLocked(any(), eq(null), anyInt(), anyInt(), eq(safeOptions));
+        verify(mRootWindowContainer.getDefaultTaskDisplayArea(), never()).moveHomeRootTaskToFront(
+                any());
+        verify(multiWindowRootTask.getDisplayArea(), never()).moveHomeRootTaskToFront(any());
+    }
+
+    /** Verifies that launch from recents doesn't set the launch cookie on the activity. */
+    @Test
+    public void testStartActivityFromRecents_inFullScreenRootTask_homeMovedToFront() {
+        final Task fullscreenRootTask = new TaskBuilder(mSupervisor).setWindowingMode(
+                WINDOWING_MODE_FULLSCREEN).setOnTop(true).build();
+
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setParentTask(
+                fullscreenRootTask).setCreateTask(true).build();
+
+        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
+                ActivityOptions.makeBasic().toBundle(),
+                Binder.getCallingPid(), Binder.getCallingUid());
+
+        doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
+                anyInt(), any());
+
+        mSupervisor.startActivityFromRecents(DEFAULT_CALLING_PID, DEFAULT_CALLING_UID,
+                activity.getRootTaskId(), safeOptions);
+
+        verify(mAtm).moveTaskToFrontLocked(any(), eq(null), anyInt(), anyInt(), eq(safeOptions));
+        verify(mRootWindowContainer.getDefaultTaskDisplayArea()).moveHomeRootTaskToFront(any());
+        verify(fullscreenRootTask.getDisplayArea()).moveHomeRootTaskToFront(any());
     }
 }
