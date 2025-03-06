@@ -52,6 +52,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -471,8 +472,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         view.setContentDescription(item.getToolName());
         icon.setImageDrawable(item.getToolIcon());
         if (item.isCustomIcon()) {
-            icon.getDrawable().mutate().setTint(context.getColor(
-                    com.android.internal.R.color.materialColorOnPrimaryContainer));
+            icon.getDrawable().mutate().setTint(Utils.getColorAttr(context,
+                    com.android.internal.R.attr.materialColorOnPrimaryContainer).getDefaultColor());
         }
         text.setText(item.getToolName());
         Intent intent = item.getToolIntent();

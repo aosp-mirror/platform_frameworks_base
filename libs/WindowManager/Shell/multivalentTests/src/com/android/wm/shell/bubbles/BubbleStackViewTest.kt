@@ -49,7 +49,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
@@ -172,6 +174,137 @@ class BubbleStackViewTest {
         assertThat(lastUpdate).isNotNull()
         assertThat(lastUpdate!!.expandedChanged).isTrue()
         assertThat(lastUpdate!!.expanded).isTrue()
+    }
+
+    @Test
+    fun expandStack_imeHidden() {
+        val bubble = createAndInflateBubble()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.addBubble(bubble)
+        }
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertThat(bubbleStackView.bubbleCount).isEqualTo(1)
+
+        positioner.setImeVisible(false, 0)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to expand the stack
+            bubbleStackView.isExpanded = true
+            verify(sysuiProxy).onStackExpandChanged(true)
+            shellExecutor.flushAll()
+        }
+
+        assertThat(bubbleStackViewManager.onImeHidden).isNull()
+    }
+
+    @Test
+    fun collapseStack_imeHidden() {
+        val bubble = createAndInflateBubble()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.addBubble(bubble)
+        }
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertThat(bubbleStackView.bubbleCount).isEqualTo(1)
+
+        positioner.setImeVisible(false, 0)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to expand the stack
+            bubbleStackView.isExpanded = true
+            verify(sysuiProxy).onStackExpandChanged(true)
+            shellExecutor.flushAll()
+        }
+
+        assertThat(bubbleStackViewManager.onImeHidden).isNull()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to collapse the stack
+            bubbleStackView.isExpanded = false
+            verify(sysuiProxy).onStackExpandChanged(false)
+            shellExecutor.flushAll()
+        }
+
+        assertThat(bubbleStackViewManager.onImeHidden).isNull()
+    }
+
+    @Test
+    fun expandStack_waitsForIme() {
+        val bubble = createAndInflateBubble()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.addBubble(bubble)
+        }
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertThat(bubbleStackView.bubbleCount).isEqualTo(1)
+
+        positioner.setImeVisible(true, 100)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to expand the stack
+            bubbleStackView.isExpanded = true
+        }
+
+        val onImeHidden = bubbleStackViewManager.onImeHidden
+        assertThat(onImeHidden).isNotNull()
+        verify(sysuiProxy, never()).onStackExpandChanged(any())
+        positioner.setImeVisible(false, 0)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            onImeHidden!!.run()
+            verify(sysuiProxy).onStackExpandChanged(true)
+            shellExecutor.flushAll()
+        }
+    }
+
+    @Test
+    fun collapseStack_waitsForIme() {
+        val bubble = createAndInflateBubble()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.addBubble(bubble)
+        }
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertThat(bubbleStackView.bubbleCount).isEqualTo(1)
+
+        positioner.setImeVisible(true, 100)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to expand the stack
+            bubbleStackView.isExpanded = true
+        }
+
+        var onImeHidden = bubbleStackViewManager.onImeHidden
+        assertThat(onImeHidden).isNotNull()
+        verify(sysuiProxy, never()).onStackExpandChanged(any())
+        positioner.setImeVisible(false, 0)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            onImeHidden!!.run()
+            verify(sysuiProxy).onStackExpandChanged(true)
+            shellExecutor.flushAll()
+        }
+
+        bubbleStackViewManager.onImeHidden = null
+        positioner.setImeVisible(true, 100)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to collapse the stack
+            bubbleStackView.isExpanded = false
+        }
+
+        onImeHidden = bubbleStackViewManager.onImeHidden
+        assertThat(onImeHidden).isNotNull()
+        verify(sysuiProxy, never()).onStackExpandChanged(false)
+        positioner.setImeVisible(false, 0)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            onImeHidden!!.run()
+            verify(sysuiProxy).onStackExpandChanged(false)
+            shellExecutor.flushAll()
+        }
     }
 
     @Test
@@ -418,6 +551,7 @@ class BubbleStackViewTest {
     }
 
     private class FakeBubbleStackViewManager : BubbleStackViewManager {
+        var onImeHidden: Runnable? = null
 
         override fun onAllBubblesAnimatedOut() {}
 
@@ -425,6 +559,8 @@ class BubbleStackViewTest {
 
         override fun checkNotificationPanelExpandedState(callback: Consumer<Boolean>) {}
 
-        override fun hideCurrentInputMethod() {}
+        override fun hideCurrentInputMethod(onImeHidden: Runnable?) {
+            this.onImeHidden = onImeHidden
+        }
     }
 }

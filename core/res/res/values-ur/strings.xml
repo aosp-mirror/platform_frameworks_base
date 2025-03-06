@@ -71,9 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"‏کالر ID کی ڈیفالٹ ترتیب محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: محدود کردہ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
-    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫APK الائنمنٹ چیک ناکام ہو گیا۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ مرتب کریں۔ مزید معلومات کے لیے، ‎&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;‎ دیکھیں"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫ELF الائنمنٹ چیک ناکام ہو گیا۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ مرتب کریں۔ مزید معلومات کے لیے، ‎&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;‎ دیکھیں"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫APK اور ELF الائنمنٹ چیکس ناکام ہو گئے۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ مرتب کریں۔ مزید معلومات کے لیے، ‎&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;‎ دیکھیں"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫APK الائنمنٹ چیک ناکام ہو گیا۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلائی جائے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ کمپائل کریں۔ مزید معلومات کے لیے &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; دیکھیں"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫ELF الائنمنٹ چیک ناکام ہو گیا۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلائی جائے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ کمپائل کریں۔ مزید معلومات کے لیے &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; دیکھیں"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫APK اور ELF الائنمنٹ چیکس ناکام ہو گئے۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلائی جائے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ کمپائل کریں۔ مزید معلومات کے لیے &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; دیکھیں"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"سروس فراہم نہیں کی گئی۔"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‏آپ کالر ID کی ترتیبات تبدیل نہیں کر سکتے ہیں۔"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ڈیٹا <xliff:g id="CARRIERDISPLAY">%s</xliff:g> پر سوئچ کیا گیا"</string>
@@ -1158,38 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> گھنٹے میں"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> دن میں"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> سال میں"</string>
-    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
-    <skip />
-    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
-    <skip />
-    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
-    <skip />
-    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
-    <skip />
-    <!-- no translation found for duration_days_medium (5994225628248661388) -->
-    <skip />
-    <!-- no translation found for duration_years_medium (734023884353592526) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
-    <skip />
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"‫<xliff:g id="COUNT">%d</xliff:g> منٹ قبل"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"‫<xliff:g id="COUNT">%d</xliff:g> گھنٹہ قبل"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"‫<xliff:g id="COUNT">%d</xliff:g> دن قبل"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"‫<xliff:g id="COUNT">%d</xliff:g> سال قبل"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"‫<xliff:g id="COUNT">%d</xliff:g> منٹ"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"‫<xliff:g id="COUNT">%d</xliff:g> گھنٹہ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"‫<xliff:g id="COUNT">%d</xliff:g> دن"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"‫<xliff:g id="COUNT">%d</xliff:g> سال"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"‫<xliff:g id="COUNT">%d</xliff:g> منٹ میں"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"‫<xliff:g id="COUNT">%d</xliff:g> گھنٹے میں"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"‫<xliff:g id="COUNT">%d</xliff:g> دن میں"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"‫<xliff:g id="COUNT">%d</xliff:g> سال میں"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"‫<xliff:g id="COUNT">%d</xliff:g> منٹ قبل"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"‫<xliff:g id="COUNT">%d</xliff:g> گھنٹہ قبل"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"‫<xliff:g id="COUNT">%d</xliff:g> دن قبل"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"‫<xliff:g id="COUNT">%d</xliff:g> سال قبل"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# منٹ پہلے}other{# منٹ پہلے}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# گھنٹہ پہلے}other{# گھنٹے پہلے}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# دن پہلے}other{# دن پہلے}}"</string>
@@ -1980,7 +1964,7 @@
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"آن ہے"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"آف ہے"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"، "</string>
-    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"‪<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> تا <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>، <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"کوئی بھی کیلنڈر"</string>

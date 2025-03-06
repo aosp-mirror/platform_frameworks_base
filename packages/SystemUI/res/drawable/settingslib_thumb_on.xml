@@ -24,7 +24,7 @@
             <size
                 android:height="@dimen/settingslib_switch_thumb_size"
                 android:width="@dimen/settingslib_switch_thumb_size"/>
-            <solid android:color="@androidprv:color/materialColorOnPrimary"/>
+            <solid android:color="?androidprv:attr/materialColorOnPrimary"/>
         </shape>
     </item>
 </layer-list>

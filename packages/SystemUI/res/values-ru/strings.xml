@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Виджеты"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Чтобы создать ярлык \"Виджеты\", убедитесь, что в настройках включена функция \"Показывать виджеты на заблокированном экране\"."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Настройки"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Кнопка \"Показать заставку\""</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Сменить пользователя."</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"раскрывающееся меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Все приложения и данные этого профиля будут удалены."</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Уведомления"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговоры"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Отклонить все беззвучные уведомления"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Открыть настройки уведомлений"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"В режиме \"Не беспокоить\" уведомления заблокированы"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Уведомлений нет}=1{Режим \"{mode}\" приостанавливает уведомления}=2{Режим \"{mode}\" и ещё один режим приостанавливают уведомления}one{Режим \"{mode}\" и ещё # режим приостанавливают уведомления}few{Режим \"{mode}\" и ещё # режима приостанавливают уведомления}many{Режим \"{mode}\" и ещё # режимов приостанавливают уведомления}other{Режим \"{mode}\" и ещё # режима приостанавливают уведомления}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Начать"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Динамичное"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Нажмите, чтобы изменить режим звонка."</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"режим звонка"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>. Нажмите, чтобы изменить режим звонка."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"отключить звук"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"включить звук"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"включить вибрацию"</string>
@@ -843,11 +842,11 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Недавние"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Назад"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Уведомления"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Быстрые клавиши"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Сочетания клавиш"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Переключение раскладки"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"или"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Удалить поисковый запрос"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Быстрые клавиши"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Сочетания клавиш"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Поиск сочетаний клавиш"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Нет сочетаний клавиш."</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Система"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заблокировать экран"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Создать заметку"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Многозадачность"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Разделить экран и поместить это приложение справа"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Разделить экран и поместить это приложение слева"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Изменить режим разделения экрана на полноэкранный режим"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Разделить экран и поместить открытое приложение справа"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Разделить экран и поместить открытое приложение слева"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Включить полноэкранный режим"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Перейти к приложению справа или внизу на разделенном экране"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Перейти к приложению слева или вверху на разделенном экране"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"В режиме разделения экрана заменить одно приложение другим"</string>
@@ -1400,7 +1399,7 @@
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Экран подключен"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Микрофон и камера"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Недавнее использование приложениями"</string>
-    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Посмотреть недавний доступ"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"История доступа"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Готово"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Развернуть и показать параметры"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Свернуть"</string>
@@ -1422,24 +1421,23 @@
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Многозадачность"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Разделение экрана"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Ввод"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Быстрые клавиши для приложений"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Приложения"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Это приложение"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Специальные возможности"</string>
-    <string name="shortcut_helper_title" msgid="8567500639300970049">"Быстрые клавиши"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Как настроить быстрые клавиши"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Сочетания клавиш"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Настройки сочетаний клавиш"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Удалить сочетание клавиш?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Сбросить настройки?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Нажмите клавишу, чтобы назначить сочетание клавиш."</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Настроенное сочетание будет безвозвратно удалено."</string>
-    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Все пользовательские ярлыки будут безвозвратно удалены."</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Найти быстрые клавиши"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Все настроенные сочетания клавиш будут безвозвратно удалены."</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Найти"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ничего не найдено"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Значок \"Свернуть\""</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Значок клавиши Meta для выполнения действия"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Значок плюса"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Настроить"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Сбросить"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Готово"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Значок \"Развернуть\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Нажмите клавишу действия на клавиатуре."</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Блестяще!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Вы выполнили жест для просмотра всех приложений."</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Анимация в руководстве. Нажмите, чтобы приостановить или продолжить воспроизведение."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Подсветка клавиатуры"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Уровень %1$d из %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Управление домом"</string>

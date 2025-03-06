@@ -35,7 +35,7 @@
             android:layout_gravity="center"
             android:paddingStart="@dimen/autofill_view_left_padding"
             android:src="@drawable/more_horiz_24px"
-            android:tint="@androidprv:color/materialColorOnSurface"
+            android:tint="?androidprv:attr/materialColorOnSurface"
             android:contentDescription="@string/more_options_content_description"
             android:background="@null"/>
 
@@ -53,7 +53,7 @@
             android:id="@android:id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@androidprv:color/materialColorOnSurface"
+            android:textColor="?androidprv:attr/materialColorOnSurface"
             style="@style/autofill.TextTitle"/>
     </LinearLayout>
 

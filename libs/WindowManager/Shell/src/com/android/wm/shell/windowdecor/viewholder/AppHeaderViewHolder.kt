@@ -40,12 +40,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.android.internal.R.color.materialColorOnSecondaryContainer
-import com.android.internal.R.color.materialColorOnSurface
-import com.android.internal.R.color.materialColorSecondaryContainer
-import com.android.internal.R.color.materialColorSurfaceContainerHigh
-import com.android.internal.R.color.materialColorSurfaceContainerLow
-import com.android.internal.R.color.materialColorSurfaceDim
+import com.android.internal.R.attr.materialColorOnSecondaryContainer
+import com.android.internal.R.attr.materialColorOnSurface
+import com.android.internal.R.attr.materialColorSecondaryContainer
+import com.android.internal.R.attr.materialColorSurfaceContainerHigh
+import com.android.internal.R.attr.materialColorSurfaceContainerLow
+import com.android.internal.R.attr.materialColorSurfaceDim
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
@@ -580,31 +580,33 @@ class AppHeaderViewHolder(
 
     @ColorInt
     private fun getAppNameAndButtonColor(taskInfo: RunningTaskInfo, hasGlobalFocus: Boolean): Int {
-        val materialColor = context.getColor(when {
+        val materialColorAttr = when {
             taskInfo.isTransparentCaptionBarAppearance &&
                     taskInfo.isLightCaptionBarAppearance -> materialColorOnSecondaryContainer
             taskInfo.isTransparentCaptionBarAppearance &&
                     !taskInfo.isLightCaptionBarAppearance -> materialColorOnSurface
             isDarkMode() -> materialColorOnSurface
             else -> materialColorOnSecondaryContainer
-        })
+        }
         val appDetailsOpacity = when {
             isDarkMode() && !hasGlobalFocus -> DARK_THEME_UNFOCUSED_OPACITY
             !isDarkMode() && !hasGlobalFocus -> LIGHT_THEME_UNFOCUSED_OPACITY
             else -> FOCUSED_OPACITY
         }
-
-
-        return if (appDetailsOpacity == FOCUSED_OPACITY) {
-            materialColor
-        } else {
-            Color.argb(
-                appDetailsOpacity,
-                Color.red(materialColor),
-                Color.green(materialColor),
-                Color.blue(materialColor)
-            )
+        context.withStyledAttributes(null, intArrayOf(materialColorAttr), 0, 0) {
+            val color = getColor(0, 0)
+            return if (appDetailsOpacity == FOCUSED_OPACITY) {
+                color
+            } else {
+                Color.argb(
+                    appDetailsOpacity,
+                    Color.red(color),
+                    Color.green(color),
+                    Color.blue(color)
+                )
+            }
         }
+        return 0
     }
 
     private fun isDarkMode(): Boolean {

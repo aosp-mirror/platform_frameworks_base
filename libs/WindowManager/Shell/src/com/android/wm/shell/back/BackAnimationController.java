@@ -1106,11 +1106,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mCurrentTracker.updateStartLocation();
             BackMotionEvent startEvent = mCurrentTracker.createStartEvent(mApps[0]);
             dispatchOnBackStarted(mActiveCallback, startEvent);
-            // TODO(b/373544911): onBackStarted is dispatched here so that
-            //  WindowOnBackInvokedDispatcher knows about the back navigation and intercepts touch
-            //  events while it's active. It would be cleaner and safer to disable multitouch
-            //  altogether (same as in gesture-nav).
-            dispatchOnBackStarted(mBackNavigationInfo.getOnBackInvokedCallback(), startEvent);
+            if (startEvent.getSwipeEdge() == EDGE_NONE) {
+                // TODO(b/373544911): onBackStarted is dispatched here so that
+                //  WindowOnBackInvokedDispatcher knows about the back navigation and intercepts
+                //  touch events while it's active. It would be cleaner and safer to disable
+                //  multitouch altogether (same as in gesture-nav).
+                dispatchOnBackStarted(mBackNavigationInfo.getOnBackInvokedCallback(), startEvent);
+            }
         }
     }
 

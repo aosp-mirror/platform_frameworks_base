@@ -529,10 +529,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Pour ouvrir une appli à l\'aide d\'un widget, vous devrez confirmer votre identité. En outre, gardez à l\'esprit que tout le monde peut voir les widgets, même lorsque votre tablette est verrouillée. Certains widgets n\'ont peut-être pas été conçus pour votre écran de verrouillage, et il pourrait être dangereux de les ajouter ici."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Pour ajouter le raccourci « Widgets », assurez-vous que « Afficher les widgets sur l\'écran de verrouillage » est activé dans les paramètres."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Paramètres"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Afficher le bouton de l\'écran de veille"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Changer d\'utilisateur"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu déroulant"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toutes les applis et les données de cette session seront supprimées."</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notifications"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Effacer toutes les notifications silencieuses"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Ouvrir les paramètres des notifications"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Les notifications sont suspendues par le mode Ne pas déranger"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Aucune notification}=1{Notifications suspendues par {mode}}=2{Notifications suspendues par {mode} et un autre mode}one{Notifications suspendues par {mode} et # autre mode}many{Notifications suspendues par {mode} et # d\'autres modes}other{Notifications suspendues par {mode} et # autres modes}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Commencer"</string>
@@ -709,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Suivi de la tête"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Touchez pour modifier le mode de sonnerie"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"mode de sonnerie"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, toucher ici pour modifier le mode de la sonnerie"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"désactiver le son"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"réactiver le son"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibration"</string>
@@ -875,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Verrouiller l\'écran"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Prendre une note"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitâche"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Utiliser l\'Écran divisé avec l\'appli actuelle à droite"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Utiliser l\'Écran divisé avec l\'appli actuelle à gauche"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Passer de l\'Écran divisé au plein écran"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Utiliser l\'Écran divisé avec l\'appli à droite"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Utiliser l\'Écran divisé avec l\'appli à gauche"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Passer au mode plein écran"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Passer à l\'appli à droite ou en dessous avec l\'Écran divisé"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Passer à l\'appli à gauche ou au-dessus avec l\'Écran divisé"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"En mode d\'écran divisé : remplacer une appli par une autre"</string>
@@ -1430,20 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Raccourcis-clavier"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personnaliser les raccourcis-clavier"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Supprimer le raccourci?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Réinitialiser aux raccourcis par défaut?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Appuyez sur la touche pour attribuer un raccourci"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Cela supprimera définitivement votre raccourci personnalisé."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Cette action supprimera définitivement tous vos raccourcis personnalisés."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Rechercher des raccourcis"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Aucun résultat de recherche"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icône Réduire"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Icône de la touche Action ou Méta"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Icône Plus"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personnaliser"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Réinitialiser"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Terminé"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icône Développer"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
@@ -1453,8 +1447,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Paramètres du clavier"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Définir un raccourci"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Supprimer"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Oui, réinitialiser"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Annuler"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Appuyez sur la touche"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"La combinaison de touches est déjà utilisée. Essayez une autre touche."</string>
@@ -1486,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Appuyez sur la touche d\'action de votre clavier"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Félicitations!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Vous avez appris le geste pour afficher toutes les applis"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animation du tutoriel; cliquer ici pour mettre en pause et reprendre la lecture."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Rétroéclairage du clavier"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Domotique"</string>

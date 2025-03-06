@@ -82,7 +82,7 @@ interface BubbleExpandedViewManager {
                 override fun isShowingAsBubbleBar(): Boolean = controller.isShowingAsBubbleBar
 
                 override fun hideCurrentInputMethod() {
-                    controller.hideCurrentInputMethod()
+                    controller.hideCurrentInputMethod(null)
                 }
 
                 override fun updateBubbleBarLocation(

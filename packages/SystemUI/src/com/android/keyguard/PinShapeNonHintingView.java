@@ -39,6 +39,7 @@ import android.widget.LinearLayout;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.android.app.animation.Interpolators;
+import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
 
 /**
@@ -48,7 +49,7 @@ import com.android.systemui.res.R;
 public class PinShapeNonHintingView extends LinearLayout implements PinShapeInput {
     private static final int RESET_STAGGER_DELAY = 40;
     private static final int RESET_MAX_DELAY = 200;
-    private int mColor = getContext().getColor(PIN_SHAPES);
+    private int mColor = Utils.getColorAttr(getContext(), PIN_SHAPES).getDefaultColor();
     private int mPosition = 0;
     private boolean mIsAnimatingReset = false;
     private final PinShapeAdapter mPinShapeAdapter;

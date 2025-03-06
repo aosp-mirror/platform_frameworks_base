@@ -59,6 +59,13 @@ class DragSessionTest : ShellTestCase() {
     }
 
     @Test
+    fun testNullClipData() {
+        // Start a new drag session with null data
+        val session = DragSession(activityTaskManager, displayLayout, null, 0)
+        assertThat(session.hideDragSourceTaskId).isEqualTo(-1)
+    }
+
+    @Test
     fun testGetRunningTask() {
         // Set up running tasks
         val runningTasks = listOf(

@@ -73,7 +73,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Deitzailearen identitatea zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenik gabe."</string>
     <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Aplikazio hau ez da bateragarria 16 KBko bertsioarekin. Ezin izan da egiaztatu APKren lerrokatzea. Orriaren tamainarekin bateragarria den modua erabilita exekutatuko da aplikazioa. Emaitza onenak lortzeko, konpilatu aplikazioa berriro 16 KBko bertsioarekin bateragarria izan dadin. Informazio gehiago lortzeko, joan hona: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
     <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Aplikazio hau ez da bateragarria 16 KBko bertsioarekin. Ezin izan da egiaztatu ELFaren lerrokatzea. Orriaren tamainarekin bateragarria den modua erabilita exekutatuko da aplikazioa. Emaitza onenak lortzeko, konpilatu aplikazioa berriro 16 KBko bertsioarekin bateragarria izan dadin. Informazio gehiago lortzeko, joan hona: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Aplikazio hau ez da bateragarria 16 KBko bertsioarekin. Ezin izan da egiaztatu APK eta ELF arteko lerrokatzea. Orriaren tamainarekin bateragarria den modua erabilita exekutatuko da aplikazioa. Emaitza onenak lortzeko, konpilatu aplikazioa berriro 16 KBko bertsioarekin bateragarria izan dadin. Informazio gehiago lortzeko, joan hona: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Aplikazio hau ez da bateragarria 16 KB-ko bertsioarekin. Ezin izan da egiaztatu APK eta ELF arteko lerrokatzea. Orriaren tamainarekin bateragarria den modua erabilita exekutatuko da aplikazioa. Emaitza onenak lortzeko, konpilatu aplikazioa berriro 16 KB-ko bertsioarekin bateragarria izan dadin. Informazio gehiago lortzeko, joan hona: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Zerbitzua ez da hornitu."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ezin duzu aldatu deitzailearen identitatearen ezarpena."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> operadorearen datu-konexiora aldatu zara"</string>
@@ -421,7 +421,7 @@
     <string name="permlab_runInBackground" msgid="541863968571682785">"exekutatu atzeko planoan"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Atzeko planoan exekuta liteke aplikazioa eta horrek bizkorrago agor lezake bateria."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"erabili datuak atzeko planoan"</string>
-    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikazioak datuak erabil litzake atzeko planoan eta horrek datu-erabilera areago lezake."</string>
+    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Datuak atzeko planoan erabil ditzake aplikazioak, eta baliteke horrek datu-erabilera handitzea."</string>
     <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"antolatu ekintzak une zehatzetan gerta daitezen"</string>
     <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Aplikazio honek ekintzak programa ditzake etorkizunean egin daitezen. Horrek esan nahi du gailua aktiboki erabiltzen ari ez zarenean ere exekuta daitekeela aplikazioa."</string>
     <string name="permlab_use_exact_alarm" msgid="348045139777131552">"antolatu alarmak edo gertaera-gogorarazpenak"</string>
@@ -698,7 +698,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Aurrera egiteko, erabili hatz-marka edo pantailaren blokeoa"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Arazo bat izan da. Saiatu berriro."</string>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Arazoren bat izan da. Saiatu berriro."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Hatz-markaren ikonoa"</string>
     <string name="device_unlock_notification_name" msgid="2632928999862915709">"Gailua desblokeatzea"</string>
     <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Probatu gailua desblokeatzeko beste modu bat"</string>
@@ -759,7 +759,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Aurrera egiteko, erabili aurpegia edo pantailaren blokeoa"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Arazo bat izan da. Saiatu berriro."</string>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Arazoren bat izan da. Saiatu berriro."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Aurpegiaren ikonoa"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"irakurri sinkronizazio-ezarpenak"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Kontu baten sinkronizazio-ezarpenak irakurtzeko baimena ematen dio aplikazioari. Adibidez, Jendea aplikazioa konturen batekin sinkronizatuta dagoen zehatz dezake."</string>
@@ -1158,38 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> h barru"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> eg. barru"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> ur. barru"</string>
-    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
-    <skip />
-    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
-    <skip />
-    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
-    <skip />
-    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
-    <skip />
-    <!-- no translation found for duration_days_medium (5994225628248661388) -->
-    <skip />
-    <!-- no translation found for duration_years_medium (734023884353592526) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
-    <skip />
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"Duela <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"Duela <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"Duela <xliff:g id="COUNT">%d</xliff:g> egun"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"Duela <xliff:g id="COUNT">%d</xliff:g> urte"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> egun"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> urte"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> min barru"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> h barru"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> egun barru"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> urte barru"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"Duela <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"Duela <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"Duela <xliff:g id="COUNT">%d</xliff:g> egun"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"Duela <xliff:g id="COUNT">%d</xliff:g> urte"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Duela # minutu}other{Duela # minutu}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Duela # ordu}other{Duela # ordu}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Duela # egun}other{Duela # egun}}"</string>

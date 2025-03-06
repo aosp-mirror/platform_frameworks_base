@@ -21,6 +21,7 @@ import static android.app.Notification.COLOR_INVALID;
 import android.annotation.Nullable;
 import android.app.Flags;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -114,9 +115,16 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
     }
 
     private void resolveThemeTextColors() {
-        mPrimaryTextColor = mContext.getColor(com.android.internal.R.color.materialColorOnSurface);
-        mSecondaryTextColor = mContext.getColor(
-                com.android.internal.R.color.materialColorOnSurfaceVariant);
+        try (TypedArray ta = mContext.getTheme().obtainStyledAttributes(
+                android.R.style.Theme_DeviceDefault_DayNight, new int[]{
+                        com.android.internal.R.attr.materialColorOnSurface,
+                        com.android.internal.R.attr.materialColorOnSurfaceVariant
+                })) {
+            if (ta != null) {
+                mPrimaryTextColor = ta.getColor(0, mPrimaryTextColor);
+                mSecondaryTextColor = ta.getColor(1, mSecondaryTextColor);
+            }
+        }
     }
 
     public void bind(@Nullable CharSequence title, @Nullable CharSequence text,

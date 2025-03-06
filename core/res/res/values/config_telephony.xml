@@ -471,6 +471,12 @@
     <string name="satellite_access_config_file" translatable="false"></string>
     <java-symbol type="string" name="satellite_access_config_file" />
 
+    <!-- A string defines the NIDD (Non-IP Data Delivery) APN to be used for satellite attachment. For more on NIDD,
+         see 3GPP TS 29.542. This config is used for an NTN-only subscription, which requires activation before being used.
+         -->
+    <string name="config_satellite_nidd_apn_name" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_nidd_apn_name" />
+
     <!-- Boolean indicating whether to enable MT SMS polling for NB IOT NTN. -->
     <bool name="config_enabled_mt_sms_polling">true</bool>
     <java-symbol type="bool" name="config_enabled_mt_sms_polling" />
@@ -500,4 +506,10 @@
     <!-- Whether to allow TN scanning during satellite session. -->
     <bool name="config_satellite_allow_tn_scanning_during_satellite_session">true</bool>
     <java-symbol type="bool" name="config_satellite_allow_tn_scanning_during_satellite_session" />
+
+    <!-- List of integer tag Ids representing VZW satellite coverage. -->
+    <integer-array name="config_verizon_satellite_enabled_tagids">
+    </integer-array>
+    <java-symbol type="array" name="config_verizon_satellite_enabled_tagids" />
+
 </resources>

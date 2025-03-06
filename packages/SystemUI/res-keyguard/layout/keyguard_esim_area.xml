@@ -27,8 +27,8 @@
     android:background="@drawable/kg_bouncer_secondary_button"
     android:drawablePadding="10dp"
     android:drawableStart="@drawable/ic_no_sim"
-    android:drawableTint="@androidprv:color/materialColorOnSurface"
+    android:drawableTint="?androidprv:attr/materialColorOnSurface"
     android:text="@string/disable_carrier_button_text"
-    android:textColor="@androidprv:color/materialColorOnSurface"
+    android:textColor="?androidprv:attr/materialColorOnSurface"
     android:textSize="@dimen/kg_status_line_font_size"
     android:visibility="gone" />

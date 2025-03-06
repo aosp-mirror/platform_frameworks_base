@@ -228,7 +228,7 @@
     <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Konfiguratu hatz-marka bidez desblokeatzeko eginbidea"</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Hatz-marka bidez desblokeatzeko eginbidea berriro konfiguratzeko, oraingo hatz-markaren irudiak eta ereduak ezabatu egingo dira lehendabizi.\n\nHaiek ezabatuz gero, hatz-marka bidez desblokeatzeko eginbidea berriro konfiguratu beharko duzu telefonoa hatz-marka erabilita desblokeatzeko edo zeu zarela egiaztatzeko."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Hatz-marka bidez desblokeatzeko eginbidea berriro konfiguratzeko, oraingo hatz-markaren irudiak eta eredua ezabatu egingo dira lehendabizi.\n\nHaiek ezabatuz gero, hatz-marka bidez desblokeatzeko eginbidea berriro konfiguratu beharko duzu telefonoa hatz-marka erabilita desblokeatzeko edo zeu zarela egiaztatzeko."</string>
-    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Ezin izan da konfiguratu hatz-marka bidez desblokeatzeko eginbidea. Berriro saiatzeko, joan ezarpenetara."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Ezin izan da konfiguratu hatz-marka bidez desblokeatzeko eginbidea. Berriro saiatzeko, joan Ezarpenak atalera."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Konfiguratu berriro aurpegi bidez desblokeatzeko eginbidea"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Aurpegi bidez desblokeatzea"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Konfiguratu aurpegi bidez desblokeatzeko eginbidea"</string>
@@ -529,10 +529,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Aplikazio bat widget baten bidez irekitzeko, zeu zarela egiaztatu beharko duzu. Gainera, kontuan izan edonork ikusi ahalko dituela halako widgetak, tableta blokeatuta badago ere. Baliteke widget batzuk pantaila blokeaturako egokiak ez izatea, eta agian ez da segurua haiek bertan gehitzea."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Ados"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgetak"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"Widgetak\" lasterbidea gehitzeko, ziurtatu \"Erakutsi widgetak pantaila blokeatuan\" gaituta dagoela ezarpenetan."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Ezarpenak"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Erakutsi pantaila-babeslearen botoia"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Aldatu erabiltzailea"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"zabaldu menua"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Saioko aplikazio eta datu guztiak ezabatuko dira."</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Jakinarazpenak"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Elkarrizketak"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Garbitu soinurik gabeko jakinarazpen guztiak"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Ireki jakinarazpen-ezarpenak"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Ez molestatzeko moduak pausatu egin ditu jakinarazpenak"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Ez dago jakinarazpenik}=1{Modu honek jakinarazpenak pausatu ditu: {mode}}=2{Modu honek eta beste modu batek jakinarazpenak pausatu dituzte: {mode}}other{Modu honek eta beste # moduk jakinarazpenak pausatu dituzte: {mode}}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Hasi"</string>
@@ -709,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Buruaren jarraipena"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Sakatu tonu-jotzailearen modua aldatzeko"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"tonu-jotzailearen modua"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>. Sakatu tonu-jotzailearen modua aldatzeko."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"desaktibatu audioa"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"aktibatu audioa"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"dardara"</string>
@@ -875,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Blokeatu pantaila"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Egin ohar bat"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Zeregin bat baino gehiago aldi berean exekutatzea"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Erabili pantaila zatitua eta ezarri aplikazio hau eskuinean"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Erabili pantaila zatitua eta ezarri aplikazio hau ezkerrean"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Aldatu pantaila zatitutik pantaila osora"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Erabili pantaila zatitua eta ezarri aplikazio hau eskuinean"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Erabili pantaila zatitua eta ezarri aplikazio hau ezkerrean"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Aldatu pantaila osora"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Aldatu eskuineko edo beheko aplikaziora pantaila zatitua erabiltzean"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Aldatu ezkerreko edo goiko aplikaziora pantaila zatitua erabiltzean"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Pantaila zatituan zaudela, ordeztu aplikazio bat beste batekin"</string>
@@ -1430,20 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Lasterbideak"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Pertsonalizatu lasterbideak"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Lasterbidea kendu nahi duzu?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Balio lehenetsia berrezarri nahi duzu?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Sakatu tekla lasterbidea esleitzeko"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Betiko ezabatuko da lasterbide pertsonalizatua."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Lasterbide pertsonalizatu guztiak betiko ezabatuko dira."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Bilatu lasterbideak"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ez dago bilaketa-emaitzarik"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Tolesteko ikonoa"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ekintzaren edo Meta teklaren ikonoa"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Plus-ikonoa"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Pertsonalizatu"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Berrezarri"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Eginda"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Zabaltzeko ikonoa"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"edo"</string>
@@ -1453,8 +1447,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Teklatuaren ezarpenak"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Ezarri lasterbidea"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Kendu"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Bai, berrezarri"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Utzi"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Sakatu tekla"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Tekla-konbinazio hori erabili da dagoeneko. Probatu beste tekla bat."</string>
@@ -1486,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Sakatu teklatuko ekintza-tekla"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Bikain!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Osatu duzu aplikazio guztiak ikusteko keinua"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Tutorialeko animazioa. Sakatu pausatzeko eta erreproduzitzeari berrekiteko."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Teklatuaren hondoko argia"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d/%2$d maila"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Etxeko gailuen kontrola"</string>

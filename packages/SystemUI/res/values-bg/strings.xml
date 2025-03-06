@@ -529,10 +529,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"За да отворите дадено приложение посредством приспособление, ще трябва да потвърдите, че това сте вие. Също така имайте предвид, че всеки ще вижда приспособленията дори когато таблетът ви е заключен. Възможно е някои от тях да не са предназначени за заключения екран и добавянето им на него може да е опасно."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Разбрах"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Приспособления"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"За да добавите пряк път към „Приспособления“, уверете се, че опцията „Показване на приспособленията на заключения екран“ е активирана в настройките."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Настройки"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Бутон за показване на скрийнсейвъра"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Превключване между потребителите"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"падащо меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Всички приложения и данни в тази сесия ще бъдат изтрити."</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Известия"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Изчистване на всички беззвучни известия"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Отваряне на настройките за известията"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Известията са поставени на пауза от режима „Не безпокойте“"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Няма известия}=1{Известията са поставени на пауза от {mode}}=2{Известията са поставени на пауза от {mode} и един друг режим}other{Известията са поставени на пауза от {mode} и # други режима}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Стартиране сега"</string>
@@ -874,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заключване на екрана"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Създаване на бележка"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Няколко задачи едновременно"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Използване на разделен екран с текущото приложение вдясно"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Използване на разделен екран с текущото приложение вляво"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Превключване от разделен към цял екран"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Използване на разделен екран с приложението вдясно"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Използване на разделен екран с приложението вляво"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Превключване на цял екран"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Превключване към приложението вдясно/отдолу в режима на разделен екран"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Превключване към приложението вляво/отгоре в режима на разделен екран"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"При разделен екран: замяна на дадено приложение с друго"</string>
@@ -1429,20 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Клавишни комбинации"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Персонализиране на клавишните комбинации"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Да се премахне ли клавишната комбинация?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Да се възстановят ли стандартните настройки?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Натиснете клавиш, за да зададете клавишна комбинация"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Това ще изтрие персонализираната клавишна комбинация за постоянно."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Това ще изтрие всичките ви персонализирани преки пътища за постоянно."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Търсете клавишни комбинации"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Няма резултати от търсенето"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за свиване"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Икона на клавиша за действия или клавиша Meta"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Икона на плюс"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Персонализиране"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Нулиране"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Готово"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за разгъване"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
@@ -1452,8 +1447,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Настройки на клавиатурата"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Задаване на клавишна комбинация"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Премахване"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Да, нулиране"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Отказ"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Натиснете клавиш"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Клавишната комбинация вече се използва. Опитайте с друг клавиш."</string>

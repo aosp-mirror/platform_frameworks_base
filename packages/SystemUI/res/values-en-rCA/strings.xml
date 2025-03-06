@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"To add the \"Widgets\" shortcut, make sure \"Show widgets on lock screen\" is enabled in settings."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Settings"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Show screensaver button"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Switch user"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pulldown menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"All apps and data in this session will be deleted."</string>
@@ -871,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lock screen"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Take a note"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Use split screen with current app on the right"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Use split screen with current app on the left"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Switch from split screen to full screen"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Use split screen with app on the right"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Use split screen with app on the left"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Switch to full screen"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Switch to app on right or below while using split screen"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Switch to app on left or above while using split screen"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"During split screen: replace an app from one to another"</string>

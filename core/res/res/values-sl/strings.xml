@@ -288,7 +288,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Nastavitve"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Pomoč"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Glas. pomočnik"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Zakleni"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Zaklep"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999 +"</string>
     <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Odgovori"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Novo obvestilo"</string>

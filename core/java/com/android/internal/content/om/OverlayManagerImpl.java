@@ -36,6 +36,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.res.AssetManager;
+import android.content.res.Flags;
 import android.os.FabricatedOverlayInfo;
 import android.os.FabricatedOverlayInternal;
 import android.os.FabricatedOverlayInternalEntry;
@@ -235,17 +236,24 @@ public class OverlayManagerImpl {
         Preconditions.checkArgument(!entryList.isEmpty(), "overlay entries shouldn't be empty");
         final String overlayName = checkOverlayNameValid(overlayInternal.overlayName);
         checkPackageName(overlayInternal.packageName);
-        Preconditions.checkStringNotEmpty(overlayInternal.targetPackageName);
+        if (Flags.selfTargetingAndroidResourceFrro()) {
+            Preconditions.checkStringNotEmpty(overlayInternal.targetPackageName);
+        } else {
+            checkPackageName(overlayInternal.targetPackageName);
+            Preconditions.checkStringNotEmpty(
+                    overlayInternal.targetOverlayable,
+                    "Target overlayable should be neither null nor empty string.");
+        }
 
         final ApplicationInfo applicationInfo = mContext.getApplicationInfo();
         String targetPackage = null;
-        if (TextUtils.equals(overlayInternal.targetPackageName, "android")) {
+        if (Flags.selfTargetingAndroidResourceFrro() && TextUtils.equals(
+                overlayInternal.targetPackageName, "android")) {
             targetPackage = AssetManager.FRAMEWORK_APK_PATH;
         } else {
             targetPackage = Preconditions.checkStringNotEmpty(
                     applicationInfo.getBaseCodePath());
         }
-
         final Path frroPath = mBasePath.resolve(overlayName + FRRO_EXTENSION);
         final Path idmapPath = mBasePath.resolve(overlayName + IDMAP_EXTENSION);
 

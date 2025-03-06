@@ -73,7 +73,7 @@
   </string-array>
   <string-array name="tile_states_airplane">
     <item msgid="1985366811411407764">"Non disponible"</item>
-    <item msgid="4801037224991420996">"Désactivée"</item>
+    <item msgid="4801037224991420996">"Désactivé"</item>
     <item msgid="1982293347302546665">"Activé"</item>
   </string-array>
   <string-array name="tile_states_location">

@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 
 import androidx.core.graphics.drawable.DrawableCompat;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
 
 /**
@@ -38,7 +39,8 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
 
     private int mPinLength;
     private int mDotDiameter;
-    private int mColor = getContext().getColor(PIN_SHAPES);
+    private int mColor = Utils.getColorAttr(getContext(), PIN_SHAPES)
+            .getDefaultColor();
     private int mPosition = 0;
     private static final int DEFAULT_PIN_LENGTH = 6;
     private PinShapeAdapter mPinShapeAdapter;

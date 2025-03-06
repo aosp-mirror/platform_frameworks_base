@@ -38,6 +38,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -542,15 +543,15 @@ public class BubbleExpandedView extends LinearLayout {
 
     void applyThemeAttrs() {
         final TypedArray ta = mContext.obtainStyledAttributes(new int[]{
-                android.R.attr.dialogCornerRadius});
+                android.R.attr.dialogCornerRadius,
+                com.android.internal.R.attr.materialColorSurfaceBright,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh});
         boolean supportsRoundedCorners = ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
                 mContext.getResources());
         mCornerRadius = supportsRoundedCorners ? ta.getDimensionPixelSize(0, 0) : 0;
-        mBackgroundColorFloating = mContext.getColor(
-                com.android.internal.R.color.materialColorSurfaceBright);
+        mBackgroundColorFloating = ta.getColor(1, Color.WHITE);
         mExpandedViewContainer.setBackgroundColor(mBackgroundColorFloating);
-        final int manageMenuBg = mContext.getColor(
-                com.android.internal.R.color.materialColorSurfaceContainerHigh);
+        final int manageMenuBg = ta.getColor(2, Color.WHITE);
         ta.recycle();
         if (mManageButton != null) {
             mManageButton.getBackground().setColorFilter(manageMenuBg, PorterDuff.Mode.SRC_IN);

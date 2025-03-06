@@ -32,7 +32,7 @@
         android:layout_width="@dimen/keyguard_settings_popup_menu_icon_height"
         android:layout_height="@dimen/keyguard_settings_popup_menu_icon_width"
         android:layout_marginEnd="@dimen/keyguard_settings_popup_menu_icon_end_margin"
-        android:tint="@androidprv:color/materialColorOnSecondaryFixed"
+        android:tint="?androidprv:attr/materialColorOnSecondaryFixed"
         android:importantForAccessibility="no"
         tools:ignore="UseAppTint" />
 
@@ -41,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@androidprv:color/materialColorOnSecondaryFixed"
+        android:textColor="?androidprv:attr/materialColorOnSecondaryFixed"
         android:textSize="14sp"
         android:maxLines="1"
         android:ellipsize="end" />

@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"વિજેટ"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"વિજેટ\"નો શૉર્ટકટ ઉમેરવા માટે, ખાતરી કરો કે સેટિંગમાં \"લૉક સ્ક્રીન પર વિજેટ બતાવો\" સુવિધા ચાલુ કરેલી છે."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"સેટિંગ"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"સ્ક્રીનસેવર બટન બતાવો"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"વપરાશકર્તા સ્વિચ કરો"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"પુલડાઉન મેનૂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ અને ડેટા કાઢી નાખવામાં આવશે."</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"નોટિફિકેશન"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"વાતચીત"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"બધા સાઇલન્ટ નોટિફિકેશન સાફ કરો"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"નોટિફિકેશનના સેટિંગ ખોલો"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ખલેલ પાડશો નહીં દ્વારા થોભાવેલ નોટિફિકેશન"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{કોઈ નોટિફિકેશન નથી}=1{{mode} દ્વારા નોટિફિકેશન થોભાવવામાં આવ્યા}=2{{mode} અને અન્ય એક મોડ દ્વારા નોટિફિકેશન થોભાવવામાં આવ્યા}one{{mode} અને અન્ય # મોડ દ્વારા નોટિફિકેશન થોભાવવામાં આવ્યા}other{{mode} અને અન્ય # મોડ દ્વારા નોટિફિકેશન થોભાવવામાં આવ્યા}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"હવે શરૂ કરો"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"હૅડ ટ્રૅકિંગ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"રિંગર મોડ બદલવા માટે ટૅપ કરો"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"રિંગર મોડ"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, રિંગર મોડ બદલવા માટે ટૅપ કરો"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"મ્યૂટ કરો"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"અનમ્યૂટ કરો"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"વાઇબ્રેટ"</string>
@@ -831,7 +830,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
-    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc કી"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -869,13 +868,13 @@
     <string name="group_system_cycle_back" msgid="8194102916946802902">"તાજેતરની ઍપ પર પાછળ જાઓ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ઍપની સૂચિ ખોલો"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"સેટિંગ ખોલો"</string>
-    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ખોલો"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"આસિસ્ટંટ ખોલો"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"લૉક સ્ક્રીન"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"નોંધ લો"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"એકસાથે એકથી વધુ કાર્યો કરવા"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"જમણી બાજુએ વર્તમાન ઍપ સાથે વિભાજિત સ્ક્રીનનો ઉપયોગ કરો"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ડાબી બાજુએ વર્તમાન ઍપ સાથે વિભાજિત સ્ક્રીનનો ઉપયોગ કરો"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"વિભાજિત સ્ક્રીનથી પૂર્ણ સ્ક્રીન પર સ્વિચ કરો"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"હાલની ઍપને જમણી બાજુએ રાખીને વિભાજિત સ્ક્રીનનો ઉપયોગ કરો"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"હાલની ઍપને ડાબી બાજુએ રાખીને વિભાજિત સ્ક્રીનનો ઉપયોગ કરો"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"પૂર્ણ સ્ક્રીન પર સ્વિચ કરો"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરતી વખતે જમણી બાજુ કે નીચેની ઍપ પર સ્વિચ કરો"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરતી વખતે ડાબી બાજુની કે ઉપરની ઍપ પર સ્વિચ કરો"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"વિભાજિત સ્ક્રીન દરમિયાન: એક ઍપને બીજી ઍપમાં બદલો"</string>
@@ -1058,7 +1057,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"સ્ક્રીન રેકોર્ડિંગ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"કોઈ શીર્ષક નથી"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"સ્ટૅન્ડબાય"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"ફૉન્ટનું કદ"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"ફૉન્ટ સાઇઝ"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"વધુ નાનું બનાવો"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"વધુ મોટું બનાવો"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"વિસ્તૃતીકરણ વિંડો"</string>
@@ -1438,8 +1437,7 @@
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"ઍક્શન અથવા મેટા કીનું આઇકન"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"પ્લસનું આઇકન"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"કસ્ટમાઇઝ કરો"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"રીસેટ કરો"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"થઈ ગયું"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"\'મોટું કરો\'નું આઇકન"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"અથવા"</string>
@@ -1452,7 +1450,7 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"હા, રીસેટ કરો"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"રદ કરો"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"કી દબાવો"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"કી સંયોજન પેહલેથી ઉપયોગમાં છે. અન્ય કી અજમાવી જુઓ."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"કી સંયોજન પહેલેલેથી ઉપયોગમાં છે. અન્ય કી અજમાવી જુઓ."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"શૉર્ટકટ સેટ કરી શકાતો નથી."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"તમારા કીબોર્ડ વડે નૅવિગેટ કરો"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"તમારા કીબોર્ડ પરની ઍક્શન કી દબાવો"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"વાહ!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"તમે \'બધી ઍપ જુઓ\' સંકેત પૂર્ણ કર્યો"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ટ્યૂટૉરિઅલ ઍનિમેશન થોભાવવાનું અને ચલાવવાનું ફરી શરૂ કરવા માટે ક્લિક કરો."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"કીબોર્ડની બૅકલાઇટ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dમાંથી %1$d લેવલ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ઘરેલું સાધનોના નિયંત્રણો"</string>

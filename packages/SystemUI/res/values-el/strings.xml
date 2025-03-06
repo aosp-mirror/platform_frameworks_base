@@ -529,10 +529,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Για να ανοίξετε μια εφαρμογή χρησιμοποιώντας ένα γραφικό στοιχείο, θα πρέπει να επαληθεύσετε την ταυτότητά σας. Επίσης, λάβετε υπόψη ότι η προβολή τους είναι δυνατή από οποιονδήποτε, ακόμα και όταν το tablet σας είναι κλειδωμένο. Ορισμένα γραφικά στοιχεία μπορεί να μην προορίζονται για την οθόνη κλειδώματος και η προσθήκη τους εδώ ενδέχεται να μην είναι ασφαλής."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Το κατάλαβα"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Για να προσθέσετε τη συντόμευση Γραφικά στοιχεία, βεβαιωθείτε ότι η ρύθμιση Εμφάνιση γραφικών στοιχείων στην οθόνη κλειδώματος είναι ενεργοποιημένη στις ρυθμίσεις."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Ρυθμίσεις"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Εμφάνιση κουμπιού προφύλαξης οθόνης"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Εναλλαγή χρήστη"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"αναπτυσσόμενο μενού"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Όλες οι εφαρμογές και τα δεδομένα αυτής της περιόδου σύνδεσης θα διαγραφούν."</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Ειδοποιήσεις"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Συζητήσεις"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Διαγραφή όλων των ειδοποιήσεων σε σίγαση"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Άνοιγμα ρυθμίσεων ειδοποιήσεων"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Οι ειδοποιήσεις τέθηκαν σε παύση από τη λειτουργία \"Μην ενοχλείτε\""</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Δεν υπάρχουν ειδοποιήσεις}=1{Οι ειδοποιήσεις τέθηκαν σε παύση από τη λειτουργία {mode}}=2{Οι ειδοποιήσεις τέθηκαν σε παύση από τη λειτουργία {mode} και μία άλλη λειτουργία}other{Οι ειδοποιήσεις τέθηκαν σε παύση από τη λειτουργία {mode} και # άλλες λειτουργίες}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Έναρξη τώρα"</string>
@@ -709,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Παρακ. κίνησ. κεφαλής"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Πατήστε για να αλλάξετε τη λειτουργία ειδοποίησης ήχου"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"λειτουργία ειδοποίησης ήχου"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, πατήστε για αλλαγή της λειτουργίας ειδοποίησης ήχου"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"σίγαση"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"κατάργηση σίγασης"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"δόνηση"</string>
@@ -875,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Κλείδωμα οθόνης"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Δημιουργία σημείωσης"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Πολυδιεργασία"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Χρήση διαχωρισμού οθόνης με την τρέχουσα εφαρμογή στα δεξιά"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Χρήση διαχωρισμού οθόνης με την τρέχουσα εφαρμογή στα αριστερά"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Εναλλαγή από διαχωρισμό οθόνης σε πλήρη οθόνη"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Χρήση διαχωρισμού οθόνης με την εφαρμογή στα δεξιά"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Χρήση διαχωρισμού οθόνης με την εφαρμογή στα αριστερά"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Εναλλαγή σε πλήρη οθόνη"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Εναλλαγή στην εφαρμογή δεξιά ή κάτω κατά τη χρήση διαχωρισμού οθόνης"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Εναλλαγή σε εφαρμογή αριστερά ή επάνω κατά τη χρήση διαχωρισμού οθόνης"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Κατά τον διαχωρισμό οθόνης: αντικατάσταση μιας εφαρμογής με άλλη"</string>
@@ -1430,20 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Συντομεύσεις πληκτρολογίου"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Προσαρμογή συντομεύσεων πληκτρολογίου"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Κατάργηση συντόμευσης;"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Επαναφορά στις προεπιλογές;"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Πατήστε το πλήκτρο για ανάθεση της συντόμευσης"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Με αυτή την ενέργεια, η προσαρμοσμένη συντόμευση θα διαγραφεί οριστικά."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Με αυτή την ενέργεια θα διαγραφούν οριστικά όλες οι προσαρμοσμένες συντομεύσεις."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Συντομεύσεις αναζήτησης"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Κανένα αποτέλεσμα αναζήτησης"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Εικονίδιο σύμπτυξης"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Εικονίδιο πλήκτρου ενέργειας ή Meta"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Εικονίδιο συν"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Προσαρμογή"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Επαναφορά"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Τέλος"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Εικονίδιο ανάπτυξης"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ή"</string>
@@ -1453,8 +1447,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Ρυθμίσεις πληκτρολογίου"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Ορισμός συντόμευσης"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Κατάργηση"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Ναι, επαναφορά"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Ακύρωση"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Πατήστε ένα πλήκτρο"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Ο συνδυασμός πλήκτρων χρησιμοποιείται ήδη. Δοκιμάστε άλλο πλήκτρο."</string>
@@ -1486,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Πατήστε το πλήκτρο ενέργειας στο πληκτρολόγιό σας"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Μπράβο!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Ολοκληρώσατε την κίνηση για την προβολή όλων των εφαρμογών"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Κινούμενη εικόνα οδηγού, κάντε κλικ για παύση και συνέχιση της αναπαραγωγής."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Οπίσθιος φωτισμός πληκτρολογίου"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Επίπεδο %1$d από %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Οικιακοί έλεγχοι"</string>

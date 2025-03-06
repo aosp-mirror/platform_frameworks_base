@@ -22,6 +22,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
@@ -1518,9 +1519,10 @@ public class NotificationChildrenContainer extends ViewGroup
         int color = mContainingNotification.getNotificationColor();
         Resources.Theme theme = new ContextThemeWrapper(mContext,
                 com.android.internal.R.style.Theme_DeviceDefault_DayNight).getTheme();
-
-        color = mContext.getColor(com.android.internal.R.color.materialColorPrimary);
-
+        try (TypedArray ta = theme.obtainStyledAttributes(
+                new int[]{com.android.internal.R.attr.materialColorPrimary})) {
+            color = ta.getColor(0, color);
+        }
         mHybridGroupManager.setOverflowNumberColor(mOverflowNumber, color);
     }
 

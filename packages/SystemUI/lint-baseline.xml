@@ -26857,8 +26857,8 @@
 
     <issue
         id="Overdraw"
-        message="Possible overdraw: Root element paints background `@androidprv:color/materialColorOnSurfaceVariant` with a theme that also paints a background (inferred theme is `@style/Theme.SystemUI`)"
-        errorLine1="    android:background=&quot;@androidprv:color/materialColorOnSurfaceVariant&quot; />"
+        message="Possible overdraw: Root element paints background `?androidprv:attr/materialColorOnSurfaceVariant` with a theme that also paints a background (inferred theme is `@style/Theme.SystemUI`)"
+        errorLine1="    android:background=&quot;?androidprv:attr/materialColorOnSurfaceVariant&quot; />"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SystemUI/res/layout/notification_children_divider.xml"
@@ -26868,8 +26868,8 @@
 
     <issue
         id="Overdraw"
-        message="Possible overdraw: Root element paints background `@androidprv:color/materialColorSurfaceContainerHigh` with a theme that also paints a background (inferred theme is `@style/Theme.SystemUI`)"
-        errorLine1="    android:background=&quot;@androidprv:color/materialColorSurfaceContainerHigh&quot;"
+        message="Possible overdraw: Root element paints background `?androidprv:attr/materialColorSurfaceContainerHigh` with a theme that also paints a background (inferred theme is `@style/Theme.SystemUI`)"
+        errorLine1="    android:background=&quot;?androidprv:attr/materialColorSurfaceContainerHigh&quot;"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SystemUI/res/layout/notification_snooze.xml"

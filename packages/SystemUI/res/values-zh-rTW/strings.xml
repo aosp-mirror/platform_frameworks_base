@@ -529,10 +529,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"如要使用小工具開啟應用程式，需先驗證身分。請留意，即使平板電腦已鎖定，所有人都還是能查看小工具。某些小工具可能不適用於螢幕鎖定畫面，新增到此可能會有安全疑慮。"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"我知道了"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"小工具"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"如要新增「小工具」捷徑，請務必前往設定啟用「在螢幕鎖定畫面上顯示小工具」。"</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"設定"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"顯示螢幕保護程式按鈕"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切換使用者"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉式選單"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會刪除。"</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"對話"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有靜音通知"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"開啟通知設定"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"「零打擾」模式已將通知設為暫停"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{沒有通知}=1{「{mode}」模式已將通知設為暫停}=2{「{mode}」和另一個模式已將通知設為暫停}other{「{mode}」和另外 # 個模式已將通知設為暫停}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即開始"</string>
@@ -709,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"頭部追蹤"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"輕觸即可變更鈴聲模式"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"鈴聲模式"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>，輕觸即可變更鈴聲模式"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"靜音"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"取消靜音"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"震動"</string>
@@ -875,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"螢幕鎖定"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"新增記事"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"多工處理"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"使用分割畫面，並在右側顯示目前使用的應用程式"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"使用分割畫面，並在左側顯示目前使用的應用程式"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"從分割畫面切換到完整畫面"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"使用分割畫面，並在右側顯示應用程式"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"使用分割畫面，並在左側顯示應用程式"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"切換至全螢幕模式"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"使用分割畫面時，切換到右邊或上方的應用程式"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"使用分割畫面時，切換到左邊或上方的應用程式"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"使用分割畫面期間：更換應用程式"</string>
@@ -1430,20 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"鍵盤快速鍵"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"自訂鍵盤快速鍵"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"要移除快速鍵嗎？"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"要重設為預設值嗎？"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"按下按鍵即可指派快速鍵"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"這項操作會永久刪除自訂快速鍵。"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"這麼做會永久刪除所有快速鍵。"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"搜尋快速鍵"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"找不到相符的搜尋結果"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收合圖示"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"快捷操作鍵或修飾鍵圖示"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"加號圖示"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"自訂"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"重設"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"完成"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"展開圖示"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"或"</string>
@@ -1453,11 +1447,10 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"鍵盤設定"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"設定快速鍵"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"移除"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"是，請重設"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"取消"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"按下按鍵"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"這個按鍵組合已在使用中，請改用其他按鍵。"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"按鍵組合重複，請改用其他按鍵。"</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"無法設定捷徑。"</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"使用鍵盤操作"</string>
@@ -1486,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"按下鍵盤上的快捷操作鍵"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"非常好！"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"你已完成「查看所有應用程式」手勢教學課程"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"教學課程動畫，按一下即可暫停和繼續播放。"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"鍵盤背光"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 級，共 %2$d 級"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"居家控制"</string>

@@ -47,18 +47,18 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.UninstallEventReceiver;
 import com.android.packageinstaller.handheld.ErrorDialogFragment;
 import com.android.packageinstaller.handheld.UninstallAlertDialogFragment;
 import com.android.packageinstaller.television.ErrorFragment;
 import com.android.packageinstaller.television.UninstallAlertFragment;
 import com.android.packageinstaller.television.UninstallAppProgress;
-import com.android.packageinstaller.common.EventResultPersister;
-import com.android.packageinstaller.common.UninstallEventReceiver;
 import com.android.packageinstaller.v2.ui.UninstallLaunch;
-
-import java.util.List;
 
 /*
  * This activity presents UI to uninstall an application. Usually launched with intent
@@ -181,12 +181,15 @@ public class UninstallerActivity extends Activity {
         if (mDialogInfo.user == null) {
             mDialogInfo.user = Process.myUserHandle();
         } else {
-            List<UserHandle> profiles = userManager.getUserProfiles();
-            if (!profiles.contains(mDialogInfo.user)) {
-                Log.e(TAG, "User " + Process.myUserHandle() + " can't request uninstall "
-                        + "for user " + mDialogInfo.user);
-                showUserIsNotAllowed();
-                return;
+            if (mDialogInfo.user != Process.myUserHandle()) {
+                final boolean isCurrentUserProfileOwner =
+                        (Process.myUserHandle() == userManager.getProfileParent(mDialogInfo.user));
+                if (!isCurrentUserProfileOwner) {
+                    Log.e(TAG, "User " + Process.myUserHandle() + " can't request uninstall "
+                            + "for user " + mDialogInfo.user);
+                    showUserIsNotAllowed();
+                    return;
+                }
             }
         }
 

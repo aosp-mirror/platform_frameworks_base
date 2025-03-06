@@ -39,6 +39,6 @@
         android:ellipsize="marquee"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@androidprv:color/materialColorError" />
+        android:textColor="?androidprv:attr/materialColorError" />
 
 </LinearLayout>

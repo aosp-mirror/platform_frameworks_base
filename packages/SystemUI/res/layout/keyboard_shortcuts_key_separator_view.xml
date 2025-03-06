@@ -22,7 +22,7 @@
     android:layout_marginLeft="0dp"
     android:layout_marginRight="0dp"
     android:text="@string/keyboard_shortcut_join"
-    android:textColor="@androidprv:color/materialColorOnSurfaceVariant"
+    android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
     android:singleLine="true"
     android:gravity="center"
     android:textSize="@dimen/ksh_item_text_size" />

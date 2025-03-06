@@ -114,3 +114,11 @@ flag {
     bug: "373535266"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "self_targeting_android_resource_frro"
+    is_exported: true
+    namespace: "customization_picker"
+    description: "Fixes bug in Launcher preview by enabling overlays targeting 'android'"
+    bug: "377545987"
+}

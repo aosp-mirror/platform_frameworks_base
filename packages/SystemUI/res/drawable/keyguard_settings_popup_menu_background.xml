@@ -26,7 +26,7 @@
     </item>
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@androidprv:color/materialColorSecondaryFixed" />
+            <solid android:color="?androidprv:attr/materialColorSecondaryFixed" />
             <corners android:radius="@dimen/keyguard_affordance_fixed_radius" />
         </shape>
     </item>
