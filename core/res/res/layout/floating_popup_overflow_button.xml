@@ -26,4 +26,4 @@
     android:paddingBottom="@dimen/floating_toolbar_menu_image_button_vertical_padding"
     android:scaleType="centerInside"
     android:background="?attr/actionBarItemBackground"
-    android:tint="@androidprv:color/materialColorOnSurface" />
+    android:tint="?androidprv:attr/materialColorOnSurface" />

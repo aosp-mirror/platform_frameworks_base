@@ -22,6 +22,6 @@
     android:height="@dimen/settingslib_switch_track_height">
     <padding android:left="@dimen/settingslib_switch_thumb_margin"
              android:right="@dimen/settingslib_switch_thumb_margin"/>
-    <solid android:color="@androidprv:color/materialColorPrimary"/>
+    <solid android:color="?androidprv:attr/materialColorPrimary"/>
     <corners android:radius="@dimen/settingslib_switch_track_radius"/>
 </shape>

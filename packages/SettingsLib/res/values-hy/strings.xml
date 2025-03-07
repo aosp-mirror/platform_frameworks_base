@@ -239,7 +239,7 @@
     <string name="category_work" msgid="4014193632325996115">"Աշխատանքային"</string>
     <string name="category_private" msgid="4244892185452788977">"Մասնավոր"</string>
     <string name="category_clone" msgid="1554511758987195974">"Կլոն"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Մշակողի ընտրանքներ"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Ծրագրավորողի ընտրանքներ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Միացնել մշակողի ընտրանքները"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Կարգավորել ընտրանքները ծրագրի ծրագրավորման համար"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Ծրագրավորման ընտրանքներն այլևս հասանելի չեն այս օգտատիրոջ"</string>

@@ -24,8 +24,8 @@
     android:viewportHeight="24">
   <path
       android:pathData="M0,12C0,5.3726 5.3726,0 12,0C18.6274,0 24,5.3726 24,12C24,18.6274 18.6274,24 12,24C5.3726,24 0,18.6274 0,12Z"
-      android:fillColor="@androidprv:color/materialColorSurfaceContainerHigh"/>
+      android:fillColor="?androidprv:attr/materialColorSurfaceContainerHigh"/>
   <path
       android:pathData="M16.3934,14.9393L17.3334,13.9993L12.0001,8.666L6.6667,13.9993L7.6068,14.9393L12.0001,10.5527"
-      android:fillColor="@androidprv:color/materialColorOnSurface"/>
+      android:fillColor="?androidprv:attr/materialColorOnSurface"/>
 </vector>

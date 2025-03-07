@@ -17,5 +17,5 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle">
     <corners android:radius="@dimen/volume_dialog_background_square_corner_radius" />
-    <solid android:color="@androidprv:color/materialColorSurface" />
+    <solid android:color="?androidprv:attr/materialColorSurface" />
 </shape>

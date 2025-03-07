@@ -28,6 +28,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -208,7 +209,7 @@ public class BubbleFlyoutView extends FrameLayout {
                         mPointerSize, mPointerSize, false /* isPointingLeft */));
         mRightTriangleShape.setBounds(0, 0, mPointerSize, mPointerSize);
 
-        applyConfigurationColors();
+        applyConfigurationColors(getResources().getConfiguration());
     }
 
     @Override
@@ -439,23 +440,29 @@ public class BubbleFlyoutView extends FrameLayout {
         boolean flagsChanged = nightModeFlags != mNightModeFlags;
         if (flagsChanged) {
             mNightModeFlags = nightModeFlags;
-            applyConfigurationColors();
+            applyConfigurationColors(configuration);
         }
         return flagsChanged;
     }
 
-    private void applyConfigurationColors() {
-        mFloatingBackgroundColor = mContext.getColor(
-                com.android.internal.R.color.materialColorSurfaceContainer);
-        mSenderText.setTextColor(
-                mContext.getColor(com.android.internal.R.color.materialColorOnSurface));
-        mMessageText.setTextColor(
-                mContext.getColor(com.android.internal.R.color.materialColorOnSurfaceVariant));
-
-        mBgPaint.setColor(mFloatingBackgroundColor);
-        mLeftTriangleShape.getPaint().setColor(mFloatingBackgroundColor);
-        mRightTriangleShape.getPaint().setColor(mFloatingBackgroundColor);
-
+    private void applyConfigurationColors(Configuration configuration) {
+        int nightModeFlags = configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean isNightModeOn = nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+        try (TypedArray ta = mContext.obtainStyledAttributes(
+                new int[]{
+                        com.android.internal.R.attr.materialColorSurfaceContainer,
+                        com.android.internal.R.attr.materialColorOnSurface,
+                        com.android.internal.R.attr.materialColorOnSurfaceVariant})) {
+            mFloatingBackgroundColor = ta.getColor(0,
+                    isNightModeOn ? Color.BLACK : Color.WHITE);
+            mSenderText.setTextColor(ta.getColor(1,
+                    isNightModeOn ? Color.WHITE : Color.BLACK));
+            mMessageText.setTextColor(ta.getColor(2,
+                    isNightModeOn ? Color.WHITE : Color.BLACK));
+            mBgPaint.setColor(mFloatingBackgroundColor);
+            mLeftTriangleShape.getPaint().setColor(mFloatingBackgroundColor);
+            mRightTriangleShape.getPaint().setColor(mFloatingBackgroundColor);
+        }
     }
 
     /**

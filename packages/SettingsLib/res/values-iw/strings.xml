@@ -64,7 +64,7 @@
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"‏מחובר אוטומטית דרך %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"מחובר אוטומטית דרך ספק של דירוג רשת"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"מחוברת באמצעות <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="tap_to_sign_up" msgid="5356397741063740395">"יש להקיש כדי להירשם"</string>
+    <string name="tap_to_sign_up" msgid="5356397741063740395">"יש ללחוץ כדי להירשם"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"אין אינטרנט"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"‏לא ניתן לגשת לשרת DNS הפרטי"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"חיבור מוגבל"</string>
@@ -74,7 +74,7 @@
     <string name="osu_opening_provider" msgid="4318105381295178285">"מתבצעת פתיחה של <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"לא ניתן היה להתחבר"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"מתבצעת השלמה של ההרשמה…"</string>
-    <string name="osu_sign_up_failed" msgid="5605453599586001793">"לא ניתן היה להשלים את ההרשמה. יש להקיש כדי לנסות שוב."</string>
+    <string name="osu_sign_up_failed" msgid="5605453599586001793">"לא ניתן היה להשלים את ההרשמה. יש ללחוץ כדי לנסות שוב."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"תהליך ההרשמה הסתיים. בתהליך התחברות…"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"איטית"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"אישור"</string>
@@ -278,7 +278,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏יש להתחבר לרשת Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb, ניפוי באגים, פיתוח"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"קיצור דרך לדוח באגים"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"הצגת לחצן ליצירת דוח על באג בתפריט ההפעלה"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"הצגת כפתור ליצירת דוח על באג בתפריט ההפעלה"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"ללא כניסה למצב שינה"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"המסך לעולם לא יהיה במצב שינה במהלך טעינה"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"‏הפעלת Snoop Log של Bluetooth HCI"</string>
@@ -379,8 +379,8 @@
     <string name="strict_mode_summary" msgid="1838248687233554654">"‏המסך יהבהב כשאפליקציות יבצעו פעולות ארוכות ב-thread הראשי"</string>
     <string name="pointer_location" msgid="7516929526199520173">"מיקום מצביע"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"שכבת-על של המסך המציגה את נתוני המגע הנוכחיים"</string>
-    <string name="show_touches" msgid="8437666942161289025">"הצגת הקשות"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"הצגת משוב ויזואלי להקשות"</string>
+    <string name="show_touches" msgid="8437666942161289025">"הצגת לחיצות"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"הצגת משוב ויזואלי ללחיצות"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"הצגת לחיצות המקשים"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"הצגת משוב חזותי עבור לחיצות פיזיות על מקשים"</string>
     <string name="touchpad_visualizer" msgid="3707916068870825115">"הצגת הקלט של לוח המגע"</string>
@@ -438,7 +438,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"הפעלת מצב חופשי (חלונות צפים)"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"סיסמת גיבוי שולחן העבודה"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"גיבויים מלאים בשולחן העבודה אינם מוגנים כעת"</string>
-    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"יש להקיש כדי לשנות או להסיר את הסיסמה לגיבויים מלאים בשולחן העבודה"</string>
+    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"יש ללחוץ כדי לשנות או להסיר את הסיסמה לגיבויים מלאים בשולחן העבודה"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"הוגדרה סיסמת גיבוי חדשה"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"הסיסמה החדשה והאישור אינם תואמים"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"הגדרת סיסמת גיבוי נכשלה"</string>
@@ -454,8 +454,8 @@
     <item msgid="1282170165150762976">"צבעים מותאמים באופן אופטימלי לתוכן דיגיטלי"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"אפליקציות בהמתנה"</string>
-    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"אפליקציה לא פעילה. יש להקיש כדי להחליף מצב."</string>
-    <string name="inactive_app_active_summary" msgid="8047630990208722344">"אפליקציה פעילה. יש להקיש כדי להחליף מצב."</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"אפליקציה לא פעילה. יש ללחוץ כדי להחליף מצב."</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"אפליקציה פעילה. יש ללחוץ כדי להחליף מצב."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"אפליקציה במצב המתנה:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"הגדרות של המרת קידוד למדיה"</string>
     <string name="transcode_user_control" msgid="6176368544817731314">"ביטול ברירות המחדל של המרת קידוד"</string>

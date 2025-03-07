@@ -79,7 +79,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"مکالمه‌های جدید به‌صورت نمادهای شناور یا حبابک‌ها نشان داده می‌شوند. برای باز کردن حبابک‌ها تک‌ضرب بزنید. برای جابه‌جایی، آن را بکشید."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"کنترل حبابک‌ها در هرزمانی"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"برای خاموش کردن حبابک‌ها از این برنامه، روی «مدیریت» تک‌ضرب بزنید"</string>
-    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"متوجه‌ام"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"متوجهم"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"هیچ حبابک جدیدی وجود ندارد"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"حبابک‌های اخیر و حبابک‌های ردشده اینجا ظاهر خواهند شد"</string>
     <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"گپ زدن بااستفاده از حبابک"</string>
@@ -103,7 +103,7 @@
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"از چندین برنامه به‌طور هم‌زمان استفاده کنید"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"برای حالت صفحهٔ دونیمه، در برنامه‌ای دیگر بکشید"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"برای جابه‌جا کردن برنامه، بیرون از آن دو تک‌ضرب بزنید"</string>
-    <string name="letterbox_education_got_it" msgid="4057634570866051177">"متوجه‌ام"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"متوجهم"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"برای اطلاعات بیشتر، گسترده کنید."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"برای نمایش بهتر بازراه‌اندازی شود؟"</string>
     <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"می‌توانید برنامه را بازراه‌اندازی کنید تا بهتر روی صفحه‌نمایش نشان داده شود، اما ممکن است پیشرفت یا تغییرات ذخیره‌نشده را ازدست بدهید"</string>

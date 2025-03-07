@@ -23,6 +23,7 @@ import android.content.res.Resources
 import android.graphics.Point
 import android.os.SystemProperties
 import android.util.Slog
+import androidx.core.content.withStyledAttributes
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.desktopmode.CaptionState
@@ -298,12 +299,31 @@ class AppHandleEducationController(
     }
 
     private fun tooltipColorScheme(captionState: CaptionState): TooltipColorScheme {
-        val onTertiaryFixed =
-            context.getColor(com.android.internal.R.color.materialColorOnTertiaryFixed)
-        val tertiaryFixed =
-            context.getColor(com.android.internal.R.color.materialColorTertiaryFixed)
+        context.withStyledAttributes(
+            set = null,
+            attrs =
+                intArrayOf(
+                    com.android.internal.R.attr.materialColorOnTertiaryFixed,
+                    com.android.internal.R.attr.materialColorTertiaryFixed,
+                    com.android.internal.R.attr.materialColorTertiaryFixedDim,
+                ),
+            defStyleAttr = 0,
+            defStyleRes = 0,
+        ) {
+            val onTertiaryFixed = getColor(/* index= */ 0, /* defValue= */ 0)
+            val tertiaryFixed = getColor(/* index= */ 1, /* defValue= */ 0)
+            val tertiaryFixedDim = getColor(/* index= */ 2, /* defValue= */ 0)
+            val taskInfo = (captionState as CaptionState.AppHandle).runningTaskInfo
 
-        return TooltipColorScheme(tertiaryFixed, onTertiaryFixed, onTertiaryFixed)
+            val tooltipContainerColor =
+                if (decorThemeUtil.getAppTheme(taskInfo) == Theme.LIGHT) {
+                    tertiaryFixed
+                } else {
+                    tertiaryFixedDim
+                }
+            return TooltipColorScheme(tooltipContainerColor, onTertiaryFixed, onTertiaryFixed)
+        }
+        return TooltipColorScheme(0, 0, 0)
     }
 
     /**

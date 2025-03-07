@@ -25,7 +25,7 @@
             <shape>
                 <size android:height="@dimen/rounded_slider_track_width" />
                 <corners android:radius="@dimen/rounded_slider_track_corner_radius" />
-                <solid android:color="@androidprv:color/customColorShadeInactive" />
+                <solid android:color="?androidprv:attr/customColorShadeInactive" />
             </shape>
         </inset>
     </item>

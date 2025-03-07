@@ -12,6 +12,7 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.util.LatencyTracker
+import com.android.settingslib.Utils
 import com.android.systemui.navigationbar.gestural.BackPanelController.DelayedOnAnimationEndListener
 
 private const val TAG = "BackPanel"
@@ -155,21 +156,23 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
                 Configuration.UI_MODE_NIGHT_YES
 
         arrowPaint.color =
-            context.getColor(
+            Utils.getColorAttrDefaultColor(
+                context,
                 if (isDeviceInNightTheme) {
-                    com.android.internal.R.color.materialColorOnSecondaryContainer
+                    com.android.internal.R.attr.materialColorOnSecondaryContainer
                 } else {
-                    com.android.internal.R.color.materialColorOnSecondaryFixed
-                }
+                    com.android.internal.R.attr.materialColorOnSecondaryFixed
+                },
             )
 
         arrowBackgroundPaint.color =
-            context.getColor(
+            Utils.getColorAttrDefaultColor(
+                context,
                 if (isDeviceInNightTheme) {
-                    com.android.internal.R.color.materialColorSecondaryContainer
+                    com.android.internal.R.attr.materialColorSecondaryContainer
                 } else {
-                    com.android.internal.R.color.materialColorSecondaryFixedDim
-                }
+                    com.android.internal.R.attr.materialColorSecondaryFixedDim
+                },
             )
     }
 

@@ -34,8 +34,8 @@
     <string name="dock_forced_resizable" msgid="7429086980048964687">"App sal dalk nie met verdeelde skerm werk nie"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"App steun nie verdeelde skerm nie"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Hierdie app kan net in 1 venster oopgemaak word"</string>
-    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Program sal dalk nie op \'n sekondêre skerm werk nie."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Program steun nie begin op sekondêre skerms nie."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"App sal dalk nie op \'n sekondêre skerm werk nie."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"App steun nie begin op sekondêre skerms nie."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Skermverdeler"</string>
     <string name="divider_title" msgid="1963391955593749442">"Skermverdeler"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Volskerm links"</string>
@@ -78,7 +78,7 @@
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Klets met borrels"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nuwe gesprekke verskyn as swerwende ikone, of borrels Tik op borrel om dit oop te maak. Sleep om dit te skuif."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Beheer borrels enige tyd"</string>
-    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tik op Bestuur om borrels vanaf hierdie program af te skakel"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tik op Bestuur om borrels vanaf hierdie app af te skakel"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Het dit"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Geen onlangse borrels nie"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Onlangse borrels en borrels wat toegemaak is, sal hier verskyn"</string>

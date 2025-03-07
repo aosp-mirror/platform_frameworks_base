@@ -127,8 +127,8 @@
                 android:layout_height="match_parent"
                 android:layout_margin="@dimen/overlay_dismiss_button_margin"
                 android:background="@drawable/circular_background"
-                android:backgroundTint="@androidprv:color/materialColorPrimary"
-                android:tint="@androidprv:color/materialColorOnPrimary"
+                android:backgroundTint="?androidprv:attr/materialColorPrimary"
+                android:tint="?androidprv:attr/materialColorOnPrimary"
                 android:padding="4dp"
                 android:src="@drawable/ic_close"/>
         </FrameLayout>

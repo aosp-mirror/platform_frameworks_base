@@ -529,10 +529,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Pentru a deschide o aplicație folosind un widget, va trebui să-ți confirmi identitatea. În plus, reține că oricine poate să vadă widgeturile, chiar dacă tableta este blocată. Este posibil ca unele widgeturi să nu fi fost create pentru ecranul de blocare și poate fi nesigur să le adaugi aici."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgeturi"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Pentru a adăuga comanda rapidă Widgeturi, verifică dacă opțiunea Afișează widgeturi pe ecranul de blocare este activată în setări."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Setări"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Butonul Afișează screensaverul"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Schimbă utilizatorul"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"meniu vertical"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Toate aplicațiile și datele din această sesiune vor fi șterse."</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificări"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversații"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Șterge toate notificările silențioase"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Deschide setările pentru notificări"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificări întrerupte prin „Nu deranja”"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Nicio notificare}=1{Notificările au fost întrerupte de {mode}}=2{Notificările au fost întrerupte de {mode} și de un alt mod}few{Notificările au fost întrerupte de {mode} și de alte # moduri}other{Notificările au fost întrerupte de {mode} și de alte # de moduri}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Începe acum"</string>
@@ -709,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Urmărirea mișcărilor capului"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Atinge pentru a schimba modul soneriei"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"modul sonerie"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, atinge pentru a schimba modul soneriei"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"dezactivează sunetul"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"activează sunetul"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrații"</string>
@@ -875,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Ecranul de blocare"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Creează o notă"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Folosește ecranul împărțit cu aplicația curentă în dreapta"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Folosește ecranul împărțit cu aplicația curentă în stânga"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Comută de la ecranul împărțit la ecranul complet"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Folosește ecranul împărțit cu aplicația în dreapta"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Folosește ecranul împărțit cu aplicația în stânga"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Treci la ecran complet"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Treci la aplicația din dreapta sau de mai jos cu ecranul împărțit"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Treci la aplicația din stânga sau de mai sus cu ecranul împărțit"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"În modul ecran împărțit: înlocuiește o aplicație cu alta"</string>
@@ -1430,20 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Comenzi rapide de la tastatură"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personalizează comenzile rapide de la tastatură"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Elimini comanda rapidă?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Resetezi la valorile prestabilite?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Apasă tasta pentru a atribui comanda rapidă"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Astfel, se va șterge definitiv comanda rapidă personalizată."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Astfel, se vor șterge definitiv toate comenzile rapide personalizate."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Comenzi directe de căutare"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Niciun rezultat al căutării"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Pictograma de restrângere"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Pictograma pentru acțiune sau tastă Meta"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Pictograma plus"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personalizează"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Resetează"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Gata"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Pictograma de extindere"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"sau"</string>
@@ -1453,8 +1447,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Setările tastaturii"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Setează o comandă rapidă"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Elimină"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Resetează"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Anulează"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Apasă tasta"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Combinația de taste este deja folosită. Încearcă altă tastă."</string>
@@ -1486,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Apasă tasta de acțiuni de pe tastatură"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Felicitări!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Ai finalizat gestul pentru afișarea tuturor aplicațiilor"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Tutorial animat, dă clic pentru a întrerupe și a relua redarea."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Iluminarea din spate a tastaturii"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivelul %1$d din %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Comenzi pentru locuință"</string>

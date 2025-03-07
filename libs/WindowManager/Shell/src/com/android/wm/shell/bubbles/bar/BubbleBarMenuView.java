@@ -18,6 +18,7 @@ package com.android.wm.shell.bubbles.bar;
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
@@ -90,11 +91,14 @@ public class BubbleBarMenuView extends LinearLayout {
     }
 
     private void updateThemeColors() {
-        mActionsSectionView.getBackground().setTint(
-                mContext.getColor(com.android.internal.R.color.materialColorSurfaceBright));
-        ImageViewCompat.setImageTintList(mBubbleDismissIconView,
-                ColorStateList.valueOf(
-                        mContext.getColor(com.android.internal.R.color.materialColorOnSurface)));
+        try (TypedArray ta = mContext.obtainStyledAttributes(new int[]{
+                com.android.internal.R.attr.materialColorSurfaceBright,
+                com.android.internal.R.attr.materialColorOnSurface
+        })) {
+            mActionsSectionView.getBackground().setTint(ta.getColor(0, Color.WHITE));
+            ImageViewCompat.setImageTintList(mBubbleDismissIconView,
+                    ColorStateList.valueOf(ta.getColor(1, Color.BLACK)));
+        }
     }
 
     /** Animates the menu from the specified start scale. */

@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyboard.backlight.ui.view
 
+import android.annotation.AttrRes
 import android.annotation.ColorInt
 import android.app.Dialog
 import android.content.Context
@@ -37,6 +38,7 @@ import android.widget.LinearLayout.LayoutParams
 import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
 import androidx.annotation.IdRes
 import androidx.core.view.setPadding
+import com.android.settingslib.Utils
 import com.android.systemui.res.R
 
 class KeyboardBacklightDialog(
@@ -78,25 +80,25 @@ class KeyboardBacklightDialog(
 
     @ColorInt
     private val filledRectangleColor =
-        context.getColor(com.android.internal.R.color.materialColorPrimary)
+        getColorFromStyle(com.android.internal.R.attr.materialColorPrimary)
     @ColorInt
     private val emptyRectangleColor =
-        context.getColor(com.android.internal.R.color.materialColorOutlineVariant)
+        getColorFromStyle(com.android.internal.R.attr.materialColorOutlineVariant)
     @ColorInt
     private val backgroundColor =
-        context.getColor(com.android.internal.R.color.materialColorSurfaceBright)
+        getColorFromStyle(com.android.internal.R.attr.materialColorSurfaceBright)
     @ColorInt
     private val defaultIconColor =
-        context.getColor(com.android.internal.R.color.materialColorOnPrimary)
+        getColorFromStyle(com.android.internal.R.attr.materialColorOnPrimary)
     @ColorInt
     private val defaultIconBackgroundColor =
-        context.getColor(com.android.internal.R.color.materialColorPrimary)
+        getColorFromStyle(com.android.internal.R.attr.materialColorPrimary)
     @ColorInt
     private val dimmedIconColor =
-        context.getColor(com.android.internal.R.color.materialColorOnSurface)
+        getColorFromStyle(com.android.internal.R.attr.materialColorOnSurface)
     @ColorInt
     private val dimmedIconBackgroundColor =
-        context.getColor(com.android.internal.R.color.materialColorSurfaceDim)
+        getColorFromStyle(com.android.internal.R.attr.materialColorSurfaceDim)
 
     private val levelContentDescription = context.getString(R.string.keyboard_backlight_value)
 
@@ -149,6 +151,11 @@ class KeyboardBacklightDialog(
                             .toFloat(),
                 )
         }
+    }
+
+    @ColorInt
+    fun getColorFromStyle(@AttrRes colorId: Int): Int {
+        return Utils.getColorAttrDefaultColor(context, colorId)
     }
 
     fun updateState(current: Int, max: Int, forceRefresh: Boolean = false) {

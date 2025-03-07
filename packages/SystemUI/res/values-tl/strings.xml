@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Mga Widget"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Para idagdag ang shortcut na \"Mga Widget,\" tiyaking naka-enable ang \"Ipakita ang mga widget sa lock screen\" sa mga setting."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Mga Setting"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Button na ipakita ang screensaver"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Magpalit ng user"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pulldown menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ide-delete ang lahat ng app at data sa session na ito."</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Mga Notification"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Mga Pag-uusap"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"I-clear ang lahat ng silent na notification"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Buksan ang mga setting ng notification"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Mga notification na na-pause ng Huwag Istorbohin"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Walang notification}=1{Na-pause ng {mode} ang mga notification}=2{Na-pause ng {mode} at isa pang mode ang mga notification}one{Na-pause ng {mode} at # pang mode ang mga notification}other{Na-pause ng {mode} at # pang mode ang mga notification}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Magsimula ngayon"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Pag-track ng Ulo"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"I-tap para baguhin ang ringer mode"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"ringer mode"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, i-tap para baguhin ang ringer mode"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"i-mute"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"i-unmute"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"i-vibrate"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"I-lock ang screen"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Magtala"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Pag-multitask"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Gumamit ng split screen nang nasa kanan ang kasalukuyang app"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Gumamit ng split screen nang nasa kaliwa ang kasalukuyang app"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Lumipat sa full screen mula sa split screen"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Gumamit ng split screen nang nasa kanan ang app"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Gumamit ng split screen nang nasa kaliwa ang app"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Lumipat sa full screen"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Lumipat sa app sa kanan o ibaba habang ginagamit ang split screen"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Lumipat sa app sa kaliwa o itaas habang ginagamit ang split screen"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Habang nasa split screen: magpalit-palit ng app"</string>
@@ -1438,8 +1437,7 @@
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Icon ng Action o Meta key"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Icon na plus"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"I-customize"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"I-reset"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Tapos na"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"I-expand ang icon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pindutin ang action key sa iyong keyboard"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Magaling!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Nakumpleto mo ang galaw sa pag-view ng lahat ng app"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animation ng tutorial, i-click para i-pause at ipagpatuloy ang paglalaro."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Backlight ng keyboard"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Level %1$d sa %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Mga Home Control"</string>

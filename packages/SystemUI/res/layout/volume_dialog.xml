@@ -58,7 +58,7 @@
         android:contentDescription="@string/accessibility_volume_settings"
         android:soundEffectsEnabled="false"
         android:src="@drawable/horizontal_ellipsis"
-        android:tint="@androidprv:color/materialColorPrimary"
+        android:tint="?androidprv:attr/materialColorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/volume_dialog_main_slider_container"
         app:layout_constraintStart_toStartOf="@id/volume_dialog_main_slider_container"

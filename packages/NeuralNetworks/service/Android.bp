@@ -19,11 +19,20 @@ package {
 filegroup {
     name: "service-ondeviceintelligence-sources",
     srcs: [
-        "java/**/*.java",
+        "module/java/**/*.java",
     ],
-    path: "java",
     visibility: [
         "//frameworks/base:__subpackages__",
         "//packages/modules/NeuralNetworks:__subpackages__",
+    ],
+}
+
+filegroup {
+    name: "service-ondeviceintelligence-sources-platform",
+    srcs: [
+        "platform/java/**/*.java",
+    ],
+    visibility: [
+        "//frameworks/base:__subpackages__",
     ],
 }

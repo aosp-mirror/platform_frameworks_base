@@ -18,7 +18,7 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:tint="@androidprv:color/materialColorPrimary"
+    android:tint="?androidprv:attr/materialColorPrimary"
     android:viewportHeight="24"
     android:viewportWidth="24">
     <path

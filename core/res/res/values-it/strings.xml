@@ -72,9 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID chiamante generalmente limitato. Prossima chiamata: non limitato"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID chiamante generalmente non limitato. Prossima chiamata: limitato"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID chiamante generalmente non limitato. Prossima chiamata: non limitato"</string>
-    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Questa app non è compatibile con 16 kB. Controllo allineamento APK non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Questa app non è compatibile con 16 kB. Controllo allineamento ELF non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Questa app non è compatibile con 16 kB. Controlli di allineamento APK ed ELF non riusciti. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Questa app non è compatibile con le pagine di 16 kB. Controllo allineamento APK non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Questa app non è compatibile con le pagine di 16 kB. Controllo allineamento ELF non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Questa app non è compatibile con le pagine di 16 kB. Controlli di allineamento APK ed ELF non riusciti. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Servizio non fornito."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Non è possibile modificare l\'impostazione ID chiamante."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"I dati sono stati trasferiti a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -692,7 +692,7 @@
     <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensore temporaneamente disattivato"</string>
     <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Impossibile usare il sensore di impronte digitali. Contatta un fornitore di servizi di riparazione."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Tasto di accensione premuto"</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"Dito <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"Impronta <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usa l\'impronta"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usa l\'impronta o il blocco schermo"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utilizza la tua impronta per continuare"</string>
@@ -1159,38 +1159,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"tra <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"tra <xliff:g id="COUNT">%d</xliff:g> g"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"tra <xliff:g id="COUNT">%d</xliff:g> a"</string>
-    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
-    <skip />
-    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
-    <skip />
-    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
-    <skip />
-    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
-    <skip />
-    <!-- no translation found for duration_days_medium (5994225628248661388) -->
-    <skip />
-    <!-- no translation found for duration_years_medium (734023884353592526) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
-    <skip />
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> min fa"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> h fa"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> g fa"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> anni fa"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> g"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> anno"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"tra <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"tra <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"tra <xliff:g id="COUNT">%d</xliff:g> g"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"tra <xliff:g id="COUNT">%d</xliff:g> anno"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> min fa"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> h fa"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> g fa"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> anni fa"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuto fa}many{# di minuti fa}other{# minuti fa}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ora fa}many{# di ore fa}other{# ore fa}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# giorno fa}many{# di giorni fa}other{# giorni fa}}"</string>

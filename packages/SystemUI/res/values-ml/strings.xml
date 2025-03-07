@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"വിജറ്റുകൾ"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"വിജറ്റുകൾ\" കുറുക്കുവഴി ചേർക്കാൻ, ക്രമീകരണത്തിൽ \"ലോക്ക് സ്‌ക്രീനിൽ വിജറ്റുകൾ കാണിക്കുക\" പ്രവർത്തനക്ഷമമാക്കിയെന്ന് ഉറപ്പാക്കുക."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"ക്രമീകരണം"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"സ്‌ക്രീൻ സേവർ കാണിക്കുക ബട്ടൺ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"പുൾഡൗൺ മെനു"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ഈ സെഷനിലെ എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"അറിയിപ്പുകൾ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"സംഭാഷണങ്ങൾ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"എല്ലാ നിശബ്‌ദ അറിയിപ്പുകളും മായ്ക്കുക"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"അറിയിപ്പ് ക്രമീകരണം തുറക്കുക"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'ശല്യപ്പെടുത്തരുത്\' വഴി അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{അറിയിപ്പുകൾ ഒന്നുമില്ല}=1{{mode}, അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തിയിരിക്കുന്നു}=2{{mode} എന്നതും മറ്റൊരു മോഡും, അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തിയിരിക്കുന്നു}other{{mode} എന്നതും മറ്റ് # മോഡുകളും, അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തിയിരിക്കുന്നു}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ഇപ്പോൾ ആരംഭിക്കുക"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ഹെഡ് ട്രാക്കിംഗ്"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"റിംഗർ മോഡ് മാറ്റാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"റിംഗർ മോഡ്"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, റിംഗർ മോഡ് മാറ്റാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"മ്യൂട്ട് ചെയ്യുക"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"അൺമ്യൂട്ട് ചെയ്യുക"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"വൈബ്രേറ്റ് ചെയ്യുക"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"ഒരു കുറിപ്പെടുക്കുക"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"മൾട്ടിടാസ്‌കിംഗ്"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"വലതുവശത്തുള്ള നിലവിലെ ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ഇടതുവശത്തുള്ള നിലവിലെ ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"സ്‌ക്രീൻ വിഭജന മോഡിൽ നിന്ന് പൂർണ്ണ സ്ക്രീനിലേക്ക് മാറുക"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"വലതുവശത്തുള്ള ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"ഇടതുവശത്തുള്ള ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"പൂർണ്ണ സ്‌ക്രീനിലേക്ക് മാറുക"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ വലതുവശത്തെ/താഴത്തെ ആപ്പിലേക്ക് മാറുക"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ ഇടതുവശത്തെ/മുകളിലെ ആപ്പിലേക്ക് മാറൂ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"സ്‌ക്രീൻ വിഭജന മോഡിൽ: ഒരു ആപ്പിൽ നിന്ന് മറ്റൊന്നിലേക്ക് മാറുക"</string>
@@ -1438,8 +1437,7 @@
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"ആക്ഷൻ/മെറ്റാ കീ ഐക്കൺ"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"പ്ലസ് ഐക്കൺ"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"ഇഷ്‌ടാനുസൃതമാക്കുക"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"റീസെറ്റ് ചെയ്യുക"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"പൂർത്തിയായി"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"വികസിപ്പിക്കൽ ഐക്കൺ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"അല്ലെങ്കിൽ"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"നിങ്ങളുടെ കീബോർഡിലെ ആക്ഷൻ കീ അമർത്തുക"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"അഭിനന്ദനങ്ങൾ!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"\'എല്ലാ ആപ്പുകളും കാണുക\' ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ട്യൂട്ടോറിയൽ ആനിമേഷൻ, താൽക്കാലികമായി നിർത്താനും പ്ലേ പുനരാരംഭിക്കാനും ക്ലിക്ക് ചെയ്യുക."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"കീബോഡ് ബാക്ക്‌ലൈറ്റ്"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d-ൽ %1$d-ാമത്തെ ലെവൽ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ഹോം കൺട്രോളുകൾ"</string>

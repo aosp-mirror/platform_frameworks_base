@@ -30,6 +30,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.Nullable;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
 
 /**
@@ -100,7 +101,7 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
         if (mAnimator != null) mAnimator.reloadColors(getContext());
 
         int textColorResId = mIsTransparentMode ? NUM_PAD_KEY : NUM_PAD_BUTTON;
-        int imageColor = getContext().getColor(textColorResId);
+        int imageColor = Utils.getColorAttrDefaultColor(getContext(), textColorResId);
         ((VectorDrawable) getDrawable()).setTintList(ColorStateList.valueOf(imageColor));
     }
 

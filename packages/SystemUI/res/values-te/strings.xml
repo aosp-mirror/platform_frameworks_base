@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"విడ్జెట్‌లు"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"విడ్జెట్‌ల\" షార్ట్‌కట్‌ను జోడించడానికి, సెట్టింగ్‌లలో \"లాక్ స్క్రీన్‌లో విడ్జెట్‌లను చూపండి\" అనే ఆప్షన్‌ను ఎనేబుల్ చేసినట్లు నిర్ధారించుకోండి."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"సెట్టింగ్‌లు"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"స్క్రీన్ సేవర్ బటన్‌ను చూపండి"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"వినియోగదారుని మార్చు"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"పుల్‌డౌన్ మెనూ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"సంభాషణలు"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"అన్ని నిశ్శబ్ద నోటిఫికేషన్‌లను క్లియర్ చేస్తుంది"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"నోటిఫికేషన్‌ల సెట్టింగ్‌లను తెరవండి"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{నోటిఫికేషన్‌లు ఏవీ లేవు}=1{{mode} ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి}=2{నోటిఫికేషన్‌లు, {mode}, మరో ఒక మోడ్ ద్వారా పాజ్ చేయబడ్డాయి}other{నోటిఫికేషన్‌లు, {mode}, మరో # మోడ్‌ల ద్వారా పాజ్ చేయబడ్డాయి}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ఇప్పుడే ప్రారంభించండి"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"హెడ్ ట్రాకింగ్"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"రింగర్ మోడ్‌ను మార్చడానికి ట్యాప్ చేయండి"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"రింగర్ మోడ్"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, రింగర్ మోడ్‌ను మార్చడానికి ట్యాప్ చేయండి"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"మ్యూట్ చేయి"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"అన్‌మ్యూట్ చేయి"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"వైబ్రేట్"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"లాక్ స్క్రీన్"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"నోట్‌ను రాయండి"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"మల్టీ-టాస్కింగ్"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"కుడివైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ఎడమవైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"స్ప్లిట్ స్క్రీన్‌ను ఫుల్ స్క్రీన్‌కు మార్చండి"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"కుడి వైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"ఎడమ వైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"ఫుల్ స్క్రీన్‌కు మారండి"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"స్ప్లిట్ స్క్రీన్ ఉపయోగిస్తున్నప్పుడు కుడి లేదా కింద యాప్‌నకు మారండి"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"స్ప్లిట్ స్క్రీన్ ఉపయోగిస్తున్నప్పుడు ఎడమ లేదా పైన యాప్‌నకు మారండి"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"స్ప్లిట్ స్క్రీన్ సమయంలో: ఒక దాన్నుండి మరో దానికి యాప్ రీప్లేస్ చేయండి"</string>
@@ -1438,8 +1437,7 @@
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"యాక్షన్ లేదా మెటా కీ చిహ్నం"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"ప్లస్ చిహ్నం"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"అనుకూలంగా మార్చండి"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"రీసెట్ చేయండి"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"పూర్తయింది"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"విస్తరించండి చిహ్నం"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"లేదా"</string>
@@ -1460,7 +1458,7 @@
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"మీ టచ్‌ప్యాడ్‌ను ఉపయోగించి నావిగేట్ చేయండి"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"టచ్‌ప్యాడ్ సంజ్ఞల గురించి తెలుసుకోండి"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"మీ కీబోర్డ్, టచ్‌ప్యాడ్‌ను ఉపయోగించి నావిగేట్ చేయండి"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"టచ్‌ప్యాడ్ సంజ్ఞలు, కీబోర్డ్ షార్ట్‌కట్‌లు, అలాగే మరిన్నింటిని గురించి తెలుసుకోండి"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"టచ్‌ప్యాడ్ సంజ్ఞలు, కీబోర్డ్ షార్ట్‌కట్‌లు మొదలైన వాటి గురించి తెలుసుకోండి"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"వెనుకకు వెళ్లండి"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"మొదటి ట్యాబ్‌కు వెళ్లండి"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ఇటీవలి యాప్‌లను చూడండి"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"మీ కీబోర్డ్‌లో యాక్షన్ కీని నొక్కండి"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"చక్కగా చేశారు!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"అన్ని యాప్‌లను చూడడానికి ఉపయోగించే సంజ్ఞకు సంబంధించిన ట్యుటోరియల్‌ను మీరు పూర్తి చేశారు"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ట్యుటోరియల్ యానిమేషన్, పాజ్ చేసి, మళ్లీ ప్లే చేయడానికి క్లిక్ చేయండి."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"కీబోర్డ్ బ్యాక్‌లైట్"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dలో %1$dవ స్థాయి"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"హోమ్ కంట్రోల్స్"</string>

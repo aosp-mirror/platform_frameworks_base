@@ -71,9 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Стандардно, ID на повикувач е скриен. Следен повик: не е скриен"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Стандардно, ID на повикувач не е скриен. Следен повик: скриен"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Стандардно, ID на повикувач не е скриен. Следен повик: не е скриен"</string>
-    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Апликацијава не е компатибилна со 16 KB. Проверката за усогласување на АПК не успеа. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Апликацијава не е компатибилна со 16 KB. Проверката за усогласување на APK не успеа. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Апликацијава не е компатибилна со 16 KB. Проверката за усогласување на ELF не успеа. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Апликацијава не е компатибилна со 16 KB. Проверките за усогласување на АПК и ELF се неуспешни. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Апликацијава не е компатибилна со 16 KB. Проверките за усогласување на APK и ELF се неуспешни. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услугата не е предвидена."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Не може да го промените поставувањето за ID на повикувач."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Мобилниот интернет се префрли на <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1049,7 +1049,7 @@
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"За да го отклучите, најавете се со вашата сметка на Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Корисничко име (e-пошта)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Лозинка"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Најави се"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Најавете се"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"Неважечко корисничко име или лозинка."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"Го заборави своето корисничко име или лозинката?\nПосети"<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"Се проверува..."</string>
@@ -1158,38 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"по <xliff:g id="COUNT">%d</xliff:g> ч."</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"по <xliff:g id="COUNT">%d</xliff:g> д."</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"по <xliff:g id="COUNT">%d</xliff:g> г."</string>
-    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
-    <skip />
-    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
-    <skip />
-    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
-    <skip />
-    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
-    <skip />
-    <!-- no translation found for duration_days_medium (5994225628248661388) -->
-    <skip />
-    <!-- no translation found for duration_years_medium (734023884353592526) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
-    <skip />
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"пред <xliff:g id="COUNT">%d</xliff:g> мин."</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"пред <xliff:g id="COUNT">%d</xliff:g> ч."</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"пред <xliff:g id="COUNT">%d</xliff:g> д."</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"пред <xliff:g id="COUNT">%d</xliff:g> год."</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> мин."</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ч."</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> д."</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> год."</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"по <xliff:g id="COUNT">%d</xliff:g> мин."</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"по <xliff:g id="COUNT">%d</xliff:g> ч."</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"по <xliff:g id="COUNT">%d</xliff:g> д."</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"по <xliff:g id="COUNT">%d</xliff:g> год."</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"пред <xliff:g id="COUNT">%d</xliff:g> мин."</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"пред <xliff:g id="COUNT">%d</xliff:g> ч."</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"пред <xliff:g id="COUNT">%d</xliff:g> д."</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"пред <xliff:g id="COUNT">%d</xliff:g> год."</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Пред # минута}one{Пред # минута}other{Пред # минути}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Пред # час}one{Пред # час}other{Пред # часа}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Пред # ден}one{Пред # ден}other{Пред # дена}}"</string>
@@ -1739,7 +1723,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"За да го отклучите, најавете се со вашата сметка на Google."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Корисничко име (е-пошта)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Лозинка"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"Најави се"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"Најавете се"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Неважечко корисничко име или лозинка."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Го заборави своето корисничко име или лозинката?\nПосети"<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Сметката се проверува..."</string>

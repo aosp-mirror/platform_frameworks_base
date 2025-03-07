@@ -83,7 +83,7 @@
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"必须先解锁设备，然后才能保存屏幕截图"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"请再次尝试截屏"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"无法保存屏幕截图"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"此应用或您所在的单位不允许进行屏幕截图"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"此应用或您所在的组织不允许截屏"</string>
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"您的 IT 管理员已禁止截取屏幕截图"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"编辑"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"编辑屏幕截图"</string>
@@ -474,7 +474,7 @@
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
     <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"向上滑动即可再次尝试人脸解锁"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"需要解锁才能使用 NFC"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"此设备归贵单位所有"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"此设备归贵组织所有"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"此设备归<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>所有"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"这是<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>提供的设备"</string>
     <string name="phone_hint" msgid="6682125338461375925">"滑动图标即可拨打电话"</string>
@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"微件"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"如要添加“微件”快捷方式，请确保已在设置中启用“在锁屏状态下显示微件”。"</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"设置"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"“显示屏保”按钮"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切换用户"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉菜单"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"对话"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有静音通知"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"打开通知设置"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"勿扰模式暂停的通知"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{无通知}=1{{mode}暂停了通知}=2{{mode}和另外 1 种模式暂停了通知}other{{mode}和另外 # 种模式暂停了通知}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即开始"</string>
@@ -608,7 +608,7 @@
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"此设备由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>提供"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"此设备归贵组织所有，已通过“<xliff:g id="VPN_APP">%1$s</xliff:g>”连接到互联网"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有，已通过“<xliff:g id="VPN_APP">%2$s</xliff:g>”连接到互联网"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"此设备归贵单位所有"</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"此设备归贵组织所有"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"此设备归贵组织所有，已通过 VPN 连接到互联网"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"此设备归<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>所有，已通过 VPN 连接到互联网"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"头部跟踪"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"点按即可更改振铃器模式"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"响铃模式"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>，点按即可更改响铃模式"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"静音"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"取消静音"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"振动"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"锁定屏幕"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"添加记事"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"多任务处理"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"使用分屏模式，并将当前应用置于右侧"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"使用分屏模式，并将当前应用置于左侧"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"从分屏模式切换为全屏"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"使用分屏模式，并将应用置于右侧"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"使用分屏模式，并将应用置于左侧"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"切换到全屏模式"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"使用分屏模式时，切换到右侧或下方的应用"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"使用分屏模式时，切换到左侧或上方的应用"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"在分屏期间：将一个应用替换为另一个应用"</string>
@@ -1417,7 +1416,7 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”正在使用（<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>）"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”最近使用过（<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>）"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"系统"</string>
-    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"系统控件"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"系统控制"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"系统应用"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"多任务处理"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"分屏"</string>
@@ -1428,18 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"键盘快捷键"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"自定义键盘快捷键"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"要移除快捷键吗？"</string>
-    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"要重置为默认快捷方式吗？"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"要重置为默认快捷键吗？"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"按下按键即可指定快捷键"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"此操作会永久删除您的自定义快捷键。"</string>
-    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"此操作会永久删除您的所有自定义快捷方式。"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"此操作会永久删除您的所有自定义快捷键。"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"搜索快捷键"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"无搜索结果"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收起图标"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"操作键或元键图标"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"加号图标"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"自定义"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"重置"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"完成"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"展开图标"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"或"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"按键盘上的快捷操作按键"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"非常棒！"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"您已完成“查看所有应用”手势教程"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"教程动画，点击可暂停和继续播放。"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"键盘背光"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 级，共 %2$d 级"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"家居控制"</string>

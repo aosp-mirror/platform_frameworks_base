@@ -30,7 +30,7 @@
         <item name="android:layout_marginTop">24dp</item>
         <item name="android:textSize">36sp</item>
         <item name="android:focusable">true</item>
-        <item name="android:textColor">@androidprv:color/materialColorOnSurface</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
 </resources>

@@ -29,6 +29,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
 import com.android.wm.shell.shared.animation.Interpolators;
 
@@ -50,8 +51,8 @@ public class TapAgainView extends TextView {
     }
 
     void updateColor() {
-        final @ColorInt int onSurface = mContext.getColor(
-                com.android.internal.R.color.materialColorOnSurface);
+        final @ColorInt int onSurface = Utils.getColorAttrDefaultColor(mContext,
+                com.android.internal.R.attr.materialColorOnSurface);
         setTextColor(onSurface);
         setBackground(getResources().getDrawable(R.drawable.rounded_bg_full, mContext.getTheme()));
     }

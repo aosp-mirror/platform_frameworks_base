@@ -17,10 +17,10 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle">
 
-    <solid android:color="@androidprv:color/materialColorSurfaceDim" />
+    <solid android:color="?androidprv:attr/materialColorSurfaceDim" />
     <stroke
         android:width="@dimen/remote_input_view_text_stroke"
-        android:color="@androidprv:color/materialColorPrimary"/>
+        android:color="?androidprv:attr/materialColorPrimary"/>
     <padding
         android:bottom="0dp"
         android:left="12dp"

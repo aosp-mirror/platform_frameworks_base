@@ -348,7 +348,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Neimenovani uređaj"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Nema dostupnih uređaja"</string>
     <string name="quick_settings_cast_no_network" msgid="3863016850468559522">"Nema WiFi-ja ni Ethernet veze"</string>
-    <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Osvjetljenje"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Osvijetljenost"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inverzija boja"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Ispravka boja"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Veličina fonta"</string>
@@ -529,8 +529,9 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Da otvorite aplikaciju pomoću vidžeta, morat ćete potvrditi identitet. Također imajte na umu da ih svako može pregledati, čak i ako je tablet zaključan. Neki vidžeti možda nisu namijenjeni za vaš zaključani ekran i njihovo dodavanje ovdje možda nije sigurno."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Razumijem"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Vidžeti"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Da biste dodali prečac Widgeti, provjerite je li u postavkama omogućena opcija Prikaži widgete na zaključanom zaslonu."</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Da dodate prečicu \"Vidžeti\", provjerite je li u postavkama omogućeno \"Prikazuj vidžete na zaključanom ekranu\"."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Postavke"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Dugme za prikaz čuvara ekrana"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Zamijeni korisnika"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"padajući meni"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci iz ove sesije će se izbrisati."</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Obavještenja"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Razgovori"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Obriši sva nečujna obavještenja"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Otvaranje postavki obavještenja"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Obavještenja su pauzirana načinom rada Ne ometaj"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Nema obavještenja}=1{Obavještenja su pauzirana putem načina rada {mode}}=2{Obavještenja su pauzirana putem načina rada {mode} i još jednog načina rada}one{Obavještenja su pauzirana putem načina rada {mode} i još # načina rada}few{Obavještenja su pauzirana putem načina rada {mode} i još # načina rada}other{Obavještenja su pauzirana putem načina rada {mode} i još # načina rada}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Započni odmah"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Praćenje položaja glave"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Dodirnite da promijenite način rada zvuka zvona"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"način rada za zvuk zvona"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>; promjena načina rada zvuka zvona dodirom"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"isključite zvuk"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"uključite zvuk"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibriranje"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključavanje ekrana"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Pisanje bilješke"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Korištenje podijeljenog ekrana s trenutnom aplikacijom na desnoj strani"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Korištenje podijeljenog ekrana s trenutnom aplikacijom na lijevoj strani"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Prebacivanje s podijeljenog ekrana na prikaz preko cijelog ekrana"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Korištenje podijeljenog ekrana s aplikacijom na desnoj strani"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Korištenje podijeljenog ekrana s aplikacijom na lijevoj strani"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Prelazak na prikaz preko cijelog ekrana"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Prelazak u aplikaciju desno ili ispod uz podijeljeni ekran"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Pređite u aplikaciju lijevo ili iznad dok koristite podijeljeni ekran"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Za vrijeme podijeljenog ekrana: zamjena jedne aplikacije drugom"</string>
@@ -1425,21 +1424,20 @@
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Prečice aplikacije"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Trenutna aplikacija"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Pristupačnost"</string>
-    <string name="shortcut_helper_title" msgid="8567500639300970049">"Prečice tastature"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Prečice na tastaturi"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Prilagodite prečice na tastaturi"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Ukloniti prečicu?"</string>
-    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Želite li vratiti na zadano?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Vratiti na zadano?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Pritisnite tipku da dodijelite prečicu"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Ovo će trajno izbrisati prilagođenu prečicu."</string>
-    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Time će se trajno izbrisati svi vaši prilagođeni prečaci."</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Prečica pretraživanja"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Ovo će trajno izbrisati sve vaše prilagođene prečice."</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pretražite prečice"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Nema rezultata pretraživanja"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona sužavanja"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ikona tipke radnji ili meta tipka"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Ikona znaka plus"</string>
-    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Prilagođavanje"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Prilagodite"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Poništavanje"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Gotovo"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona proširivanja"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ili"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pritisnite tipku radnji na tastaturi"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Odlično!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Izvršili ste pokret za prikaz svih aplikacija"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animacija vodiča; pauziranje i nastavak reprodukcije klikom."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvjetljenje tastature"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. nivo od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrole za dom"</string>

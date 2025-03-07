@@ -25,7 +25,7 @@
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> చిత్రంలో చిత్రం రూపంలో ఉంది"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి ట్యాప్ చేసి, దీన్ని ఆఫ్ చేయండి."</string>
     <string name="pip_play" msgid="3496151081459417097">"ప్లే చేయి"</string>
-    <string name="pip_pause" msgid="690688849510295232">"పాజ్ చేయి"</string>
+    <string name="pip_pause" msgid="690688849510295232">"పాజ్ చేయండి"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"దాటవేసి తర్వాత దానికి వెళ్లు"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"దాటవేసి మునుపటి దానికి వెళ్లు"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"సైజ్‌ మార్చు"</string>

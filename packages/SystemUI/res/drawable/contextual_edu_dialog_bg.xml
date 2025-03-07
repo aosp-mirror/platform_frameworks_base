@@ -19,6 +19,6 @@
     android:insetBottom="@dimen/contextual_edu_dialog_elevation">
     <shape>
         <corners android:radius="28dp" />
-        <solid android:color="@androidprv:color/materialColorTertiaryFixed" />
+        <solid android:color="?androidprv:attr/materialColorTertiaryFixed" />
     </shape>
 </inset>

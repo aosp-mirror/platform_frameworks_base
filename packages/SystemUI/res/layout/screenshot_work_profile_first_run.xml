@@ -38,8 +38,8 @@
             android:layout_height="24dp"
             android:layout_gravity="center"
             android:background="@drawable/circular_background"
-            android:backgroundTint="@androidprv:color/materialColorSurfaceContainerHigh"
-            android:tint="@androidprv:color/materialColorOnSurface"
+            android:backgroundTint="?androidprv:attr/materialColorSurfaceContainerHigh"
+            android:tint="?androidprv:attr/materialColorOnSurface"
             android:padding="2dp"
             android:src="@drawable/ic_close"/>
     </FrameLayout>

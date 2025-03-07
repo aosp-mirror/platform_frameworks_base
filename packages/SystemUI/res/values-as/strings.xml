@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ৱিজেট"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"ৱিজেট\"ৰ শ্বৰ্টকাট যোগ দিবলৈ, ছেটিঙত \"লক স্ক্ৰীনত ৱিজেট দেখুৱাওক\" সক্ষম কৰি থোৱাটো নিশ্চিত কৰক।"</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"ছেটিং"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"স্ক্ৰীনছেভাৰৰ বুটাম দেখুৱাওক"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ব্যৱহাৰকাৰী সলনি কৰক"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"পুল-ডাউনৰ মেনু"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ আটাইবোৰ এপ্ আৰু ডেটা মচা হ\'ব।"</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"জাননীসমূহ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"বাৰ্তালাপ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"আটাইবোৰ নীৰৱ জাননী মচক"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"জাননীৰ ছেটিং খোলক"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"অসুবিধা নিদিব-ই জাননী পজ কৰিছে"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{কোনো জাননী নাই}=1{{mode}এ জাননী পজ কৰিছে}=2{{mode} আৰু আন এটা ম’ডে জাননী পজ কৰিছে}one{{mode} আৰু আন # টা ম’ডে জাননী পজ কৰিছে}other{{mode} আৰু আন # টা ম’ডে জাননী পজ কৰিছে}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"এতিয়াই আৰম্ভ কৰক"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"হে’ড ট্ৰেকিং"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ৰিংগাৰ ম’ড সলনি কৰিবলৈ টিপক"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"ৰিংগাৰ ম’ড"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, ৰিংগাৰ ম’ড সলনি কৰিবলৈ টিপক"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"মিউট কৰক"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"আনমিউট কৰক"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"কম্পন কৰক"</string>
@@ -873,9 +872,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"লক স্ক্ৰীন"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"টোকা লিখক"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"মাল্টিটাস্কিং"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"বৰ্তমানৰ এপ্‌টোৰ সৈতে সোঁফালে বিভাজিত স্ক্ৰীন ব্যৱহাৰ কৰক"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"বৰ্তমানৰ এপ্‌টোৰ সৈতে বাওঁফালে বিভাজিত স্ক্ৰীন ব্যৱহাৰ কৰক"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"বিভাজিত স্ক্ৰীনৰ পৰা পূৰ্ণ স্ক্ৰীনলৈ সলনি কৰক"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"সোঁফালে থকা এপ্‌টোৰ সৈতে বিভাজিত স্ক্ৰীন ব্যৱহাৰ কৰক"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"বাওঁফালে থকা এপ্‌টোৰ সৈতে বিভাজিত স্ক্ৰীন ব্যৱহাৰ কৰক"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"পূৰ্ণ স্ক্ৰীনলৈ সলনি কৰক"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"বিভাজিত স্ক্ৰীন ব্যৱহাৰ কৰাৰ সময়ত সোঁফালে অথবা তলত থকা এপলৈ সলনি কৰক"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"বিভাজিত স্ক্ৰীন ব্যৱহাৰ কৰাৰ সময়ত বাওঁফালে অথবা ওপৰত থকা এপলৈ সলনি কৰক"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"বিভাজিত স্ক্ৰীনৰ ব্যৱহাৰ কৰাৰ সময়ত: কোনো এপ্ এখন স্ক্ৰীনৰ পৰা আনখনলৈ নিয়ক"</string>
@@ -1438,8 +1437,7 @@
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"কাৰ্য বা মেটা কীৰ চিহ্ন"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"যোগ চিনৰ চিহ্ন"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"কাষ্টমাইজ কৰক"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"ৰিছেট কৰক"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"হ’ল"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"বিস্তাৰ কৰাৰ চিহ্ন"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"অথবা"</string>
@@ -1481,8 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"আপোনাৰ কীব’ৰ্ডৰ কাৰ্য কীটোত টিপক"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"বঢ়িয়া!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"আপুনি আটাইবোৰ এপ্ চোৱাৰ নিৰ্দেশনাটো সম্পূৰ্ণ কৰিছে"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"টিউট’ৰিয়েল এনিমেশ্বন, পজ কৰিবলৈ আৰু প্লে’ কৰাটো পুনৰ আৰম্ভ কৰিবলৈ ক্লিক কৰক।"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"কীব’ৰ্ডৰ বেকলাইট"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dৰ %1$d স্তৰ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ঘৰৰ সা-সৰঞ্জামৰ নিয়ন্ত্ৰণ"</string>

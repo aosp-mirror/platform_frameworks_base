@@ -76,8 +76,8 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: محظور"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: غير محظور"</string>
     <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. وتعذَّر إكمال عملية التأكُّد من محاذاة ملفات APK. وسيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. ولكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاطّلاع على الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. وتعذَّر إكمال عملية التأكُّد من محاذاة ملفات ELF. وسيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. ولكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاطّلاع على الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. وتعذَّر إكمال عمليات التأكُّد من محاذاة ملفات APK وELF. وسيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. ولكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاطّلاع على الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. تعذَّر إكمال عملية التأكُّد من محاذاة ملفات ELF. سيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. لكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الانتقال إلى الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. تعذَّر إكمال عمليات التأكُّد من محاذاة ملفات APK وELF. سيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. لكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاتنقال إلى الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"لا يمكنك تغيير إعداد معرّف المتصل."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"تم تبديل البيانات إلى <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1162,38 +1162,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"خلال <xliff:g id="COUNT">%d</xliff:g> ساعة"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"خلال <xliff:g id="COUNT">%d</xliff:g> يوم"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"خلال <xliff:g id="COUNT">%d</xliff:g> سنة"</string>
-    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
-    <skip />
-    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
-    <skip />
-    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
-    <skip />
-    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
-    <skip />
-    <!-- no translation found for duration_days_medium (5994225628248661388) -->
-    <skip />
-    <!-- no translation found for duration_years_medium (734023884353592526) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
-    <skip />
-    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
-    <skip />
-    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
-    <skip />
-    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
-    <skip />
-    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
-    <skip />
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"قبل <xliff:g id="COUNT">%d</xliff:g> دقيقة"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"قبل <xliff:g id="COUNT">%d</xliff:g> ساعة"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"قبل <xliff:g id="COUNT">%d</xliff:g> يوم"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"قبل <xliff:g id="COUNT">%d</xliff:g> سنة"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"‫<xliff:g id="COUNT">%d</xliff:g> دقيقة"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"‫<xliff:g id="COUNT">%d</xliff:g> ساعة"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"‫<xliff:g id="COUNT">%d</xliff:g> يوم"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"‫<xliff:g id="COUNT">%d</xliff:g> سنة"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"خلال <xliff:g id="COUNT">%d</xliff:g> دقيقة"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"خلال <xliff:g id="COUNT">%d</xliff:g> ساعة"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"خلال <xliff:g id="COUNT">%d</xliff:g> يوم"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"خلال <xliff:g id="COUNT">%d</xliff:g> سنة"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"قبل <xliff:g id="COUNT">%d</xliff:g> دقيقة"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"قبل <xliff:g id="COUNT">%d</xliff:g> ساعة"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"قبل <xliff:g id="COUNT">%d</xliff:g> يوم"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"قبل <xliff:g id="COUNT">%d</xliff:g> سنة"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{قبل دقيقة واحدة}zero{قبل # دقيقة}two{قبل دقيقتين}few{قبل # دقائق}many{قبل # دقيقة}other{قبل # دقيقة}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{قبل ساعة واحدة}zero{قبل # ساعة}two{قبل ساعتين}few{قبل # ساعات}many{قبل # ساعة}other{قبل # ساعة}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{قبل يوم واحد}zero{قبل # يوم}two{قبل يومين}few{قبل # أيام}many{قبل # يومًا}other{قبل # يوم}}"</string>

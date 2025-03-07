@@ -16,7 +16,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <item android:state_enabled="false"
-        android:color="@androidprv:color/materialColorPrimaryFixed"
+        android:color="?androidprv:attr/materialColorPrimaryFixed"
         android:alpha="0.30"/>
-    <item android:color="@androidprv:color/materialColorPrimaryFixed"/>
+    <item android:color="?androidprv:attr/materialColorPrimaryFixed"/>
 </selector>

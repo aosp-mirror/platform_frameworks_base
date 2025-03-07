@@ -233,8 +233,7 @@ ondeviceintelligence_module_java_defaults {
             libs: ["service-ondeviceintelligence.stubs.system_server"],
         },
         release_ondevice_intelligence_platform: {
-            srcs: [":service-ondeviceintelligence-sources"],
-            static_libs: ["modules-utils-backgroundthread"],
+            srcs: [":service-ondeviceintelligence-sources-platform"],
         },
     },
 }

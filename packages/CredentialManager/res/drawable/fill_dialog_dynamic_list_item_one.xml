@@ -21,6 +21,6 @@
         <shape android:shape="rectangle">
             <corners android:topLeftRadius="4dp" android:topRightRadius="4dp"
             android:bottomLeftRadius="0dp" android:bottomRightRadius="0dp"/>
-            <solid android:color="@androidprv:color/materialColorSurfaceContainer" />
+            <solid android:color="?androidprv:attr/materialColorSurfaceContainer" />
         </shape>
 </inset>

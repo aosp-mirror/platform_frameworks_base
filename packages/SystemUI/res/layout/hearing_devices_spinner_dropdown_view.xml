@@ -28,7 +28,7 @@
         android:layout_height="@dimen/hearing_devices_preset_spinner_icon_size"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/hearing_devices_layout_margin"
-        android:tint="@androidprv:color/materialColorOnPrimaryContainer"
+        android:tint="?androidprv:attr/materialColorOnPrimaryContainer"
         android:src="@drawable/ic_check"
         android:contentDescription="@string/hearing_devices_spinner_item_selected"/>
     <TextView
