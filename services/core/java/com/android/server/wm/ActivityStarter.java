@@ -55,6 +55,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.launchModeToString;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_FLAG_AVOID_MOVE_TO_FRONT;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -1713,6 +1714,9 @@ class ActivityStarter {
         if (!userLeaving && transition != null) {
             // no-user-leaving implies not entering PiP.
             transition.setCanPipOnFinish(false /* canPipOnFinish */);
+        }
+        if (avoidMoveToFront() && transition != null) {
+            transition.addFlag(TRANSIT_FLAG_AVOID_MOVE_TO_FRONT);
         }
         if (isIndependentLaunch && transition != null) {
             transitionController.requestStartTransition(transition,
