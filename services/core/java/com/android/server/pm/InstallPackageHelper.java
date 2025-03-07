@@ -2638,8 +2638,8 @@ final class InstallPackageHelper {
                         pkg.getBaseApkPath(), pkg.getSplitCodePaths());
             }
 
-            DexOptHelper.performDexoptIfNeeded(installRequest, mDexManager, mContext,
-                    mPm.mInstallLock.getRawLock());
+            DexOptHelper.performDexoptIfNeeded(
+                    installRequest, mDexManager, mPm.mInstallLock.getRawLock());
         }
         PackageManagerServiceUtils.waitForNativeBinariesExtractionForIncremental(
                 incrementalStorages);

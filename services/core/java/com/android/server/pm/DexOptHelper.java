@@ -712,11 +712,9 @@ public final class DexOptHelper {
         }
     }
 
-    /**
-     * Returns DexoptOptions by the given InstallRequest.
-     */
-    static DexoptOptions getDexoptOptionsByInstallRequest(InstallRequest installRequest,
-            DexManager dexManager) {
+    /** Returns DexoptOptions by the given InstallRequest. */
+    private static DexoptOptions getDexoptOptionsByInstallRequest(
+            InstallRequest installRequest, DexManager dexManager) {
         final PackageSetting ps = installRequest.getScannedPackageSetting();
         final String packageName = ps.getPackageName();
         final boolean isBackupOrRestore =
@@ -734,80 +732,38 @@ public final class DexOptHelper {
         var options = new DexoptOptions(packageName, compilationReason, dexoptFlags);
         if (installRequest.getDexoptCompilerFilter() != null) {
             options = options.overrideCompilerFilter(installRequest.getDexoptCompilerFilter());
-        } else if (pkg != null && pkg.isDebuggable()) {
+        } else if (shouldSkipDexopt(installRequest)) {
             options = options.overrideCompilerFilter(DexoptParams.COMPILER_FILTER_NOOP);
         }
         return options;
     }
 
-    /**
-     * Perform dexopt if needed for the installation
-     */
-    static void performDexoptIfNeeded(InstallRequest installRequest, DexManager dexManager,
-            Context context, PackageManagerTracedLock.RawLock installLock) {
+    /** Perform dexopt if needed for the installation */
+    static void performDexoptIfNeeded(
+            InstallRequest installRequest,
+            DexManager dexManager,
+            PackageManagerTracedLock.RawLock installLock) {
+        if (!shouldCallArtService(installRequest)) {
+            return;
+        }
 
-        // Construct the DexoptOptions early to see if we should skip running dexopt.
-        //
-        // Do not run PackageDexOptimizer through the local performDexOpt
-        // method because `pkg` may not be in `mPackages` yet.
-        //
-        // Also, don't fail application installs if the dexopt step fails.
-        DexoptOptions dexoptOptions = getDexoptOptionsByInstallRequest(installRequest, dexManager);
-        // Check whether we need to dexopt the app.
-        //
-        // NOTE: it is IMPORTANT to call dexopt:
-        //   - after doRename which will sync the package data from AndroidPackage and
-        //     its corresponding ApplicationInfo.
-        //   - after installNewPackageLIF or replacePackageLIF which will update result with the
-        //     uid of the application (pkg.applicationInfo.uid).
-        //     This update happens in place!
-        //
-        // We only need to dexopt if the package meets ALL of the following conditions:
-        //   1) it is not an instant app or if it is then dexopt is enabled via gservices.
-        //   2) it is not debuggable.
-        //   3) it is not on Incremental File System.
-        //
-        // Note that we do not dexopt instant apps by default. dexopt can take some time to
-        // complete, so we skip this step during installation. Instead, we'll take extra time
-        // the first time the instant app starts. It's preferred to do it this way to provide
-        // continuous progress to the useur instead of mysteriously blocking somewhere in the
-        // middle of running an instant app. The default behaviour can be overridden
-        // via gservices.
-        //
-        // Furthermore, dexopt may be skipped, depending on the install scenario and current
-        // state of the device.
-        //
-        // TODO(b/174695087): instantApp and onIncremental should be removed and their install
-        //       path moved to SCENARIO_FAST.
-
-        final boolean performDexopt = DexOptHelper.shouldPerformDexopt(installRequest,
-                dexoptOptions, context);
-        if (performDexopt) {
-            // dexopt can take long, and ArtService doesn't require installd, so we release
-            // the lock here and re-acquire the lock after dexopt is finished.
+        // dexopt can take long, and ArtService doesn't require installd, so we release the lock
+        // here and re-acquire the lock after dexopt is finished.
+        if (installLock != null) {
+            installLock.unlock();
+        }
+        try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+            DexoptOptions dexoptOptions =
+                    getDexoptOptionsByInstallRequest(installRequest, dexManager);
+            // Don't fail application installs if the dexopt step fails.
+            DexoptResult dexOptResult =
+                    DexOptHelper.dexoptPackageUsingArtService(installRequest, dexoptOptions);
+            installRequest.onDexoptFinished(dexOptResult);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (installLock != null) {
-                installLock.unlock();
-            }
-            try {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-
-                // This mirrors logic from commitReconciledScanResultLocked, where the library
-                // files needed for dexopt are assigned.
-                PackageSetting realPkgSetting = installRequest.getRealPackageSetting();
-                // Unfortunately, the updated system app flag is only tracked on this
-                // PackageSetting
-                boolean isUpdatedSystemApp =
-                        installRequest.getScannedPackageSetting().isUpdatedSystemApp();
-                realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
-
-                DexoptResult dexOptResult = DexOptHelper.dexoptPackageUsingArtService(
-                        installRequest, dexoptOptions);
-                installRequest.onDexoptFinished(dexOptResult);
-            } finally {
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-                if (installLock != null) {
-                    installLock.lock();
-                }
+                installLock.lock();
             }
         }
     }
@@ -838,29 +794,36 @@ public final class DexOptHelper {
         }
     }
 
+    private static boolean shouldSkipDexopt(InstallRequest installRequest) {
+        PackageSetting ps = installRequest.getScannedPackageSetting();
+        AndroidPackage pkg = ps.getPkg();
+        boolean onIncremental = isIncrementalPath(ps.getPathString());
+        return pkg == null || pkg.isDebuggable() || onIncremental;
+    }
+
     /**
-     * Returns whether to perform dexopt by the given InstallRequest.
+     * Returns whether to call ART Service to perform dexopt for the given InstallRequest. Note that
+     * ART Service may still skip dexopt, depending on the specified compiler filter, compilation
+     * reason, and other conditions.
      */
-    static boolean shouldPerformDexopt(InstallRequest installRequest, DexoptOptions dexoptOptions,
-            Context context) {
+    private static boolean shouldCallArtService(InstallRequest installRequest) {
         final boolean isApex = ((installRequest.getScanFlags() & SCAN_AS_APEX) != 0);
+        // Historically, we did not dexopt instant apps,  and we have no plan to do so in the
+        // future, so there is no need to call into ART Service.
         final boolean instantApp = ((installRequest.getScanFlags() & SCAN_AS_INSTANT_APP) != 0);
         final PackageSetting ps = installRequest.getScannedPackageSetting();
         final AndroidPackage pkg = ps.getPkg();
-        final boolean onIncremental = isIncrementalPath(ps.getPathString());
-        final boolean performDexOptForRollback = Flags.recoverabilityDetection()
-                ? !(installRequest.isRollback()
-                && installRequest.getInstallSource().mInitiatingPackageName.equals("android"))
-                : true;
+        final boolean performDexOptForRollback =
+                !(installRequest.isRollback()
+                        && installRequest
+                                .getInstallSource()
+                                .mInitiatingPackageName
+                                .equals("android"));
 
-        // Don't skip the dexopt call if the compiler filter is "skip". Instead, call dexopt with
-        // the "skip" filter so that ART Service gets notified and skips dexopt itself.
-        return (!instantApp || Global.getInt(context.getContentResolver(),
-                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
-                && pkg != null
-                && (!onIncremental)
-                && !isApex
-                && performDexOptForRollback;
+        // THINK TWICE when you add a new condition here. You probably want to add a condition to
+        // `shouldSkipDexopt` instead. In that way, ART Service will be called with the "skip"
+        // compiler filter and it will have the chance to decide whether to skip dexopt.
+        return !instantApp && pkg != null && !isApex && performDexOptForRollback;
     }
 
     private static class StagedApexObserver extends IStagedApexObserver.Stub {
