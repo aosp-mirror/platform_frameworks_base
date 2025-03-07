@@ -143,19 +143,16 @@ public class AdbService extends IAdbManager.Stub {
 
         @Override
         public File getAdbKeysFile() {
-            return mDebuggingManager == null ? null : mDebuggingManager.getUserKeyFile();
+            return mDebuggingManager.getUserKeyFile();
         }
 
         @Override
         public File getAdbTempKeysFile() {
-            return mDebuggingManager == null ? null : mDebuggingManager.getAdbTempKeysFile();
+            return mDebuggingManager.getAdbTempKeysFile();
         }
 
         @Override
         public void notifyKeyFilesUpdated() {
-            if (mDebuggingManager == null) {
-                return;
-            }
             mDebuggingManager.notifyKeyFilesUpdated();
         }
 
@@ -237,7 +234,7 @@ public class AdbService extends IAdbManager.Stub {
 
     private boolean mIsAdbUsbEnabled;
     private boolean mIsAdbWifiEnabled;
-    private AdbDebuggingManager mDebuggingManager;
+    private final AdbDebuggingManager mDebuggingManager;
 
     private ContentObserver mObserver;
 
@@ -287,38 +284,27 @@ public class AdbService extends IAdbManager.Stub {
      */
     public void bootCompleted() {
         Slog.d(TAG, "boot completed");
-        if (mDebuggingManager != null) {
-            mDebuggingManager.setAdbEnabled(mIsAdbUsbEnabled, AdbTransportType.USB);
-            mDebuggingManager.setAdbEnabled(mIsAdbWifiEnabled, AdbTransportType.WIFI);
-        }
+        mDebuggingManager.setAdbEnabled(mIsAdbUsbEnabled, AdbTransportType.USB);
+        mDebuggingManager.setAdbEnabled(mIsAdbWifiEnabled, AdbTransportType.WIFI);
     }
 
     @Override
     public void allowDebugging(boolean alwaysAllow, @NonNull String publicKey) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
         Preconditions.checkStringNotEmpty(publicKey);
-        if (mDebuggingManager != null) {
-            mDebuggingManager.allowDebugging(alwaysAllow, publicKey);
-        }
+        mDebuggingManager.allowDebugging(alwaysAllow, publicKey);
     }
 
     @Override
     public void denyDebugging() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
-        if (mDebuggingManager != null) {
-            mDebuggingManager.denyDebugging();
-        }
+        mDebuggingManager.denyDebugging();
     }
 
     @Override
     public void clearDebuggingKeys() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
-        if (mDebuggingManager != null) {
-            mDebuggingManager.clearDebuggingKeys();
-        } else {
-            throw new RuntimeException("Cannot clear ADB debugging keys, "
-                    + "AdbDebuggingManager not enabled");
-        }
+        mDebuggingManager.clearDebuggingKeys();
     }
 
     /**
@@ -350,25 +336,18 @@ public class AdbService extends IAdbManager.Stub {
     public void allowWirelessDebugging(boolean alwaysAllow, @NonNull String bssid) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
         Preconditions.checkStringNotEmpty(bssid);
-        if (mDebuggingManager != null) {
-            mDebuggingManager.allowWirelessDebugging(alwaysAllow, bssid);
-        }
+        mDebuggingManager.allowWirelessDebugging(alwaysAllow, bssid);
     }
 
     @Override
     public void denyWirelessDebugging() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
-        if (mDebuggingManager != null) {
-            mDebuggingManager.denyWirelessDebugging();
-        }
+        mDebuggingManager.denyWirelessDebugging();
     }
 
     @Override
     public FingerprintAndPairDevice[] getPairedDevices() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
-        if (mDebuggingManager == null) {
-            return null;
-        }
         Map<String, PairDevice> map = mDebuggingManager.getPairedDevices();
         FingerprintAndPairDevice[] ret = new FingerprintAndPairDevice[map.size()];
         int i = 0;
@@ -385,17 +364,13 @@ public class AdbService extends IAdbManager.Stub {
     public void unpairDevice(@NonNull String fingerprint) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
         Preconditions.checkStringNotEmpty(fingerprint);
-        if (mDebuggingManager != null) {
-            mDebuggingManager.unpairDevice(fingerprint);
-        }
+        mDebuggingManager.unpairDevice(fingerprint);
     }
 
     @Override
     public void enablePairingByPairingCode() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
-        if (mDebuggingManager != null) {
-            mDebuggingManager.enablePairingByPairingCode();
-        }
+        mDebuggingManager.enablePairingByPairingCode();
     }
 
     @Override
@@ -403,27 +378,19 @@ public class AdbService extends IAdbManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
         Preconditions.checkStringNotEmpty(serviceName);
         Preconditions.checkStringNotEmpty(password);
-        if (mDebuggingManager != null) {
-            mDebuggingManager.enablePairingByQrCode(serviceName, password);
-        }
+        mDebuggingManager.enablePairingByQrCode(serviceName, password);
     }
 
     @Override
     public void disablePairing() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
-        if (mDebuggingManager != null) {
-            mDebuggingManager.disablePairing();
-        }
+        mDebuggingManager.disablePairing();
     }
 
     @Override
     public int getAdbWirelessPort() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
-        if (mDebuggingManager != null) {
-            return mDebuggingManager.getAdbWirelessPort();
-        }
-        // If ro.adb.secure=0
-        return mConnectionPort.get();
+        return mDebuggingManager.getAdbWirelessPort();
     }
 
     @Override
@@ -503,7 +470,7 @@ public class AdbService extends IAdbManager.Stub {
         } else if (transportType == AdbTransportType.WIFI && enable != mIsAdbWifiEnabled) {
             mIsAdbWifiEnabled = enable;
             if (mIsAdbWifiEnabled) {
-                if (!AdbProperties.secure().orElse(false) && mDebuggingManager == null) {
+                if (!AdbProperties.secure().orElse(false)) {
                     // Start adbd. If this is secure adb, then we defer enabling adb over WiFi.
                     SystemProperties.set(WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
                     mConnectionPortPoller =
@@ -537,9 +504,7 @@ public class AdbService extends IAdbManager.Stub {
             }
         }
 
-        if (mDebuggingManager != null) {
-            mDebuggingManager.setAdbEnabled(enable, transportType);
-        }
+        mDebuggingManager.setAdbEnabled(enable, transportType);
 
         Slog.d(TAG, "Broadcasting enable = " + enable + ", type = " + transportType);
         mCallbacks.broadcast((callback) -> {
@@ -586,11 +551,8 @@ public class AdbService extends IAdbManager.Stub {
                     dump = new DualDumpOutputStream(new IndentingPrintWriter(pw, "  "));
                 }
 
-                if (mDebuggingManager != null) {
-                    mDebuggingManager.dump(dump, "debugging_manager",
-                            AdbServiceDumpProto.DEBUGGING_MANAGER);
-                }
-
+                mDebuggingManager.dump(dump, "debugging_manager",
+                        AdbServiceDumpProto.DEBUGGING_MANAGER);
                 dump.flush();
             } else {
                 pw.println("Dump current ADB state");
