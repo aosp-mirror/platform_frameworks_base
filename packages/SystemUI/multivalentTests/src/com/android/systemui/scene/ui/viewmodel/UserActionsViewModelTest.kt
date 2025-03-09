@@ -22,7 +22,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
@@ -77,7 +76,7 @@ class UserActionsViewModelTest : SysuiTestCase() {
             val expected1 =
                 mapOf(
                     Back to UserActionResult(toScene = Scenes.Gone),
-                    Swipe(SwipeDirection.Up) to UserActionResult(toScene = Scenes.Shade)
+                    Swipe.Up to UserActionResult(toScene = Scenes.Shade),
                 )
             underTest.upstream.value = expected1
             runCurrent()
@@ -86,7 +85,7 @@ class UserActionsViewModelTest : SysuiTestCase() {
             val expected2 =
                 mapOf(
                     Back to UserActionResult(toScene = Scenes.Lockscreen),
-                    Swipe(SwipeDirection.Down) to UserActionResult(toScene = Scenes.Shade)
+                    Swipe.Down to UserActionResult(toScene = Scenes.Shade),
                 )
             underTest.upstream.value = expected2
             runCurrent()
@@ -104,7 +103,7 @@ class UserActionsViewModelTest : SysuiTestCase() {
             val expected =
                 mapOf(
                     Back to UserActionResult(toScene = Scenes.Lockscreen),
-                    Swipe(SwipeDirection.Down) to UserActionResult(toScene = Scenes.Shade)
+                    Swipe.Down to UserActionResult(toScene = Scenes.Shade),
                 )
             underTest.upstream.value = expected
             runCurrent()
@@ -120,7 +119,7 @@ class UserActionsViewModelTest : SysuiTestCase() {
         val upstream = MutableStateFlow<Map<UserAction, UserActionResult>>(emptyMap())
 
         override suspend fun hydrateActions(
-            setActions: (Map<UserAction, UserActionResult>) -> Unit,
+            setActions: (Map<UserAction, UserActionResult>) -> Unit
         ) {
             upstream.collect { setActions(it) }
         }

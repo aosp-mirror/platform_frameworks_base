@@ -22,10 +22,14 @@ import android.app.admin.DevicePolicyResources.Strings.Settings.WORK_CATEGORY_HE
 import android.content.Context
 import android.content.pm.UserInfo
 import com.android.settingslib.R
+import com.android.settingslib.RestrictedLockUtils
+import com.android.settingslib.RestrictedLockUtilsInternal
 import com.android.settingslib.spaprivileged.framework.common.devicePolicyManager
 
 interface IEnterpriseRepository {
     fun getEnterpriseString(updatableStringId: String, resId: Int): String
+    fun getAdminSummaryString(advancedProtectionStringId: Int, updatableStringId: String,
+        resId: Int, enforcedAdmin: RestrictedLockUtils.EnforcedAdmin?, userId: Int): String
 }
 
 class EnterpriseRepository(private val context: Context) : IEnterpriseRepository {
@@ -33,6 +37,21 @@ class EnterpriseRepository(private val context: Context) : IEnterpriseRepository
 
     override fun getEnterpriseString(updatableStringId: String, resId: Int): String =
         checkNotNull(resources.getString(updatableStringId) { context.getString(resId) })
+
+    override fun getAdminSummaryString(
+        advancedProtectionStringId: Int,
+        updatableStringId: String,
+        resId: Int,
+        enforcedAdmin: RestrictedLockUtils.EnforcedAdmin?,
+        userId: Int
+    ): String {
+        return if (RestrictedLockUtilsInternal.isPolicyEnforcedByAdvancedProtection(context,
+                enforcedAdmin?.enforcedRestriction, userId)) {
+            context.getString(advancedProtectionStringId)
+        } else {
+            getEnterpriseString(updatableStringId, resId)
+        }
+    }
 
     fun getProfileTitle(userInfo: UserInfo): String = if (userInfo.isManagedProfile) {
         getEnterpriseString(WORK_CATEGORY_HEADER, R.string.category_work)

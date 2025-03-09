@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.content.testableContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -33,8 +34,14 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.shared.model.DismissAction
+import com.android.systemui.keyguard.shared.model.KeyguardDone
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
+import com.android.systemui.res.R
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -166,21 +173,35 @@ class BouncerSceneContentViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun isSideBySideSupported() =
+    fun isOneHandedModeSupported() =
         testScope.runTest {
-            val isSideBySideSupported by collectLastValue(underTest.isSideBySideSupported)
+            val isOneHandedModeSupported by collectLastValue(underTest.isOneHandedModeSupported)
             kosmos.fakeFeatureFlagsClassic.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            kosmos.testableContext.orCreateTestableResources.addOverride(
+                R.bool.config_enableBouncerUserSwitcher,
+                true,
+            )
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
-            assertThat(isSideBySideSupported).isTrue()
+            assertThat(isOneHandedModeSupported).isTrue()
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Password)
-            assertThat(isSideBySideSupported).isTrue()
+            assertThat(isOneHandedModeSupported).isTrue()
 
             kosmos.fakeFeatureFlagsClassic.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+            kosmos.testableContext.orCreateTestableResources.addOverride(
+                R.bool.can_use_one_handed_bouncer,
+                true,
+            )
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
-            assertThat(isSideBySideSupported).isTrue()
+            assertThat(isOneHandedModeSupported).isTrue()
 
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Password)
-            assertThat(isSideBySideSupported).isFalse()
+            assertThat(isOneHandedModeSupported).isFalse()
+            kosmos.testableContext.orCreateTestableResources.removeOverride(
+                R.bool.config_enableBouncerUserSwitcher
+            )
+            kosmos.testableContext.orCreateTestableResources.removeOverride(
+                R.bool.can_use_one_handed_bouncer
+            )
         }
 
     @Test
@@ -194,6 +215,25 @@ class BouncerSceneContentViewModelTest : SysuiTestCase() {
 
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pattern)
             assertThat(isFoldSplitRequired).isTrue()
+        }
+
+    @Test
+    fun onUiDestroyed_clearsPendingDismissAction() =
+        kosmos.runTest {
+            val dismissAction by collectLastValue(fakeKeyguardRepository.dismissAction)
+            fakeKeyguardRepository.setDismissAction(
+                DismissAction.RunImmediately(
+                    onDismissAction = { KeyguardDone.IMMEDIATE },
+                    onCancelAction = {},
+                    message = "",
+                    willAnimateOnLockscreen = true,
+                )
+            )
+            assertThat(dismissAction).isNotEqualTo(DismissAction.None)
+
+            underTest.onUiDestroyed()
+
+            assertThat(dismissAction).isEqualTo(DismissAction.None)
         }
 
     private fun authMethodsToTest(): List<AuthenticationMethodModel> {

@@ -16,9 +16,11 @@
 
 package android.content.pm;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -513,6 +515,7 @@ public final class UserProperties implements Parcelable {
      * Note that, internally, this does not perform an exact copy.
      * @hide
      */
+    @SuppressLint("MissingPermission")
     public UserProperties(UserProperties orig,
             boolean exposeAllFields,
             boolean hasManagePermission,
@@ -614,12 +617,10 @@ public final class UserProperties implements Parcelable {
      *    {@link #SHOW_IN_SETTINGS_SEPARATE},
      *    and {@link #SHOW_IN_SETTINGS_NO}.
      *
-     * <p> The caller must have {@link android.Manifest.permission#MANAGE_USERS} to query this
-     * property.
-     *
      * @return whether, and how, a profile should be shown in the Settings.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_USERS)
     public @ShowInSettings int getShowInSettings() {
         if (isPresent(INDEX_SHOW_IN_SETTINGS)) return mShowInSettings;
         if (mDefaultProperties != null) return mDefaultProperties.mShowInSettings;
@@ -690,6 +691,8 @@ public final class UserProperties implements Parcelable {
     /**
      * Returns whether a profile should be started when its parent starts (unless in quiet mode).
      * This only applies for users that have parents (i.e. for profiles).
+     *
+     * Only available to the SYSTEM uid.
      * @hide
      */
     public boolean getStartWithParent() {
@@ -708,6 +711,8 @@ public final class UserProperties implements Parcelable {
      * Returns whether an app in the profile should be deleted when the same package in
      * the parent user is being deleted.
      * This only applies for users that have parents (i.e. for profiles).
+     *
+     * Only available to the SYSTEM uid.
      * @hide
      */
     public boolean getDeleteAppWithParent() {
@@ -726,6 +731,8 @@ public final class UserProperties implements Parcelable {
      * Returns whether the user should always
      * be {@link android.os.UserManager#isUserVisible() visible}.
      * The intended usage is for the Communal Profile, which is running and accessible at all times.
+     *
+     * Only available to the SYSTEM uid.
      * @hide
      */
     public boolean getAlwaysVisible() {
@@ -747,6 +754,7 @@ public final class UserProperties implements Parcelable {
      * Possible return values include
      * {@link #INHERIT_DEVICE_POLICY_FROM_PARENT} or {@link #INHERIT_DEVICE_POLICY_NO}
      *
+     * Only available to the SYSTEM uid.
      * @hide
      */
     public @InheritDevicePolicy int getInheritDevicePolicy() {
@@ -777,6 +785,7 @@ public final class UserProperties implements Parcelable {
      * @return whether contacts access from an associated profile is enabled for the user
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_USERS)
     public boolean getUseParentsContacts() {
         if (isPresent(INDEX_USE_PARENTS_CONTACTS)) return mUseParentsContacts;
         if (mDefaultProperties != null) return mDefaultProperties.mUseParentsContacts;
@@ -796,7 +805,9 @@ public final class UserProperties implements Parcelable {
 
     /**
      * Returns true if user needs to update default
-     * {@link com.android.server.pm.CrossProfileIntentFilter} with its parents during an OTA update
+     * {@link com.android.server.pm.CrossProfileIntentFilter} with its parents during an OTA update.
+     *
+     * Only available to the SYSTEM uid.
      * @hide
      */
     public boolean getUpdateCrossProfileIntentFiltersOnOTA() {
@@ -863,6 +874,7 @@ public final class UserProperties implements Parcelable {
      * checks is not guaranteed when the property is false and may vary depending on user types.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.MANAGE_USERS)
     public boolean isAuthAlwaysRequiredToDisableQuietMode() {
         if (isPresent(INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE)) {
             return mAuthAlwaysRequiredToDisableQuietMode;
@@ -894,6 +906,8 @@ public final class UserProperties implements Parcelable {
      * locking for a user can happen if either the device configuration is set or if this property
      * is set. When both, the config and the property value is false, the user storage is always
      * locked when the user is stopped.
+     *
+     * Only available to the SYSTEM uid.
      * @hide
      */
     public boolean getAllowStoppingUserWithDelayedLocking() {
@@ -915,6 +929,8 @@ public final class UserProperties implements Parcelable {
 
     /**
      * Returns the user's {@link CrossProfileIntentFilterAccessControlLevel}.
+     *
+     * Only available to the SYSTEM uid.
      * @hide
      */
     public @CrossProfileIntentFilterAccessControlLevel int
@@ -944,6 +960,7 @@ public final class UserProperties implements Parcelable {
      * Returns the user's {@link CrossProfileIntentResolutionStrategy}.
      * @return user's {@link CrossProfileIntentResolutionStrategy}.
      *
+     * Only available to the SYSTEM uid.
      * @hide
      */
     public @CrossProfileIntentResolutionStrategy int getCrossProfileIntentResolutionStrategy() {
@@ -1052,32 +1069,47 @@ public final class UserProperties implements Parcelable {
 
     @Override
     public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("UserProperties{");
+        s.append("mPropertiesPresent="); s.append(Long.toBinaryString(mPropertiesPresent));
+        try {
+            s.append(listPropertiesAsStringBuilder());
+        } catch (SecurityException e) {
+            // Caller doesn't have permission to see all the properties. Just don't share them.
+        }
+        s.append("}");
+        return s.toString();
+    }
+
+    private StringBuilder listPropertiesAsStringBuilder() {
+        final StringBuilder s = new StringBuilder();
+
         // Please print in increasing order of PropertyIndex.
-        return "UserProperties{"
-                + "mPropertiesPresent=" + Long.toBinaryString(mPropertiesPresent)
-                + ", mShowInLauncher=" + getShowInLauncher()
-                + ", mStartWithParent=" + getStartWithParent()
-                + ", mShowInSettings=" + getShowInSettings()
-                + ", mInheritDevicePolicy=" + getInheritDevicePolicy()
-                + ", mUseParentsContacts=" + getUseParentsContacts()
-                + ", mUpdateCrossProfileIntentFiltersOnOTA="
-                + getUpdateCrossProfileIntentFiltersOnOTA()
-                + ", mCrossProfileIntentFilterAccessControl="
-                + getCrossProfileIntentFilterAccessControl()
-                + ", mCrossProfileIntentResolutionStrategy="
-                + getCrossProfileIntentResolutionStrategy()
-                + ", mMediaSharedWithParent=" + isMediaSharedWithParent()
-                + ", mCredentialShareableWithParent=" + isCredentialShareableWithParent()
-                + ", mAuthAlwaysRequiredToDisableQuietMode="
-                + isAuthAlwaysRequiredToDisableQuietMode()
-                + ", mAllowStoppingUserWithDelayedLocking="
-                + getAllowStoppingUserWithDelayedLocking()
-                + ", mDeleteAppWithParent=" + getDeleteAppWithParent()
-                + ", mAlwaysVisible=" + getAlwaysVisible()
-                + ", mCrossProfileContentSharingStrategy=" + getCrossProfileContentSharingStrategy()
-                + ", mProfileApiVisibility=" + getProfileApiVisibility()
-                + ", mItemsRestrictedOnHomeScreen=" + areItemsRestrictedOnHomeScreen()
-                + "}";
+        s.append(", mShowInLauncher="); s.append(getShowInLauncher());
+        s.append(", mStartWithParent="); s.append(getStartWithParent());
+        s.append(", mShowInSettings="); s.append(getShowInSettings());
+        s.append(", mInheritDevicePolicy="); s.append(getInheritDevicePolicy());
+        s.append(", mUseParentsContacts="); s.append(getUseParentsContacts());
+        s.append(", mUpdateCrossProfileIntentFiltersOnOTA=");
+        s.append(getUpdateCrossProfileIntentFiltersOnOTA());
+        s.append(", mCrossProfileIntentFilterAccessControl=");
+        s.append(getCrossProfileIntentFilterAccessControl());
+        s.append(", mCrossProfileIntentResolutionStrategy=");
+        s.append(getCrossProfileIntentResolutionStrategy());
+        s.append(", mMediaSharedWithParent="); s.append(isMediaSharedWithParent());
+        s.append(", mCredentialShareableWithParent="); s.append(isCredentialShareableWithParent());
+        s.append(", mAuthAlwaysRequiredToDisableQuietMode=");
+        s.append(isAuthAlwaysRequiredToDisableQuietMode());
+        s.append(", mAllowStoppingUserWithDelayedLocking=");
+        s.append(getAllowStoppingUserWithDelayedLocking());
+        s.append(", mDeleteAppWithParent="); s.append(getDeleteAppWithParent());
+        s.append(", mAlwaysVisible="); s.append(getAlwaysVisible());
+        s.append(", mCrossProfileContentSharingStrategy=");
+        s.append(getCrossProfileContentSharingStrategy());
+        s.append(", mProfileApiVisibility="); s.append(getProfileApiVisibility());
+        s.append(", mItemsRestrictedOnHomeScreen="); s.append(areItemsRestrictedOnHomeScreen());
+
+        return s;
     }
 
     /**

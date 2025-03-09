@@ -72,6 +72,7 @@ import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.SizeSpecSource;
+import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
@@ -87,8 +88,8 @@ import com.android.wm.shell.compatui.impl.DefaultCompatUIHandler;
 import com.android.wm.shell.compatui.impl.DefaultCompatUIRepository;
 import com.android.wm.shell.compatui.impl.DefaultComponentIdGenerator;
 import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -123,6 +124,7 @@ import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.taskview.TaskViewFactory;
 import com.android.wm.shell.taskview.TaskViewFactoryController;
 import com.android.wm.shell.taskview.TaskViewTransitions;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.MixedTransitionHandler;
 import com.android.wm.shell.transition.Transitions;
@@ -137,7 +139,6 @@ import dagger.Module;
 import dagger.Provides;
 
 import java.util.Optional;
-import java.util.function.IntPredicate;
 
 /**
  * Provides basic dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -266,7 +267,7 @@ public abstract class WMShellBaseModule {
             Lazy<CompatUIShellCommandHandler> compatUIShellCommandHandler,
             Lazy<AccessibilityManager> accessibilityManager,
             CompatUIRepository compatUIRepository,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopUserRepositories> desktopUserRepositories,
             @NonNull CompatUIState compatUIState,
             @NonNull CompatUIComponentIdGenerator componentIdGenerator,
             @NonNull CompatUIComponentFactory compatUIComponentFactory,
@@ -279,10 +280,6 @@ public abstract class WMShellBaseModule {
                     new DefaultCompatUIHandler(compatUIRepository, compatUIState,
                             componentIdGenerator, compatUIComponentFactory, mainExecutor));
         }
-        final IntPredicate inDesktopModePredicate =
-                desktopModeTaskRepository.<IntPredicate>map(modeTaskRepository -> displayId ->
-                        modeTaskRepository.getVisibleTaskCount(displayId) > 0)
-                            .orElseGet(() -> displayId -> false);
         return Optional.of(
                 new CompatUIController(
                         context,
@@ -299,7 +296,7 @@ public abstract class WMShellBaseModule {
                         compatUIShellCommandHandler.get(),
                         accessibilityManager.get(),
                         compatUIStatusManager,
-                        inDesktopModePredicate));
+                        desktopUserRepositories));
     }
 
     @WMSingleton
@@ -400,9 +397,6 @@ public abstract class WMShellBaseModule {
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             RootTaskDisplayAreaOrganizer rootTdaOrganizer) {
-        if (!com.android.window.flags.Flags.explicitRefreshRateHints()) {
-            return Optional.empty();
-        }
         final PerfHintController perfHintController =
                 new PerfHintController(context, shellInit, shellCommandHandler, rootTdaOrganizer);
         return Optional.of(perfHintController.getHinter());
@@ -638,7 +632,7 @@ public abstract class WMShellBaseModule {
     static Optional<FreeformComponents> provideFreeformComponents(
             @DynamicOverride Optional<FreeformComponents> freeformComponents,
             Context context) {
-        if (FreeformComponents.isFreeformEnabled(context)) {
+        if (FreeformComponents.requiresFreeformComponents(context)) {
             return freeformComponents;
         }
         return Optional.empty();
@@ -706,14 +700,14 @@ public abstract class WMShellBaseModule {
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopUserRepositories> desktopUserRepositories,
             TaskStackTransitionObserver taskStackTransitionObserver,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return Optional.ofNullable(
                 RecentTasksController.create(context, shellInit, shellController,
                         shellCommandHandler, taskStackListener, activityTaskManager,
-                        desktopModeTaskRepository, taskStackTransitionObserver, mainExecutor));
+                        desktopUserRepositories, taskStackTransitionObserver, mainExecutor));
     }
 
     @BindsOptionalOf
@@ -742,14 +736,15 @@ public abstract class WMShellBaseModule {
             @ShellMainThread Handler mainHandler,
             @ShellAnimationThread ShellExecutor animExecutor,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            HomeTransitionObserver homeTransitionObserver) {
+            HomeTransitionObserver homeTransitionObserver,
+            FocusTransitionObserver focusTransitionObserver) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTransitionsOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
         return new Transitions(context, shellInit, shellCommandHandler, shellController, organizer,
                 pool, displayController, mainExecutor, mainHandler, animExecutor,
-                rootTaskDisplayAreaOrganizer, homeTransitionObserver);
+                rootTaskDisplayAreaOrganizer, homeTransitionObserver, focusTransitionObserver);
     }
 
     @WMSingleton
@@ -757,6 +752,12 @@ public abstract class WMShellBaseModule {
     static HomeTransitionObserver provideHomeTransitionObserver(Context context,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new HomeTransitionObserver(context, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static FocusTransitionObserver provideFocusTransitionObserver() {
+        return new FocusTransitionObserver();
     }
 
     @WMSingleton
@@ -790,13 +791,15 @@ public abstract class WMShellBaseModule {
     static KeyguardTransitionHandler provideKeyguardTransitionHandler(
             ShellInit shellInit,
             ShellController shellController,
+            DisplayController displayController,
             Transitions transitions,
             TaskStackListenerImpl taskStackListener,
             @ShellMainThread Handler mainHandler,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            FocusTransitionObserver focusTransitionObserver) {
         return new KeyguardTransitionHandler(
-                shellInit, shellController, transitions, taskStackListener, mainHandler,
-                mainExecutor);
+                shellInit, shellController, displayController, transitions, taskStackListener,
+                mainHandler, mainExecutor, focusTransitionObserver);
     }
 
     @WMSingleton
@@ -858,6 +861,12 @@ public abstract class WMShellBaseModule {
             return splitscreenController;
         }
         return Optional.empty();
+    }
+
+    @WMSingleton
+    @Provides
+    static SplitState provideSplitState() {
+        return new SplitState();
     }
 
     //
@@ -986,7 +995,7 @@ public abstract class WMShellBaseModule {
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
         return desktopTasksController.flatMap((lazy) -> {
-            if (DesktopModeStatus.canEnterDesktopMode(context)) {
+            if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
                 return Optional.of(lazy.get());
             }
             return Optional.empty();
@@ -995,16 +1004,16 @@ public abstract class WMShellBaseModule {
 
     @BindsOptionalOf
     @DynamicOverride
-    abstract DesktopModeTaskRepository optionalDesktopModeTaskRepository();
+    abstract DesktopUserRepositories optionalDesktopUserRepositories();
 
     @WMSingleton
     @Provides
-    static Optional<DesktopModeTaskRepository> provideDesktopTaskRepository(Context context,
-            @DynamicOverride Optional<Lazy<DesktopModeTaskRepository>> desktopModeTaskRepository) {
+    static Optional<DesktopUserRepositories> provideDesktopUserRepositories(Context context,
+            @DynamicOverride Optional<Lazy<DesktopUserRepositories>> desktopUserRepositories) {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        return desktopModeTaskRepository.flatMap((lazy) -> {
+        return desktopUserRepositories.flatMap((lazy) -> {
             if (DesktopModeStatus.canEnterDesktopMode(context)) {
                 return Optional.of(lazy.get());
             }
@@ -1019,10 +1028,13 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static TaskStackTransitionObserver provideTaskStackTransitionObserver(
-            Lazy<Transitions> transitions,
-            ShellInit shellInit
+            ShellInit shellInit,
+            Lazy<ShellTaskOrganizer> shellTaskOrganizer,
+            ShellCommandHandler shellCommandHandler,
+            Lazy<Transitions> transitions
     ) {
-        return new TaskStackTransitionObserver(transitions, shellInit);
+        return new TaskStackTransitionObserver(shellInit, shellTaskOrganizer, shellCommandHandler,
+                transitions);
     }
 
     //

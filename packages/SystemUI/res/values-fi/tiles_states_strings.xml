@@ -191,4 +191,9 @@
     <item msgid="3079622119444911877">"Pois päältä"</item>
     <item msgid="3028994095749238254">"Päällä"</item>
   </string-array>
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"Ei saatavilla"</item>
+    <item msgid="6419996398343291862">"Pois päältä"</item>
+    <item msgid="5908720590832378783">"Päällä"</item>
+  </string-array>
 </resources>

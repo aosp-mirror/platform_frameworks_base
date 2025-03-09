@@ -55,6 +55,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
@@ -84,7 +85,7 @@ public class InstantAppNotifier
 
     @Inject
     public InstantAppNotifier(
-            Context context,
+            @ShadeDisplayAware Context context,
             CommandQueue commandQueue,
             UserTracker userTracker,
             @Main Executor mainExecutor,

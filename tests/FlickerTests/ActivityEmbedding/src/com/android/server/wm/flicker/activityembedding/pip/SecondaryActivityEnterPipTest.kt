@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
  * Setup: Start from a split A|B. Transition: B enters PIP, observe the window first goes fullscreen
  * then shrink to the bottom right corner on screen.
  *
- * To run this test: `atest FlickerTestsOther:SecondaryActivityEnterPipTest`
+ * To run this test: `atest FlickerTestsActivityEmbedding:SecondaryActivityEnterPipTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

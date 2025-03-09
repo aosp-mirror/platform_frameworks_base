@@ -24,11 +24,10 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
-import android.hardware.input.KeyboardLayoutSelectionResult
-import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
 import android.hardware.input.InputManagerGlobal
 import android.hardware.input.KeyboardLayout
+import android.hardware.input.KeyboardLayoutSelectionResult
 import android.icu.util.ULocale
 import android.os.Bundle
 import android.os.test.TestLooper
@@ -42,8 +41,12 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.os.KeyboardConfiguredProto
 import com.android.internal.util.FrameworkStatsLog
 import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.test.input.MockInputManagerRule
 import com.android.test.input.R
-import org.junit.After
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -53,10 +56,6 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
 
 fun createKeyboard(
     deviceId: Int,
@@ -120,8 +119,8 @@ class KeyboardLayoutManagerTests {
     val extendedMockitoRule = ExtendedMockitoRule.Builder(this)
             .mockStatic(FrameworkStatsLog::class.java).build()!!
 
-    @Mock
-    private lateinit var iInputManager: IInputManager
+    @get:Rule
+    val inputManagerRule = MockInputManagerRule()
 
     @Mock
     private lateinit var native: NativeInputManagerService
@@ -148,7 +147,6 @@ class KeyboardLayoutManagerTests {
     @Before
     fun setup() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         dataStore = PersistentDataStore(object : PersistentDataStore.Injector() {
             override fun openRead(): InputStream? {
                 throw FileNotFoundException()
@@ -171,13 +169,6 @@ class KeyboardLayoutManagerTests {
         setupIme()
     }
 
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
-        }
-    }
-
     private fun setupInputDevices() {
         val inputManager = InputManager(context)
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
@@ -191,19 +182,19 @@ class KeyboardLayoutManagerTests {
                 DEFAULT_PRODUCT_ID, DEFAULT_DEVICE_BUS, "en", "dvorak")
         englishQwertyKeyboardDevice = createKeyboard(ENGLISH_QWERTY_DEVICE_ID, DEFAULT_VENDOR_ID,
                 DEFAULT_PRODUCT_ID, DEFAULT_DEVICE_BUS, "en", "qwerty")
-        Mockito.`when`(iInputManager.inputDeviceIds)
+        Mockito.`when`(inputManagerRule.mock.inputDeviceIds)
             .thenReturn(intArrayOf(
                 DEVICE_ID,
                 VENDOR_SPECIFIC_DEVICE_ID,
                 ENGLISH_DVORAK_DEVICE_ID,
                 ENGLISH_QWERTY_DEVICE_ID
             ))
-        Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardDevice)
-        Mockito.`when`(iInputManager.getInputDevice(VENDOR_SPECIFIC_DEVICE_ID))
+        Mockito.`when`(inputManagerRule.mock.getInputDevice(DEVICE_ID)).thenReturn(keyboardDevice)
+        Mockito.`when`(inputManagerRule.mock.getInputDevice(VENDOR_SPECIFIC_DEVICE_ID))
             .thenReturn(vendorSpecificKeyboardDevice)
-        Mockito.`when`(iInputManager.getInputDevice(ENGLISH_DVORAK_DEVICE_ID))
+        Mockito.`when`(inputManagerRule.mock.getInputDevice(ENGLISH_DVORAK_DEVICE_ID))
             .thenReturn(englishDvorakKeyboardDevice)
-        Mockito.`when`(iInputManager.getInputDevice(ENGLISH_QWERTY_DEVICE_ID))
+        Mockito.`when`(inputManagerRule.mock.getInputDevice(ENGLISH_QWERTY_DEVICE_ID))
                 .thenReturn(englishQwertyKeyboardDevice)
     }
 

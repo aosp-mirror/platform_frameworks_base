@@ -35,7 +35,7 @@ import kotlin.reflect.KClass
  * // TODO(b/http://b/299909989): Clean up legacy mappings after the transition
  */
 data class QSTileState(
-    val icon: () -> Icon?,
+    val icon: Icon?,
     val iconRes: Int?,
     val label: CharSequence,
     val activationState: ActivationState,
@@ -54,21 +54,18 @@ data class QSTileState(
             resources: Resources,
             theme: Theme,
             config: QSTileUIConfig,
-            builder: Builder.() -> Unit
+            builder: Builder.() -> Unit,
         ): QSTileState {
             val iconDrawable = resources.getDrawable(config.iconRes, theme)
             return build(
-                { Icon.Loaded(iconDrawable, null) },
+                Icon.Loaded(iconDrawable, null),
                 resources.getString(config.labelRes),
                 builder,
             )
         }
 
-        fun build(
-            icon: () -> Icon?,
-            label: CharSequence,
-            builder: Builder.() -> Unit
-        ): QSTileState = Builder(icon, label).apply { builder() }.build()
+        fun build(icon: Icon?, label: CharSequence, builder: Builder.() -> Unit): QSTileState =
+            Builder(icon, label).apply { builder() }.build()
     }
 
     enum class ActivationState(val legacyState: Int) {
@@ -117,10 +114,7 @@ data class QSTileState(
         data object None : SideViewIcon
     }
 
-    class Builder(
-        var icon: () -> Icon?,
-        var label: CharSequence,
-    ) {
+    class Builder(var icon: Icon?, var label: CharSequence) {
         var iconRes: Int? = null
         var activationState: ActivationState = ActivationState.INACTIVE
         var secondaryLabel: CharSequence? = null

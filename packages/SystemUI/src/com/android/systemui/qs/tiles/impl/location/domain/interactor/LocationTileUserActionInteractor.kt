@@ -16,9 +16,9 @@
 
 package com.android.systemui.qs.tiles.impl.location.domain.interactor
 
-import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import android.content.Intent
 import android.provider.Settings
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.ActivityStarter
@@ -32,7 +32,7 @@ import com.android.systemui.statusbar.policy.LocationController
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** Handles location tile clicks. */
@@ -53,9 +53,11 @@ constructor(
                     val wasEnabled: Boolean = input.data.isEnabled
                     if (keyguardController.isMethodSecure() && keyguardController.isShowing()) {
                         activityStarter.postQSRunnableDismissingKeyguard {
-                            CoroutineScope(applicationScope.coroutineContext + createCoroutineTracingContext("LocationTileScope")).launch {
-                                locationController.setLocationEnabled(!wasEnabled)
-                            }
+                            CoroutineScope(
+                                    applicationScope.coroutineContext +
+                                        newTracingContext("LocationTileScope")
+                                )
+                                .launch { locationController.setLocationEnabled(!wasEnabled) }
                         }
                     } else {
                         withContext(coroutineContext) {

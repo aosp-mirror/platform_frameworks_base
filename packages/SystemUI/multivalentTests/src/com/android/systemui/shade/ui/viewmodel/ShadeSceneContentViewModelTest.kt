@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
 import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -42,6 +43,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.google.common.truth.Truth.assertThat
@@ -49,6 +51,7 @@ import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -158,10 +161,7 @@ class ShadeSceneContentViewModelTest : SysuiTestCase() {
                         underTest.unfoldTranslationX(isOnStartSide = true),
                         underTest.unfoldTranslationX(isOnStartSide = false),
                     ) { start, end ->
-                        Translations(
-                            start = start,
-                            end = end,
-                        )
+                        Translations(start = start, end = end)
                     }
                 )
 
@@ -186,6 +186,20 @@ class ShadeSceneContentViewModelTest : SysuiTestCase() {
             assertThat(translations?.end).isEqualTo(-0f)
         }
 
+    @Test
+    fun disable2QuickSettings_isQsEnabledIsFalse() =
+        testScope.runTest {
+            val isQsEnabled by collectLastValue(underTest.isQsEnabled)
+            assertThat(isQsEnabled).isTrue()
+
+            kosmos.fakeDisableFlagsRepository.disableFlags.update {
+                it.copy(disable2 = DISABLE2_QUICK_SETTINGS)
+            }
+            runCurrent()
+
+            assertThat(isQsEnabled).isFalse()
+        }
+
     private fun prepareConfiguration(): Int {
         val configuration = context.resources.configuration
         configuration.setLayoutDirection(Locale.US)
@@ -193,7 +207,7 @@ class ShadeSceneContentViewModelTest : SysuiTestCase() {
         val maxTranslation = 10
         kosmos.fakeConfigurationRepository.setDimensionPixelSize(
             R.dimen.notification_side_paddings,
-            maxTranslation
+            maxTranslation,
         )
         return maxTranslation
     }
@@ -224,8 +238,5 @@ class ShadeSceneContentViewModelTest : SysuiTestCase() {
         runCurrent()
     }
 
-    private data class Translations(
-        val start: Float,
-        val end: Float,
-    )
+    private data class Translations(val start: Float, val end: Float)
 }

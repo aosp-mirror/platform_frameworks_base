@@ -16,11 +16,15 @@
 
 package android.telephony.ims.feature;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,6 +34,8 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@FlaggedApi(Flags.FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+@SystemApi
 public final class ConnectionFailureInfo implements Parcelable {
 
     /** @hide */
@@ -67,7 +73,7 @@ public final class ConnectionFailureInfo implements Parcelable {
     public static final int REASON_RRC_TIMEOUT = 6;
     /** Device currently not in service */
     public static final int REASON_NO_SERVICE = 7;
-    /** The PDN is no more active */
+    /** The PDN is no longer active */
     public static final int REASON_PDN_NOT_AVAILABLE = 8;
     /** Radio resource is busy with another subscription */
     public static final int REASON_RF_BUSY = 9;
@@ -135,6 +141,8 @@ public final class ConnectionFailureInfo implements Parcelable {
 
     /**
      * @return the cause code from the network or modem specific to the failure.
+     *         See 3GPP TS 24.401 Annex A (Cause values for EPS mobility management) and
+     *         3GPP TS 24.501 Annex A (Cause values for 5GS mobility management).
      */
     public int getCauseCode() {
         return mCauseCode;

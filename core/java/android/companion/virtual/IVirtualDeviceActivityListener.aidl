@@ -63,4 +63,11 @@ oneway interface IVirtualDeviceActivityListener {
      * @param user The user associated with the activity.
      */
     void onSecureWindowShown(int displayId, in ComponentName componentName, in UserHandle user);
+
+    /**
+     * Called when a secure surface is no longer shown on the device.
+     *
+     * @param displayId The display ID on which the secure surface was shown.
+     */
+    void onSecureWindowHidden(int displayId);
 }

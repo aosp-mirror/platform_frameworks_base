@@ -23,6 +23,10 @@ import com.android.statementservice.network.retriever.StatementRetriever;
 
 import kotlin.coroutines.Continuation;
 
+import java.util.Collections;
+import java.util.List;
+
+
 /**
  * An immutable value type representing a statement, consisting of a source, target, and relation.
  * This reflects an assertion that the relation holds for the source, target pair. For example, if a
@@ -32,7 +36,21 @@ import kotlin.coroutines.Continuation;
  * {
  * "relation": ["delegate_permission/common.handle_all_urls"],
  * "target"  : {"namespace": "android_app", "package_name": "com.example.app",
- *              "sha256_cert_fingerprints": ["00:11:22:33"] }
+ *              "sha256_cert_fingerprints": ["00:11:22:33"] },
+ * "relation_extensions": {
+ *     "delegate_permission/common_handle_all_urls": {
+ *         "dynamic_app_link_components": [
+ *             {
+ *                 "/": "/foo*",
+ *                 "exclude": true,
+ *                 "comments": "App should not handle paths that start with foo"
+ *             },
+ *             {
+ *                 "/": "*",
+ *                 "comments": "Catch all other paths"
+ *             }
+ *         ]
+ *     }
  * }
  * </pre>
  *
@@ -40,7 +58,7 @@ import kotlin.coroutines.Continuation;
  * return a {@link Statement} with {@link #getSource} equal to the input parameter,
  * {@link #getRelation} equal to
  *
- * <pre>Relation.create("delegate_permission", "common.get_login_creds");</pre>
+ * <pre>Relation.create("delegate_permission", "common.handle_all_urls");</pre>
  *
  * and with {@link #getTarget} equal to
  *
@@ -48,17 +66,23 @@ import kotlin.coroutines.Continuation;
  *                           + "\"package_name\": \"com.example.app\"}"
  *                           + "\"sha256_cert_fingerprints\": \"[\"00:11:22:33\"]\"}");
  * </pre>
+ *
+ * If extensions exist for the handle_all_urls relation then {@link #getDynamicAppLinkComponents}
+ * will return a list of parsed {@link DynamicAppLinkComponent}s.
  */
 public final class Statement {
 
     private final AbstractAsset mTarget;
     private final Relation mRelation;
     private final AbstractAsset mSource;
+    private final List<DynamicAppLinkComponent> mDynamicAppLinkComponents;
 
-    private Statement(AbstractAsset source, AbstractAsset target, Relation relation) {
+    private Statement(AbstractAsset source, AbstractAsset target, Relation relation,
+                      List<DynamicAppLinkComponent> components) {
         mSource = source;
         mTarget = target;
         mRelation = relation;
+        mDynamicAppLinkComponents = Collections.unmodifiableList(components);
     }
 
     /**
@@ -86,6 +110,14 @@ public final class Statement {
     }
 
     /**
+     * Returns the relation matching rules of the statement.
+     */
+    @NonNull
+    public List<DynamicAppLinkComponent> getDynamicAppLinkComponents() {
+        return mDynamicAppLinkComponents;
+    }
+
+    /**
      * Creates a new Statement object for the specified target asset and relation. For example:
      * <pre>
      *   Asset asset = Asset.Factory.create(
@@ -95,8 +127,9 @@ public final class Statement {
      * </pre>
      */
     public static Statement create(@NonNull AbstractAsset source, @NonNull AbstractAsset target,
-                                   @NonNull Relation relation) {
-        return new Statement(source, target, relation);
+                                   @NonNull Relation relation,
+                                   @NonNull List<DynamicAppLinkComponent> components) {
+        return new Statement(source, target, relation, components);
     }
 
     @Override
@@ -119,6 +152,9 @@ public final class Statement {
         if (!mSource.equals(statement.mSource)) {
             return false;
         }
+        if (!mDynamicAppLinkComponents.equals(statement.mDynamicAppLinkComponents)) {
+            return false;
+        }
 
         return true;
     }
@@ -128,6 +164,7 @@ public final class Statement {
         int result = mTarget.hashCode();
         result = 31 * result + mRelation.hashCode();
         result = 31 * result + mSource.hashCode();
+        result = 31 * result + mDynamicAppLinkComponents.hashCode();
         return result;
     }
 
@@ -140,6 +177,10 @@ public final class Statement {
         statement.append(mTarget);
         statement.append(", ");
         statement.append(mRelation);
+        if (!mDynamicAppLinkComponents.isEmpty()) {
+            statement.append(", ");
+            statement.append(mDynamicAppLinkComponents);
+        }
         return statement.toString();
     }
 }

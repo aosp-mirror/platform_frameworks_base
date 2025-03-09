@@ -37,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.util.icuMessageFormat
 import javax.inject.Inject
@@ -48,7 +49,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** Handles domain layer logic for locked sim cards. */
@@ -62,7 +63,7 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val repository: SimBouncerRepository,
     private val telephonyManager: TelephonyManager,
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val euiccManager: EuiccManager?,
     // TODO(b/307977401): Replace this with `MobileConnectionsInteractor` when available.
@@ -125,7 +126,7 @@ constructor(
         // memory. Do it asynchronously with a 5-sec delay to avoid making the keyguard
         // dismiss animation janky.
 
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             delay(5000)
             System.gc()
             System.runFinalization()
@@ -151,7 +152,7 @@ constructor(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE_UNAUDITED,
                 UserHandle.SYSTEM
             )
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             if (euiccManager != null) {
                 euiccManager.switchToSubscription(
                     INVALID_SUBSCRIPTION_ID,

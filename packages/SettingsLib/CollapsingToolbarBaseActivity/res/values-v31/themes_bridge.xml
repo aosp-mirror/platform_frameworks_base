@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Copyright (C) 2024 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!-- See appcompat/appcompat/THEMES for the theme structure. -->
+<resources>
+    <!--
+      ~ Bridge theme overlay to simulate AppCompat themes based on a platform theme.
+      ~ Only non-widget attributes are included here since we should still use the platform widgets.
+      ~ Only public theme attributes (as in platform public-final.xml) can be referenced here since
+      ~ this is used in modules.
+      -->
+    <style name="Base.V31.ThemeOverlay.AppCompat.PlatformBridge" parent="">
+        <!-- START Base.V7.Theme.AppCompat -->
+
+        <item name="colorBackgroundFloating">?android:colorBackgroundFloating</item>
+
+        <item name="isLightTheme">?android:isLightTheme</item>
+
+        <item name="selectableItemBackground">?android:selectableItemBackground</item>
+        <item name="selectableItemBackgroundBorderless">?android:selectableItemBackgroundBorderless</item>
+        <item name="homeAsUpIndicator">?android:homeAsUpIndicator</item>
+
+        <item name="dividerVertical">?android:dividerVertical</item>
+        <item name="dividerHorizontal">?android:dividerHorizontal</item>
+
+        <!-- List attributes -->
+        <item name="textAppearanceListItem">?android:textAppearanceListItem</item>
+        <item name="textAppearanceListItemSmall">?android:textAppearanceListItemSmall</item>
+        <item name="textAppearanceListItemSecondary">?android:textAppearanceListItemSecondary</item>
+        <item name="listPreferredItemHeight">?android:listPreferredItemHeight</item>
+        <item name="listPreferredItemHeightSmall">?android:listPreferredItemHeightSmall</item>
+        <item name="listPreferredItemHeightLarge">?android:listPreferredItemHeightLarge</item>
+        <item name="listPreferredItemPaddingLeft">?android:listPreferredItemPaddingLeft</item>
+        <item name="listPreferredItemPaddingRight">?android:listPreferredItemPaddingRight</item>
+        <item name="listPreferredItemPaddingStart">?android:listPreferredItemPaddingStart</item>
+        <item name="listPreferredItemPaddingEnd">?android:listPreferredItemPaddingEnd</item>
+
+        <!-- Color palette -->
+        <item name="colorPrimaryDark">?android:colorPrimaryDark</item>
+        <item name="colorPrimary">?android:colorPrimary</item>
+        <item name="colorAccent">?android:colorAccent</item>
+
+        <item name="colorControlNormal">?android:colorControlNormal</item>
+        <item name="colorControlActivated">?android:colorControlActivated</item>
+        <item name="colorControlHighlight">?android:colorControlHighlight</item>
+        <item name="colorButtonNormal">?android:colorButtonNormal</item>
+
+        <item name="colorError">?android:colorError</item>
+
+        <!-- END Base.V7.Theme.AppCompat -->
+    </style>
+    <style name="Base.ThemeOverlay.AppCompat.PlatformBridge" parent="Base.V31.ThemeOverlay.AppCompat.PlatformBridge" />
+    <style name="ThemeOverlay.AppCompat.PlatformBridge" parent="Base.ThemeOverlay.AppCompat.PlatformBridge" />
+
+    <!--
+      ~ Bridge theme overlay to simulate MaterialComponents themes based on a platform theme.
+      -->
+    <style name="Base.V31.ThemeOverlay.MaterialComponents.PlatformBridge" parent="ThemeOverlay.AppCompat.PlatformBridge">
+        <!-- START Base.V14.Theme.MaterialComponents.Bridge -->
+        <!--
+          ~ This is copied as-is from the original bridge theme since it is guaranteed to not affect
+          ~ existing widgets.
+          -->
+
+        <item name="isMaterialTheme">true</item>
+
+        <item name="colorPrimaryVariant">@color/design_dark_default_color_primary_variant</item>
+        <item name="colorSecondary">@color/design_dark_default_color_secondary</item>
+        <item name="colorSecondaryVariant">@color/design_dark_default_color_secondary_variant</item>
+        <item name="colorSurface">@color/design_dark_default_color_surface</item>
+        <item name="colorPrimarySurface">?attr/colorSurface</item>
+        <item name="colorOnPrimary">@color/design_dark_default_color_on_primary</item>
+        <item name="colorOnSecondary">@color/design_dark_default_color_on_secondary</item>
+        <item name="colorOnBackground">@color/design_dark_default_color_on_background</item>
+        <item name="colorOnError">@color/design_dark_default_color_on_error</item>
+        <item name="colorOnSurface">@color/design_dark_default_color_on_surface</item>
+        <item name="colorOnPrimarySurface">?attr/colorOnSurface</item>
+
+        <item name="scrimBackground">@color/mtrl_scrim_color</item>
+        <item name="popupMenuBackground">@drawable/mtrl_popupmenu_background_overlay</item>
+
+        <item name="minTouchTargetSize">@dimen/mtrl_min_touch_target_size</item>
+
+        <!-- MaterialComponents Widget styles -->
+        <item name="badgeStyle">@style/Widget.MaterialComponents.Badge</item>
+        <item name="bottomAppBarStyle">@style/Widget.MaterialComponents.BottomAppBar</item>
+        <item name="chipStyle">@style/Widget.MaterialComponents.Chip.Action</item>
+        <item name="chipGroupStyle">@style/Widget.MaterialComponents.ChipGroup</item>
+        <item name="chipStandaloneStyle">@style/Widget.MaterialComponents.Chip.Entry</item>
+        <item name="circularProgressIndicatorStyle">@style/Widget.MaterialComponents.CircularProgressIndicator</item>
+        <item name="extendedFloatingActionButtonStyle">@style/Widget.MaterialComponents.ExtendedFloatingActionButton.Icon</item>
+        <item name="linearProgressIndicatorStyle">@style/Widget.MaterialComponents.LinearProgressIndicator</item>
+        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.MaterialComponents.Button.OutlinedButton</item>
+        <item name="materialButtonToggleGroupStyle">@style/Widget.MaterialComponents.MaterialButtonToggleGroup</item>
+        <item name="materialCardViewStyle">@style/Widget.MaterialComponents.CardView</item>
+        <item name="navigationRailStyle">@style/Widget.MaterialComponents.NavigationRailView</item>
+        <item name="sliderStyle">@style/Widget.MaterialComponents.Slider</item>
+
+        <!-- Type styles -->
+        <item name="textAppearanceHeadline1">@style/TextAppearance.MaterialComponents.Headline1</item>
+        <item name="textAppearanceHeadline2">@style/TextAppearance.MaterialComponents.Headline2</item>
+        <item name="textAppearanceHeadline3">@style/TextAppearance.MaterialComponents.Headline3</item>
+        <item name="textAppearanceHeadline4">@style/TextAppearance.MaterialComponents.Headline4</item>
+        <item name="textAppearanceHeadline5">@style/TextAppearance.MaterialComponents.Headline5</item>
+        <item name="textAppearanceHeadline6">@style/TextAppearance.MaterialComponents.Headline6</item>
+        <item name="textAppearanceSubtitle1">@style/TextAppearance.MaterialComponents.Subtitle1</item>
+        <item name="textAppearanceSubtitle2">@style/TextAppearance.MaterialComponents.Subtitle2</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.MaterialComponents.Body1</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.MaterialComponents.Body2</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.MaterialComponents.Caption</item>
+        <item name="textAppearanceButton">@style/TextAppearance.MaterialComponents.Button</item>
+        <item name="textAppearanceOverline">@style/TextAppearance.MaterialComponents.Overline</item>
+
+        <!-- Shape styles -->
+        <item name="shapeAppearanceSmallComponent">
+          @style/ShapeAppearance.MaterialComponents.SmallComponent
+        </item>
+        <item name="shapeAppearanceMediumComponent">
+          @style/ShapeAppearance.MaterialComponents.MediumComponent
+        </item>
+        <item name="shapeAppearanceLargeComponent">
+          @style/ShapeAppearance.MaterialComponents.LargeComponent
+        </item>
+
+        <!-- Motion -->
+        <item name="motionEasingStandard">@string/material_motion_easing_standard</item>
+        <item name="motionEasingEmphasized">@string/material_motion_easing_emphasized</item>
+        <item name="motionEasingDecelerated">@string/material_motion_easing_decelerated</item>
+        <item name="motionEasingAccelerated">@string/material_motion_easing_accelerated</item>
+        <item name="motionEasingLinear">@string/material_motion_easing_linear</item>
+
+        <item name="motionDurationShort1">@integer/material_motion_duration_short_1</item>
+        <item name="motionDurationShort2">@integer/material_motion_duration_short_2</item>
+        <item name="motionDurationMedium1">@integer/material_motion_duration_medium_1</item>
+        <item name="motionDurationMedium2">@integer/material_motion_duration_medium_2</item>
+        <item name="motionDurationLong1">@integer/material_motion_duration_long_1</item>
+        <item name="motionDurationLong2">@integer/material_motion_duration_long_2</item>
+
+        <item name="motionPath">@integer/material_motion_path</item>
+
+        <!-- Elevation Overlays -->
+        <item name="elevationOverlayEnabled">true</item>
+        <item name="elevationOverlayColor">?attr/colorOnSurface</item>
+
+        <!-- END Base.V14.Theme.MaterialComponents.Bridge -->
+
+        <!-- START Base.V14.Theme.MaterialComponents -->
+        <!--
+          ~ Only a subset of widget attributes being actually used are included here since there are
+          ~ too many of them and they need to be investigated on a case-by-case basis.
+          -->
+
+        <!-- Framework, AppCompat, or Design Widget styles -->
+        <item name="appBarLayoutStyle">@style/Widget.MaterialComponents.AppBarLayout.Surface</item>
+
+        <!-- END Base.V14.Theme.MaterialComponents -->
+    </style>
+    <style name="Base.ThemeOverlay.MaterialComponents.PlatformBridge" parent="Base.V31.ThemeOverlay.AppCompat.PlatformBridge" />
+    <style name="ThemeOverlay.MaterialComponents.PlatformBridge" parent="Base.ThemeOverlay.AppCompat.PlatformBridge" />
+</resources>

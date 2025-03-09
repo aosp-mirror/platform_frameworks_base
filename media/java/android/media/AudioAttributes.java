@@ -16,11 +16,15 @@
 
 package android.media;
 
+import static android.media.audio.Flags.FLAG_SPEAKER_CLEANUP_USAGE;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+// TODO switch from HIDL imports to AIDL
 import android.audio.policy.configuration.V7_0.AudioUsage;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.audiopolicy.AudioProductStrategy;
@@ -245,6 +249,16 @@ public final class AudioAttributes implements Parcelable {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int USAGE_ANNOUNCEMENT = SYSTEM_USAGE_OFFSET + 3;
+
+    /**
+     * @hide
+     * Usage value to use when a system application plays a signal intended to clean up the
+     * speaker transducers and free them of deposits of dust or water.
+     */
+    @FlaggedApi(FLAG_SPEAKER_CLEANUP_USAGE)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int USAGE_SPEAKER_CLEANUP = SYSTEM_USAGE_OFFSET + 4;
 
     /**
      * IMPORTANT: when adding new usage types, add them to SDK_USAGES and update SUPPRESSIBLE_USAGES
@@ -1202,7 +1216,6 @@ public final class AudioAttributes implements Parcelable {
                     break;
                 case AudioSystem.STREAM_BLUETOOTH_SCO:
                     mContentType = CONTENT_TYPE_SPEECH;
-                    mFlags |= FLAG_SCO;
                     break;
                 case AudioSystem.STREAM_DTMF:
                     mContentType = CONTENT_TYPE_SONIFICATION;
@@ -1522,6 +1535,8 @@ public final class AudioAttributes implements Parcelable {
                 return "USAGE_VEHICLE_STATUS";
             case USAGE_ANNOUNCEMENT:
                 return "USAGE_ANNOUNCEMENT";
+            case USAGE_SPEAKER_CLEANUP:
+                return "USAGE_SPEAKER_CLEANUP";
             default:
                 return "unknown usage " + usage;
         }
@@ -1662,12 +1677,8 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /**
-     * @param usage one of {@link AttributeSystemUsage},
-     *     {@link AttributeSystemUsage#USAGE_CALL_ASSISTANT},
-     *     {@link AttributeSystemUsage#USAGE_EMERGENCY},
-     *     {@link AttributeSystemUsage#USAGE_SAFETY},
-     *     {@link AttributeSystemUsage#USAGE_VEHICLE_STATUS},
-     *     {@link AttributeSystemUsage#USAGE_ANNOUNCEMENT}
+     * Returns whether the given usage can only be used by system-privileged components
+     * @param usage one of {@link AttributeSystemUsage}.
      * @return boolean indicating if the usage is a system usage or not
      * @hide
      */
@@ -1677,7 +1688,8 @@ public final class AudioAttributes implements Parcelable {
                 || usage == USAGE_EMERGENCY
                 || usage == USAGE_SAFETY
                 || usage == USAGE_VEHICLE_STATUS
-                || usage == USAGE_ANNOUNCEMENT);
+                || usage == USAGE_ANNOUNCEMENT
+                || usage == USAGE_SPEAKER_CLEANUP);
     }
 
     /**
@@ -1750,8 +1762,7 @@ public final class AudioAttributes implements Parcelable {
                     AudioSystem.STREAM_SYSTEM : AudioSystem.STREAM_SYSTEM_ENFORCED;
         }
         if ((aa.getAllFlags() & FLAG_SCO) == FLAG_SCO) {
-            return fromGetVolumeControlStream ?
-                    AudioSystem.STREAM_VOICE_CALL : AudioSystem.STREAM_BLUETOOTH_SCO;
+            return AudioSystem.STREAM_VOICE_CALL;
         }
         if ((aa.getAllFlags() & FLAG_BEACON) == FLAG_BEACON) {
             return fromGetVolumeControlStream ?
@@ -1792,6 +1803,7 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_SAFETY:
             case USAGE_VEHICLE_STATUS:
             case USAGE_ANNOUNCEMENT:
+            case USAGE_SPEAKER_CLEANUP:
             case USAGE_UNKNOWN:
                 return AudioSystem.STREAM_MUSIC;
             default:
@@ -1831,7 +1843,8 @@ public final class AudioAttributes implements Parcelable {
             USAGE_EMERGENCY,
             USAGE_SAFETY,
             USAGE_VEHICLE_STATUS,
-            USAGE_ANNOUNCEMENT
+            USAGE_ANNOUNCEMENT,
+            USAGE_SPEAKER_CLEANUP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeSystemUsage {}
@@ -1881,6 +1894,7 @@ public final class AudioAttributes implements Parcelable {
         USAGE_SAFETY,
         USAGE_VEHICLE_STATUS,
         USAGE_ANNOUNCEMENT,
+        USAGE_SPEAKER_CLEANUP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeUsage {}

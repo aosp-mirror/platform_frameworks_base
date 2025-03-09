@@ -35,27 +35,21 @@ class ViewUtil @Inject constructor() {
     fun touchIsWithinView(view: View, x: Float, y: Float): Boolean {
         val left = view.locationOnScreen[0]
         val top = view.locationOnScreen[1]
-        return left <= x &&
-                x <= left + view.width &&
-                top <= y &&
-                y <= top + view.height
+        return left <= x && x <= left + view.width && top <= y && y <= top + view.height
     }
 
-    /**
-     * Sets [outRect] to be the view's location within its window.
-     */
-    fun setRectToViewWindowLocation(view: View, outRect: Rect) {
-        val locInWindow = IntArray(2)
-        view.getLocationInWindow(locInWindow)
-
-        val x = locInWindow[0]
-        val y = locInWindow[1]
-
-        outRect.set(
-            x,
-            y,
-            x + view.width,
-            y + view.height,
-        )
-    }
+    /** Sets [outRect] to be the view's location within its window. */
+    fun setRectToViewWindowLocation(view: View, outRect: Rect) = view.viewBoundsOnScreen(outRect)
 }
+
+fun View.viewBoundsOnScreen(outRect: Rect) {
+    val locInWindow = IntArray(2)
+    getLocationInWindow(locInWindow)
+
+    val x = locInWindow[0]
+    val y = locInWindow[1]
+
+    outRect.set(x, y, x + width, y + height)
+}
+
+fun View.viewBoundsOnScreen(): Rect = Rect().also { viewBoundsOnScreen(it) }

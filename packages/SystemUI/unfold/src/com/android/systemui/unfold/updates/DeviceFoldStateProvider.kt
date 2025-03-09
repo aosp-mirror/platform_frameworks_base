@@ -306,7 +306,7 @@ constructor(
     }
 
     private fun isOnLargeScreen(): Boolean {
-        return context.resources.configuration.smallestScreenWidthDp >
+        return context.applicationContext.resources.configuration.smallestScreenWidthDp >
             INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP
     }
 

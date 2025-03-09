@@ -66,7 +66,7 @@ class AirplaneModeMapperTest : SysuiTestCase() {
             createAirplaneModeState(
                 QSTileState.ActivationState.ACTIVE,
                 context.resources.getStringArray(R.array.tile_states_airplane)[Tile.STATE_ACTIVE],
-                R.drawable.qs_airplane_icon_on
+                R.drawable.qs_airplane_icon_on,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -81,7 +81,7 @@ class AirplaneModeMapperTest : SysuiTestCase() {
             createAirplaneModeState(
                 QSTileState.ActivationState.INACTIVE,
                 context.resources.getStringArray(R.array.tile_states_airplane)[Tile.STATE_INACTIVE],
-                R.drawable.qs_airplane_icon_off
+                R.drawable.qs_airplane_icon_off,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -89,11 +89,11 @@ class AirplaneModeMapperTest : SysuiTestCase() {
     private fun createAirplaneModeState(
         activationState: QSTileState.ActivationState,
         secondaryLabel: String,
-        iconRes: Int
+        iconRes: Int,
     ): QSTileState {
         val label = context.getString(R.string.airplane_mode)
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -103,7 +103,7 @@ class AirplaneModeMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

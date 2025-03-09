@@ -25,7 +25,6 @@ package {
 
 java_library {
     name: "wm-flicker-common-app-helpers",
-    platform_apis: true,
     optimize: {
         enabled: false,
     },

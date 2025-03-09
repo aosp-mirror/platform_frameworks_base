@@ -23,10 +23,10 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -41,18 +41,17 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.spy
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FromGoneTransitionInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
         }
     private val testScope = kosmos.testScope
     private val underTest = kosmos.fromGoneTransitionInteractor
-    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
 
     @Before
     fun setUp() {
@@ -101,9 +100,7 @@ class FromGoneTransitionInteractorTest : SysuiTestCase() {
 
             // We're in the middle of a GONE -> LOCKSCREEN transition.
             assertThat(keyguardTransitionRepository)
-                .startedTransition(
-                    to = KeyguardState.LOCKSCREEN,
-                )
+                .startedTransition(to = KeyguardState.LOCKSCREEN)
         }
 
     @Test
@@ -121,15 +118,13 @@ class FromGoneTransitionInteractorTest : SysuiTestCase() {
             kosmos.fakeBiometricSettingsRepository.setAuthenticationFlags(
                 AuthenticationFlags(
                     0,
-                    LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN
+                    LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
                 )
             )
             runCurrent()
 
             // We're in the middle of a GONE -> LOCKSCREEN transition.
             assertThat(keyguardTransitionRepository)
-                .startedTransition(
-                    to = KeyguardState.LOCKSCREEN,
-                )
+                .startedTransition(to = KeyguardState.LOCKSCREEN)
         }
 }

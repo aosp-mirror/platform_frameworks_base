@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import javax.inject.Inject
 import javax.inject.Named
@@ -53,7 +54,7 @@ constructor(
     burnInInteractor: BurnInInteractor,
     @Named(KeyguardQuickAffordancesCombinedViewModelModule.Companion.LOCKSCREEN_INSTANCE)
     shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     communalSceneInteractor: CommunalSceneInteractor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
@@ -70,7 +71,7 @@ constructor(
     val visible: Flow<Boolean> =
         anyOf(
             keyguardInteractor.statusBarState.map { state -> state == StatusBarState.KEYGUARD },
-            communalSceneInteractor.isCommunalVisible
+            communalSceneInteractor.isCommunalVisible,
         )
 
     /** An observable for whether the indication area should be padded. */
@@ -85,7 +86,7 @@ constructor(
         } else {
             combine(
                     keyguardBottomAreaViewModel.startButton,
-                    keyguardBottomAreaViewModel.endButton
+                    keyguardBottomAreaViewModel.endButton,
                 ) { startButtonModel, endButtonModel ->
                     startButtonModel.isVisible || endButtonModel.isVisible
                 }

@@ -19,21 +19,19 @@ package com.android.systemui.qs.tiles.impl.location.domain
 import android.content.res.Resources
 import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.location.domain.model.LocationTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [LocationTileModel] to [QSTileState]. */
 class LocationTileMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    private val theme: Theme,
-) : QSTileDataToStateMapper<LocationTileModel> {
+constructor(@ShadeDisplayAware private val resources: Resources, private val theme: Theme) :
+    QSTileDataToStateMapper<LocationTileModel> {
 
     override fun map(config: QSTileConfig, data: LocationTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
@@ -43,17 +41,9 @@ constructor(
                 } else {
                     R.drawable.qs_location_icon_off
                 }
-            val icon =
-                Icon.Loaded(
-                    resources.getDrawable(
-                        iconRes!!,
-                        theme,
-                    ),
-                    contentDescription = null
-                )
-            this.icon = { icon }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
 
-            this.label = resources.getString(R.string.quick_settings_location_label)
+            label = resources.getString(R.string.quick_settings_location_label)
 
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE

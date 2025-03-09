@@ -28,12 +28,14 @@
 #define INDENT "  "
 #define INDENT2 "    "
 
+namespace android {
+
 namespace {
+
 // Time to spend fading out the pointer completely.
 const nsecs_t POINTER_FADE_DURATION = 500 * 1000000LL; // 500 ms
-} // namespace
 
-namespace android {
+} // namespace
 
 // --- MouseCursorController ---
 
@@ -47,8 +49,7 @@ MouseCursorController::MouseCursorController(PointerControllerContext& context)
     mLocked.lastFrameUpdatedTime = 0;
 
     mLocked.pointerFadeDirection = 0;
-    mLocked.pointerX = 0;
-    mLocked.pointerY = 0;
+    mLocked.pointerPosition = {0, 0};
     mLocked.pointerAlpha = 0.0f; // pointer is initially faded
     mLocked.pointerSprite = mContext.getSpriteController().createSprite();
     mLocked.updatePointerIcon = false;
@@ -64,50 +65,60 @@ MouseCursorController::~MouseCursorController() {
     mLocked.pointerSprite.clear();
 }
 
-void MouseCursorController::move(float deltaX, float deltaY) {
+vec2 MouseCursorController::move(vec2 delta) {
 #if DEBUG_MOUSE_CURSOR_UPDATES
     ALOGD("Move pointer by deltaX=%0.3f, deltaY=%0.3f", deltaX, deltaY);
 #endif
-    if (deltaX == 0.0f && deltaY == 0.0f) {
-        return;
+    if (delta.x == 0.0f && delta.y == 0.0f) {
+        return {0, 0};
     }
 
+    // When transition occurs, the MouseCursorController object may or may not be deleted, depending
+    // if there's another display on the other side of the transition. At this point we still need
+    // to move the cursor to the boundary.
     std::scoped_lock lock(mLock);
-
-    setPositionLocked(mLocked.pointerX + deltaX, mLocked.pointerY + deltaY);
+    const vec2 targetPosition = mLocked.pointerPosition + delta;
+    setPositionLocked(targetPosition);
+    // The amount of the delta that was not consumed as a result of the cursor
+    // hitting the edge of the display.
+    return targetPosition - mLocked.pointerPosition;
 }
 
-void MouseCursorController::setPosition(float x, float y) {
+void MouseCursorController::setPosition(vec2 position) {
 #if DEBUG_MOUSE_CURSOR_UPDATES
     ALOGD("Set pointer position to x=%0.3f, y=%0.3f", x, y);
 #endif
     std::scoped_lock lock(mLock);
-    setPositionLocked(x, y);
+    setPositionLocked(position);
 }
 
-void MouseCursorController::setPositionLocked(float x, float y) REQUIRES(mLock) {
-    const auto& v = mLocked.viewport;
-    if (!v.isValid()) return;
-
+FloatRect MouseCursorController::getBoundsLocked() REQUIRES(mLock) {
     // The valid bounds for a mouse cursor. Since the right and bottom edges are considered outside
     // the display, clip the bounds by one pixel instead of letting the cursor get arbitrarily
     // close to the outside edge.
-    const FloatRect bounds{
+    return FloatRect{
             static_cast<float>(mLocked.viewport.logicalLeft),
             static_cast<float>(mLocked.viewport.logicalTop),
             static_cast<float>(mLocked.viewport.logicalRight - 1),
             static_cast<float>(mLocked.viewport.logicalBottom - 1),
     };
-    mLocked.pointerX = std::max(bounds.left, std::min(bounds.right, x));
-    mLocked.pointerY = std::max(bounds.top, std::min(bounds.bottom, y));
+}
+
+void MouseCursorController::setPositionLocked(vec2 position) REQUIRES(mLock) {
+    const auto& v = mLocked.viewport;
+    if (!v.isValid()) return;
+
+    const FloatRect bounds = getBoundsLocked();
+    mLocked.pointerPosition.x = std::max(bounds.left, std::min(bounds.right, position.x));
+    mLocked.pointerPosition.y = std::max(bounds.top, std::min(bounds.bottom, position.y));
 
     updatePointerLocked();
 }
 
-FloatPoint MouseCursorController::getPosition() const {
+vec2 MouseCursorController::getPosition() const {
     std::scoped_lock lock(mLock);
 
-    return {mLocked.pointerX, mLocked.pointerY};
+    return mLocked.pointerPosition;
 }
 
 ui::LogicalDisplayId MouseCursorController::getDisplayId() const {
@@ -209,20 +220,21 @@ void MouseCursorController::setDisplayViewport(const DisplayViewport& viewport,
         if (viewport.isValid()) {
             // Use integer coordinates as the starting point for the cursor location.
             // We usually expect display sizes to be even numbers, so the flooring is precautionary.
-            mLocked.pointerX = std::floor((viewport.logicalLeft + viewport.logicalRight) / 2);
-            mLocked.pointerY = std::floor((viewport.logicalTop + viewport.logicalBottom) / 2);
+            mLocked.pointerPosition.x =
+                    std::floor((viewport.logicalLeft + viewport.logicalRight) / 2);
+            mLocked.pointerPosition.y =
+                    std::floor((viewport.logicalTop + viewport.logicalBottom) / 2);
             // Reload icon resources for density may be changed.
             loadResourcesLocked(getAdditionalMouseResources);
         } else {
-            mLocked.pointerX = 0;
-            mLocked.pointerY = 0;
+            mLocked.pointerPosition = {0, 0};
         }
     } else if (oldViewport.orientation != viewport.orientation) {
         // Apply offsets to convert from the pixel top-left corner position to the pixel center.
         // This creates an invariant frame of reference that we can easily rotate when
         // taking into account that the pointer may be located at fractional pixel offsets.
-        float x = mLocked.pointerX + 0.5f;
-        float y = mLocked.pointerY + 0.5f;
+        float x = mLocked.pointerPosition.x + 0.5f;
+        float y = mLocked.pointerPosition.y + 0.5f;
         float temp;
 
         // Undo the previous rotation.
@@ -267,8 +279,8 @@ void MouseCursorController::setDisplayViewport(const DisplayViewport& viewport,
 
         // Apply offsets to convert from the pixel center to the pixel top-left corner position
         // and save the results.
-        mLocked.pointerX = x - 0.5f;
-        mLocked.pointerY = y - 0.5f;
+        mLocked.pointerPosition.x = x - 0.5f;
+        mLocked.pointerPosition.y = y - 0.5f;
     }
 
     updatePointerLocked();
@@ -354,7 +366,7 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
     spriteController.openTransaction();
 
     mLocked.pointerSprite->setLayer(Sprite::BASE_LAYER_POINTER);
-    mLocked.pointerSprite->setPosition(mLocked.pointerX, mLocked.pointerY);
+    mLocked.pointerSprite->setPosition(mLocked.pointerPosition.x, mLocked.pointerPosition.y);
     mLocked.pointerSprite->setDisplayId(mLocked.viewport.displayId);
     mLocked.pointerSprite->setSkipScreenshot(mLocked.skipScreenshot);
 

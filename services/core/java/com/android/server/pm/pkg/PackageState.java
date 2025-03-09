@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -196,6 +197,21 @@ public interface PackageState {
      * @hide
      */
     int getCategoryOverride();
+
+    /**
+     * Returns true if ELF files will be loaded in Page size compatibility mode
+     *
+     * @hide
+     */
+    boolean isPageSizeAppCompatEnabled();
+
+    /**
+     * Returns dialog string based on alignment of uncompressed shared libs inside the APK and ELF
+     * alignment.
+     *
+     * @hide
+     */
+    String getPageSizeCompatWarningMessage(Context context);
 
     /**
      * The install time CPU override, if any. This value is written at install time

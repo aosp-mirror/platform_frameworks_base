@@ -29,6 +29,7 @@ android_library {
         "//apex_available:platform",
         "com.android.permission",
         "com.android.mediaprovider",
+        "com.android.healthfitness",
     ],
 }
 
@@ -51,5 +52,6 @@ java_aconfig_library {
         "//apex_available:platform",
         "com.android.permission",
         "com.android.mediaprovider",
+        "com.android.healthfitness",
     ],
 }

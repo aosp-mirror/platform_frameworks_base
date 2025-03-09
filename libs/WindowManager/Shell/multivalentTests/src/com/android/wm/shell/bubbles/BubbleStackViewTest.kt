@@ -23,10 +23,10 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
-import android.view.IWindowManager
 import android.view.WindowManager
-import android.view.WindowManagerGlobal
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -36,13 +36,11 @@ import com.android.internal.protolog.ProtoLog
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.Flags
 import com.android.wm.shell.R
+import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix
 import com.android.wm.shell.common.FloatingContentCoordinator
-import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
-import com.android.wm.shell.taskview.TaskView
-import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import org.junit.After
@@ -50,10 +48,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
-import com.android.wm.shell.shared.bubbles.BubbleBarLocation
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -67,11 +66,12 @@ class BubbleStackViewTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var positioner: BubblePositioner
+    private lateinit var bubbleLogger: BubbleLogger
     private lateinit var iconFactory: BubbleIconFactory
     private lateinit var expandedViewManager: FakeBubbleExpandedViewManager
     private lateinit var bubbleStackView: BubbleStackView
-    private lateinit var shellExecutor: ShellExecutor
-    private lateinit var windowManager: IWindowManager
+    private lateinit var shellExecutor: TestShellExecutor
+    private lateinit var windowManager: WindowManager
     private lateinit var bubbleTaskViewFactory: BubbleTaskViewFactory
     private lateinit var bubbleData: BubbleData
     private lateinit var bubbleStackViewManager: FakeBubbleStackViewManager
@@ -82,9 +82,8 @@ class BubbleStackViewTest {
         PhysicsAnimatorTestUtils.prepareForTest()
         // Disable protolog tool when running the tests from studio
         ProtoLog.REQUIRE_PROTOLOGTOOL = false
-        windowManager = WindowManagerGlobal.getWindowManagerService()!!
         shellExecutor = TestShellExecutor()
-        val windowManager = context.getSystemService(WindowManager::class.java)
+        windowManager = context.getSystemService(WindowManager::class.java)
         iconFactory =
             BubbleIconFactory(
                 context,
@@ -96,10 +95,11 @@ class BubbleStackViewTest {
                 )
             )
         positioner = BubblePositioner(context, windowManager)
+        bubbleLogger = BubbleLogger(UiEventLoggerFake())
         bubbleData =
             BubbleData(
                 context,
-                BubbleLogger(UiEventLoggerFake()),
+                bubbleLogger,
                 positioner,
                 BubbleEducationController(context),
                 shellExecutor,
@@ -107,7 +107,7 @@ class BubbleStackViewTest {
             )
         bubbleStackViewManager = FakeBubbleStackViewManager()
         expandedViewManager = FakeBubbleExpandedViewManager()
-        bubbleTaskViewFactory = FakeBubbleTaskViewFactory()
+        bubbleTaskViewFactory = FakeBubbleTaskViewFactory(context, shellExecutor)
         bubbleStackView =
             BubbleStackView(
                 context,
@@ -167,12 +167,144 @@ class BubbleStackViewTest {
             // This will eventually propagate an update back to the stack view, but setting the
             // entire pipeline is outside the scope of a unit test.
             assertThat(bubbleData.isExpanded).isTrue()
+            shellExecutor.flushAll()
         }
 
         assertThat(semaphore.tryAcquire(5, TimeUnit.SECONDS)).isTrue()
         assertThat(lastUpdate).isNotNull()
         assertThat(lastUpdate!!.expandedChanged).isTrue()
         assertThat(lastUpdate!!.expanded).isTrue()
+    }
+
+    @Test
+    fun expandStack_imeHidden() {
+        val bubble = createAndInflateBubble()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.addBubble(bubble)
+        }
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertThat(bubbleStackView.bubbleCount).isEqualTo(1)
+
+        positioner.setImeVisible(false, 0)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to expand the stack
+            bubbleStackView.isExpanded = true
+            verify(sysuiProxy).onStackExpandChanged(true)
+            shellExecutor.flushAll()
+        }
+
+        assertThat(bubbleStackViewManager.onImeHidden).isNull()
+    }
+
+    @Test
+    fun collapseStack_imeHidden() {
+        val bubble = createAndInflateBubble()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.addBubble(bubble)
+        }
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertThat(bubbleStackView.bubbleCount).isEqualTo(1)
+
+        positioner.setImeVisible(false, 0)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to expand the stack
+            bubbleStackView.isExpanded = true
+            verify(sysuiProxy).onStackExpandChanged(true)
+            shellExecutor.flushAll()
+        }
+
+        assertThat(bubbleStackViewManager.onImeHidden).isNull()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to collapse the stack
+            bubbleStackView.isExpanded = false
+            verify(sysuiProxy).onStackExpandChanged(false)
+            shellExecutor.flushAll()
+        }
+
+        assertThat(bubbleStackViewManager.onImeHidden).isNull()
+    }
+
+    @Test
+    fun expandStack_waitsForIme() {
+        val bubble = createAndInflateBubble()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.addBubble(bubble)
+        }
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertThat(bubbleStackView.bubbleCount).isEqualTo(1)
+
+        positioner.setImeVisible(true, 100)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to expand the stack
+            bubbleStackView.isExpanded = true
+        }
+
+        val onImeHidden = bubbleStackViewManager.onImeHidden
+        assertThat(onImeHidden).isNotNull()
+        verify(sysuiProxy, never()).onStackExpandChanged(any())
+        positioner.setImeVisible(false, 0)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            onImeHidden!!.run()
+            verify(sysuiProxy).onStackExpandChanged(true)
+            shellExecutor.flushAll()
+        }
+    }
+
+    @Test
+    fun collapseStack_waitsForIme() {
+        val bubble = createAndInflateBubble()
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            bubbleStackView.addBubble(bubble)
+        }
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        assertThat(bubbleStackView.bubbleCount).isEqualTo(1)
+
+        positioner.setImeVisible(true, 100)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to expand the stack
+            bubbleStackView.isExpanded = true
+        }
+
+        var onImeHidden = bubbleStackViewManager.onImeHidden
+        assertThat(onImeHidden).isNotNull()
+        verify(sysuiProxy, never()).onStackExpandChanged(any())
+        positioner.setImeVisible(false, 0)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            onImeHidden!!.run()
+            verify(sysuiProxy).onStackExpandChanged(true)
+            shellExecutor.flushAll()
+        }
+
+        bubbleStackViewManager.onImeHidden = null
+        positioner.setImeVisible(true, 100)
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // simulate a request from the bubble data listener to collapse the stack
+            bubbleStackView.isExpanded = false
+        }
+
+        onImeHidden = bubbleStackViewManager.onImeHidden
+        assertThat(onImeHidden).isNotNull()
+        verify(sysuiProxy, never()).onStackExpandChanged(false)
+        positioner.setImeVisible(false, 0)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            onImeHidden!!.run()
+            verify(sysuiProxy).onStackExpandChanged(false)
+            shellExecutor.flushAll()
+        }
     }
 
     @Test
@@ -205,6 +337,7 @@ class BubbleStackViewTest {
 
             bubbleStackView.setSelectedBubble(bubble2)
             bubbleStackView.isExpanded = true
+            shellExecutor.flushAll()
         }
 
         assertThat(semaphore.tryAcquire(5, TimeUnit.SECONDS)).isTrue()
@@ -222,6 +355,7 @@ class BubbleStackViewTest {
         // tap on bubble1 to select it
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             bubble1.iconView!!.performClick()
+            shellExecutor.flushAll()
         }
         assertThat(semaphore.tryAcquire(5, TimeUnit.SECONDS)).isTrue()
         assertThat(bubbleData.selectedBubble).isEqualTo(bubble1)
@@ -232,6 +366,7 @@ class BubbleStackViewTest {
             // listener wired up.
             bubbleStackView.setSelectedBubble(bubble1)
             bubble1.iconView!!.performClick()
+            shellExecutor.flushAll()
         }
 
         assertThat(semaphore.tryAcquire(5, TimeUnit.SECONDS)).isTrue()
@@ -352,6 +487,16 @@ class BubbleStackViewTest {
         assertThat(bubbleStackView.getBubbleIndex(bubbleOverflow)).isGreaterThan(-1)
     }
 
+    @Test
+    fun removeFromWindow_stopMonitoringSwipeUpGesture() {
+        bubbleStackView = Mockito.spy(bubbleStackView)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            // No way to add to window in the test environment right now so just pretend
+            bubbleStackView.onDetachedFromWindow()
+        }
+        verify(bubbleStackView).stopMonitoringSwipeUpGesture()
+    }
+
     private fun createAndInflateChatBubble(key: String): Bubble {
         val icon = Icon.createWithResource(context.resources, R.drawable.bubble_ic_overflow_button)
         val shortcutInfo = ShortcutInfo.Builder(context, "fakeId").setIcon(icon).build()
@@ -394,6 +539,7 @@ class BubbleStackViewTest {
             expandedViewManager,
             bubbleTaskViewFactory,
             positioner,
+            bubbleLogger,
             bubbleStackView,
             null,
             iconFactory,
@@ -405,6 +551,7 @@ class BubbleStackViewTest {
     }
 
     private class FakeBubbleStackViewManager : BubbleStackViewManager {
+        var onImeHidden: Runnable? = null
 
         override fun onAllBubblesAnimatedOut() {}
 
@@ -412,57 +559,8 @@ class BubbleStackViewTest {
 
         override fun checkNotificationPanelExpandedState(callback: Consumer<Boolean>) {}
 
-        override fun hideCurrentInputMethod() {}
-    }
-
-    private class TestShellExecutor : ShellExecutor {
-
-        override fun execute(runnable: Runnable) {
-            runnable.run()
+        override fun hideCurrentInputMethod(onImeHidden: Runnable?) {
+            this.onImeHidden = onImeHidden
         }
-
-        override fun executeDelayed(r: Runnable, delayMillis: Long) {
-            r.run()
-        }
-
-        override fun removeCallbacks(r: Runnable?) {}
-
-        override fun hasCallback(r: Runnable): Boolean = false
-    }
-
-    private inner class FakeBubbleTaskViewFactory : BubbleTaskViewFactory {
-        override fun create(): BubbleTaskView {
-            val taskViewTaskController = mock<TaskViewTaskController>()
-            val taskView = TaskView(context, taskViewTaskController)
-            return BubbleTaskView(taskView, shellExecutor)
-        }
-    }
-
-    private inner class FakeBubbleExpandedViewManager : BubbleExpandedViewManager {
-
-        override val overflowBubbles: List<Bubble>
-            get() = emptyList()
-
-        override fun setOverflowListener(listener: BubbleData.Listener) {}
-
-        override fun collapseStack() {}
-
-        override fun updateWindowFlagsForBackpress(intercept: Boolean) {}
-
-        override fun promoteBubbleFromOverflow(bubble: Bubble) {}
-
-        override fun removeBubble(key: String, reason: Int) {}
-
-        override fun dismissBubble(bubble: Bubble, reason: Int) {}
-
-        override fun setAppBubbleTaskId(key: String, taskId: Int) {}
-
-        override fun isStackExpanded(): Boolean = false
-
-        override fun isShowingAsBubbleBar(): Boolean = false
-
-        override fun hideCurrentInputMethod() {}
-
-        override fun updateBubbleBarLocation(location: BubbleBarLocation) {}
     }
 }

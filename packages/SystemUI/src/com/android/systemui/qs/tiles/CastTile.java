@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.app.Dialog;
 import android.content.Intent;
 import android.media.MediaRouter.RouteInfo;
+import android.media.projection.StopReason;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -183,7 +184,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 });
             }
         } else {
-            mController.stopCasting(activeDevices.get(0));
+            mController.stopCasting(activeDevices.get(0), StopReason.STOP_QS_TILE);
         }
     }
 
@@ -290,8 +291,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
         if (connecting && !state.value) {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_connecting);
         }
-        state.icon = ResourceIcon.get(state.value ? R.drawable.ic_cast_connected
-                : R.drawable.ic_cast);
+        state.icon = maybeLoadResourceIcon(state.value
+                ? R.drawable.ic_cast_connected : R.drawable.ic_cast);
         if (canCastToNetwork() || state.value) {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
             if (!state.value) {

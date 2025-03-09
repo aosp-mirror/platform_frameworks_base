@@ -33,23 +33,32 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.FaceScanningOverlay
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.util.concurrent.Executor
-import javax.inject.Inject
 
-@SysUISingleton
-class FaceScanningProviderFactory @Inject constructor(
-        private val authController: AuthController,
-        private val context: Context,
-        private val statusBarStateController: StatusBarStateController,
-        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-        @Main private val mainExecutor: Executor,
-        private val logger: ScreenDecorationsLogger,
-        private val facePropertyRepository: FacePropertyRepository,
-) : DecorProviderFactory() {
+interface FaceScanningProviderFactory : DecorProviderFactory {
+
+    fun canShowFaceScanningAnim(): Boolean
+
+    fun shouldShowFaceScanningAnim(): Boolean
+}
+
+class FaceScanningProviderFactoryImpl
+@AssistedInject
+constructor(
+    private val authController: AuthController,
+    @Assisted private val context: Context,
+    private val statusBarStateController: StatusBarStateController,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    @Main private val mainExecutor: Executor,
+    private val logger: ScreenDecorationsLogger,
+    private val facePropertyRepository: FacePropertyRepository,
+) : FaceScanningProviderFactory {
     private val display = context.display
     private val displayInfo = DisplayInfo()
 
@@ -60,11 +69,12 @@ class FaceScanningProviderFactory @Inject constructor(
             }
 
             // update display info
-            display?.getDisplayInfo(displayInfo) ?: run {
-                Log.w(TAG, "display is null, can't update displayInfo")
-            }
+            display?.getDisplayInfo(displayInfo)
+                ?: run { Log.w(TAG, "display is null, can't update displayInfo") }
             return DisplayCutout.getFillBuiltInDisplayCutout(
-                    context.resources, displayInfo.uniqueId)
+                context.resources,
+                displayInfo.uniqueId,
+            )
         }
 
     override val providers: List<DecorProvider>
@@ -81,39 +91,45 @@ class FaceScanningProviderFactory @Inject constructor(
                     // Cutout drawing is updated in ScreenDecorations#updateCutout
                     for (bound in bounds) {
                         list.add(
-                                FaceScanningOverlayProviderImpl(
-                                        bound.baseOnRotation0(displayInfo.rotation),
-                                        authController,
-                                        statusBarStateController,
-                                        keyguardUpdateMonitor,
-                                        mainExecutor,
-                                        logger,
-                                        facePropertyRepository,
-                                )
+                            FaceScanningOverlayProviderImpl(
+                                bound.baseOnRotation0(displayInfo.rotation),
+                                authController,
+                                statusBarStateController,
+                                keyguardUpdateMonitor,
+                                mainExecutor,
+                                logger,
+                                facePropertyRepository,
+                            )
                         )
                     }
                 }
             }
         }
 
-    fun canShowFaceScanningAnim(): Boolean {
+    override fun canShowFaceScanningAnim(): Boolean {
         return hasProviders && keyguardUpdateMonitor.isFaceEnabledAndEnrolled
     }
 
-    fun shouldShowFaceScanningAnim(): Boolean {
+    override fun shouldShowFaceScanningAnim(): Boolean {
         return canShowFaceScanningAnim() &&
-                (keyguardUpdateMonitor.isFaceDetectionRunning || authController.isShowing)
+            (keyguardUpdateMonitor.isFaceDetectionRunning || authController.isShowing)
+    }
+
+    // Using the name "Creator" so that it doesn't become "...FactoryFactory".
+    @AssistedFactory
+    interface Creator {
+        fun create(context: Context): FaceScanningProviderFactoryImpl
     }
 }
 
 class FaceScanningOverlayProviderImpl(
-        override val alignedBound: Int,
-        private val authController: AuthController,
-        private val statusBarStateController: StatusBarStateController,
-        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-        private val mainExecutor: Executor,
-        private val logger: ScreenDecorationsLogger,
-        private val facePropertyRepository: FacePropertyRepository,
+    override val alignedBound: Int,
+    private val authController: AuthController,
+    private val statusBarStateController: StatusBarStateController,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val mainExecutor: Executor,
+    private val logger: ScreenDecorationsLogger,
+    private val facePropertyRepository: FacePropertyRepository,
 ) : BoundDecorProvider() {
     override val viewId: Int = com.android.systemui.res.R.id.face_scanning_anim
 
@@ -122,7 +138,7 @@ class FaceScanningOverlayProviderImpl(
         reloadToken: Int,
         @Surface.Rotation rotation: Int,
         tintColor: Int,
-        displayUniqueId: String?
+        displayUniqueId: String?,
     ) {
         (view.layoutParams as FrameLayout.LayoutParams).let {
             updateLayoutParams(it, rotation)
@@ -138,9 +154,10 @@ class FaceScanningOverlayProviderImpl(
         context: Context,
         parent: ViewGroup,
         @Surface.Rotation rotation: Int,
-        tintColor: Int
+        tintColor: Int,
     ): View {
-        val view = FaceScanningOverlay(
+        val view =
+            FaceScanningOverlay(
                 context,
                 alignedBound,
                 statusBarStateController,
@@ -148,43 +165,46 @@ class FaceScanningOverlayProviderImpl(
                 mainExecutor,
                 logger,
                 authController,
-        )
+            )
         view.id = viewId
         view.setColor(tintColor)
-        FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT).let {
-            updateLayoutParams(it, rotation)
-            parent.addView(view, it)
-        }
+        FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            )
+            .let {
+                updateLayoutParams(it, rotation)
+                parent.addView(view, it)
+            }
         return view
     }
 
     private fun updateLayoutParams(
         layoutParams: FrameLayout.LayoutParams,
-        @Surface.Rotation rotation: Int
+        @Surface.Rotation rotation: Int,
     ) {
         layoutParams.let { lp ->
             lp.width = ViewGroup.LayoutParams.MATCH_PARENT
             lp.height = ViewGroup.LayoutParams.MATCH_PARENT
             logger.faceSensorLocation(facePropertyRepository.sensorLocation.value)
-            facePropertyRepository.sensorLocation.value?.y?.let {
-                faceAuthSensorHeight ->
+            facePropertyRepository.sensorLocation.value?.y?.let { faceAuthSensorHeight ->
                 val faceScanningHeight = (faceAuthSensorHeight * 2)
                 when (rotation) {
-                    Surface.ROTATION_0, Surface.ROTATION_180 ->
-                        lp.height = faceScanningHeight
-                    Surface.ROTATION_90, Surface.ROTATION_270 ->
-                        lp.width = faceScanningHeight
+                    Surface.ROTATION_0,
+                    Surface.ROTATION_180 -> lp.height = faceScanningHeight
+                    Surface.ROTATION_90,
+                    Surface.ROTATION_270 -> lp.width = faceScanningHeight
                 }
             }
 
-            lp.gravity = when (rotation) {
-                Surface.ROTATION_0 -> Gravity.TOP or Gravity.START
-                Surface.ROTATION_90 -> Gravity.LEFT or Gravity.START
-                Surface.ROTATION_180 -> Gravity.BOTTOM or Gravity.END
-                Surface.ROTATION_270 -> Gravity.RIGHT or Gravity.END
-                else -> -1 /* invalid rotation */
-            }
+            lp.gravity =
+                when (rotation) {
+                    Surface.ROTATION_0 -> Gravity.TOP or Gravity.START
+                    Surface.ROTATION_90 -> Gravity.LEFT or Gravity.START
+                    Surface.ROTATION_180 -> Gravity.BOTTOM or Gravity.END
+                    Surface.ROTATION_270 -> Gravity.RIGHT or Gravity.END
+                    else -> -1 /* invalid rotation */
+                }
         }
     }
 }
@@ -209,24 +229,27 @@ fun DisplayCutout.getBoundBaseOnCurrentRotation(): List<Int> {
 fun Int.baseOnRotation0(@DisplayCutout.BoundsPosition currentRotation: Int): Int {
     return when (currentRotation) {
         Surface.ROTATION_0 -> this
-        Surface.ROTATION_90 -> when (this) {
-            BOUNDS_POSITION_LEFT -> BOUNDS_POSITION_TOP
-            BOUNDS_POSITION_TOP -> BOUNDS_POSITION_RIGHT
-            BOUNDS_POSITION_RIGHT -> BOUNDS_POSITION_BOTTOM
-            else /* BOUNDS_POSITION_BOTTOM */ -> BOUNDS_POSITION_LEFT
-        }
-        Surface.ROTATION_270 -> when (this) {
-            BOUNDS_POSITION_LEFT -> BOUNDS_POSITION_BOTTOM
-            BOUNDS_POSITION_TOP -> BOUNDS_POSITION_LEFT
-            BOUNDS_POSITION_RIGHT -> BOUNDS_POSITION_TOP
-            else /* BOUNDS_POSITION_BOTTOM */ -> BOUNDS_POSITION_RIGHT
-        }
-        else /* Surface.ROTATION_180 */ -> when (this) {
-            BOUNDS_POSITION_LEFT -> BOUNDS_POSITION_RIGHT
-            BOUNDS_POSITION_TOP -> BOUNDS_POSITION_BOTTOM
-            BOUNDS_POSITION_RIGHT -> BOUNDS_POSITION_LEFT
-            else /* BOUNDS_POSITION_BOTTOM */ -> BOUNDS_POSITION_TOP
-        }
+        Surface.ROTATION_90 ->
+            when (this) {
+                BOUNDS_POSITION_LEFT -> BOUNDS_POSITION_TOP
+                BOUNDS_POSITION_TOP -> BOUNDS_POSITION_RIGHT
+                BOUNDS_POSITION_RIGHT -> BOUNDS_POSITION_BOTTOM
+                else /* BOUNDS_POSITION_BOTTOM */ -> BOUNDS_POSITION_LEFT
+            }
+        Surface.ROTATION_270 ->
+            when (this) {
+                BOUNDS_POSITION_LEFT -> BOUNDS_POSITION_BOTTOM
+                BOUNDS_POSITION_TOP -> BOUNDS_POSITION_LEFT
+                BOUNDS_POSITION_RIGHT -> BOUNDS_POSITION_TOP
+                else /* BOUNDS_POSITION_BOTTOM */ -> BOUNDS_POSITION_RIGHT
+            }
+        else /* Surface.ROTATION_180 */ ->
+            when (this) {
+                BOUNDS_POSITION_LEFT -> BOUNDS_POSITION_RIGHT
+                BOUNDS_POSITION_TOP -> BOUNDS_POSITION_BOTTOM
+                BOUNDS_POSITION_RIGHT -> BOUNDS_POSITION_LEFT
+                else /* BOUNDS_POSITION_BOTTOM */ -> BOUNDS_POSITION_TOP
+            }
     }
 }
 

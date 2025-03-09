@@ -51,7 +51,7 @@ import java.util.concurrent.Executor
 import java.util.function.Consumer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 interface FullscreenLightRevealAnimation {
     fun init()
@@ -106,7 +106,7 @@ constructor(
         rotationChangeProvider.addCallback(rotationWatcher)
 
         buildSurface { builder ->
-            applicationScope.launch(executor.asCoroutineDispatcher()) {
+            applicationScope.launch(context = executor.asCoroutineDispatcher()) {
                 val overlayContainer = builder.build()
 
                 SurfaceControl.Transaction()

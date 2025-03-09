@@ -37,10 +37,14 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         isStarted = false
     }
 
-    fun expandRipple(onAnimationEnd: Runnable? = null) {
+    fun expandRipple(logger: MediaTttReceiverLogger, onAnimationEnd: Runnable? = null) {
         duration = DEFAULT_DURATION
         isStarted = true
-        super.startRipple(onAnimationEnd)
+        super.startRipple {
+            logger.logRippleAnimationEnd(id, EXPAND)
+            onAnimationEnd?.run()
+        }
+        logger.logRippleAnimationStart(id, EXPAND)
     }
 
     /** Used to animate out the ripple. No-op if the ripple was never started via [startRipple]. */
@@ -53,10 +57,14 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         animator.removeAllListeners()
         animator.addListener(
             object : AnimatorListenerAdapter() {
+                override fun onAnimationCancel(animation: Animator) {
+                    onAnimationEnd(animation)
+                }
+
                 override fun onAnimationEnd(animation: Animator) {
                     animation?.let {
                         visibility = GONE
-                        logger.logRippleAnimationEnd(id)
+                        logger.logRippleAnimationEnd(id, COLLAPSE)
                     }
                     onAnimationEnd?.run()
                     isStarted = false
@@ -64,13 +72,14 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
             }
         )
         animator.reverse()
+        logger.logRippleAnimationStart(id, COLLAPSE)
     }
 
     // Expands the ripple to cover full screen.
     fun expandToFull(
         newHeight: Float,
         logger: MediaTttReceiverLogger,
-        onAnimationEnd: Runnable? = null
+        onAnimationEnd: Runnable? = null,
     ) {
         if (!isStarted) {
             return
@@ -95,10 +104,14 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         }
         animator.addListener(
             object : AnimatorListenerAdapter() {
+                override fun onAnimationCancel(animation: Animator) {
+                    onAnimationEnd(animation)
+                }
+
                 override fun onAnimationEnd(animation: Animator) {
                     animation?.let {
                         visibility = GONE
-                        logger.logRippleAnimationEnd(id)
+                        logger.logRippleAnimationEnd(id, EXPAND_TO_FULL)
                     }
                     onAnimationEnd?.run()
                     isStarted = false
@@ -106,6 +119,7 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
             }
         )
         animator.start()
+        logger.logRippleAnimationStart(id, EXPAND_TO_FULL)
     }
 
     // Calculates the actual starting percentage according to ripple shader progress set method.
@@ -151,5 +165,8 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
     companion object {
         const val DEFAULT_DURATION = 333L
         const val EXPAND_TO_FULL_DURATION = 1000L
+        private const val COLLAPSE = "collapse"
+        private const val EXPAND_TO_FULL = "expand to full"
+        private const val EXPAND = "expand"
     }
 }

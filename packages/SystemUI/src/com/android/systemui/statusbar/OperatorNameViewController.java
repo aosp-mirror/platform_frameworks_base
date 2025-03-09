@@ -119,7 +119,6 @@ public class OperatorNameViewController extends ViewController<OperatorNameView>
 
     /** Factory for constructing an {@link OperatorNameViewController}. */
     public static class Factory {
-        private final DarkIconDispatcher mDarkIconDispatcher;
         private final TunerService mTunerService;
         private final TelephonyManager mTelephonyManager;
         private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -129,7 +128,7 @@ public class OperatorNameViewController extends ViewController<OperatorNameView>
         private final JavaAdapter mJavaAdapter;
 
         @Inject
-        public Factory(DarkIconDispatcher darkIconDispatcher,
+        public Factory(
                 TunerService tunerService,
                 TelephonyManager telephonyManager,
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -137,7 +136,6 @@ public class OperatorNameViewController extends ViewController<OperatorNameView>
                 AirplaneModeInteractor airplaneModeInteractor,
                 SubscriptionManagerProxy subscriptionManagerProxy,
                 JavaAdapter javaAdapter) {
-            mDarkIconDispatcher = darkIconDispatcher;
             mTunerService = tunerService;
             mTelephonyManager = telephonyManager;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -148,9 +146,11 @@ public class OperatorNameViewController extends ViewController<OperatorNameView>
         }
 
         /** Create an {@link OperatorNameViewController}. */
-        public OperatorNameViewController create(OperatorNameView view) {
-            return new OperatorNameViewController(view,
-                    mDarkIconDispatcher,
+        public OperatorNameViewController create(
+                OperatorNameView view, DarkIconDispatcher darkIconDispatcher) {
+            return new OperatorNameViewController(
+                    view,
+                    darkIconDispatcher,
                     mTunerService,
                     mTelephonyManager,
                     mKeyguardUpdateMonitor,

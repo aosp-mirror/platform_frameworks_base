@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"የካሜራ ችግሮች አሉ?\nዳግም ለማበጀት መታ ያድርጉ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"አልተስተካከለም?\nለማህደር መታ ያድርጉ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ምንም የካሜራ ችግሮች የሉም? ለማሰናበት መታ ያድርጉ።"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"የመተግበሪያ ምናሌው እዚህ መገኘት ይችላል"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"በርካታ መተግበሪያዎችን በአንድ ላይ ለመክፈት ወደ የዴስክቶፕ እይታ ይግቡ"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"በማንኛውም ጊዜ ከመተግበሪያ ምናሌው ላይ ወደ ሙሉ ገጽ እይታ ይመለሱ"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ተጨማሪ ይመልከቱ እና ያድርጉ"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ለተከፈለ ማያ ገፅ ሌላ መተግበሪያ ይጎትቱ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ቦታውን ለመቀየር ከመተግበሪያው ውጭ ሁለቴ መታ ያድርጉ"</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"ምረጥ"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"ቅጽበታዊ ገፅ ዕይታ"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"በአሳሽ ውስጥ ክፈት"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"መተግበሪያ ውስጥ ክፈት"</string>
     <string name="new_window_text" msgid="6318648868380652280">"አዲስ መስኮት"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"መስኮቶችን አስተዳድር"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"ምጥጥነ ገፅታ ለውጥ"</string>
     <string name="close_text" msgid="4986518933445178928">"ዝጋ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ምናሌ ዝጋ"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"ምናሌን ክፈት"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"የማያ ገጹ መጠን አሳድግ"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"ማያ ገጹን አሳድግ"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ይህ መተግበሪያ መጠኑ ሊቀየር አይችልም"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"መጠን ቀይር"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"መተግበሪያ ወደዚህ መንቀሳቀስ አይችልም"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"አስማጭ"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"ወደነበረበት መልስ"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"አሳድግ"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"ወደነበረበት መልስ"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"ወደ ግራ አሳድግ"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"ወደ ቀኝ አሳድግ"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"በነባሪ ቅንብሮች ክፈት"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"ለዚህ የድር መተግበሪያ አገናኙን እንዴት እንደሚከፍቱ ይምረጡ"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"በመተግበሪያው ውስጥ"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"በአሳሽዎ ውስጥ"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"እሺ"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"እዚህ አሳሽዎ ውስጥ መተግበሪያዎችን በፍጥነት ይክፈቱ"</string>
 </resources>

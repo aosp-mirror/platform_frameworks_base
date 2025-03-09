@@ -33,6 +33,7 @@ import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
 import android.view.View
+import android.view.WindowInsets.Type.systemBars
 import android.view.WindowManager
 import androidx.core.graphics.toPointF
 import androidx.test.filters.SmallTest
@@ -186,13 +187,35 @@ class HandleMenuTest : ShellTestCase() {
         assertEquals(expected.toPointF(), handleMenu.handleMenuPosition)
     }
 
-    private fun createTaskInfo(windowingMode: Int, splitPosition: Int) {
+    @Test
+    fun testCreate_forceShowSystemBars_usesSystemViewContainer() {
+        createTaskInfo(WINDOWING_MODE_FREEFORM)
+
+        handleMenu = createAndShowHandleMenu(forceShowSystemBars = true)
+
+        // Only AdditionalSystemViewContainer supports force showing system bars.
+        assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
+    }
+
+    @Test
+    fun testCreate_forceShowSystemBars() {
+        createTaskInfo(WINDOWING_MODE_FREEFORM)
+
+        handleMenu = createAndShowHandleMenu(forceShowSystemBars = true)
+
+        val types = (handleMenu.handleMenuViewContainer as AdditionalSystemViewContainer)
+            .lp.forciblyShownTypes
+        assertTrue((types and systemBars()) != 0)
+    }
+
+    private fun createTaskInfo(windowingMode: Int, splitPosition: Int? = null) {
         val taskDescriptionBuilder = ActivityManager.TaskDescription.Builder()
             .setBackgroundColor(Color.YELLOW)
         val bounds = when (windowingMode) {
             WINDOWING_MODE_FULLSCREEN -> DISPLAY_BOUNDS
             WINDOWING_MODE_FREEFORM -> FREEFORM_BOUNDS
             WINDOWING_MODE_MULTI_WINDOW -> {
+                checkNotNull(splitPosition)
                 if (splitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
                     SPLIT_LEFT_BOUNDS
                 } else {
@@ -208,14 +231,19 @@ class HandleMenuTest : ShellTestCase() {
             .setBounds(bounds)
             .setVisible(true)
             .build()
-        whenever(splitScreenController.getSplitPosition(any())).thenReturn(splitPosition)
-        whenever(splitScreenController.getStageBounds(any(), any())).thenAnswer {
-            (it.arguments.first() as Rect).set(SPLIT_LEFT_BOUNDS)
-            (it.arguments[1] as Rect).set(SPLIT_RIGHT_BOUNDS)
+        if (windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+            whenever(splitScreenController.getSplitPosition(any())).thenReturn(splitPosition)
+            whenever(splitScreenController.getStageBounds(any(), any())).thenAnswer {
+                (it.arguments.first() as Rect).set(SPLIT_LEFT_BOUNDS)
+                (it.arguments[1] as Rect).set(SPLIT_RIGHT_BOUNDS)
+            }
         }
     }
 
-    private fun createAndShowHandleMenu(splitPosition: Int): HandleMenu {
+    private fun createAndShowHandleMenu(
+        splitPosition: Int? = null,
+        forceShowSystemBars: Boolean = false
+    ): HandleMenu {
         val layoutId = if (mockDesktopWindowDecoration.mTaskInfo.isFreeform) {
             R.layout.desktop_mode_app_header
         } else {
@@ -225,10 +253,11 @@ class HandleMenuTest : ShellTestCase() {
             WINDOWING_MODE_FULLSCREEN -> (DISPLAY_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
             WINDOWING_MODE_FREEFORM -> 0
             WINDOWING_MODE_MULTI_WINDOW -> {
+                checkNotNull(splitPosition)
                 if (splitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
                     (SPLIT_LEFT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
                 } else {
-                    (SPLIT_RIGHT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
+                    SPLIT_LEFT_BOUNDS.width() + (SPLIT_RIGHT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
                 }
             }
             else -> error("Invalid windowing mode")
@@ -237,10 +266,25 @@ class HandleMenuTest : ShellTestCase() {
             WindowManagerWrapper(mockWindowManager),
             layoutId, appIcon, appName, splitScreenController, shouldShowWindowingPill = true,
             shouldShowNewWindowButton = true, shouldShowManageWindowsButton = false,
-            null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
-            captionX = captionX
+            shouldShowChangeAspectRatioButton = false, shouldShowDesktopModeButton = true,
+            isBrowserApp = false, null /* openInAppOrBrowserIntent */, captionWidth = HANDLE_WIDTH,
+            captionHeight = 50,
+            captionX = captionX,
+            captionY = 0,
         )
-        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock())
+        handleMenu.show(
+            onToDesktopClickListener = mock(),
+            onToFullscreenClickListener = mock(),
+            onToSplitScreenClickListener = mock(),
+            onNewWindowClickListener = mock(),
+            onManageWindowsClickListener = mock(),
+            onChangeAspectRatioClickListener = mock(),
+            openInAppOrBrowserClickListener = mock(),
+            onOpenByDefaultClickListener = mock(),
+            onCloseMenuClickListener = mock(),
+            onOutsideTouchListener = mock(),
+            forceShowSystemBars = forceShowSystemBars
+        )
         return handleMenu
     }
 

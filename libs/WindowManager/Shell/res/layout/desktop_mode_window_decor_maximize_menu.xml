@@ -17,20 +17,21 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/maximize_menu"
-    android:layout_width="@dimen/desktop_mode_maximize_menu_width"
+    android:layout_width="wrap_content"
     android:layout_height="@dimen/desktop_mode_maximize_menu_height"
     android:background="@drawable/desktop_mode_maximize_menu_background"
     android:elevation="1dp">
 
     <LinearLayout
         android:id="@+id/container"
-        android:layout_width="@dimen/desktop_mode_maximize_menu_width"
+        android:layout_width="wrap_content"
         android:layout_height="@dimen/desktop_mode_maximize_menu_height"
         android:orientation="horizontal"
         android:padding="16dp"
         android:gravity="center">
 
         <LinearLayout
+            android:id="@+id/maximize_menu_immersive_toggle_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -38,17 +39,48 @@
             <Button
                 android:layout_width="94dp"
                 android:layout_height="60dp"
-                android:id="@+id/maximize_menu_maximize_button"
+                android:id="@+id/maximize_menu_immersive_toggle_button"
                 style="?android:attr/buttonBarButtonStyle"
                 android:stateListAnimator="@null"
                 android:importantForAccessibility="yes"
-                android:contentDescription="@string/desktop_mode_maximize_menu_maximize_button_text"
-                android:layout_marginRight="8dp"
+                android:contentDescription="@string/desktop_mode_maximize_menu_immersive_button_text"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="4dp"
                 android:alpha="0"/>
 
             <TextView
-                android:id="@+id/maximize_menu_maximize_window_text"
+                android:id="@+id/maximize_menu_immersive_toggle_button_text"
+                android:layout_width="94dp"
+                android:layout_height="18dp"
+                android:textSize="11sp"
+                android:layout_marginBottom="76dp"
+                android:gravity="center"
+                android:fontFamily="google-sans-text"
+                android:importantForAccessibility="no"
+                android:text="@string/desktop_mode_maximize_menu_immersive_button_text"
+                android:textColor="?androidprv:attr/materialColorOnSurface"
+                android:alpha="0"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/maximize_menu_size_toggle_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_width="94dp"
+                android:layout_height="60dp"
+                android:id="@+id/maximize_menu_size_toggle_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:stateListAnimator="@null"
+                android:importantForAccessibility="yes"
+                android:contentDescription="@string/desktop_mode_maximize_menu_maximize_button_text"
+                android:layout_marginBottom="4dp"
+                android:alpha="0"/>
+
+            <TextView
+                android:id="@+id/maximize_menu_size_toggle_button_text"
                 android:layout_width="94dp"
                 android:layout_height="18dp"
                 android:textSize="11sp"
@@ -62,6 +94,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/maximize_menu_snap_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -73,13 +106,14 @@
                 android:padding="4dp"
                 android:background="@drawable/desktop_mode_maximize_menu_layout_background"
                 android:layout_marginBottom="4dp"
+                android:layout_marginStart="8dp"
                 android:alpha="0">
                 <Button
                     android:id="@+id/maximize_menu_snap_left_button"
                     style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="41dp"
                     android:layout_height="@dimen/desktop_mode_maximize_menu_button_height"
-                    android:layout_marginRight="4dp"
+                    android:layout_marginEnd="4dp"
                     android:background="@drawable/desktop_mode_maximize_menu_button_background"
                     android:importantForAccessibility="yes"
                     android:contentDescription="@string/desktop_mode_maximize_menu_snap_left_button_text"
@@ -115,7 +149,7 @@
      used to monitor input events over the entire menu. -->
     <View
         android:id="@+id/maximize_menu_overlay"
-        android:layout_width="@dimen/desktop_mode_maximize_menu_width"
+        android:layout_width="match_parent"
         android:layout_height="@dimen/desktop_mode_maximize_menu_height"/>
 </FrameLayout>
 

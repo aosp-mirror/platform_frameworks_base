@@ -24,22 +24,20 @@ import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import androidx.test.core.app.ApplicationProvider
 import com.android.server.testutils.any
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoJUnitRunner
+import com.android.test.input.MockInputManagerRule
 import java.util.concurrent.Executor
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.`when`
+import org.mockito.junit.MockitoJUnitRunner
 
 /**
  * Tests for [InputManager.KeyboardBacklightListener].
@@ -50,23 +48,19 @@ import kotlin.test.fail
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)
 class KeyboardBacklightListenerTest {
+
     @get:Rule
-    val rule = MockitoJUnit.rule()!!
+    val inputManagerRule = MockInputManagerRule()
 
     private lateinit var testLooper: TestLooper
     private var registeredListener: IKeyboardBacklightListener? = null
     private lateinit var executor: Executor
     private lateinit var context: Context
     private lateinit var inputManager: InputManager
-    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
-
-    @Mock
-    private lateinit var iInputManagerMock: IInputManager
 
     @Before
     fun setUp() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManagerMock)
         testLooper = TestLooper()
         executor = HandlerExecutor(Handler(testLooper.looper))
         registeredListener = null
@@ -84,7 +78,7 @@ class KeyboardBacklightListenerTest {
             }
             registeredListener = listener
             null
-        }.`when`(iInputManagerMock).registerKeyboardBacklightListener(any())
+        }.`when`(inputManagerRule.mock).registerKeyboardBacklightListener(any())
 
         // Handle keyboard backlight listener being unregistered.
         doAnswer {
@@ -95,14 +89,7 @@ class KeyboardBacklightListenerTest {
             }
             registeredListener = null
             null
-        }.`when`(iInputManagerMock).unregisterKeyboardBacklightListener(any())
-    }
-
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
-        }
+        }.`when`(inputManagerRule.mock).unregisterKeyboardBacklightListener(any())
     }
 
     private fun notifyKeyboardBacklightChanged(

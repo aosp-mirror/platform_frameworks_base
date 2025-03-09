@@ -17,6 +17,7 @@
 package com.android.server.power.stats;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.usage.NetworkStatsManager;
@@ -43,7 +44,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Queue;
-import java.util.concurrent.Future;
 
 /**
  * Mocks a BatteryStatsImpl object.
@@ -81,7 +81,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
             Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
         super(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
                 mock(PlatformIdleStateCallback.class), mock(EnergyStatsRetriever.class),
-                mock(UserInfoProvider.class), mock(PowerProfile.class),
+                mock(UserInfoProvider.class), mockPowerProfile(),
                 new CpuScalingPolicies(new SparseArray<>(), new SparseArray<>()),
                 powerStatsUidResolver, mock(FrameworkStatsLogger.class),
                 mock(BatteryStatsHistory.TraceDelegate.class),
@@ -95,6 +95,12 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
         mCpuUidFreqTimeReader = mock(KernelCpuUidFreqTimeReader.class);
         mKernelWakelockReader = null;
+    }
+
+    private static PowerProfile mockPowerProfile() {
+        PowerProfile powerProfile = mock(PowerProfile.class);
+        when(powerProfile.getNumDisplays()).thenReturn(1);
+        return powerProfile;
     }
 
     public void initMeasuredEnergyStats(String[] customBucketNames) {
@@ -288,30 +294,25 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         public int flags = 0;
 
         @Override
-        public Future<?> scheduleSync(String reason, int flags) {
-            return null;
+        public void scheduleSync(String reason, int flags) {
         }
 
         @Override
-        public Future<?> scheduleCleanupDueToRemovedUser(int userId) {
-            return null;
+        public void scheduleCleanupDueToRemovedUser(int userId) {
         }
 
         @Override
-        public Future<?> scheduleCpuSyncDueToRemovedUid(int uid) {
-            return null;
+        public void scheduleCpuSyncDueToRemovedUid(int uid) {
         }
 
         @Override
-        public Future<?> scheduleSyncDueToScreenStateChange(int flag, boolean onBattery,
+        public void scheduleSyncDueToScreenStateChange(int flag, boolean onBattery,
                 boolean onBatteryScreenOff, int screenState, int[] perDisplayScreenStates) {
             flags |= flag;
-            return null;
         }
 
         @Override
-        public Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis) {
-            return null;
+        public void scheduleCpuSyncDueToWakelockChange(long delayMillis) {
         }
 
         @Override
@@ -319,8 +320,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
 
         @Override
-        public Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis) {
-            return null;
+        public void scheduleSyncDueToBatteryLevelChange(long delayMillis) {
         }
 
         @Override

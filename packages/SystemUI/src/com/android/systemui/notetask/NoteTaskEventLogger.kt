@@ -19,6 +19,7 @@ import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.notetask.NoteTaskEntryPoint.APP_CLIPS
 import com.android.systemui.notetask.NoteTaskEntryPoint.KEYBOARD_SHORTCUT
+import com.android.systemui.notetask.NoteTaskEntryPoint.QS_NOTES_TILE
 import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
 import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
@@ -43,45 +44,47 @@ class NoteTaskEventLogger @Inject constructor(private val uiEventLogger: UiEvent
     /** Logs a [NoteTaskInfo] as an **open** [NoteTaskUiEvent], including package name and uid. */
     fun logNoteTaskOpened(info: NoteTaskInfo) {
         val event =
-                when (info.entryPoint) {
-                    TAIL_BUTTON -> {
-                        if (info.isKeyguardLocked) {
-                            NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON_LOCKED
-                        } else {
-                            NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON
-                        }
+            when (info.entryPoint) {
+                TAIL_BUTTON -> {
+                    if (info.isKeyguardLocked) {
+                        NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON_LOCKED
+                    } else {
+                        NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON
                     }
-
-                    WIDGET_PICKER_SHORTCUT,
-                    WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE -> NOTE_OPENED_VIA_SHORTCUT
-
-                    QUICK_AFFORDANCE -> NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE
-                    APP_CLIPS,
-                    KEYBOARD_SHORTCUT,
-                    null -> return
                 }
+
+                WIDGET_PICKER_SHORTCUT,
+                WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE -> NOTE_OPENED_VIA_SHORTCUT
+
+                QUICK_AFFORDANCE -> NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE
+                APP_CLIPS,
+                KEYBOARD_SHORTCUT,
+                QS_NOTES_TILE,  // TODO(b/376640872): Add logging for QS Tile entry point.
+                null -> return
+            }
         uiEventLogger.log(event, info.uid, info.packageName)
     }
 
     /** Logs a [NoteTaskInfo] as a **closed** [NoteTaskUiEvent], including package name and uid. */
     fun logNoteTaskClosed(info: NoteTaskInfo) {
         val event =
-                when (info.entryPoint) {
-                    TAIL_BUTTON -> {
-                        if (info.isKeyguardLocked) {
-                            NoteTaskUiEvent.NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON_LOCKED
-                        } else {
-                            NoteTaskUiEvent.NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON
-                        }
+            when (info.entryPoint) {
+                TAIL_BUTTON -> {
+                    if (info.isKeyguardLocked) {
+                        NoteTaskUiEvent.NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON_LOCKED
+                    } else {
+                        NoteTaskUiEvent.NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON
                     }
-
-                    WIDGET_PICKER_SHORTCUT,
-                    WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE,
-                    QUICK_AFFORDANCE,
-                    APP_CLIPS,
-                    KEYBOARD_SHORTCUT,
-                    null -> return
                 }
+
+                WIDGET_PICKER_SHORTCUT,
+                WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE,
+                QUICK_AFFORDANCE,
+                APP_CLIPS,
+                KEYBOARD_SHORTCUT,
+                QS_NOTES_TILE,
+                null -> return
+            }
         uiEventLogger.log(event, info.uid, info.packageName)
     }
 
@@ -90,19 +93,20 @@ class NoteTaskEventLogger @Inject constructor(private val uiEventLogger: UiEvent
 
         @UiEvent(doc = "User opened a note by tapping on the lockscreen shortcut.")
         NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE(1294),
-
-        @UiEvent(doc = "User opened a note by pressing the stylus tail button while the screen was unlocked.") // ktlint-disable max-line-length
+        @UiEvent(
+            doc =
+                "User opened a note by pressing the stylus tail button while the screen was unlocked."
+        )
         NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON(1295),
-
-        @UiEvent(doc = "User opened a note by pressing the stylus tail button while the screen was locked.") // ktlint-disable max-line-length
+        @UiEvent(
+            doc =
+                "User opened a note by pressing the stylus tail button while the screen was locked."
+        )
         NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON_LOCKED(1296),
-
         @UiEvent(doc = "User opened a note by tapping on an app shortcut.")
         NOTE_OPENED_VIA_SHORTCUT(1297),
-
         @UiEvent(doc = "Note closed via a tail button while device is unlocked")
         NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON(1311),
-
         @UiEvent(doc = "Note closed via a tail button while device is locked")
         NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON_LOCKED(1312);
 

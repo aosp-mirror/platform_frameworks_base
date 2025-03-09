@@ -21,10 +21,13 @@
 #include <format/binary/ResChunkPullParser.h>
 
 #include <algorithm>
+#include <array>
 #include <map>
 #include <memory>
 #include <queue>
 #include <set>
+#include <span>
+#include <utility>
 #include <vector>
 
 #include "ResourceTable.h"
@@ -346,6 +349,21 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
             value->value->Accept(&body_printer);
             printer->Undent();
           }
+          printer->Println("Flag disabled values:");
+          for (const auto& value : entry.flag_disabled_values) {
+            printer->Print("(");
+            printer->Print(value->config.to_string());
+            printer->Print(") ");
+            value->value->Accept(&headline_printer);
+            if (options.show_sources && !value->value->GetSource().path.empty()) {
+              printer->Print(" src=");
+              printer->Print(value->value->GetSource().to_string());
+            }
+            printer->Println();
+            printer->Indent();
+            value->value->Accept(&body_printer);
+            printer->Undent();
+          }
           printer->Undent();
         }
       }
@@ -430,7 +448,7 @@ void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer*
   using namespace android;
 
   if (pool->getError() == NO_INIT) {
-    printer->Print("String pool is unitialized.\n");
+    printer->Print("String pool is uninitialized.\n");
     return;
   } else if (pool->getError() != NO_ERROR) {
     printer->Print("String pool is corrupt/invalid.\n");
@@ -669,6 +687,80 @@ class ChunkPrinter {
     printer_->Print("\n");
   }
 
+  void PrintQualifiers(uint32_t qualifiers) const {
+    if (qualifiers == 0) {
+      printer_->Print("0");
+      return;
+    }
+
+    printer_->Print(StringPrintf("0x%04x: ", qualifiers));
+    static constinit std::array kValues = {
+        std::pair{ResTable_config::CONFIG_MCC, "mcc"},
+        std::pair{ResTable_config::CONFIG_MNC, "mnc"},
+        std::pair{ResTable_config::CONFIG_LOCALE, "locale"},
+        std::pair{ResTable_config::CONFIG_TOUCHSCREEN, "touchscreen"},
+        std::pair{ResTable_config::CONFIG_KEYBOARD, "keyboard"},
+        std::pair{ResTable_config::CONFIG_KEYBOARD_HIDDEN, "keyboard_hidden"},
+        std::pair{ResTable_config::CONFIG_NAVIGATION, "navigation"},
+        std::pair{ResTable_config::CONFIG_ORIENTATION, "orientation"},
+        std::pair{ResTable_config::CONFIG_DENSITY, "screen_density"},
+        std::pair{ResTable_config::CONFIG_SCREEN_SIZE, "screen_size"},
+        std::pair{ResTable_config::CONFIG_SMALLEST_SCREEN_SIZE, "screen_smallest_size"},
+        std::pair{ResTable_config::CONFIG_VERSION, "version"},
+        std::pair{ResTable_config::CONFIG_SCREEN_LAYOUT, "screen_layout"},
+        std::pair{ResTable_config::CONFIG_UI_MODE, "ui_mode"},
+        std::pair{ResTable_config::CONFIG_LAYOUTDIR, "layout_dir"},
+        std::pair{ResTable_config::CONFIG_SCREEN_ROUND, "screen_round"},
+        std::pair{ResTable_config::CONFIG_COLOR_MODE, "color_mode"},
+        std::pair{ResTable_config::CONFIG_GRAMMATICAL_GENDER, "grammatical_gender"}};
+    const char* delimiter = "";
+    for (auto&& pair : kValues) {
+      if (qualifiers & pair.first) {
+        printer_->Print(StringPrintf("%s%s", delimiter, pair.second));
+        delimiter = "|";
+      }
+    }
+  }
+
+  bool PrintTypeSpec(const ResTable_typeSpec* chunk) const {
+    printer_->Print(StringPrintf(" id: 0x%02x", android::util::DeviceToHost32(chunk->id)));
+    printer_->Print(StringPrintf(" types: %u", android::util::DeviceToHost16(chunk->typesCount)));
+    printer_->Print(
+        StringPrintf(" entry configs: %u\n", android::util::DeviceToHost32(chunk->entryCount)));
+    printer_->Print("Entry qualifier masks:\n");
+    printer_->Indent();
+    std::span<const uint32_t> masks(reinterpret_cast<const uint32_t*>(GetChunkData(&chunk->header)),
+                                    GetChunkDataLen(&chunk->header) / sizeof(uint32_t));
+    int i = 0;
+    int non_empty_count = 0;
+    for (auto dev_mask : masks) {
+      auto mask = android::util::DeviceToHost32(dev_mask);
+      if (mask == 0) {
+        i++;
+        continue;
+      }
+      ++non_empty_count;
+      printer_->Print(StringPrintf("#0x%02x = ", i++));
+      if (mask & ResTable_typeSpec::SPEC_PUBLIC) {
+        mask &= ~ResTable_typeSpec::SPEC_PUBLIC;
+        printer_->Print("(PUBLIC) ");
+      }
+      if (mask & ResTable_typeSpec::SPEC_STAGED_API) {
+        mask &= ~ResTable_typeSpec::SPEC_STAGED_API;
+        printer_->Print("(STAGED) ");
+      }
+      PrintQualifiers(mask);
+      printer_->Print("\n");
+    }
+    if (non_empty_count > 0) {
+      printer_->Print("\n");
+    } else {
+      printer_->Print("(all empty)\n");
+    }
+    printer_->Undent();
+    return true;
+  }
+
   bool PrintTableType(const ResTable_type* chunk) {
     printer_->Print(StringPrintf(" id: 0x%02x", android::util::DeviceToHost32(chunk->id)));
     printer_->Print(StringPrintf(
@@ -847,6 +939,10 @@ class ChunkPrinter {
 
         case RES_TABLE_TYPE_TYPE:
           PrintTableType(reinterpret_cast<const ResTable_type*>(chunk));
+          break;
+
+        case RES_TABLE_TYPE_SPEC_TYPE:
+          PrintTypeSpec(reinterpret_cast<const ResTable_typeSpec*>(chunk));
           break;
 
         default:

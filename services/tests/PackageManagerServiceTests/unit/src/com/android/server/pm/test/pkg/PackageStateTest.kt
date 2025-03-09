@@ -94,6 +94,7 @@ class PackageStateTest {
             ParsedService::getIntents,
             ParsedService::getProperties,
             Intent::getCategories,
+            Intent::getExtraIntentKeys,
             PackageUserState::getDisabledComponents,
             PackageUserState::getEnabledComponents,
             PackageUserState::getSharedLibraryOverlayPaths,

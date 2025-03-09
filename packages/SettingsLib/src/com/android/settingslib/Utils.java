@@ -1,7 +1,6 @@
 package com.android.settingslib;
 
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_USER_LABEL;
-import static android.webkit.Flags.updateServiceV2;
 
 import android.annotation.ColorInt;
 import android.app.admin.DevicePolicyManager;
@@ -496,7 +495,7 @@ public class Utils {
                 || packageName.equals(sServicesSystemSharedLibPackageName)
                 || packageName.equals(sSharedSystemSharedLibPackageName)
                 || packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
-                || (updateServiceV2() && packageName.equals(getDefaultWebViewPackageName(pm)))
+                || packageName.equals(getDefaultWebViewPackageName(pm))
                 || isDeviceProvisioningPackage(resources, packageName);
     }
 

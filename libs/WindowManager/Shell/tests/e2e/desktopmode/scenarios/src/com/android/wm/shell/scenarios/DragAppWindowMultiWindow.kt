@@ -40,7 +40,7 @@ abstract class DragAppWindowMultiWindow : DragAppWindowScenarioTestBase()
     @Before
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
         mailApp.launchViaIntent(wmHelper)
         newTasksApp.launchViaIntent(wmHelper)
         imeApp.launchViaIntent(wmHelper)

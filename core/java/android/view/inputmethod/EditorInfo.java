@@ -24,6 +24,7 @@ import static android.view.inputmethod.EditorInfoProto.PACKAGE_NAME;
 import static android.view.inputmethod.EditorInfoProto.PRIVATE_IME_OPTIONS;
 import static android.view.inputmethod.EditorInfoProto.TARGET_INPUT_METHOD_USER_ID;
 import static android.view.inputmethod.Flags.FLAG_EDITORINFO_HANDWRITING_ENABLED;
+import static android.view.inputmethod.Flags.FLAG_PUBLIC_AUTOFILL_ID_IN_EDITORINFO;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -470,12 +471,10 @@ public class EditorInfo implements InputType, Parcelable {
     public String packageName;
 
     /**
-     * Autofill Id for the field that's currently on focus.
-     *
-     * <p> Marked as hide since it's only used by framework.</p>
-     * @hide
+     * Autofill Id for the field that's currently on focus. See link {@link AutofillId} for more
+     * details. It is set by {@link View#getAutofillId()}
      */
-    public AutofillId autofillId;
+    private AutofillId autofillId;
 
     /**
      * Identifier for the editor's field.  This is optional, and may be
@@ -523,7 +522,6 @@ public class EditorInfo implements InputType, Parcelable {
      */
     @Nullable
     public LocaleList hintLocales = null;
-
 
     /**
      * List of acceptable MIME types for
@@ -757,6 +755,30 @@ public class EditorInfo implements InputType, Parcelable {
     @FlaggedApi(FLAG_EDITORINFO_HANDWRITING_ENABLED)
     public boolean isStylusHandwritingEnabled() {
         return mIsStylusHandwritingEnabled;
+    }
+
+    private boolean mWritingToolsEnabled = true;
+
+    /**
+     * Returns {@code true} when an {@code Editor} has writing tools enabled.
+     * {@code true} by default for all editors. Toolkits can optionally disable them where not
+     * relevant e.g. passwords, number input, etc.
+     * @see #setWritingToolsEnabled(boolean)
+     */
+    @FlaggedApi(Flags.FLAG_WRITING_TOOLS)
+    public boolean isWritingToolsEnabled() {
+        return mWritingToolsEnabled;
+    }
+
+    /**
+     * Set {@code false} if {@code Editor} opts-out of writing tools, that enable IMEs to replace
+     * text with generative AI text.
+     * @param enabled set {@code true} to enabled or {@code false to disable} support.
+     * @see #isWritingToolsEnabled()
+     */
+    @FlaggedApi(Flags.FLAG_WRITING_TOOLS)
+    public void setWritingToolsEnabled(boolean enabled) {
+        mWritingToolsEnabled = enabled;
     }
 
     /**
@@ -1200,6 +1222,28 @@ public class EditorInfo implements InputType, Parcelable {
     }
 
     /**
+     * Returns the {@link AutofillId} of the view that this {@link EditorInfo} is associated with.
+     * The value is filled in with the result of {@link android.view.View#getAutofillId()
+     * View.getAutofillId()} on the view that is being edited.
+     *
+     * Note: For virtual view(e.g. Compose or Webview), default behavior is the autofillId is the id
+     * of the container view, unless the virtual view provider sets the virtual id when the
+     * InputMethodManager calls {@link android.view.View#onCreateInputConnection()} on the container
+     * view.
+     */
+    @FlaggedApi(FLAG_PUBLIC_AUTOFILL_ID_IN_EDITORINFO)
+    @Nullable
+    public AutofillId getAutofillId() {
+        return autofillId;
+    }
+
+    /** Sets the {@link AutofillId} of the view that this {@link EditorInfo} is associated with. */
+    @FlaggedApi(FLAG_PUBLIC_AUTOFILL_ID_IN_EDITORINFO)
+    public void setAutofillId(@Nullable AutofillId autofillId) {
+        this.autofillId = autofillId;
+    }
+
+    /**
      * Export the state of {@link EditorInfo} into a protocol buffer output stream.
      *
      * @param proto Stream to write the state to
@@ -1255,6 +1299,7 @@ public class EditorInfo implements InputType, Parcelable {
                 + InputMethodDebug.handwritingGestureTypeFlagsToString(
                         mSupportedHandwritingGesturePreviewTypes));
         pw.println(prefix + "isStylusHandwritingEnabled=" + mIsStylusHandwritingEnabled);
+        pw.println(prefix + "writingToolsEnabled=" + mWritingToolsEnabled);
         pw.println(prefix + "contentMimeTypes=" + Arrays.toString(contentMimeTypes));
         if (targetInputMethodUser != null) {
             pw.println(prefix + "targetInputMethodUserId=" + targetInputMethodUser.getIdentifier());
@@ -1335,6 +1380,7 @@ public class EditorInfo implements InputType, Parcelable {
         }
         dest.writeStringArray(contentMimeTypes);
         UserHandle.writeToParcel(targetInputMethodUser, dest);
+        dest.writeBoolean(mWritingToolsEnabled);
     }
 
     /**
@@ -1375,6 +1421,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.hintLocales = hintLocales.isEmpty() ? null : hintLocales;
                     res.contentMimeTypes = source.readStringArray();
                     res.targetInputMethodUser = UserHandle.readFromParcel(source);
+                    res.mWritingToolsEnabled = source.readBoolean();
                     return res;
                 }
 

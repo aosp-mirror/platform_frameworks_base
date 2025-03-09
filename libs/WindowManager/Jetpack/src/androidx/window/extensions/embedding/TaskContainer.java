@@ -48,8 +48,6 @@ import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
 
-import com.android.window.flags.Flags;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -156,7 +154,7 @@ class TaskContainer {
         mSplitController = splitController;
         for (ParcelableTaskFragmentContainerData tfData :
                 data.getParcelableTaskFragmentContainerDataList()) {
-            final TaskFragmentInfo info = taskFragmentInfoMap.get(tfData.mToken);
+            final TaskFragmentInfo info = taskFragmentInfoMap.remove(tfData.mToken);
             if (info != null && !info.isEmpty()) {
                 final TaskFragmentContainer container =
                         new TaskFragmentContainer(tfData, splitController, this);
@@ -184,8 +182,15 @@ class TaskContainer {
 
     @NonNull
     List<ParcelableSplitContainerData> getParcelableSplitContainerDataList() {
-        final List<ParcelableSplitContainerData> data = new ArrayList<>(mSplitContainers.size());
+        final int size =
+                mSplitPinContainer != null ? mSplitContainers.size() - 1 : mSplitContainers.size();
+        final List<ParcelableSplitContainerData> data = new ArrayList<>(size);
         for (SplitContainer splitContainer : mSplitContainers) {
+            if (splitContainer == mSplitPinContainer) {
+                // Skip SplitPinContainer as it cannot be restored because the SplitPinRule is
+                // set while pinning the container in runtime.
+                continue;
+            }
             data.add(splitContainer.getParcelableData());
         }
         return data;
@@ -634,11 +639,7 @@ class TaskContainer {
         // pin container.
         updateAlwaysOnTopOverlayIfNecessary();
 
-        // TODO(b/289875940): Making backup-restore as an opt-in solution, before the flag goes
-        //  to next-food.
-        if (Flags.aeBackStackRestore()) {
-            mSplitController.scheduleBackup();
-        }
+        mSplitController.scheduleBackup();
     }
 
     private void updateAlwaysOnTopOverlayIfNecessary() {

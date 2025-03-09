@@ -49,7 +49,7 @@ internal class MobileState(
 ) : ConnectivityState() {
 
     @JvmField var telephonyDisplayInfo = TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
-            TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE, false)
+            TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE, false, false, false)
     @JvmField var serviceState: ServiceState? = null
     @JvmField var signalStrength: SignalStrength? = null
 

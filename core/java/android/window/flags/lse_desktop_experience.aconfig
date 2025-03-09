@@ -58,10 +58,13 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_windowing_scvh_cache"
+    name: "enable_desktop_windowing_scvh_cache_bug_fix"
     namespace: "lse_desktop_experience"
     description: "Enables a SurfaceControlViewHost cache for window decorations"
-    bug: "345146928"
+    bug: "360452034"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -90,6 +93,16 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables using AdditionalSystemViewContainer to resolve handle input issues."
     bug: "316186265"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_accessible_custom_headers"
+    namespace: "lse_desktop_experience"
+    description: "Enables a11y-friendly custom header input handling"
+    bug: "339302584"
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -162,6 +175,13 @@ flag {
 }
 
 flag {
+    name: "enable_a11y_metrics"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable log collection for a11y actions in desktop windowing mode"
+    bug: "341319597"
+}
+
+flag {
     name: "enable_caption_compat_inset_force_consumption"
     namespace: "lse_desktop_experience"
     description: "Enables force-consumption of caption bar insets for immersive apps in freeform"
@@ -221,7 +241,7 @@ flag {
     name: "enable_desktop_windowing_app_handle_education"
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing app handle education"
-    bug: "348208342"
+    bug: "316006079"
 }
 
 flag {
@@ -232,10 +252,37 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_windowing_enter_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables enter desktop windowing transition & motion polish changes"
+    bug: "369763947"
+}
+
+flag {
+    name: "enable_desktop_windowing_enter_transition_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables enter desktop windowing transition & motion polish changes"
+    bug: "380224875"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_desktop_windowing_exit_transitions"
     namespace: "lse_desktop_experience"
     description: "Enables exit desktop windowing transition & motion polish changes"
     bug: "353650462"
+}
+
+flag {
+    name: "enable_desktop_windowing_exit_transitions_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables exit desktop windowing transition & motion polish changes"
+    bug: "380224768"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -250,6 +297,14 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing app-to-web education"
     bug: "348205896"
+    is_exported: true
+}
+
+flag {
+    name: "enable_desktop_windowing_app_to_web_education_integration"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing App-to-Web education and integrates new APIs"
+    bug: "380272815"
 }
 
 flag {
@@ -287,6 +342,20 @@ flag {
 }
 
 flag {
+    name: "enable_fully_immersive_in_desktop"
+    namespace: "lse_desktop_experience"
+    description: "Enabled the fully immersive experience from desktop"
+    bug: "359523924"
+}
+
+flag {
+    name: "enable_restore_to_previous_size_from_desktop_immersive"
+    namespace: "lse_desktop_experience"
+    description: "Restores the window bounds to their previous size when exiting desktop immersive"
+    bug: "372318163"
+}
+
+flag {
     name: "enable_display_focus_in_shell_transitions"
     namespace: "lse_desktop_experience"
     description: "Creates a shell transition when display focus switches."
@@ -298,4 +367,137 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Allow entering desktop mode by default on freeform displays"
     bug: "361419732"
+}
+
+flag {
+    name: "enable_desktop_app_launch_alttab_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for alt-tab app launches in Desktop Mode."
+    bug: "370735595"
+}
+
+flag {
+    name: "enable_desktop_app_launch_alttab_transitions_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for alt-tab app launches in Desktop Mode."
+    bug: "380225486"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_desktop_app_launch_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for app launches in Desktop Mode."
+    bug: "375992828"
+}
+
+flag {
+    name: "enable_desktop_app_launch_transitions_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for app launches in Desktop Mode."
+    bug: "380224832"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_desktop_system_dialogs_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for system dialogs in Desktop Mode."
+    bug: "335638193"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_move_to_next_display_shortcut"
+    namespace: "lse_desktop_experience"
+    description: "Add new keyboard shortcut of moving a task into next display"
+    bug: "364154795"
+}
+
+flag {
+    name: "enable_drag_to_maximize"
+    namespace: "lse_desktop_experience"
+    description: "Enables a switch to change the concequence of dragging a window to the top edge."
+    bug: "372614715"
+}
+
+flag {
+    name: "enable_task_resizing_keyboard_shortcuts"
+    namespace: "lse_desktop_experience"
+    description: "Enables keyboard shortcuts for resizing tasks in desktop mode."
+    bug: "335819608"
+}
+
+flag {
+    name: "enable_display_windowing_mode_switching"
+    namespace: "lse_desktop_experience"
+    description: "Change the default display's windowing mode to freeform when display connected in extended mode."
+    bug: "374849026"
+}
+
+flag {
+    name: "enable_desktop_windowing_pip"
+    namespace: "lse_desktop_experience"
+    description: "Enables PiP features in desktop mode."
+    bug: "350475854"
+}
+
+flag {
+    name: "reparent_window_token_api"
+    namespace: "lse_desktop_experience"
+    description: "Allows to reparent a window token to a different display"
+    is_fixed_read_only: true
+    bug: "381258683"
+}
+
+flag {
+    name: "enable_desktop_windowing_hsum"
+    namespace: "lse_desktop_experience"
+    description: "Enables HSUM on desktop mode."
+    bug: "366397912"
+}
+
+flag {
+    name: "enable_multiple_desktops"
+    namespace: "lse_desktop_experience"
+    description: "Enable multiple desktop sessions for desktop windowing."
+    bug: "379158791"
+}
+
+flag {
+    name: "enable_connected_displays_dnd"
+    namespace: "lse_desktop_experience"
+    description: "Enable drag-and-drop between connected displays."
+    bug: "381793841"
+}
+
+flag {
+    name: "enable_connected_displays_window_drag"
+    namespace: "lse_desktop_experience"
+    description: "Enable window drag between connected displays."
+    bug: "381172172"
+}
+
+flag {
+    name: "enable_bug_fixes_for_secondary_display"
+    namespace: "lse_desktop_experience"
+    description: "Bugfixes / papercuts to bring Desktop Windowing to secondary displays."
+    bug: "382023296"
+}
+
+flag {
+    name: "enable_top_visible_root_task_per_user_tracking"
+    namespace: "lse_desktop_experience"
+    description: "Enables tracking the top visible root tasks for a user."
+    bug: "381038076"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

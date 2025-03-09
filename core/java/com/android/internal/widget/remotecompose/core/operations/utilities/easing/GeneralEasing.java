@@ -15,23 +15,24 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
-/**
- * Provides and interface to create easing functions
- */
-public class GeneralEasing extends Easing{
-    float[] mEasingData = new float[0];
-    Easing mEasingCurve = new CubicEasing(CUBIC_STANDARD);
+import android.annotation.NonNull;
+
+/** Provides and interface to create easing functions */
+public class GeneralEasing extends Easing {
+    @NonNull float[] mEasingData = new float[0];
+    @NonNull Easing mEasingCurve = new CubicEasing(CUBIC_STANDARD);
 
     /**
      * Set the curve based on the float encoding of it
+     *
      * @param data
      */
-    public void setCurveSpecification(float[] data) {
+    public void setCurveSpecification(@NonNull float[] data) {
         mEasingData = data;
         createEngine();
     }
 
-    public float[] getCurveSpecification() {
+    public @NonNull float[] getCurveSpecification() {
         return mEasingData;
     }
 
@@ -47,11 +48,9 @@ public class GeneralEasing extends Easing{
                 mEasingCurve = new CubicEasing(type);
                 break;
             case CUBIC_CUSTOM:
-                mEasingCurve = new CubicEasing(mEasingData[1],
-                        mEasingData[2],
-                        mEasingData[3],
-                        mEasingData[5]
-                );
+                mEasingCurve =
+                        new CubicEasing(
+                                mEasingData[1], mEasingData[2], mEasingData[3], mEasingData[5]);
                 break;
             case EASE_OUT_BOUNCE:
                 mEasingCurve = new BounceCurve(type);
@@ -59,23 +58,20 @@ public class GeneralEasing extends Easing{
         }
     }
 
-    /**
-     * get the value at point x
-     */
+    /** get the value at point x */
+    @Override
     public float get(float x) {
         return mEasingCurve.get(x);
     }
 
-    /**
-     * get the slope of the easing function at at x
-     */
+    /** get the slope of the easing function at at x */
+    @Override
     public float getDiff(float x) {
         return mEasingCurve.getDiff(x);
     }
 
+    @Override
     public int getType() {
         return mEasingCurve.getType();
     }
-
-
 }

@@ -130,10 +130,6 @@ fun SceneScope.CollapsedShadeHeader(
     modifier: Modifier = Modifier,
 ) {
     val viewModel = rememberViewModel("CollapsedShadeHeader") { viewModelFactory.create() }
-    val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
-    if (isDisabled) {
-        return
-    }
 
     val cutoutWidth = LocalDisplayCutout.current.width()
     val cutoutHeight = LocalDisplayCutout.current.height()
@@ -196,7 +192,7 @@ fun SceneScope.CollapsedShadeHeader(
                             horizontalArrangement = Arrangement.End,
                             modifier =
                                 Modifier.element(ShadeHeader.Elements.CollapsedContentEnd)
-                                    .padding(horizontal = horizontalPadding)
+                                    .padding(horizontal = horizontalPadding),
                         ) {
                             if (isLargeScreenLayout) {
                                 ShadeCarrierGroup(
@@ -207,7 +203,7 @@ fun SceneScope.CollapsedShadeHeader(
                             SystemIconContainer(
                                 viewModel = viewModel,
                                 isClickable = isLargeScreenLayout,
-                                modifier = Modifier.align(Alignment.CenterVertically)
+                                modifier = Modifier.align(Alignment.CenterVertically),
                             ) {
                                 StatusIcons(
                                     viewModel = viewModel,
@@ -217,7 +213,7 @@ fun SceneScope.CollapsedShadeHeader(
                                     modifier =
                                         Modifier.align(Alignment.CenterVertically)
                                             .padding(end = 6.dp)
-                                            .weight(1f, fill = false)
+                                            .weight(1f, fill = false),
                                 )
                                 BatteryIcon(
                                     createBatteryMeterViewController =
@@ -252,27 +248,15 @@ fun SceneScope.CollapsedShadeHeader(
                 CutoutLocation.NONE,
                 CutoutLocation.RIGHT -> {
                     startPlaceable.placeRelative(x = 0, y = 0)
-                    endPlaceable.placeRelative(
-                        x = startPlaceable.width,
-                        y = 0,
-                    )
+                    endPlaceable.placeRelative(x = startPlaceable.width, y = 0)
                 }
                 CutoutLocation.CENTER -> {
                     startPlaceable.placeRelative(x = 0, y = 0)
-                    endPlaceable.placeRelative(
-                        x = startPlaceable.width + cutoutWidthPx,
-                        y = 0,
-                    )
+                    endPlaceable.placeRelative(x = startPlaceable.width + cutoutWidthPx, y = 0)
                 }
                 CutoutLocation.LEFT -> {
-                    startPlaceable.placeRelative(
-                        x = cutoutWidthPx,
-                        y = 0,
-                    )
-                    endPlaceable.placeRelative(
-                        x = startPlaceable.width + cutoutWidthPx,
-                        y = 0,
-                    )
+                    startPlaceable.placeRelative(x = cutoutWidthPx, y = 0)
+                    endPlaceable.placeRelative(x = startPlaceable.width + cutoutWidthPx, y = 0)
                 }
             }
         }
@@ -288,10 +272,6 @@ fun SceneScope.ExpandedShadeHeader(
     modifier: Modifier = Modifier,
 ) {
     val viewModel = rememberViewModel("ExpandedShadeHeader") { viewModelFactory.create() }
-    val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
-    if (isDisabled) {
-        return
-    }
 
     val useExpandedFormat by remember {
         derivedStateOf { shouldUseExpandedFormat(layoutState.transitionState) }
@@ -302,17 +282,14 @@ fun SceneScope.ExpandedShadeHeader(
     Box(modifier = modifier.sysuiResTag(ShadeHeader.TestTags.Root)) {
         if (isPrivacyChipVisible) {
             Box(modifier = Modifier.height(CollapsedHeight).fillMaxWidth()) {
-                PrivacyChip(
-                    viewModel = viewModel,
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                )
+                PrivacyChip(viewModel = viewModel, modifier = Modifier.align(Alignment.CenterEnd))
             }
         }
         Column(
             verticalArrangement = Arrangement.Bottom,
             modifier =
                 Modifier.fillMaxWidth()
-                    .defaultMinSize(minHeight = ShadeHeader.Dimensions.ExpandedHeight)
+                    .defaultMinSize(minHeight = ShadeHeader.Dimensions.ExpandedHeight),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Box {
@@ -362,11 +339,7 @@ fun SceneScope.ExpandedShadeHeader(
 }
 
 @Composable
-private fun SceneScope.Clock(
-    scale: Float,
-    viewModel: ShadeHeaderViewModel,
-    modifier: Modifier,
-) {
+private fun SceneScope.Clock(scale: Float, viewModel: ShadeHeaderViewModel, modifier: Modifier) {
     val layoutDirection = LocalLayoutDirection.current
 
     Element(key = ShadeHeader.Elements.Clock, modifier = modifier) {
@@ -391,10 +364,10 @@ private fun SceneScope.Clock(
                                     LayoutDirection.Ltr -> 0f
                                     LayoutDirection.Rtl -> 1f
                                 },
-                                0.5f
+                                0.5f,
                             )
                     }
-                    .clickable { viewModel.onClockClicked() }
+                    .clickable { viewModel.onClockClicked() },
         )
     }
 }
@@ -447,10 +420,7 @@ private fun BatteryIcon(
 }
 
 @Composable
-private fun ShadeCarrierGroup(
-    viewModel: ShadeHeaderViewModel,
-    modifier: Modifier = Modifier,
-) {
+private fun ShadeCarrierGroup(viewModel: ShadeHeaderViewModel, modifier: Modifier = Modifier) {
     Row(modifier = modifier) {
         val subIds by viewModel.mobileSubIds.collectAsStateWithLifecycle()
 
@@ -465,11 +435,11 @@ private fun ShadeCarrierGroup(
                             viewModel =
                                 (viewModel.mobileIconsViewModel.viewModelForSub(
                                     subId,
-                                    StatusBarLocation.SHADE_CARRIER_GROUP
+                                    StatusBarLocation.SHADE_CARRIER_GROUP,
                                 ) as ShadeCarrierGroupMobileIconViewModel),
                         )
                         .also { it.setOnClickListener { viewModel.onShadeCarrierGroupClicked() } }
-                },
+                }
             )
         }
     }
@@ -506,7 +476,7 @@ private fun SceneScope.StatusIcons(
                 Utils.getColorAttrDefaultColor(themedContext, android.R.attr.textColorPrimary),
                 Utils.getColorAttrDefaultColor(
                     themedContext,
-                    android.R.attr.textColorPrimaryInverse
+                    android.R.attr.textColorPrimaryInverse,
                 ),
             )
             statusBarIconController.addIconGroup(iconManager)
@@ -551,7 +521,7 @@ private fun SystemIconContainer(
     viewModel: ShadeHeaderViewModel,
     isClickable: Boolean,
     modifier: Modifier = Modifier,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -578,10 +548,7 @@ private fun SystemIconContainer(
 }
 
 @Composable
-private fun SceneScope.PrivacyChip(
-    viewModel: ShadeHeaderViewModel,
-    modifier: Modifier = Modifier,
-) {
+private fun SceneScope.PrivacyChip(viewModel: ShadeHeaderViewModel, modifier: Modifier = Modifier) {
     val privacyList by viewModel.privacyItems.collectAsStateWithLifecycle()
 
     AndroidView(

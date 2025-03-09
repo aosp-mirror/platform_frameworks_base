@@ -15,6 +15,7 @@
  */
 
 #define LOG_NDEBUG 0
+
 #define LOG_TAG "BootAnimation"
 #define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
@@ -61,6 +62,8 @@
 
 #include "BootAnimation.h"
 
+#include <com_android_graphics_bootanimation_flags.h>
+
 #define ANIM_PATH_MAX 255
 #define STR(x)   #x
 #define STRTO(x) STR(x)
@@ -106,7 +109,6 @@ static const int TEXT_CENTER_VALUE = INT_MAX;
 static const int TEXT_MISSING_VALUE = INT_MIN;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
 static const char PROGRESS_PROP_NAME[] = "service.bootanim.progress";
-static const char DISPLAYS_PROP_NAME[] = "persist.service.bootanim.displays";
 static const char CLOCK_ENABLED_PROP_NAME[] = "persist.sys.bootanim.clock.enabled";
 static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
 static const int MAX_CHECK_EXIT_INTERVAL_US = 50000;
@@ -449,19 +451,21 @@ public:
                     auto token = SurfaceComposerClient::getPhysicalDisplayToken(
                         event.header.displayId);
 
-                    if (token != mBootAnimation->mDisplayToken) {
+                    auto& firstDisplay = mBootAnimation->mDisplays.front();
+                    if (token != firstDisplay.displayToken) {
                         // ignore hotplug of a secondary display
                         continue;
                     }
 
                     DisplayMode displayMode;
                     const status_t error = SurfaceComposerClient::getActiveDisplayMode(
-                        mBootAnimation->mDisplayToken, &displayMode);
+                                               firstDisplay.displayToken, &displayMode);
                     if (error != NO_ERROR) {
                         SLOGE("Can't get active display mode.");
                     }
                     mBootAnimation->resizeSurface(displayMode.resolution.getWidth(),
-                        displayMode.resolution.getHeight());
+                                                  displayMode.resolution.getHeight(),
+                                                  firstDisplay);
                 }
             }
         } while (numEvents > 0);
@@ -507,141 +511,106 @@ ui::Size BootAnimation::limitSurfaceSize(int width, int height) const {
 status_t BootAnimation::readyToRun() {
     ATRACE_CALL();
     mAssets.addDefaultAssets();
+    return initDisplaysAndSurfaces();
+}
 
-    const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
-    if (ids.empty()) {
-        SLOGE("Failed to get ID for any displays\n");
+status_t BootAnimation::initDisplaysAndSurfaces() {
+    std::vector<PhysicalDisplayId> displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (displayIds.empty()) {
+        SLOGE("Failed to get ID for any displays");
         return NAME_NOT_FOUND;
     }
 
-    // this system property specifies multi-display IDs to show the boot animation
-    // multiple ids can be set with comma (,) as separator, for example:
-    // setprop persist.boot.animation.displays 19260422155234049,19261083906282754
-    Vector<PhysicalDisplayId> physicalDisplayIds;
-    char displayValue[PROPERTY_VALUE_MAX] = "";
-    property_get(DISPLAYS_PROP_NAME, displayValue, "");
-    bool isValid = displayValue[0] != '\0';
-    if (isValid) {
-        char *p = displayValue;
-        while (*p) {
-            if (!isdigit(*p) && *p != ',') {
-                isValid = false;
-                break;
-            }
-            p ++;
-        }
-        if (!isValid)
-            SLOGE("Invalid syntax for the value of system prop: %s", DISPLAYS_PROP_NAME);
-    }
-    if (isValid) {
-        std::istringstream stream(displayValue);
-        for (PhysicalDisplayId id; stream >> id.value; ) {
-            physicalDisplayIds.add(id);
-            if (stream.peek() == ',')
-                stream.ignore();
-        }
-
-        // the first specified display id is used to retrieve mDisplayToken
-        for (const auto id : physicalDisplayIds) {
-            if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
-                if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
-                    mDisplayToken = token;
-                    break;
-                }
-            }
-        }
+    // If Multi-Display isn't explicitly enabled, ignore all displays after the first one
+    if (!com::android::graphics::bootanimation::flags::multidisplay()) {
+        displayIds.erase(displayIds.begin() + 1, displayIds.end());
     }
 
-    // If the system property is not present or invalid, display 0 is used
-    if (mDisplayToken == nullptr) {
-        mDisplayToken = SurfaceComposerClient::getPhysicalDisplayToken(ids.front());
-        if (mDisplayToken == nullptr) {
+    for (const auto id : displayIds) {
+        if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
+            mDisplays.push_back({.displayToken = token});
+        } else {
+            SLOGE("Failed to get display token for a display");
+            SLOGE("Failed to get display token for display %" PRIu64, id.value);
             return NAME_NOT_FOUND;
         }
     }
 
-    DisplayMode displayMode;
-    const status_t error =
-            SurfaceComposerClient::getActiveDisplayMode(mDisplayToken, &displayMode);
-    if (error != NO_ERROR) {
-        return error;
-    }
+    // Initialize EGL
+    mEgl = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    eglInitialize(mEgl, nullptr, nullptr);
+    EGLConfig config = getEglConfig(mEgl);
+    EGLint contextAttributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+    mEglContext = eglCreateContext(mEgl, config, nullptr, contextAttributes);
 
     mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
     mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
-    ui::Size resolution = displayMode.resolution;
-    resolution = limitSurfaceSize(resolution.width, resolution.height);
-    // create the native surface
-    sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
-            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565,
-            ISurfaceComposerClient::eOpaque);
 
-    SurfaceComposerClient::Transaction t;
-    if (isValid) {
-        // In the case of multi-display, boot animation shows on the specified displays
-        for (const auto id : physicalDisplayIds) {
-            if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
-                if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
-                    t.setDisplayLayerStack(token, ui::DEFAULT_LAYER_STACK);
-                }
-            }
+    for (size_t displayIdx = 0; displayIdx < mDisplays.size(); displayIdx++) {
+        auto& display = mDisplays[displayIdx];
+        DisplayMode displayMode;
+        const status_t error =
+                SurfaceComposerClient::getActiveDisplayMode(display.displayToken, &displayMode);
+        if (error != NO_ERROR) {
+            return error;
         }
-        t.setLayerStack(control, ui::DEFAULT_LAYER_STACK);
-    }
+        ui::Size resolution = displayMode.resolution;
+        // Clamp each surface to max size
+        resolution = limitSurfaceSize(resolution.width, resolution.height);
+        // Create the native surface
+        display.surfaceControl =
+                session()->createSurface(String8("BootAnimation"), resolution.width,
+                                         resolution.height, PIXEL_FORMAT_RGB_565,
+                                         ISurfaceComposerClient::eOpaque);
+        // Attach surface to layerstack, and associate layerstack with physical display
+        configureDisplayAndLayerStack(display, ui::LayerStack::fromValue(displayIdx));
+        display.surface = display.surfaceControl->getSurface();
+        display.eglSurface = eglCreateWindowSurface(mEgl, config, display.surface.get(), nullptr);
 
-    t.setLayer(control, 0x40000000)
-        .apply();
+        EGLint w, h;
+        eglQuerySurface(mEgl, display.eglSurface, EGL_WIDTH, &w);
+        eglQuerySurface(mEgl, display.eglSurface, EGL_HEIGHT, &h);
+        if (eglMakeCurrent(mEgl, display.eglSurface, display.eglSurface,
+                           mEglContext) == EGL_FALSE) {
+            return NO_INIT;
+        }
+        display.initWidth = display.width = w;
+        display.initHeight = display.height = h;
+        mTargetInset = -1;
 
-    sp<Surface> s = control->getSurface();
+        // Rotate the boot animation according to the value specified in the sysprop
+        // ro.bootanim.set_orientation_<display_id>. Four values are supported: ORIENTATION_0,
+        // ORIENTATION_90, ORIENTATION_180 and ORIENTATION_270.
+        // If the value isn't specified or is ORIENTATION_0, nothing will be changed.
+        // This is needed to support boot animation in orientations different from the natural
+        // device orientation. For example, on tablets that may want to keep natural orientation
+        // portrait for applications compatibility and to have the boot animation in landscape.
+        rotateAwayFromNaturalOrientationIfNeeded(display);
 
-    // initialize opengl and egl
-    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    eglInitialize(display, nullptr, nullptr);
-    EGLConfig config = getEglConfig(display);
-    EGLSurface surface = eglCreateWindowSurface(display, config, s.get(), nullptr);
-    // Initialize egl context with client version number 2.0.
-    EGLint contextAttributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
-    EGLContext context = eglCreateContext(display, config, nullptr, contextAttributes);
-    EGLint w, h;
-    eglQuerySurface(display, surface, EGL_WIDTH, &w);
-    eglQuerySurface(display, surface, EGL_HEIGHT, &h);
-
-    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
-        return NO_INIT;
-    }
-
-    mDisplay = display;
-    mContext = context;
-    mSurface = surface;
-    mInitWidth = mWidth = w;
-    mInitHeight = mHeight = h;
-    mFlingerSurfaceControl = control;
-    mFlingerSurface = s;
-    mTargetInset = -1;
-
-    // Rotate the boot animation according to the value specified in the sysprop
-    // ro.bootanim.set_orientation_<display_id>. Four values are supported: ORIENTATION_0,
-    // ORIENTATION_90, ORIENTATION_180 and ORIENTATION_270.
-    // If the value isn't specified or is ORIENTATION_0, nothing will be changed.
-    // This is needed to support having boot animation in orientations different from the natural
-    // device orientation. For example, on tablets that may want to keep natural orientation
-    // portrait for applications compatibility and to have the boot animation in landscape.
-    rotateAwayFromNaturalOrientationIfNeeded();
-
-    projectSceneToWindow();
+        projectSceneToWindow(display);
+    } // end iteration over all display tokens
 
     // Register a display event receiver
     mDisplayEventReceiver = std::make_unique<DisplayEventReceiver>();
     status_t status = mDisplayEventReceiver->initCheck();
     SLOGE_IF(status != NO_ERROR, "Initialization of DisplayEventReceiver failed with status: %d",
-            status);
+             status);
     mLooper->addFd(mDisplayEventReceiver->getFd(), 0, Looper::EVENT_INPUT,
-            new DisplayEventCallback(this), nullptr);
+                   new DisplayEventCallback(this), nullptr);
 
     return NO_ERROR;
 }
 
-void BootAnimation::rotateAwayFromNaturalOrientationIfNeeded() {
+void BootAnimation::configureDisplayAndLayerStack(const Display& display,
+                                                  ui::LayerStack layerStack) {
+    SurfaceComposerClient::Transaction t;
+    t.setDisplayLayerStack(display.displayToken, layerStack);
+    t.setLayerStack(display.surfaceControl, layerStack)
+     .setLayer(display.surfaceControl, 0x40000000)
+     .apply();
+}
+
+void BootAnimation::rotateAwayFromNaturalOrientationIfNeeded(Display& display) {
     ATRACE_CALL();
     const auto orientation = parseOrientationProperty();
 
@@ -651,16 +620,16 @@ void BootAnimation::rotateAwayFromNaturalOrientationIfNeeded() {
     }
 
     if (orientation == ui::ROTATION_90 || orientation == ui::ROTATION_270) {
-        std::swap(mWidth, mHeight);
-        std::swap(mInitWidth, mInitHeight);
-        mFlingerSurfaceControl->updateDefaultBufferSize(mWidth, mHeight);
+        std::swap(display.width, display.height);
+        std::swap(display.initWidth, display.initHeight);
+        display.surfaceControl->updateDefaultBufferSize(display.width, display.height);
     }
 
-    Rect displayRect(0, 0, mWidth, mHeight);
-    Rect layerStackRect(0, 0, mWidth, mHeight);
+    Rect displayRect(0, 0, display.width, display.height);
+    Rect layerStackRect(0, 0, display.width, display.height);
 
     SurfaceComposerClient::Transaction t;
-    t.setDisplayProjection(mDisplayToken, orientation, layerStackRect, displayRect);
+    t.setDisplayProjection(display.displayToken, orientation, layerStackRect, displayRect);
     t.apply();
 }
 
@@ -691,38 +660,37 @@ ui::Rotation BootAnimation::parseOrientationProperty() {
     return ui::ROTATION_0;
 }
 
-void BootAnimation::projectSceneToWindow() {
+void BootAnimation::projectSceneToWindow(const Display& display) {
     ATRACE_CALL();
-    glViewport(0, 0, mWidth, mHeight);
-    glScissor(0, 0, mWidth, mHeight);
+    glViewport(0, 0, display.width, display.height);
+    glScissor(0, 0, display.width, display.height);
 }
 
-void BootAnimation::resizeSurface(int newWidth, int newHeight) {
+void BootAnimation::resizeSurface(int newWidth, int newHeight, Display& display) {
     ATRACE_CALL();
     // We assume this function is called on the animation thread.
-    if (newWidth == mWidth && newHeight == mHeight) {
+    if (newWidth == display.width && newHeight == display.height) {
         return;
     }
-    SLOGV("Resizing the boot animation surface to %d %d", newWidth, newHeight);
 
-    eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    eglDestroySurface(mDisplay, mSurface);
+    eglMakeCurrent(mEgl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglDestroySurface(mEgl, display.eglSurface);
 
     const auto limitedSize = limitSurfaceSize(newWidth, newHeight);
-    mWidth = limitedSize.width;
-    mHeight = limitedSize.height;
+    display.width = limitedSize.width;
+    display.height = limitedSize.height;
 
-    mFlingerSurfaceControl->updateDefaultBufferSize(mWidth, mHeight);
-    EGLConfig config = getEglConfig(mDisplay);
-    EGLSurface surface = eglCreateWindowSurface(mDisplay, config, mFlingerSurface.get(), nullptr);
-    if (eglMakeCurrent(mDisplay, surface, surface, mContext) == EGL_FALSE) {
-        SLOGE("Can't make the new surface current. Error %d", eglGetError());
+    display.surfaceControl->updateDefaultBufferSize(display.width, display.height);
+    EGLConfig config = getEglConfig(mEgl);
+    EGLSurface eglSurface = eglCreateWindowSurface(mEgl, config, display.surface.get(), nullptr);
+    if (eglMakeCurrent(mEgl, eglSurface, eglSurface, mEglContext) == EGL_FALSE) {
+        SLOGE("Can't make the new eglSurface current. Error %d", eglGetError());
         return;
     }
 
-    projectSceneToWindow();
+    projectSceneToWindow(display);
 
-    mSurface = surface;
+    display.eglSurface = eglSurface;
 }
 
 bool BootAnimation::preloadAnimation() {
@@ -852,24 +820,26 @@ bool BootAnimation::threadLoop() {
     // animation.
     if (mZipFileName.empty()) {
         ALOGD("No animation file");
-        result = android();
+        result = android(mDisplays.front());
     } else {
         result = movie();
     }
 
     mCallbacks->shutdown();
-    eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    eglDestroyContext(mDisplay, mContext);
-    eglDestroySurface(mDisplay, mSurface);
-    mFlingerSurface.clear();
-    mFlingerSurfaceControl.clear();
-    eglTerminate(mDisplay);
+    eglMakeCurrent(mEgl, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglDestroyContext(mEgl, mEglContext);
+    for (auto& display : mDisplays) {
+        eglDestroySurface(mEgl, display.eglSurface);
+        display.surface.clear();
+        display.surfaceControl.clear();
+    }
+    eglTerminate(mEgl);
     eglReleaseThread();
     IPCThreadState::self()->stopProcess();
     return result;
 }
 
-bool BootAnimation::android() {
+bool BootAnimation::android(const Display& display) {
     ATRACE_CALL();
     glActiveTexture(GL_TEXTURE0);
 
@@ -887,7 +857,7 @@ bool BootAnimation::android() {
 
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT);
-    eglSwapBuffers(mDisplay, mSurface);
+    eglSwapBuffers(mEgl, display.eglSurface);
 
     // Blend state
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -895,11 +865,11 @@ bool BootAnimation::android() {
     const nsecs_t startTime = systemTime();
     do {
         processDisplayEvents();
-        const GLint xc = (mWidth  - mAndroid[0].w) / 2;
-        const GLint yc = (mHeight - mAndroid[0].h) / 2;
+        const GLint xc = (display.width  - mAndroid[0].w) / 2;
+        const GLint yc = (display.height - mAndroid[0].h) / 2;
         const Rect updateRect(xc, yc, xc + mAndroid[0].w, yc + mAndroid[0].h);
-        glScissor(updateRect.left, mHeight - updateRect.bottom, updateRect.width(),
-                updateRect.height());
+        glScissor(updateRect.left, display.height - updateRect.bottom, updateRect.width(),
+                  updateRect.height());
 
         nsecs_t now = systemTime();
         double time = now - startTime;
@@ -913,14 +883,14 @@ bool BootAnimation::android() {
         glEnable(GL_SCISSOR_TEST);
         glDisable(GL_BLEND);
         glBindTexture(GL_TEXTURE_2D, mAndroid[1].name);
-        drawTexturedQuad(x,                 yc, mAndroid[1].w, mAndroid[1].h);
-        drawTexturedQuad(x + mAndroid[1].w, yc, mAndroid[1].w, mAndroid[1].h);
+        drawTexturedQuad(x,                 yc, mAndroid[1].w, mAndroid[1].h, display);
+        drawTexturedQuad(x + mAndroid[1].w, yc, mAndroid[1].w, mAndroid[1].h, display);
 
         glEnable(GL_BLEND);
         glBindTexture(GL_TEXTURE_2D, mAndroid[0].name);
-        drawTexturedQuad(xc, yc, mAndroid[0].w, mAndroid[0].h);
+        drawTexturedQuad(xc, yc, mAndroid[0].w, mAndroid[0].h, display);
 
-        EGLBoolean res = eglSwapBuffers(mDisplay, mSurface);
+        EGLBoolean res = eglSwapBuffers(mEgl, display.eglSurface);
         if (res == EGL_FALSE)
             break;
 
@@ -939,7 +909,7 @@ bool BootAnimation::android() {
 
 void BootAnimation::checkExit() {
     ATRACE_CALL();
-    // Allow surface flinger to gracefully request shutdown
+    // Allow SurfaceFlinger to gracefully request shutdown
     char value[PROPERTY_VALUE_MAX];
     property_get(EXIT_PROP_NAME, value, "0");
     int exitnow = atoi(value);
@@ -1085,7 +1055,8 @@ status_t BootAnimation::initFont(Font* font, const char* fallback) {
     return status;
 }
 
-void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* x, int* y) {
+void BootAnimation::drawText(const char* str, const Font& font, bool bold,
+                             int* x, int* y, const Display& display) {
     ATRACE_CALL();
     glEnable(GL_BLEND);  // Allow us to draw on top of the animation
     glBindTexture(GL_TEXTURE_2D, font.texture.name);
@@ -1096,14 +1067,14 @@ void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* 
     const int strWidth = font.char_width * len;
 
     if (*x == TEXT_CENTER_VALUE) {
-        *x = (mWidth - strWidth) / 2;
+        *x = (display.width - strWidth) / 2;
     } else if (*x < 0) {
-        *x = mWidth + *x - strWidth;
+        *x = display.width + *x - strWidth;
     }
     if (*y == TEXT_CENTER_VALUE) {
-        *y = (mHeight - font.char_height) / 2;
+        *y = (display.height - font.char_height) / 2;
     } else if (*y < 0) {
-        *y = mHeight + *y - font.char_height;
+        *y = display.height + *y - font.char_height;
     }
 
     for (int i = 0; i < len; i++) {
@@ -1123,7 +1094,7 @@ void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* 
         float v1 = v0 + 1.0f / FONT_NUM_ROWS / 2;
         float u1 = u0 + 1.0f / FONT_NUM_COLS;
         glUniform4f(mTextCropAreaLocation, u0, v0, u1, v1);
-        drawTexturedQuad(*x, *y, font.char_width, font.char_height);
+        drawTexturedQuad(*x, *y, font.char_width, font.char_height, display);
 
         *x += font.char_width;
     }
@@ -1133,7 +1104,8 @@ void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* 
 }
 
 // We render 12 or 24 hour time.
-void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) {
+void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos,
+                              const Display& display) {
     ATRACE_CALL();
     static constexpr char TIME_FORMAT_12[] = "%l:%M";
     static constexpr char TIME_FORMAT_24[] = "%H:%M";
@@ -1156,10 +1128,11 @@ void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) 
     char* out = timeBuff[0] == ' ' ? &timeBuff[1] : &timeBuff[0];
     int x = xPos;
     int y = yPos;
-    drawText(out, font, false, &x, &y);
+    drawText(out, font, false, &x, &y, display);
 }
 
-void BootAnimation::drawProgress(int percent, const Font& font, const int xPos, const int yPos) {
+void BootAnimation::drawProgress(int percent, const Font& font, const int xPos, const int yPos,
+                                 const Display& display) {
     ATRACE_CALL();
     static constexpr int PERCENT_LENGTH = 5;
 
@@ -1169,7 +1142,7 @@ void BootAnimation::drawProgress(int percent, const Font& font, const int xPos, 
     sprintf(percentBuff, "%d;", percent);
     int x = xPos;
     int y = yPos;
-    drawText(percentBuff, font, false, &x, &y);
+    drawText(percentBuff, font, false, &x, &y, display);
 }
 
 bool BootAnimation::parseAnimationDesc(Animation& animation)  {
@@ -1298,8 +1271,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
 
 bool BootAnimation::preloadZip(Animation& animation) {
     ATRACE_CALL();
-    // read all the data structures
-    const size_t pcount = animation.parts.size();
+    const size_t numParts = animation.parts.size();
     void *cookie = nullptr;
     ZipFileRO* zip = animation.zip;
     if (!zip->startIteration(&cookie)) {
@@ -1335,8 +1307,8 @@ bool BootAnimation::preloadZip(Animation& animation) {
                 continue;
             }
 
-            for (size_t j = 0; j < pcount; j++) {
-                if (path.string() == animation.parts[j].path.c_str()) {
+            for (size_t partIdx = 0; partIdx < numParts; partIdx++) {
+                if (path.string() == animation.parts[partIdx].path.c_str()) {
                     uint16_t method;
                     // supports only stored png files
                     if (zip->getEntryInfo(entry, &method, nullptr, nullptr, nullptr, nullptr,
@@ -1344,7 +1316,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
                         if (method == ZipFileRO::kCompressStored) {
                             FileMap* map = zip->createEntryFileMap(entry);
                             if (map) {
-                                Animation::Part& part(animation.parts.editItemAt(j));
+                                Animation::Part& part(animation.parts.editItemAt(partIdx));
                                 if (leaf == "audio.wav") {
                                     // a part may have at most one audio file
                                     part.audioData = (uint8_t *)map->getDataPtr();
@@ -1375,7 +1347,8 @@ bool BootAnimation::preloadZip(Animation& animation) {
     // If there is trimData present, override the positioning defaults.
     for (Animation::Part& part : animation.parts) {
         const char* trimDataStr = part.trimData.c_str();
-        for (size_t frameIdx = 0; frameIdx < part.frames.size(); frameIdx++) {
+        const size_t numFramesInPart = part.frames.size();
+        for (size_t frameIdxInPart = 0; frameIdxInPart < numFramesInPart; frameIdxInPart++) {
             const char* endl = strstr(trimDataStr, "\n");
             // No more trimData for this part.
             if (endl == nullptr) {
@@ -1386,7 +1359,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
             trimDataStr = ++endl;
             int width = 0, height = 0, x = 0, y = 0;
             if (sscanf(lineStr, "%dx%d+%d+%d", &width, &height, &x, &y) == 4) {
-                Animation::Frame& frame(part.frames.editItemAt(frameIdx));
+                Animation::Frame& frame(part.frames.editItemAt(frameIdxInPart));
                 frame.trimWidth = width;
                 frame.trimHeight = height;
                 frame.trimX = x;
@@ -1509,13 +1482,15 @@ float mapLinear(float x, float a1, float a2, float b1, float b2) {
     return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );
 }
 
-void BootAnimation::drawTexturedQuad(float xStart, float yStart, float width, float height) {
+void BootAnimation::drawTexturedQuad(float xStart, float yStart,
+                                     float width, float height,
+                                     const Display& display) {
     ATRACE_CALL();
     // Map coordinates from screen space to world space.
-    float x0 = mapLinear(xStart, 0, mWidth, -1, 1);
-    float y0 = mapLinear(yStart, 0, mHeight, -1, 1);
-    float x1 = mapLinear(xStart + width, 0, mWidth, -1, 1);
-    float y1 = mapLinear(yStart + height, 0, mHeight, -1, 1);
+    float x0 = mapLinear(xStart, 0, display.width, -1, 1);
+    float y0 = mapLinear(yStart, 0, display.height, -1, 1);
+    float x1 = mapLinear(xStart + width, 0, display.width, -1, 1);
+    float y1 = mapLinear(yStart + height, 0, display.height, -1, 1);
     // Update quad vertex positions.
     quadPositions[0] = x0;
     quadPositions[1] = y0;
@@ -1562,7 +1537,7 @@ void BootAnimation::initDynamicColors() {
 
 bool BootAnimation::playAnimation(const Animation& animation) {
     ATRACE_CALL();
-    const size_t pcount = animation.parts.size();
+    const size_t numParts = animation.parts.size();
     nsecs_t frameDuration = s2ns(1) / animation.fps;
 
     SLOGD("%sAnimationShownTiming start time: %" PRId64 "ms", mShuttingDown ? "Shutdown" : "Boot",
@@ -1572,9 +1547,9 @@ bool BootAnimation::playAnimation(const Animation& animation) {
     int lastDisplayedProgress = 0;
     int colorTransitionStart = animation.colorTransitionStart;
     int colorTransitionEnd = animation.colorTransitionEnd;
-    for (size_t i=0 ; i<pcount ; i++) {
-        const Animation::Part& part(animation.parts[i]);
-        const size_t fcount = part.frames.size();
+    for (size_t partIdx = 0; partIdx < numParts; partIdx++) {
+        const Animation::Part& part(animation.parts[partIdx]);
+        const size_t numFramesInPart = part.frames.size();
         glBindTexture(GL_TEXTURE_2D, 0);
 
         // Handle animation package
@@ -1586,7 +1561,9 @@ bool BootAnimation::playAnimation(const Animation& animation) {
         }
 
         // process the part not only while the count allows but also if already fading
-        for (int r=0 ; !part.count || r<part.count || fadedFramesCount > 0 ; r++) {
+        for (int frameIdx = 0;
+             !part.count || frameIdx < part.count || fadedFramesCount > 0;
+             frameIdx++) {
             if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
 
             // It's possible that the sysprops were not loaded yet at this boot phase.
@@ -1601,12 +1578,12 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     const int transitionLength = colorTransitionEnd - colorTransitionStart;
                     if (part.postDynamicColoring) {
                         colorTransitionStart = 0;
-                        colorTransitionEnd = fmin(transitionLength, fcount - 1);
+                        colorTransitionEnd = fmin(transitionLength, numFramesInPart - 1);
                     }
                 }
             }
 
-            mCallbacks->playPart(i, part, r);
+            mCallbacks->playPart(partIdx, part, frameIdx);
 
             glClearColor(
                     part.backgroundColor[0],
@@ -1620,11 +1597,10 @@ bool BootAnimation::playAnimation(const Animation& animation) {
 
             // For the last animation, if we have progress indicator from
             // the system, display it.
-            int currentProgress = android::base::GetIntProperty(PROGRESS_PROP_NAME, 0);
-            bool displayProgress = animation.progressEnabled &&
-                (i == (pcount -1)) && currentProgress != 0;
+            const bool displayProgress = animation.progressEnabled && (partIdx == (numParts - 1)) &&
+                    android::base::GetIntProperty(PROGRESS_PROP_NAME, 0) != 0;
 
-            for (size_t j=0 ; j<fcount ; j++) {
+            for (size_t frameIdxInPart = 0; frameIdxInPart < numFramesInPart; frameIdxInPart++) {
                 if (shouldStopPlayingPart(part, fadedFramesCount, lastDisplayedProgress)) break;
 
                 // Color progress is
@@ -1635,21 +1611,15 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 // - 1 for parts that come after.
                 float colorProgress = part.useDynamicColoring
                     ? fmin(fmax(
-                        ((float)j - colorTransitionStart) /
+                        (static_cast<float>(frameIdxInPart) - colorTransitionStart) /
                             fmax(colorTransitionEnd - colorTransitionStart, 1.0f), 0.0f), 1.0f)
                     : (part.postDynamicColoring ? 1 : 0);
-
                 processDisplayEvents();
 
-                const double ratio_w = static_cast<double>(mWidth) / mInitWidth;
-                const double ratio_h = static_cast<double>(mHeight) / mInitHeight;
-                const int animationX = (mWidth - animation.width * ratio_w) / 2;
-                const int animationY = (mHeight - animation.height * ratio_h) / 2;
-
-                const Animation::Frame& frame(part.frames[j]);
+                const Animation::Frame& frame(part.frames[frameIdxInPart]);
                 nsecs_t lastFrame = systemTime();
 
-                if (r > 0) {
+                if (frameIdx > 0) {
                     glBindTexture(GL_TEXTURE_2D, frame.tid);
                 } else {
                     if (part.count != 1) {
@@ -1662,17 +1632,6 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     initTexture(frame.map, &w, &h, false /* don't premultiply alpha */);
                 }
 
-                const int trimWidth = frame.trimWidth * ratio_w;
-                const int trimHeight = frame.trimHeight * ratio_h;
-                const int trimX = frame.trimX * ratio_w;
-                const int trimY = frame.trimY * ratio_h;
-                const int xc = animationX + trimX;
-                const int yc = animationY + trimY;
-                glClear(GL_COLOR_BUFFER_BIT);
-                // specify the y center as ceiling((mHeight - frame.trimHeight) / 2)
-                // which is equivalent to mHeight - (yc + frame.trimHeight)
-                const int frameDrawY = mHeight - (yc + trimHeight);
-
                 float fade = 0;
                 // if the part hasn't been stopped yet then continue fading if necessary
                 if (exitPending() && part.hasFadingPhase()) {
@@ -1681,40 +1640,66 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                         fadedFramesCount = MAX_FADED_FRAMES_COUNT; // no more fading
                     }
                 }
-                glUseProgram(mImageShader);
-                glUniform1i(mImageTextureLocation, 0);
-                glUniform1f(mImageFadeLocation, fade);
-                if (animation.dynamicColoringEnabled) {
-                    glUniform1f(mImageColorProgressLocation, colorProgress);
-                }
-                glEnable(GL_BLEND);
-                drawTexturedQuad(xc, frameDrawY, trimWidth, trimHeight);
-                glDisable(GL_BLEND);
 
-                if (mClockEnabled && mTimeIsAccurate && validClock(part)) {
-                    drawClock(animation.clockFont, part.clockPosX, part.clockPosY);
-                }
+                // Draw the current frame's texture on every physical display that is enabled.
+                for (const auto& display : mDisplays) {
+                    eglMakeCurrent(mEgl, display.eglSurface, display.eglSurface, mEglContext);
 
-                if (displayProgress) {
-                    int newProgress = android::base::GetIntProperty(PROGRESS_PROP_NAME, 0);
-                    // In case the new progress jumped suddenly, still show an
-                    // increment of 1.
-                    if (lastDisplayedProgress != 100) {
-                      // Artificially sleep 1/10th a second to slow down the animation.
-                      usleep(100000);
-                      if (lastDisplayedProgress < newProgress) {
-                        lastDisplayedProgress++;
-                      }
+                    const double ratioW =
+                            static_cast<double>(display.width) / display.initWidth;
+                    const double ratioH =
+                            static_cast<double>(display.height) / display.initHeight;
+                    const int animationX = (display.width - animation.width * ratioW) / 2;
+                    const int animationY = (display.height - animation.height * ratioH) / 2;
+
+                    const int trimWidth = frame.trimWidth * ratioW;
+                    const int trimHeight = frame.trimHeight * ratioH;
+                    const int trimX = frame.trimX * ratioW;
+                    const int trimY = frame.trimY * ratioH;
+                    const int xc = animationX + trimX;
+                    const int yc = animationY + trimY;
+                    projectSceneToWindow(display);
+                    handleViewport(frameDuration, display);
+                    glClear(GL_COLOR_BUFFER_BIT);
+                    // specify the y center as ceiling((height - frame.trimHeight) / 2)
+                    // which is equivalent to height - (yc + frame.trimHeight)
+                    const int frameDrawY = display.height - (yc + trimHeight);
+
+                    glUseProgram(mImageShader);
+                    glUniform1i(mImageTextureLocation, 0);
+                    glUniform1f(mImageFadeLocation, fade);
+                    if (animation.dynamicColoringEnabled) {
+                        glUniform1f(mImageColorProgressLocation, colorProgress);
                     }
-                    // Put the progress percentage right below the animation.
-                    int posY = animation.height / 3;
-                    int posX = TEXT_CENTER_VALUE;
-                    drawProgress(lastDisplayedProgress, animation.progressFont, posX, posY);
+                    glEnable(GL_BLEND);
+                    drawTexturedQuad(xc, frameDrawY, trimWidth, trimHeight, display);
+                    glDisable(GL_BLEND);
+
+                    if (mClockEnabled && mTimeIsAccurate && validClock(part)) {
+                        drawClock(animation.clockFont, part.clockPosX, part.clockPosY, display);
+                    }
+
+                    if (displayProgress) {
+                        int newProgress = android::base::GetIntProperty(PROGRESS_PROP_NAME, 0);
+                        // In case the new progress jumped suddenly, still show an
+                        // increment of 1.
+                        if (lastDisplayedProgress != 100) {
+                          // Artificially sleep 1/10th a second to slow down the animation.
+                          usleep(100000);
+                          if (lastDisplayedProgress < newProgress) {
+                            lastDisplayedProgress++;
+                          }
+                        }
+                        // Put the progress percentage right below the animation.
+                        int posY = animation.height / 3;
+                        int posX = TEXT_CENTER_VALUE;
+                        drawProgress(lastDisplayedProgress,
+                            animation.progressFont, posX, posY, display);
+                    }
+
+                    eglSwapBuffers(mEgl, display.eglSurface);
                 }
 
-                handleViewport(frameDuration);
-
-                eglSwapBuffers(mDisplay, mSurface);
 
                 nsecs_t now = systemTime();
                 nsecs_t delay = frameDuration - (now - lastFrame);
@@ -1760,9 +1745,7 @@ bool BootAnimation::playAnimation(const Animation& animation) {
     // Free textures created for looping parts now that the animation is done.
     for (const Animation::Part& part : animation.parts) {
         if (part.count != 1) {
-            const size_t fcount = part.frames.size();
-            for (size_t j = 0; j < fcount; j++) {
-                const Animation::Frame& frame(part.frames[j]);
+            for (const auto& frame : part.frames) {
                 glDeleteTextures(1, &frame.tid);
             }
         }
@@ -1781,16 +1764,17 @@ void BootAnimation::processDisplayEvents() {
     mLooper->pollOnce(0);
 }
 
-void BootAnimation::handleViewport(nsecs_t timestep) {
+void BootAnimation::handleViewport(nsecs_t timestep, const Display& display) {
     ATRACE_CALL();
-    if (mShuttingDown || !mFlingerSurfaceControl || mTargetInset == 0) {
+    if (mShuttingDown || !display.surfaceControl || mTargetInset == 0) {
         return;
     }
     if (mTargetInset < 0) {
         // Poll the amount for the top display inset. This will return -1 until persistent properties
         // have been loaded.
-        mTargetInset = android::base::GetIntProperty("persist.sys.displayinset.top",
-                -1 /* default */, -1 /* min */, mHeight / 2 /* max */);
+        mTargetInset =
+                android::base::GetIntProperty("persist.sys.displayinset.top", -1 /* default */,
+                                              -1 /* min */, display.height / 2 /* max */);
     }
     if (mTargetInset <= 0) {
         return;
@@ -1802,19 +1786,27 @@ void BootAnimation::handleViewport(nsecs_t timestep) {
         int interpolatedInset = (cosf((fraction + 1) * M_PI) / 2.0f + 0.5f) * mTargetInset;
 
         SurfaceComposerClient::Transaction()
-                .setCrop(mFlingerSurfaceControl, Rect(0, interpolatedInset, mWidth, mHeight))
+                .setCrop(display.surfaceControl,
+                         Rect(0, interpolatedInset, display.width, display.height))
                 .apply();
     } else {
         // At the end of the animation, we switch to the viewport that DisplayManager will apply
         // later. This changes the coordinate system, and means we must move the surface up by
         // the inset amount.
-        Rect layerStackRect(0, 0, mWidth, mHeight - mTargetInset);
-        Rect displayRect(0, mTargetInset, mWidth, mHeight);
-
+        Rect layerStackRect(0, 0,
+                display.width,
+                display.height - mTargetInset);
+        Rect displayRect(0, mTargetInset,
+                display.width,
+                display.height);
         SurfaceComposerClient::Transaction t;
-        t.setPosition(mFlingerSurfaceControl, 0, -mTargetInset)
-                .setCrop(mFlingerSurfaceControl, Rect(0, mTargetInset, mWidth, mHeight));
-        t.setDisplayProjection(mDisplayToken, ui::ROTATION_0, layerStackRect, displayRect);
+        t.setPosition(display.surfaceControl, 0, -mTargetInset)
+                .setCrop(display.surfaceControl,
+                         Rect(0, mTargetInset,
+                              display.width,
+                              display.height));
+        t.setDisplayProjection(display.displayToken,
+                ui::ROTATION_0, layerStackRect, displayRect);
         t.apply();
 
         mTargetInset = mCurrentInset = 0;

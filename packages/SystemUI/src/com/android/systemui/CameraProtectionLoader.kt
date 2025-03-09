@@ -22,15 +22,18 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.util.PathParser
 import com.android.systemui.res.R
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlin.math.roundToInt
 
 interface CameraProtectionLoader {
     fun loadCameraProtectionInfoList(): List<CameraProtectionInfo>
 }
 
-class CameraProtectionLoaderImpl @Inject constructor(private val context: Context) :
-    CameraProtectionLoader {
+class CameraProtectionLoaderImpl
+@AssistedInject
+constructor(@Assisted private val context: Context) : CameraProtectionLoader {
 
     override fun loadCameraProtectionInfoList(): List<CameraProtectionInfo> {
         val list = mutableListOf<CameraProtectionInfo>()
@@ -76,7 +79,7 @@ class CameraProtectionLoaderImpl @Inject constructor(private val context: Contex
                 computed.left.roundToInt(),
                 computed.top.roundToInt(),
                 computed.right.roundToInt(),
-                computed.bottom.roundToInt()
+                computed.bottom.roundToInt(),
             )
         val displayUniqueId = context.getString(displayUniqueIdRes)
         return CameraProtectionInfo(
@@ -84,7 +87,7 @@ class CameraProtectionLoaderImpl @Inject constructor(private val context: Contex
             physicalCameraId,
             protectionPath,
             protectionBounds,
-            displayUniqueId
+            displayUniqueId,
         )
     }
 
@@ -94,5 +97,10 @@ class CameraProtectionLoaderImpl @Inject constructor(private val context: Contex
         } catch (e: Throwable) {
             throw IllegalArgumentException("Invalid protection path", e)
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(context: Context): CameraProtectionLoaderImpl
     }
 }

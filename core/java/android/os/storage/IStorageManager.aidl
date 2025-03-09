@@ -181,6 +181,5 @@ interface IStorageManager {
      * device's useful lifetime remains. If no information is available, -1
      * is returned.
      */
-    @EnforcePermission("READ_PRIVILEGED_PHONE_STATE")
     int getInternalStorageRemainingLifetime() = 99;
 }

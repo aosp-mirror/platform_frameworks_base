@@ -22,7 +22,7 @@ import com.android.systemui.statusbar.notification.collection.coordinator.visual
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl
 import com.android.systemui.statusbar.notification.collection.notifCollection
 import com.android.systemui.statusbar.notification.collection.render.notificationVisibilityProvider
-import com.android.systemui.statusbar.policy.headsUpManager
+import com.android.systemui.statusbar.notification.headsup.headsUpManager
 
 var Kosmos.onUserInteractionCallback: OnUserInteractionCallback by
     Kosmos.Fixture {

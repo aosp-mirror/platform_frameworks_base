@@ -16,20 +16,23 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
+import android.content.res.Resources
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.gesture.HomeGestureMonitor
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
+import com.android.systemui.touchpad.tutorial.ui.gesture.HomeGestureRecognizer
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @Composable
-fun HomeGestureTutorialScreen(
-    onDoneButtonClicked: () -> Unit,
-    onBack: () -> Unit,
-) {
+fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
     val screenConfig =
         TutorialScreenConfig(
             colors = rememberScreenColors(),
@@ -38,21 +41,30 @@ fun HomeGestureTutorialScreen(
                     titleResId = R.string.touchpad_home_gesture_action_title,
                     bodyResId = R.string.touchpad_home_gesture_guidance,
                     titleSuccessResId = R.string.touchpad_home_gesture_success_title,
-                    bodySuccessResId = R.string.touchpad_home_gesture_success_body
+                    bodySuccessResId = R.string.touchpad_home_gesture_success_body,
                 ),
-            animations =
-                TutorialScreenConfig.Animations(
-                    educationResId = R.raw.trackpad_home_edu,
-                    successResId = R.raw.trackpad_home_success
+            animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_home_edu),
+        )
+    val recognizer = rememberHomeGestureRecognizer(LocalContext.current.resources)
+    val gestureUiState: Flow<GestureUiState> =
+        remember(recognizer) {
+            GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
+                it.toGestureUiState(
+                    progressStartMarker = "drag with gesture",
+                    progressEndMarker = "release playback realtime",
+                    successAnimation = R.raw.trackpad_home_success,
                 )
-        )
-    val gestureMonitorProvider =
-        DistanceBasedGestureMonitorProvider(
-            monitorFactory = { distanceThresholdPx, gestureStateCallback ->
-                HomeGestureMonitor(distanceThresholdPx, gestureStateCallback)
             }
-        )
-    GestureTutorialScreen(screenConfig, gestureMonitorProvider, onDoneButtonClicked, onBack)
+        }
+    GestureTutorialScreen(screenConfig, recognizer, gestureUiState, onDoneButtonClicked, onBack)
+}
+
+@Composable
+private fun rememberHomeGestureRecognizer(resources: Resources): GestureRecognizer {
+    val distance =
+        resources.getDimensionPixelSize(R.dimen.touchpad_tutorial_gestures_distance_threshold)
+    val velocity = resources.getDimension(R.dimen.touchpad_home_gesture_velocity_threshold)
+    return remember(distance) { HomeGestureRecognizer(distance, velocity) }
 }
 
 @Composable
@@ -64,7 +76,7 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
         rememberLottieDynamicProperties(
             rememberColorFilterProperty(".primaryFixedDim", primaryFixedDim),
             rememberColorFilterProperty(".onPrimaryFixed", onPrimaryFixed),
-            rememberColorFilterProperty(".onPrimaryFixedVariant", onPrimaryFixedVariant)
+            rememberColorFilterProperty(".onPrimaryFixedVariant", onPrimaryFixedVariant),
         )
     val screenColors =
         remember(dynamicProperties) {

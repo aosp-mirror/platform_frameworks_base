@@ -40,6 +40,8 @@ android_library {
     static_libs: [
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
+
+        "PlatformComposeCore",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],

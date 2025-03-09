@@ -16,6 +16,7 @@
 
 package com.android.server.display.feature;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -199,14 +200,70 @@ public class DisplayManagerFlags {
             Flags.FLAG_IDLE_SCREEN_CONFIG_IN_SUBSCRIBING_LIGHT_SENSOR,
             Flags::idleScreenConfigInSubscribingLightSensor);
 
+    private final FlagState mVirtualDisplayLimit =
+            new FlagState(
+                    Flags.FLAG_VIRTUAL_DISPLAY_LIMIT,
+                    Flags::virtualDisplayLimit);
+
     private final FlagState mNormalBrightnessForDozeParameter = new FlagState(
             Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
             Flags::normalBrightnessForDozeParameter
+    );
+    private final FlagState mBlockAutobrightnessChangesOnStylusUsage = new FlagState(
+            Flags.FLAG_BLOCK_AUTOBRIGHTNESS_CHANGES_ON_STYLUS_USAGE,
+            Flags::blockAutobrightnessChangesOnStylusUsage
+    );
+    private final FlagState mIsUserRefreshRateForExternalDisplayEnabled = new FlagState(
+            Flags.FLAG_ENABLE_USER_REFRESH_RATE_FOR_EXTERNAL_DISPLAY,
+            Flags::enableUserRefreshRateForExternalDisplay
+    );
+
+    private final FlagState mEnableWaitingConfirmationBeforeMirroring = new FlagState(
+            Flags.FLAG_ENABLE_WAITING_CONFIRMATION_BEFORE_MIRRORING,
+            Flags::enableWaitingConfirmationBeforeMirroring
+    );
+
+    private final FlagState mEnableApplyDisplayChangedDuringDisplayAdded = new FlagState(
+            Flags.FLAG_ENABLE_APPLY_DISPLAY_CHANGED_DURING_DISPLAY_ADDED,
+            Flags::enableApplyDisplayChangedDuringDisplayAdded
     );
 
     private final FlagState mEnableBatteryStatsForAllDisplays = new FlagState(
             Flags.FLAG_ENABLE_BATTERY_STATS_FOR_ALL_DISPLAYS,
             Flags::enableBatteryStatsForAllDisplays
+    );
+
+    private final FlagState mHasArrSupport = new FlagState(
+            Flags.FLAG_ENABLE_HAS_ARR_SUPPORT,
+            Flags::enableHasArrSupport
+    );
+
+    private final FlagState mAutoBrightnessModeBedtimeWearFlagState = new FlagState(
+            Flags.FLAG_AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+            Flags::autoBrightnessModeBedtimeWear
+    );
+
+    private final FlagState mGetSupportedRefreshRatesFlagState = new FlagState(
+            Flags.FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES,
+            Flags::enableGetSupportedRefreshRates
+    );
+
+    private final FlagState mEnablePluginManagerFlagState = new FlagState(
+            Flags.FLAG_ENABLE_PLUGIN_MANAGER,
+            Flags::enablePluginManager
+    );
+    private final FlagState mDisplayListenerPerformanceImprovementsFlagState = new FlagState(
+            Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS,
+            Flags::displayListenerPerformanceImprovements
+    );
+    private final FlagState mEnableDisplayContentModeManagementFlagState = new FlagState(
+            Flags.FLAG_ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT,
+            Flags::enableDisplayContentModeManagement
+    );
+
+    private final FlagState mSubscribeGranularDisplayEvents = new FlagState(
+            Flags.FLAG_SUBSCRIBE_GRANULAR_DISPLAY_EVENTS,
+            Flags::subscribeGranularDisplayEvents
     );
 
     /**
@@ -412,11 +469,16 @@ public class DisplayManagerFlags {
         return mNewHdrBrightnessModifier.isEnabled();
     }
 
+    public boolean isVirtualDisplayLimitEnabled() {
+        return mVirtualDisplayLimit.isEnabled();
+    }
+
     /**
      * @return Whether the useDozeBrightness parameter should be used
      */
-    public boolean isNormalBrightnessForDozeParameterEnabled() {
-        return mNormalBrightnessForDozeParameter.isEnabled();
+    public boolean isNormalBrightnessForDozeParameterEnabled(Context context) {
+        return mNormalBrightnessForDozeParameter.isEnabled() && context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowNormalBrightnessForDozePolicy);
     }
 
      /**
@@ -428,11 +490,85 @@ public class DisplayManagerFlags {
     }
 
     /**
+      * @return {@code true} if mirroring won't be enabled until boot completes and the user enables
+      * the display.
+      */
+    public boolean isWaitingConfirmationBeforeMirroringEnabled() {
+        return mEnableWaitingConfirmationBeforeMirroring.isEnabled();
+    }
+
+    /**
       * @return {@code true} if battery stats is enabled for all displays, not just the primary
       * display.
       */
     public boolean isBatteryStatsEnabledForAllDisplays() {
         return mEnableBatteryStatsForAllDisplays.isEnabled();
+    }
+
+    /**
+      * @return {@code true} if need to apply display changes during display added event.
+      */
+    public boolean isApplyDisplayChangedDuringDisplayAddedEnabled() {
+        return mEnableApplyDisplayChangedDuringDisplayAdded.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if autobrightness is to be blocked when stylus is being used
+     */
+    public boolean isBlockAutobrightnessChangesOnStylusUsage() {
+        return mBlockAutobrightnessChangesOnStylusUsage.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if need to use user refresh rate settings for
+     * external displays.
+     */
+    public boolean isUserRefreshRateForExternalDisplayEnabled() {
+        return mIsUserRefreshRateForExternalDisplayEnabled.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if hasArrSupport API is enabled.
+     */
+    public boolean hasArrSupportFlag() {
+        return mHasArrSupport.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if bedtime mode specific auto-brightness curve should be loaded and be
+     * applied when bedtime mode is enabled.
+     */
+    public boolean isAutoBrightnessModeBedtimeWearEnabled() {
+        return mAutoBrightnessModeBedtimeWearFlagState.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if supported refresh rate api is enabled.
+     */
+    public boolean enableGetSupportedRefreshRates() {
+        return mGetSupportedRefreshRatesFlagState.isEnabled();
+    }
+
+    public boolean isPluginManagerEnabled() {
+        return mEnablePluginManagerFlagState.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if the flag for display listener performance improvements is enabled
+     */
+    public boolean isDisplayListenerPerformanceImprovementsEnabled() {
+        return mDisplayListenerPerformanceImprovementsFlagState.isEnabled();
+    }
+
+    public boolean isDisplayContentModeManagementEnabled() {
+        return mEnableDisplayContentModeManagementFlagState.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if the flag for subscribing to granular display events is enabled
+     */
+    public boolean isSubscribeGranularDisplayEventsEnabled() {
+        return mSubscribeGranularDisplayEvents.isEnabled();
     }
 
     /**
@@ -476,9 +612,21 @@ public class DisplayManagerFlags {
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
         pw.println(" " + mOffloadSessionCancelBlockScreenOn);
         pw.println(" " + mNewHdrBrightnessModifier);
+        pw.println(" " + mVirtualDisplayLimit);
         pw.println(" " + mNormalBrightnessForDozeParameter);
         pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
+        pw.println(" " + mEnableWaitingConfirmationBeforeMirroring);
         pw.println(" " + mEnableBatteryStatsForAllDisplays);
+        pw.println(" " + mEnableApplyDisplayChangedDuringDisplayAdded);
+        pw.println(" " + mBlockAutobrightnessChangesOnStylusUsage);
+        pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);
+        pw.println(" " + mHasArrSupport);
+        pw.println(" " + mAutoBrightnessModeBedtimeWearFlagState);
+        pw.println(" " + mGetSupportedRefreshRatesFlagState);
+        pw.println(" " + mEnablePluginManagerFlagState);
+        pw.println(" " + mDisplayListenerPerformanceImprovementsFlagState);
+        pw.println(" " + mSubscribeGranularDisplayEvents);
+        pw.println(" " + mEnableDisplayContentModeManagementFlagState);
     }
 
     private static class FlagState {

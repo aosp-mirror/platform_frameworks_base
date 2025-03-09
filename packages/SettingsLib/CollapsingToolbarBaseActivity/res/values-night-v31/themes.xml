@@ -21,4 +21,15 @@
         <item name="colorPrimary">@color/settingslib_primary_dark_device_default_settings</item>
         <item name="colorAccent">@color/settingslib_accent_device_default_dark</item>
     </style>
+
+    <!--
+      ~ TODO(b/349675008): Remove this theme overlay once the platform bridge theme properly sets
+      ~ the MaterialComponents colors based on the platform theme.
+      -->
+    <style name="ThemeOverlay.MaterialComponents.PlatformBridge.CollapsingToolbar">
+        <item name="elevationOverlayEnabled">true</item>
+        <item name="elevationOverlayColor">?attr/colorPrimary</item>
+        <item name="colorPrimary">@color/settingslib_primary_dark_device_default_settings</item>
+        <item name="colorAccent">@color/settingslib_accent_device_default_dark</item>
+    </style>
 </resources>

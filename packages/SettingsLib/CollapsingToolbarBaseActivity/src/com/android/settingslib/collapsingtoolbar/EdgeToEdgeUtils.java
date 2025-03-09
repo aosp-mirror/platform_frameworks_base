@@ -17,6 +17,7 @@
 package com.android.settingslib.collapsingtoolbar;
 
 import android.os.Build;
+import android.view.ViewGroup;
 
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
@@ -53,6 +54,8 @@ public class EdgeToEdgeUtils {
                             .getInsets(WindowInsetsCompat.Type.statusBars()).top;
                     // Apply the insets paddings to the view.
                     v.setPadding(insets.left, statusBarHeight, insets.right, insets.bottom);
+                    ((ViewGroup)v).setClipToPadding(false);
+                    ((ViewGroup)v).setClipChildren(false);
 
                     // Return CONSUMED if you don't want the window insets to keep being
                     // passed down to descendant views.

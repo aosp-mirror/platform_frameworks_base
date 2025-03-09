@@ -16,16 +16,19 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresDevice
+import android.platform.test.annotations.RequiresFlagsDisabled
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.subject.exceptions.ExceptionMessageBuilder
 import android.tools.flicker.subject.exceptions.IncorrectRegionException
 import android.tools.flicker.subject.layers.LayerSubject
-import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.helpers.PipAppHelper
+import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.pip.common.EnterPipTransition
 import org.junit.Assume
 import org.junit.FixMethodOrder
@@ -35,10 +38,11 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 import kotlin.math.abs
 
+
 /**
  * Test entering pip from an app via auto-enter property when navigating to home.
  *
- * To run this test: `atest WMShellFlickerTestsPip1:AutoEnterPipOnGoToHomeTest`
+ * To run this test: `atest WMShellFlickerTestsPip:AutoEnterPipOnGoToHomeTest`
  *
  * Actions:
  * ```
@@ -60,7 +64,10 @@ import kotlin.math.abs
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) : EnterPipTransition(flicker) {
+    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
+
     override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }
 
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {

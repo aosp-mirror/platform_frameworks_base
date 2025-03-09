@@ -94,6 +94,14 @@ public class HearingAidDeviceManager {
     boolean setSubDeviceIfNeeded(CachedBluetoothDevice newDevice) {
         final long hiSyncId = newDevice.getHiSyncId();
         if (isValidHiSyncId(hiSyncId)) {
+            // The remote device supports CSIP, the other ear should be processed as a member
+            // device. Ignore hiSyncId grouping from ASHA here.
+            if (newDevice.getProfiles().stream().anyMatch(
+                    profile -> profile instanceof CsipSetCoordinatorProfile)) {
+                Log.w(TAG, "Skip ASHA grouping since this device supports CSIP");
+                return false;
+            }
+
             final CachedBluetoothDevice hearingAidDevice = getCachedDevice(hiSyncId);
             // Just add one of the hearing aids from a pair in the list that is shown in the UI.
             // Once there is another device with the same hiSyncId, to add new device as sub
@@ -161,6 +169,7 @@ public class HearingAidDeviceManager {
             // device. Ignore hiSyncId grouping from ASHA here.
             if (cachedDevice.getProfiles().stream().anyMatch(
                     profile -> profile instanceof CsipSetCoordinatorProfile)) {
+                Log.w(TAG, "Skip ASHA grouping since this device supports CSIP");
                 continue;
             }
 

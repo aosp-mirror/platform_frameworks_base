@@ -78,7 +78,8 @@ public class OverlayManager {
 
     /**
      * Applications can use OverlayManager to create overlays to overlay on itself resources. The
-     * overlay target is itself and the work range is only in caller application.
+     * overlay target is itself, or the Android package, and the work range is only in caller
+     * application.
      *
      * <p>In {@link android.content.Context#getSystemService(String)}, it crashes because of {@link
      * java.lang.NullPointerException} if the parameter is OverlayManager. if the self-targeting is
@@ -401,7 +402,7 @@ public class OverlayManager {
     }
 
     /**
-     * Get the related information of overlays for {@code targetPackageName}.
+     * Get the related information of self-targeting overlays for {@code targetPackageName}.
      *
      * @param targetPackageName the target package name
      * @return a list of overlay information

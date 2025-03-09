@@ -56,7 +56,7 @@ class WorkModeTileMapperTest : SysuiTestCase() {
         whenever(
                 devicePolicyResourceManager.getString(
                     eq(DevicePolicyResources.Strings.SystemUi.QS_WORK_PROFILE_LABEL),
-                    any()
+                    any(),
                 )
             )
             .thenReturn(testLabel)
@@ -66,12 +66,12 @@ class WorkModeTileMapperTest : SysuiTestCase() {
                     .apply {
                         addOverride(
                             com.android.internal.R.drawable.stat_sys_managed_profile_status,
-                            TestStubDrawable()
+                            TestStubDrawable(),
                         )
                     }
                     .resources,
                 context.theme,
-                devicePolicyManager
+                devicePolicyManager,
             )
     }
 
@@ -105,13 +105,11 @@ class WorkModeTileMapperTest : SysuiTestCase() {
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
 
-    private fun createWorkModeTileState(
-        activationState: QSTileState.ActivationState,
-    ): QSTileState {
+    private fun createWorkModeTileState(activationState: QSTileState.ActivationState): QSTileState {
         val label = testLabel
         val iconRes = com.android.internal.R.drawable.stat_sys_managed_profile_status
         return QSTileState(
-            icon = { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            icon = Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes = iconRes,
             label = label,
             activationState = activationState,
@@ -134,7 +132,7 @@ class WorkModeTileMapperTest : SysuiTestCase() {
             stateDescription = null,
             sideViewIcon = QSTileState.SideViewIcon.None,
             enabledState = QSTileState.EnabledState.ENABLED,
-            expandedAccessibilityClassName = Switch::class.qualifiedName
+            expandedAccessibilityClassName = Switch::class.qualifiedName,
         )
     }
 }

@@ -26,7 +26,7 @@ import com.android.systemui.keyguard.ui.viewmodel.AccessibilityActionsViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** View binder for accessibility actions placeholder on keyguard. */
 object AccessibilityActionsViewBinder {

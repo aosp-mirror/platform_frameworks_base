@@ -17,7 +17,6 @@
 package android.companion.virtual.sensor;
 
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -136,7 +135,6 @@ public final class VirtualSensor implements Parcelable {
     /**
      * Send a sensor event to the system.
      */
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendEvent(@NonNull VirtualSensorEvent event) {
         try {
             mVirtualDevice.sendSensorEvent(mToken, event);

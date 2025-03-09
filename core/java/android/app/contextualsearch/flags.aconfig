@@ -6,10 +6,25 @@ flag {
   namespace: "machine_learning"
   description: "Flag to enable the service"
   bug: "309689654"
+  is_exported: true
 }
 flag {
   name: "enable_token_refresh"
   namespace: "machine_learning"
   description: "Flag to refresh the token to the callback"
   bug: "309689654"
+}
+
+flag {
+    name: "multi_window_screen_context"
+    namespace: "sysui_integrations"
+    description: "Report screen context and positions for all windows."
+    bug: "371065456"
+}
+
+flag {
+    name: "contextual_search_window_layer"
+    namespace: "sysui_integrations"
+    description: "Identify live contextual search UI to exclude from contextual search screenshot."
+    bug: "372510690"
 }

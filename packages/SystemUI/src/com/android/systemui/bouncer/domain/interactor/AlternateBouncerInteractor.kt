@@ -17,22 +17,17 @@
 package com.android.systemui.bouncer.domain.interactor
 
 import android.util.Log
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricsAllowedInteractor
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
-import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.time.SystemClock
 import dagger.Lazy
@@ -55,13 +50,9 @@ import kotlinx.coroutines.flow.stateIn
 class AlternateBouncerInteractor
 @Inject
 constructor(
-    private val statusBarStateController: StatusBarStateController,
-    private val keyguardStateController: KeyguardStateController,
     private val bouncerRepository: KeyguardBouncerRepository,
     fingerprintPropertyRepository: FingerprintPropertyRepository,
-    private val biometricSettingsRepository: BiometricSettingsRepository,
     private val systemClock: SystemClock,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val deviceEntryBiometricsAllowedInteractor:
         Lazy<DeviceEntryBiometricsAllowedInteractor>,
     private val keyguardInteractor: Lazy<KeyguardInteractor>,
@@ -73,17 +64,10 @@ constructor(
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
     private val alternateBouncerUiAvailableFromSource: HashSet<String> = HashSet()
     val alternateBouncerSupported: StateFlow<Boolean> =
-        if (DeviceEntryUdfpsRefactor.isEnabled) {
-            fingerprintPropertyRepository.sensorType
-                .map { sensorType -> sensorType.isUdfps() || sensorType.isPowerButton() }
-                .stateIn(
-                    scope = scope,
-                    started = SharingStarted.Eagerly,
-                    initialValue = false,
-                )
-        } else {
-            bouncerRepository.alternateBouncerUIAvailable
-        }
+        fingerprintPropertyRepository.sensorType
+            .map { sensorType -> sensorType.isUdfps() || sensorType.isPowerButton() }
+            .stateIn(scope = scope, started = SharingStarted.Eagerly, initialValue = false)
+
     private val isDozingOrAod: Flow<Boolean> =
         anyOf(
                 keyguardTransitionInteractor.get().transitionValue(KeyguardState.DOZING).map {
@@ -106,7 +90,7 @@ constructor(
                     combine(
                             keyguardTransitionInteractor.get().currentKeyguardState,
                             sceneInteractor.get().currentScene,
-                            ::Pair
+                            ::Pair,
                         )
                         .flatMapLatest { (currentKeyguardState, transitionState) ->
                             if (currentKeyguardState == KeyguardState.GONE) {
@@ -122,7 +106,7 @@ constructor(
                                         .isFingerprintAuthCurrentlyAllowed,
                                     keyguardInteractor.get().isKeyguardDismissible,
                                     bouncerRepository.primaryBouncerShow,
-                                    isDozingOrAod
+                                    isDozingOrAod,
                                 ) {
                                     fingerprintAllowed,
                                     keyguardDismissible,
@@ -141,34 +125,14 @@ constructor(
             }
             .distinctUntilChanged()
             .onEach { Log.d(TAG, "canShowAlternateBouncer changed to $it") }
-            .stateIn(
-                scope = scope,
-                started = WhileSubscribed(),
-                initialValue = false,
-            )
+            .stateIn(scope = scope, started = WhileSubscribed(), initialValue = false)
 
     /**
      * Always shows the alternate bouncer. Requesters must check [canShowAlternateBouncer]` before
      * calling this.
      */
     fun forceShow() {
-        if (DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()) {
-            show()
-            return
-        }
         bouncerRepository.setAlternateVisible(true)
-    }
-
-    /**
-     * Sets the correct bouncer states to show the alternate bouncer if it can show.
-     *
-     * @return whether alternateBouncer is visible
-     * @deprecated use [forceShow] and manually check [canShowAlternateBouncer] beforehand
-     */
-    fun show(): Boolean {
-        DeviceEntryUdfpsRefactor.assertInLegacyMode()
-        bouncerRepository.setAlternateVisible(canShowAlternateBouncerForFingerprint())
-        return isVisibleState()
     }
 
     /**
@@ -189,28 +153,8 @@ constructor(
         return bouncerRepository.alternateBouncerVisible.value
     }
 
-    fun setAlternateBouncerUIAvailable(isAvailable: Boolean, token: String) {
-        DeviceEntryUdfpsRefactor.assertInLegacyMode()
-        if (isAvailable) {
-            alternateBouncerUiAvailableFromSource.add(token)
-        } else {
-            alternateBouncerUiAvailableFromSource.remove(token)
-        }
-        bouncerRepository.setAlternateBouncerUIAvailable(
-            alternateBouncerUiAvailableFromSource.isNotEmpty()
-        )
-    }
-
     fun canShowAlternateBouncerForFingerprint(): Boolean {
-        if (DeviceEntryUdfpsRefactor.isEnabled) {
-            return canShowAlternateBouncer.value
-        }
-        return alternateBouncerSupported.value &&
-            biometricSettingsRepository.isFingerprintAuthCurrentlyAllowed.value &&
-            !keyguardUpdateMonitor.isFingerprintLockedOut &&
-            !keyguardStateController.isUnlocked &&
-            !statusBarStateController.isDozing &&
-            !bouncerRepository.primaryBouncerShow.value
+        return canShowAlternateBouncer.value
     }
 
     /**

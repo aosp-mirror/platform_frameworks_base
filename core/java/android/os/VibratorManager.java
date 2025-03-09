@@ -22,8 +22,11 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.app.ActivityThread;
 import android.content.Context;
+import android.os.vibrator.VendorVibrationSession;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
+
+import java.util.concurrent.Executor;
 
 /**
  * Provides access to all vibrators from the device, as well as the ability to run them
@@ -60,6 +63,14 @@ public abstract class VibratorManager {
      */
     @NonNull
     public abstract int[] getVibratorIds();
+
+    /**
+     * Return true if the vibrator manager has all capabilities, false otherwise.
+     * @hide
+     */
+    public boolean hasCapabilities(int capabilities) {
+        return false;
+    }
 
     /**
      * Retrieve a single vibrator by id.
@@ -190,4 +201,30 @@ public abstract class VibratorManager {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public abstract void cancel(int usageFilter);
+
+
+    /**
+     * Starts a vibration session on given vibrators.
+     *
+     * @param vibratorIds The vibrators that will be controlled by this session.
+     * @param attrs       The {@link VibrationAttributes} corresponding to the vibrations that will
+     *                    be performed in the session. This will be used to decide the priority of
+     *                    this session against other system vibrations.
+     * @param reason      The description for this session, used for debugging purposes.
+     * @param cancellationSignal A signal to cancel the session before it starts.
+     * @param executor    The executor for the session callbacks.
+     * @param callback    The {@link VendorVibrationSession.Callback} for the started session.
+     * @see Vibrator#startVendorSession
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.VIBRATE,
+            android.Manifest.permission.VIBRATE_VENDOR_EFFECTS,
+            android.Manifest.permission.START_VIBRATION_SESSIONS,
+    })
+    public void startVendorSession(@NonNull int[] vibratorIds, @NonNull VibrationAttributes attrs,
+            @Nullable String reason, @Nullable CancellationSignal cancellationSignal,
+            @NonNull Executor executor, @NonNull VendorVibrationSession.Callback callback) {
+        Log.w(TAG, "startVendorSession is not supported");
+    }
 }

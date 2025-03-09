@@ -42,6 +42,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.systemui.Flags
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
 import com.android.systemui.volume.panel.ui.composable.ComposeVolumePanelUiComponent
@@ -51,7 +52,7 @@ import kotlinx.coroutines.flow.StateFlow
 /** [ComposeVolumePanelUiComponent] implementing a toggleable button from a bottom row. */
 class ToggleButtonComponent(
     private val viewModelFlow: StateFlow<ButtonViewModel?>,
-    private val onCheckedChange: (isChecked: Boolean) -> Unit
+    private val onCheckedChange: (isChecked: Boolean) -> Unit,
 ) : ComposeVolumePanelUiComponent {
 
     @Composable
@@ -68,15 +69,29 @@ class ToggleButtonComponent(
             BottomComponentButtonSurface {
                 val colors =
                     if (viewModel.isActive) {
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                        )
+                        if (Flags.volumeRedesign()) {
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            )
+                        } else {
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                            )
+                        }
                     } else {
-                        ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        if (Flags.volumeRedesign()) {
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                            )
+                        } else {
+                            ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 Button(
                     modifier =
@@ -93,7 +108,7 @@ class ToggleButtonComponent(
                     onClick = { onCheckedChange(!viewModel.isActive) },
                     shape = RoundedCornerShape(20.dp),
                     colors = colors,
-                    contentPadding = PaddingValues(0.dp)
+                    contentPadding = PaddingValues(0.dp),
                 ) {
                     Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
                 }

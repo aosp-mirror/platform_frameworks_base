@@ -149,7 +149,20 @@ interface ITunerResourceManager {
      *
      * @param lnbIds ids of the updating lnbs.
      */
-    void setLnbInfoList(in int[] lnbIds);
+    void setLnbInfoList(in long[] lnbIds);
+
+    /**
+     * Determines whether the Resource Holder retains ownership of the resource during a challenge
+     * scenario, when both Resource Holder and Resource Challenger have same processId and same
+     * priority.
+     *
+     * @param clientId The client id used to set ownership of resource in case of resource
+     *     challenger situation.
+     * @param enabled Set to {@code true} to allow the Resource Holder to retain ownership,
+     *     or false to allow the Resource Challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
+     */
+    void setResourceOwnershipRetention(int clientId, boolean enabled);
 
     /*
      * This API is used by the Tuner framework to request a frontend from the TunerHAL.
@@ -185,7 +198,7 @@ interface ITunerResourceManager {
      *
      * @return true if there is frontend granted.
      */
-    boolean requestFrontend(in TunerFrontendRequest request, out int[] frontendHandle);
+    boolean requestFrontend(in TunerFrontendRequest request, out long[] frontendHandle);
 
     /*
      * Sets the maximum usable frontends number of a given frontend type. It is used to enable or
@@ -253,7 +266,7 @@ interface ITunerResourceManager {
      *
      * @return true if there is demux granted.
      */
-    boolean requestDemux(in TunerDemuxRequest request, out int[] demuxHandle);
+    boolean requestDemux(in TunerDemuxRequest request, out long[] demuxHandle);
 
     /*
      * This API is used by the Tuner framework to request an available descrambler from the
@@ -277,7 +290,7 @@ interface ITunerResourceManager {
      *
      * @return true if there is Descrambler granted.
      */
-    boolean requestDescrambler(in TunerDescramblerRequest request, out int[] descramblerHandle);
+    boolean requestDescrambler(in TunerDescramblerRequest request, out long[] descramblerHandle);
 
     /*
      * This API is used by the Tuner framework to request an available Cas session. This session
@@ -303,7 +316,7 @@ interface ITunerResourceManager {
      *
      * @return true if there is CAS session granted.
      */
-    boolean requestCasSession(in CasSessionRequest request, out int[] casSessionHandle);
+    boolean requestCasSession(in CasSessionRequest request, out long[] casSessionHandle);
 
     /*
      * This API is used by the Tuner framework to request an available CuCam.
@@ -328,7 +341,7 @@ interface ITunerResourceManager {
      *
      * @return true if there is CiCam granted.
      */
-    boolean requestCiCam(in TunerCiCamRequest request, out int[] ciCamHandle);
+    boolean requestCiCam(in TunerCiCamRequest request, out long[] ciCamHandle);
 
     /*
      * This API is used by the Tuner framework to request an available Lnb from the TunerHAL.
@@ -352,7 +365,7 @@ interface ITunerResourceManager {
      *
      * @return true if there is Lnb granted.
      */
-    boolean requestLnb(in TunerLnbRequest request, out int[] lnbHandle);
+    boolean requestLnb(in TunerLnbRequest request, out long[] lnbHandle);
 
     /*
      * Notifies the TRM that the given frontend has been released.
@@ -365,7 +378,7 @@ interface ITunerResourceManager {
      * @param frontendHandle the handle of the released frontend.
      * @param clientId the id of the client that is releasing the frontend.
      */
-    void releaseFrontend(in int frontendHandle, int clientId);
+    void releaseFrontend(in long frontendHandle, int clientId);
 
     /*
      * Notifies the TRM that the Demux with the given handle was released.
@@ -375,7 +388,7 @@ interface ITunerResourceManager {
      * @param demuxHandle the handle of the released Tuner Demux.
      * @param clientId the id of the client that is releasing the demux.
      */
-    void releaseDemux(in int demuxHandle, int clientId);
+    void releaseDemux(in long demuxHandle, int clientId);
 
     /*
      * Notifies the TRM that the Descrambler with the given handle was released.
@@ -385,7 +398,7 @@ interface ITunerResourceManager {
      * @param descramblerHandle the handle of the released Tuner Descrambler.
      * @param clientId the id of the client that is releasing the descrambler.
      */
-    void releaseDescrambler(in int descramblerHandle, int clientId);
+    void releaseDescrambler(in long descramblerHandle, int clientId);
 
     /*
      * Notifies the TRM that the given Cas session has been released.
@@ -397,7 +410,7 @@ interface ITunerResourceManager {
      * @param casSessionHandle the handle of the released CAS session.
      * @param clientId the id of the client that is releasing the cas session.
      */
-    void releaseCasSession(in int casSessionHandle, int clientId);
+    void releaseCasSession(in long casSessionHandle, int clientId);
 
     /**
      * Notifies the TRM that the given CiCam has been released.
@@ -410,7 +423,7 @@ interface ITunerResourceManager {
      * @param ciCamHandle the handle of the releasing CiCam.
      * @param clientId the id of the client that is releasing the CiCam.
      */
-    void releaseCiCam(in int ciCamHandle, int clientId);
+    void releaseCiCam(in long ciCamHandle, int clientId);
 
     /*
      * Notifies the TRM that the Lnb with the given handle was released.
@@ -422,7 +435,7 @@ interface ITunerResourceManager {
      * @param lnbHandle the handle of the released Tuner Lnb.
      * @param clientId the id of the client that is releasing the lnb.
      */
-    void releaseLnb(in int lnbHandle, int clientId);
+    void releaseLnb(in long lnbHandle, int clientId);
 
     /*
      * Compare two clients' priority.

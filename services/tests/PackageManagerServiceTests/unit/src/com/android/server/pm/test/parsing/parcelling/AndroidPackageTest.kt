@@ -26,6 +26,8 @@ import android.content.pm.SigningDetails
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.util.ArraySet
 import android.util.SparseArray
 import android.util.SparseIntArray
@@ -47,13 +49,18 @@ import com.android.internal.pm.pkg.component.ParsedUsesPermissionImpl
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
+import org.junit.Rule
 import java.security.KeyPairGenerator
 import java.security.PublicKey
 import java.util.UUID
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
+@EnableFlags(android.content.pm.Flags.FLAG_INCLUDE_FEATURE_FLAGS_IN_PACKAGE_CACHER)
 class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, PackageImpl::class) {
+
+    @get:Rule
+    val setFlagsRule: SetFlagsRule = SetFlagsRule()
 
     companion object {
         private val TEST_UUID = UUID.fromString("57554103-df3e-4475-ae7a-8feba49353ac")
@@ -93,6 +100,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "getUsesOptionalLibrariesSorted",
         "getUsesSdkLibrariesSorted",
         "getUsesStaticLibrariesSorted",
+        "readFeatureFlagState",
+        "writeFeatureFlagState",
         // Tested through setting minor/major manually
         "setLongVersionCode",
         "getLongVersionCode",
@@ -149,6 +158,10 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "isSystem",
         "isSystemExt",
         "isVendor",
+
+        // Tested through addFeatureFlag
+        "addFeatureFlag",
+        "getFeatureFlagState",
     )
 
     override val baseParams = listOf(
@@ -275,6 +288,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isUpdatableSystem,
         AndroidPackage::getEmergencyInstaller,
         AndroidPackage::isAllowCrossUidActivitySwitchFromBelow,
+        AndroidPackage::getIntentMatchingFlags,
+        AndroidPackage::getPageSizeAppCompatFlags,
     )
 
     override fun extraParams() = listOf(
@@ -568,6 +583,34 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             PackageImpl::setSystemExt,
             true
         ),
+        getSetByValue(
+            AndroidPackage::getAlternateLauncherIconResIds,
+            PackageImpl::setAlternateLauncherIconResIds,
+            intArrayOf(3, 5, 7),
+            compare = { first, second ->
+                equalBy(
+                    first, second,
+                    { it.size },
+                    { it[0] },
+                    { it[1] },
+                    { it[2] }
+                )
+            }
+        ),
+        getSetByValue(
+            AndroidPackage::getAlternateLauncherLabelResIds,
+            PackageImpl::setAlternateLauncherLabelResIds,
+            intArrayOf(3, 5, 7),
+            compare = { first, second ->
+                equalBy(
+                    first, second,
+                    { it.size },
+                    { it[0] },
+                    { it[1] },
+                    { it[2] }
+                )
+            }
+        ),
     )
 
     override fun initialObject() = PackageImpl.forParsing(
@@ -613,6 +656,9 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         .setSplitClassLoaderName(1, "testSplitClassLoaderNameOne")
         .addUsesSdkLibrary("testSdk", 2L, arrayOf("testCertDigest1"), true)
         .addUsesStaticLibrary("testStatic", 3L, arrayOf("testCertDigest2"))
+        .addFeatureFlag("testFlag1", null)
+        .addFeatureFlag("testFlag2", true)
+        .addFeatureFlag("testFlag3", false)
 
     override fun finalizeObject(parcelable: Parcelable) {
         (parcelable as PackageImpl).hideAsParsed().hideAsFinal()
@@ -673,6 +719,12 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                 .containsExactly("testCertDigest2")
 
         expect.that(after.storageUuid).isEqualTo(TEST_UUID)
+
+        expect.that(after.featureFlagState).containsExactlyEntriesIn(mapOf(
+            "testFlag1" to null,
+            "testFlag2" to true,
+            "testFlag3" to false,
+        ))
     }
 
     private fun testKey() = KeyPairGenerator.getInstance("RSA")

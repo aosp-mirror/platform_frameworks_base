@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Имате проблеми с камерата?\nДокоснете за ремонтиране"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Проблемът не се отстрани?\nДокоснете за връщане в предишното състояние"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Нямате проблеми с камерата? Докоснете, за да отхвърлите."</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Можете да намерите менюто на приложението тук"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Активирайте изгледа за настолни компютри, за да отворите няколко приложения едновременно"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Преминете към цял екран по всяко време от менюто на приложението"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Преглеждайте и правете повече неща"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Преместете друго приложение с плъзгане, за да преминете в режим за разделен екран"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Докоснете два пъти извън дадено приложение, за да промените позицията му"</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"Избиране"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Екранна снимка"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Отваряне в браузър"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"Отваряне в приложение"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Нов прозорец"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"Управление на прозорците"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"Промяна на съотношението"</string>
     <string name="close_text" msgid="4986518933445178928">"Затваряне"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Затваряне на менюто"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Отваряне на менюто"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Увеличаване на екрана"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Прилепване на екрана"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Това приложение не може да бъде преоразмерено"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Преоразмеряване"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Приложението не може да бъде преместено тук"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Реалистично"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Възстановяване"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Увеличаване"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Възстановяване"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Прилепване наляво"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Прилепване надясно"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"Отваряне на настройките по подразбиране"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"Изберете как да се отварят уеб връзките за това приложение"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"В приложението"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"В браузъра ви"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"OK"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"Бързо отваряйте приложения в браузъра си оттук"</string>
 </resources>

@@ -20,7 +20,10 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES;
 import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_HAS_ARR_SUPPORT;
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -61,6 +64,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -447,6 +451,13 @@ public final class Display {
     @UnsupportedAppUsage
     @TestApi
     public static final int TYPE_VIRTUAL = 5;
+
+    /**
+     * The maximum display type value.
+     * Helpful to get all possible display values.
+     * @hide
+     */
+    public static final int TYPE_MAX = TYPE_VIRTUAL;
 
     /**
      * Display state: The display state is unknown.
@@ -1198,17 +1209,36 @@ public final class Display {
 
     /**
      * Get the supported refresh rates of this display in frames per second.
-     * <p>
-     * This method only returns refresh rates for the display's default modes. For more options, use
-     * {@link #getSupportedModes()}.
      *
-     * @deprecated use {@link #getSupportedModes()} instead
+     * <ul>
+     * <li> Android version {@link Build.VERSION_CODES#BAKLAVA} and above:
+     * returns display supported render rates.
+     * <li> Android version {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and below:
+     * This method only returns refresh rates for the display's default modes. For more options,
+     * use {@link #getSupportedModes()}.
+     * </ul>
      */
-    @Deprecated
-    public float[] getSupportedRefreshRates() {
+    @FlaggedApi(FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES)
+    public @NonNull float[] getSupportedRefreshRates() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.getDefaultRefreshRates();
+            final float[] refreshRates = mDisplayInfo.getDefaultRefreshRates();
+            Objects.requireNonNull(refreshRates);
+            return refreshRates;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @SuppressLint({"UnflaggedApi"}) // Usage in the CTS to test backward compatibility.
+    public @NonNull float[] getSupportedRefreshRatesLegacy() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            final float[] refreshRates = mDisplayInfo.getDefaultRefreshRatesLegacy();
+            Objects.requireNonNull(refreshRates);
+            return refreshRates;
         }
     }
 
@@ -1255,6 +1285,84 @@ public final class Display {
             updateDisplayInfoLocked();
             final Display.Mode[] modes = mDisplayInfo.supportedModes;
             return Arrays.copyOf(modes, modes.length);
+        }
+    }
+
+    /**
+     * Returns whether display supports adaptive refresh rate or not.
+     */
+    // TODO(b/372526856) Add a link to the documentation for ARR.
+    @FlaggedApi(FLAG_ENABLE_HAS_ARR_SUPPORT)
+    public boolean hasArrSupport() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.hasArrSupport;
+        }
+    }
+
+    /**
+     * Normal category determines the framework's recommended normal frame rate.
+     * Opt for this normal rate unless a higher frame rate significantly enhances
+     * the user experience.
+     *
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_HIGH
+     */
+    @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
+    public static final int FRAME_RATE_CATEGORY_NORMAL = 0;
+
+    /**
+     * High category determines the framework's recommended high frame rate.
+     * Opt for this high rate when a higher frame rate significantly enhances
+     * the user experience.
+     *
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_NORMAL
+     */
+    @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
+    public static final int FRAME_RATE_CATEGORY_HIGH = 1;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = {"FRAME_RATE_CATEGORY_"},
+            value = {
+                FRAME_RATE_CATEGORY_NORMAL,
+                FRAME_RATE_CATEGORY_HIGH
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrameRateCategory {}
+
+    /**
+     * <p> Gets the display-defined frame rate given a descriptive frame rate category. </p>
+     *
+     * <p> For example, an animation that does not require fast render rates can use
+     * the {@link #FRAME_RATE_CATEGORY_NORMAL} to get the suggested frame rate.
+     *
+     * <pre>{@code
+     *  float desiredMinRate = display.getSuggestedFrameRate(FRAME_RATE_CATEGORY_NORMAL);
+     *  surface.setFrameRate(desiredMinRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+     * }</pre>
+     * </p>
+     *
+     * @param category either {@link #FRAME_RATE_CATEGORY_NORMAL}
+     *                 or {@link #FRAME_RATE_CATEGORY_HIGH}
+     *
+     * @see Surface#setFrameRate(float, int)
+     * @throws IllegalArgumentException when category is not {@link #FRAME_RATE_CATEGORY_NORMAL}
+     * or {@link #FRAME_RATE_CATEGORY_HIGH}
+     */
+    @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
+    public float getSuggestedFrameRate(@FrameRateCategory int category) {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            if (category == FRAME_RATE_CATEGORY_HIGH) {
+                return mDisplayInfo.frameRateCategoryRate.getHigh();
+            } else if (category == FRAME_RATE_CATEGORY_NORMAL) {
+                return mDisplayInfo.frameRateCategoryRate.getNormal();
+            } else {
+                throw new IllegalArgumentException("Invalid FrameRateCategory provided");
+            }
         }
     }
 
@@ -1474,8 +1582,9 @@ public final class Display {
             // Although we only care about the HDR/SDR ratio changing, that can also come in the
             // form of the larger DISPLAY_CHANGED event
             mGlobal.registerDisplayListener(toRegister, executor,
-                    DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED
-                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED,
+                    DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+                            | DisplayManagerGlobal
+                                    .INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED,
                     ActivityThread.currentPackageName());
         }
 
@@ -1710,7 +1819,12 @@ public final class Display {
      *         {@code getWindowManager()} or {@code getSystemService(Context.WINDOW_SERVICE)}), the
      *         returned metrics provide the size of the current app window. As a result, in
      *         multi-window mode, the returned size can be smaller than the size of the device
-     *         screen.
+     *         screen. System decoration handling may vary depending on API level:
+     *         <ul>
+     *             <li>API level 35 and above, the window size will be returned.
+     *             <li>API level 34 and below, the window size minus system decoration areas and
+     *                 display cutout is returned.
+     *         </ul>
      *     <li>If metrics are requested from a non-activity context (for example, the application
      *         context, where the WindowManager is accessed by
      *         {@code getApplicationContext().getSystemService(Context.WINDOW_SERVICE)}), the
@@ -2357,6 +2471,8 @@ public final class Display {
          * constrained by the system.
          * @hide
          */
+        @SuppressWarnings("UnflaggedApi") // For testing only
+        @TestApi
         public float getVsyncRate() {
             return mVsyncRate;
         }

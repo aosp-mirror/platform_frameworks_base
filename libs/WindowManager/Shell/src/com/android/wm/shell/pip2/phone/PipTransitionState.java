@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip2.phone;
 
 import android.annotation.IntDef;
+import android.app.TaskInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -133,16 +134,16 @@ public class PipTransitionState {
     private final Rect mSwipePipToHomeAppBounds = new Rect();
 
     //
-    // Tokens and leashes
+    // Task related caches
     //
-
-    // pinned PiP task's WC token
-    @Nullable
-    WindowContainerToken mPipTaskToken;
 
     // pinned PiP task's leash
     @Nullable
-    SurfaceControl mPinnedTaskLeash;
+    private SurfaceControl mPinnedTaskLeash;
+
+    // pinned PiP task info
+    @Nullable
+    private TaskInfo mPipTaskInfo;
 
     // Overlay leash potentially used during swipe PiP to home transition;
     // if null while mInSwipePipToHomeTransition is true, then srcRectHint was invalid.
@@ -154,6 +155,8 @@ public class PipTransitionState {
     //
     @Nullable
     private Runnable mOnIdlePipTransitionStateRunnable;
+
+    private boolean mInFixedRotation = false;
 
     /**
      * An interface to track state updates as we progress through PiP transitions.
@@ -256,7 +259,7 @@ public class PipTransitionState {
 
     private void maybeRunOnIdlePipTransitionStateCallback() {
         if (mOnIdlePipTransitionStateRunnable != null && isPipStateIdle()) {
-            mOnIdlePipTransitionStateRunnable.run();
+            mMainHandler.post(mOnIdlePipTransitionStateRunnable);
             mOnIdlePipTransitionStateRunnable = null;
         }
     }
@@ -300,6 +303,43 @@ public class PipTransitionState {
         mInSwipePipToHomeTransition = false;
         mSwipePipToHomeOverlay = null;
         mSwipePipToHomeAppBounds.setEmpty();
+    }
+
+    @Nullable WindowContainerToken getPipTaskToken() {
+        return mPipTaskInfo != null ? mPipTaskInfo.getToken() : null;
+    }
+
+    @Nullable SurfaceControl getPinnedTaskLeash() {
+        return mPinnedTaskLeash;
+    }
+
+    void setPinnedTaskLeash(@Nullable SurfaceControl leash) {
+        mPinnedTaskLeash = leash;
+    }
+
+    @Nullable TaskInfo getPipTaskInfo() {
+        return mPipTaskInfo;
+    }
+
+    void setPipTaskInfo(@Nullable TaskInfo pipTaskInfo) {
+        mPipTaskInfo = pipTaskInfo;
+    }
+
+    /**
+     * @return true if either in swipe or button-nav fixed rotation.
+     */
+    public boolean isInFixedRotation() {
+        return mInFixedRotation;
+    }
+
+    /**
+     * Sets the fixed rotation flag.
+     */
+    public void setInFixedRotation(boolean inFixedRotation) {
+        mInFixedRotation = inFixedRotation;
+        if (!inFixedRotation) {
+            maybeRunOnIdlePipTransitionStateCallback();
+        }
     }
 
     /**
@@ -351,7 +391,7 @@ public class PipTransitionState {
 
     public boolean isPipStateIdle() {
         // This needs to be a valid in-PiP state that isn't a transient state.
-        return mState == ENTERED_PIP || mState == CHANGED_PIP_BOUNDS;
+        return (mState == ENTERED_PIP || mState == CHANGED_PIP_BOUNDS) && !isInFixedRotation();
     }
 
     @Override

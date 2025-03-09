@@ -56,7 +56,7 @@ public class SeamlessRotator {
         mOldRotation = oldRotation;
         mNewRotation = newRotation;
         mApplyFixedTransformHint = applyFixedTransformationHint;
-        mFixedTransformHint = oldRotation;
+        mFixedTransformHint = (oldRotation + info.installOrientation) % 4;
         final boolean flipped = info.rotation == ROTATION_90 || info.rotation == ROTATION_270;
         final int pH = flipped ? info.logicalWidth : info.logicalHeight;
         final int pW = flipped ? info.logicalHeight : info.logicalWidth;

@@ -25,6 +25,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
@@ -48,7 +49,6 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
 import javax.inject.Inject
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class ModesTile
@@ -109,6 +109,11 @@ constructor(
         userActionInteractor.handleClick(expandable)
     }
 
+    override fun handleSecondaryClick(expandable: Expandable?) = runBlocking {
+        val model = dataInteractor.getCurrentTileModel()
+        userActionInteractor.handleToggleClick(model)
+    }
+
     override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent
 
     @VisibleForTesting
@@ -120,12 +125,12 @@ constructor(
         tileState = tileMapper.map(config, model)
         state?.apply {
             this.state = tileState.activationState.legacyState
-            val tileStateIcon = tileState.icon()
-            icon = tileStateIcon?.asQSTileIcon() ?: ResourceIcon.get(ICON_RES_ID)
+            icon = tileState.icon?.asQSTileIcon() ?: maybeLoadResourceIcon(ICON_RES_ID)
             label = tileLabel
             secondaryLabel = tileState.secondaryLabel
             contentDescription = tileState.contentDescription
             expandedAccessibilityClassName = tileState.expandedAccessibilityClassName
+            handlesSecondaryClick = true
         }
     }
 

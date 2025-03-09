@@ -23,7 +23,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.composable.transitions.TO_BOUNCER_FADE_FRACTION
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -36,9 +38,7 @@ import kotlinx.coroutines.flow.Flow
 @SysUISingleton
 class AlternateBouncerToPrimaryBouncerTransitionViewModel
 @Inject
-constructor(
-    animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
@@ -46,8 +46,22 @@ constructor(
                 edge = Edge.create(from = ALTERNATE_BOUNCER, to = Scenes.Bouncer),
             )
             .setupWithoutSceneContainer(
-                edge = Edge.create(from = ALTERNATE_BOUNCER, to = PRIMARY_BOUNCER),
+                edge = Edge.create(from = ALTERNATE_BOUNCER, to = PRIMARY_BOUNCER)
             )
+
+    private val alphaForAnimationStep: (Float) -> Float =
+        when {
+            SceneContainerFlag.isEnabled -> { step ->
+                    1f - Math.min((step / TO_BOUNCER_FADE_FRACTION), 1f)
+                }
+            else -> { step -> 1f - step }
+        }
+
+    val lockscreenAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = FromAlternateBouncerTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
+            onStep = alphaForAnimationStep,
+        )
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)

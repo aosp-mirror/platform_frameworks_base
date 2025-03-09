@@ -720,6 +720,25 @@ public class HighBrightnessModeControllerTest {
                         .DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_LOW_REQUESTED_BRIGHTNESS));
     }
 
+    @Test
+    public void testDoesNotAcceptExternalHdrLayerUpdates_hdrBoostEnabled() {
+        final HighBrightnessModeController hbmc = createDefaultHbm();
+        assertFalse(hbmc.mIsHdrLayerPresent);
+
+        hbmc.onHdrBoostApplied(true);
+        assertFalse(hbmc.mIsHdrLayerPresent);
+    }
+
+    @Test
+    public void testAcceptsExternalHdrLayerUpdates_hdrBoostDisabled() {
+        final HighBrightnessModeController hbmc = createDefaultHbm();
+        hbmc.disableHdrBoost();
+        assertFalse(hbmc.mIsHdrLayerPresent);
+
+        hbmc.onHdrBoostApplied(true);
+        assertTrue(hbmc.mIsHdrLayerPresent);
+    }
+
     private void assertState(HighBrightnessModeController hbmc,
             float brightnessMin, float brightnessMax, int hbmMode) {
         assertEquals(brightnessMin, hbmc.getCurrentBrightnessMin(), EPSILON);

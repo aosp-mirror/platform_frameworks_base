@@ -77,6 +77,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastAssistant;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastMetadata;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
+import com.android.settingslib.media.InputMediaDevice;
 import com.android.settingslib.media.InputRouteManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
@@ -812,8 +813,15 @@ public class MediaSwitchingController
     }
 
     private void attachConnectNewDeviceItemIfNeeded(List<MediaItem> mediaItems) {
+        boolean isSelectedDeviceNotAGroup = getSelectedMediaDevice().size() == 1;
+        if (enableInputRouting()) {
+            // When input routing is enabled, there are expected to be at least 2 total selected
+            // devices: one output device and one input device.
+            isSelectedDeviceNotAGroup = getSelectedMediaDevice().size() <= 2;
+        }
+
         // Attach "Connect a device" item only when current output is not remote and not a group
-        if (!isCurrentConnectedDeviceRemote() && getSelectedMediaDevice().size() == 1) {
+        if (!isCurrentConnectedDeviceRemote() && isSelectedDeviceNotAGroup) {
             mediaItems.add(MediaItem.createPairNewDeviceMediaItem());
         }
     }
@@ -875,6 +883,17 @@ public class MediaSwitchingController
     }
 
     protected void connectDevice(MediaDevice device) {
+        // If input routing is supported and the device is an input device, call mInputRouteManager
+        // to handle routing.
+        if (enableInputRouting() && device instanceof InputMediaDevice) {
+            var unused =
+                    ThreadUtils.postOnBackgroundThread(
+                            () -> {
+                                mInputRouteManager.selectDevice(device);
+                            });
+            return;
+        }
+
         mMetricLogger.updateOutputEndPoints(getCurrentConnectedMediaDevice(), device);
 
         ThreadUtils.postOnBackgroundThread(() -> {

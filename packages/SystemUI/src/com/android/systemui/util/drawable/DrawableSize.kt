@@ -11,6 +11,7 @@ import android.graphics.drawable.AnimatedStateListDrawable
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.LayerDrawable
 import android.util.Log
 import androidx.annotation.Px
 import com.android.app.tracing.traceSection
@@ -22,36 +23,35 @@ class DrawableSize {
         const val TAG = "SysUiDrawableSize"
 
         /**
-         * Downscales passed Drawable to set maximum width and height. This will only
-         * be done for Drawables that can be downscaled non-destructively - e.g. animated
-         * and stateful drawables will no be downscaled.
+         * Downscales passed Drawable to set maximum width and height. This will only be done for
+         * Drawables that can be downscaled non-destructively - e.g. animated drawables, stateful
+         * drawables, and drawables with mixed-type layers will not be downscaled.
          *
-         * Downscaling will keep the aspect ratio.
-         * This method will not touch drawables that already fit into size specification.
+         * Downscaling will keep the aspect ratio. This method will not touch drawables that already
+         * fit into size specification.
          *
          * @param resources Resources on which to base the density of resized drawable.
          * @param drawable Drawable to downscale.
          * @param maxWidth Maximum width of the downscaled drawable.
          * @param maxHeight Maximum height of the downscaled drawable.
-         *
          * @return returns downscaled drawable if it's possible to downscale it or original if it's
-         *         not.
+         *   not.
          */
         @JvmStatic
         fun downscaleToSize(
             res: Resources,
             drawable: Drawable,
             @Px maxWidth: Int,
-            @Px maxHeight: Int
+            @Px maxHeight: Int,
         ): Drawable {
             traceSection("DrawableSize#downscaleToSize") {
                 // Bitmap drawables can contain big bitmaps as their content while sneaking it past
                 // us using density scaling. Inspect inside the Bitmap drawables for actual bitmap
                 // size for those.
-                val originalWidth = (drawable as? BitmapDrawable)?.bitmap?.width
-                                    ?: drawable.intrinsicWidth
-                val originalHeight = (drawable as? BitmapDrawable)?.bitmap?.height
-                                    ?: drawable.intrinsicHeight
+                val originalWidth =
+                    (drawable as? BitmapDrawable)?.bitmap?.width ?: drawable.intrinsicWidth
+                val originalHeight =
+                    (drawable as? BitmapDrawable)?.bitmap?.height ?: drawable.intrinsicHeight
 
                 // Don't touch drawable if we can't resolve sizes for whatever reason.
                 if (originalWidth <= 0 || originalHeight <= 0) {
@@ -61,14 +61,18 @@ class DrawableSize {
                 // Do not touch drawables that are already within bounds.
                 if (originalWidth < maxWidth && originalHeight < maxHeight) {
                     if (Log.isLoggable(TAG, Log.DEBUG)) {
-                        Log.d(TAG, "Not resizing $originalWidth x $originalHeight" + " " +
-                                "to $maxWidth x $maxHeight")
+                        Log.d(
+                            TAG,
+                            "Not resizing $originalWidth x $originalHeight" +
+                                " " +
+                                "to $maxWidth x $maxHeight",
+                        )
                     }
 
                     return drawable
                 }
 
-                if (!isSimpleBitmap(drawable)) {
+                if (isComplicatedBitmap(drawable)) {
                     return drawable
                 }
 
@@ -80,19 +84,25 @@ class DrawableSize {
                 val height = (originalHeight * scale).toInt()
 
                 if (width <= 0 || height <= 0) {
-                    Log.w(TAG, "Attempted to resize ${drawable.javaClass.simpleName} " +
-                            "from $originalWidth x $originalHeight to invalid $width x $height.")
+                    Log.w(
+                        TAG,
+                        "Attempted to resize ${drawable.javaClass.simpleName} " +
+                            "from $originalWidth x $originalHeight to invalid $width x $height.",
+                    )
                     return drawable
                 }
 
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Resizing large drawable (${drawable.javaClass.simpleName}) " +
-                            "from $originalWidth x $originalHeight to $width x $height")
+                    Log.d(
+                        TAG,
+                        "Resizing large drawable (${drawable.javaClass.simpleName}) " +
+                            "from $originalWidth x $originalHeight to $width x $height",
+                    )
                 }
 
                 // We want to keep existing config if it's more efficient than 32-bit RGB.
-                val config = (drawable as? BitmapDrawable)?.bitmap?.config
-                        ?: Bitmap.Config.ARGB_8888
+                val config =
+                    (drawable as? BitmapDrawable)?.bitmap?.config ?: Bitmap.Config.ARGB_8888
                 val scaledDrawableBitmap = Bitmap.createBitmap(width, height, config)
                 val canvas = Canvas(scaledDrawableBitmap)
 
@@ -105,8 +115,8 @@ class DrawableSize {
             }
         }
 
-        private fun isSimpleBitmap(drawable: Drawable): Boolean {
-            return !(drawable.isStateful || isAnimated(drawable))
+        private fun isComplicatedBitmap(drawable: Drawable): Boolean {
+            return drawable.isStateful || isAnimated(drawable) || hasComplicatedLayers(drawable)
         }
 
         private fun isAnimated(drawable: Drawable): Boolean {
@@ -118,6 +128,31 @@ class DrawableSize {
                 drawable is AnimatedRotateDrawable ||
                 drawable is AnimatedStateListDrawable ||
                 drawable is AnimatedVectorDrawable
+        }
+
+        private fun hasComplicatedLayers(drawable: Drawable): Boolean {
+            if (drawable !is LayerDrawable) {
+                return false
+            }
+            if (drawable.numberOfLayers == 1) {
+                return false
+            }
+
+            val firstLayerType = drawable.getDrawable(0).javaClass
+            for (i in 1..<drawable.numberOfLayers) {
+                val layer = drawable.getDrawable(i)
+                if (layer.javaClass != firstLayerType) {
+                    // If different layers have different drawable types, we shouldn't scale it down
+                    // because we may lose the level information if one of the layers is a bitmap
+                    // and another layer is a level-list. See b/244282477.
+                    return true
+                }
+                if (isComplicatedBitmap(layer)) {
+                    return true
+                }
+            }
+
+            return false
         }
     }
 }

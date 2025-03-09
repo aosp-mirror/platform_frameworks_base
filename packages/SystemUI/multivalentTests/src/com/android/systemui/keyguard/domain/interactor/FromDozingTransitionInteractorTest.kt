@@ -36,8 +36,9 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -79,7 +80,7 @@ import platform.test.runner.parameterized.Parameters
 class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            this.fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
             this.fakeCommunalSceneRepository =
                 spy(FakeCommunalSceneRepository(applicationScope = applicationCoroutineScope))
         }
@@ -89,6 +90,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
     private lateinit var powerInteractor: PowerInteractor
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var keyguardInteractor: KeyguardInteractor
 
     companion object {
         @JvmStatic
@@ -105,7 +107,8 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
     @Before
     fun setup() {
         powerInteractor = kosmos.powerInteractor
-        transitionRepository = kosmos.fakeKeyguardTransitionRepository
+        keyguardInteractor = kosmos.keyguardInteractor
+        transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
         underTest = kosmos.fromDozingTransitionInteractor
 
         underTest.start()
@@ -133,6 +136,20 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             // Under default conditions, we should transition to LOCKSCREEN when waking up.
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.LOCKSCREEN)
+        }
+
+    @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionToGone_onWakeup_whenGoingAway() =
+        testScope.runTest {
+            keyguardInteractor.setIsKeyguardGoingAway(true)
+            runCurrent()
+
+            powerInteractor.setAwakeForTest()
+            advanceTimeBy(60L)
+
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.GONE)
         }
 
     @Test

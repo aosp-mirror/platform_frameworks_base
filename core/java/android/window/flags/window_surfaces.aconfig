@@ -13,14 +13,6 @@ flag {
 
 flag {
     namespace: "window_surfaces"
-    name: "explicit_refresh_rate_hints"
-    description: "Performance related hints during transitions"
-    is_fixed_read_only: true
-    bug: "300019131"
-}
-
-flag {
-    namespace: "window_surfaces"
     name: "delete_capture_display"
     description: "Delete uses of ScreenCapture#captureDisplay"
     is_fixed_read_only: true
@@ -33,14 +25,6 @@ flag {
     description: "Whether to allow system activity to disable ActivityRecordInputSink"
     is_fixed_read_only: true
     bug: "262477923"
-}
-
-flag {
-    namespace: "window_surfaces"
-    name: "secure_window_state"
-    description: "Move SC secure flag to WindowState level"
-    is_fixed_read_only: true
-    bug: "308662081"
 }
 
 flag {
@@ -104,4 +88,13 @@ flag {
     description: "Set VRI SC properties in the client instead of system server"
     is_fixed_read_only: true
     bug: "308662081"
+}
+
+flag {
+    name: "jank_api"
+    namespace: "window_surfaces"
+    description: "Adds the jank data listener to AttachedSurfaceControl"
+    is_fixed_read_only: true
+    is_exported: true
+    bug: "293949943"
 }

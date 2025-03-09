@@ -110,6 +110,7 @@
     <dimen name="below_clock_padding_start">32dp</dimen>
     <dimen name="below_clock_padding_end">16dp</dimen>
     <dimen name="below_clock_padding_start_icons">28dp</dimen>
+    <dimen name="smartspace_padding_horizontal">16dp</dimen>
 
     <!-- Proportion of the screen height to use to set the maximum height of the bouncer to when
          the device is in the DEVICE_POSTURE_HALF_OPENED posture, for the PIN/pattern entry. 0 will

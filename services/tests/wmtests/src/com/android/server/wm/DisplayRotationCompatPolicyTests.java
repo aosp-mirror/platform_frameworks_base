@@ -51,6 +51,7 @@ import static org.mockito.Mockito.times;
 import android.app.servertransaction.RefreshCallbackItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -544,39 +545,35 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     }
 
     @Test
-    public void testIsCameraActiveWhenCallbackInvokedNoMultiWindow_returnTrue() {
+    public void testShouldCameraCompatControlOrientationWhenInvokedNoMultiWindow_returnTrue() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
-        assertTrue(
-                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+        assertTrue(mDisplayRotationCompatPolicy.shouldCameraCompatControlOrientation(mActivity));
     }
 
     @Test
-    public void testIsCameraActiveWhenCallbackNotInvokedNoMultiWindow_returnFalse() {
+    public void testShouldCameraCompatControlOrientationWhenNotInvokedNoMultiWindow_returnFalse() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertFalse(
-                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+        assertFalse(mDisplayRotationCompatPolicy.shouldCameraCompatControlOrientation(mActivity));
     }
 
     @Test
-    public void testIsCameraActiveWhenCallbackNotInvokedMultiWindow_returnFalse() {
+    public void testShouldCameraCompatControlOrientationWhenNotInvokedMultiWindow_returnFalse() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         when(mActivity.inMultiWindowMode()).thenReturn(true);
 
-        assertFalse(
-                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+        assertFalse(mDisplayRotationCompatPolicy.shouldCameraCompatControlOrientation(mActivity));
     }
 
     @Test
-    public void testIsCameraActiveWhenCallbackInvokedMultiWindow_returnFalse() {
+    public void testShouldCameraCompatControlOrientationWhenInvokedMultiWindow_returnFalse() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         when(mActivity.inMultiWindowMode()).thenReturn(true);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
-        assertFalse(
-                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+        assertFalse(mDisplayRotationCompatPolicy.shouldCameraCompatControlOrientation(mActivity));
     }
 
     private void configureActivity(@ScreenOrientation int activityOrientation) {
@@ -595,6 +592,11 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 .setScreenOrientation(activityOrientation)
                 .setTask(mTask)
                 .build();
+
+        spyOn(mActivity.info.applicationInfo);
+        // Disable for camera compat.
+        doReturn(false).when(mActivity.info.applicationInfo).isChangeEnabled(
+                ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT);
 
         spyOn(mActivity.mAtmService.getLifecycleManager());
         spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
@@ -618,7 +620,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
-                .scheduleTransactionAndLifecycleItems(mActivity.app.getThread(),
+                .scheduleTransactionItems(mActivity.app.getThread(),
                         refreshCallbackItem, resumeActivityItem);
     }
 

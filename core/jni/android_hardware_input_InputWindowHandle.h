@@ -24,24 +24,11 @@
 
 namespace android {
 
-class NativeInputWindowHandle : public gui::WindowInfoHandle {
-public:
-    NativeInputWindowHandle(jweak objWeak);
-    virtual ~NativeInputWindowHandle();
+sp<gui::WindowInfoHandle> android_view_InputWindowHandle_getHandle(JNIEnv* env,
+                                                                   jobject inputWindowHandleObj);
 
-    jobject getInputWindowHandleObjLocalRef(JNIEnv* env);
-
-    virtual bool updateInfo();
-
-private:
-    jweak mObjWeak;
-};
-
-extern sp<NativeInputWindowHandle> android_view_InputWindowHandle_getHandle(
-        JNIEnv* env, jobject inputWindowHandleObj);
-
-extern jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env,
-                                                             gui::WindowInfo windowInfo);
+jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env,
+                                                      const gui::WindowInfo& windowInfo);
 
 } // namespace android
 

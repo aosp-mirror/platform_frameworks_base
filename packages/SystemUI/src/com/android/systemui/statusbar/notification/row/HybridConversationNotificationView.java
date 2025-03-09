@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Flags;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Icon;
@@ -93,12 +94,22 @@ public class HybridConversationNotificationView extends HybridNotificationView {
         }
         mConversationSenderName = requireViewById(R.id.conversation_notification_sender);
         applyTextColor(mConversationSenderName, mSecondaryTextColor);
-        mFacePileSize = getResources()
-                .getDimensionPixelSize(R.dimen.conversation_single_line_face_pile_size);
-        mFacePileAvatarSize = getResources()
-                .getDimensionPixelSize(R.dimen.conversation_single_line_face_pile_avatar_size);
-        mSingleAvatarSize = getResources()
-                .getDimensionPixelSize(R.dimen.conversation_single_line_avatar_size);
+        if (Flags.notificationsRedesignTemplates()) {
+            mFacePileSize = getResources()
+                    .getDimensionPixelSize(R.dimen.notification_2025_single_line_face_pile_size);
+            mFacePileAvatarSize = getResources()
+                    .getDimensionPixelSize(
+                            R.dimen.notification_2025_single_line_face_pile_avatar_size);
+            mSingleAvatarSize = getResources()
+                    .getDimensionPixelSize(R.dimen.notification_2025_single_line_avatar_size);
+        } else {
+            mFacePileSize = getResources()
+                    .getDimensionPixelSize(R.dimen.conversation_single_line_face_pile_size);
+            mFacePileAvatarSize = getResources()
+                    .getDimensionPixelSize(R.dimen.conversation_single_line_face_pile_avatar_size);
+            mSingleAvatarSize = getResources()
+                    .getDimensionPixelSize(R.dimen.conversation_single_line_avatar_size);
+        }
         mFacePileProtectionWidth = getResources().getDimensionPixelSize(
                 R.dimen.conversation_single_line_face_pile_protection_width);
         mTransformationHelper.setCustomTransformation(

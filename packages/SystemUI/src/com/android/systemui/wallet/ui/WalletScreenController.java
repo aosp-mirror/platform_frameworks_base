@@ -330,13 +330,19 @@ public class WalletScreenController implements
         QAWalletCardViewInfo(Context context, WalletCard walletCard) {
             mWalletCard = walletCard;
             Icon cardImageIcon = mWalletCard.getCardImage();
-            if (cardImageIcon.getType() == Icon.TYPE_URI) {
-                mCardDrawable = null;
-            } else {
+            if (cardImageIcon.getType() == Icon.TYPE_BITMAP
+                    || cardImageIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
                 mCardDrawable = mWalletCard.getCardImage().loadDrawable(context);
+            } else {
+                mCardDrawable = null;
             }
             Icon icon = mWalletCard.getCardIcon();
-            mIconDrawable = icon == null ? null : icon.loadDrawable(context);
+            if (icon != null && (icon.getType() == Icon.TYPE_BITMAP
+                    || icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP)) {
+                mIconDrawable = icon.loadDrawable(context);
+            } else {
+                mIconDrawable = null;
+            }
         }
 
         @Override

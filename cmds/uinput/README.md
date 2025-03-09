@@ -83,6 +83,11 @@ control values to be sent to the uinput device, which depends on the control cod
 Due to the sequential nature in which this is parsed, the `type` field must be specified before
 the `data` field in this JSON Object.
 
+Every `register` command will need a `"UI_SET_EVBIT"` configuration entry that lists what types of
+axes it declares. This entry should be the first in the list. For example, if the uinput device has
+`"UI_SET_KEYBIT"` and `"UI_SET_RELBIT"` configuration entries, it will also need a `"UI_SET_EVBIT"`
+entry with data of `["EV_KEY", "EV_REL"]` or the other configuration entries will be ignored.
+
 `ff_effects_max` must be provided if `UI_SET_FFBIT` is used in `configuration`.
 
 `abs_info` fields are provided to set the device axes information. It is an array of below objects:

@@ -21,7 +21,7 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.QuickStepContract
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 class TouchpadGesturesInteractor(
     private val sysUiState: SysUiState,

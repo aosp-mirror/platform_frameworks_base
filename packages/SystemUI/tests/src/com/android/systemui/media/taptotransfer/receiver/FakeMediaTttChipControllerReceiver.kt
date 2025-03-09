@@ -23,7 +23,6 @@ import android.view.ViewGroup
 import android.view.accessibility.AccessibilityManager
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewUiEventLogger
@@ -43,7 +42,6 @@ class FakeMediaTttChipControllerReceiver(
     dumpManager: DumpManager,
     powerManager: PowerManager,
     mainHandler: Handler,
-    mediaTttFlags: MediaTttFlags,
     uiEventLogger: MediaTttReceiverUiEventLogger,
     viewUtil: ViewUtil,
     wakeLockBuilder: WakeLock.Builder,
@@ -62,7 +60,6 @@ class FakeMediaTttChipControllerReceiver(
         dumpManager,
         powerManager,
         mainHandler,
-        mediaTttFlags,
         uiEventLogger,
         viewUtil,
         wakeLockBuilder,

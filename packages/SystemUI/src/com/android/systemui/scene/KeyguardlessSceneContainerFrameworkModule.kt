@@ -29,6 +29,7 @@ import com.android.systemui.scene.domain.startable.StatusBarStartable
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.composable.SceneContainerTransitions
 import com.android.systemui.scene.ui.viewmodel.SplitEdgeDetector
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
@@ -98,6 +99,7 @@ interface KeyguardlessSceneContainerFrameworkModule {
                         Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Gone,
+                transitions = SceneContainerTransitions,
                 overlayKeys =
                     listOfNotNull(
                         Overlays.NotificationsShade.takeIf { DualShade.isEnabled },

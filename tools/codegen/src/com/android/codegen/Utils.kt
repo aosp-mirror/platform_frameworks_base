@@ -62,7 +62,7 @@ fun String.toLowerCamel(): String {
     if (length >= 2 && this[0] == 'm' && this[1].isUpperCase()) return substring(1).capitalize()
     if (all { it.isLetterOrDigit() }) return decapitalize()
     return split("[^a-zA-Z0-9]".toRegex())
-            .map { it.toLowerCase().capitalize() }
+            .map { it.lowercase().capitalize() }
             .joinToString("")
             .decapitalize()
 }

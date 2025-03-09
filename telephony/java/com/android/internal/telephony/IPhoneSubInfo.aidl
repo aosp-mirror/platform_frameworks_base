@@ -83,6 +83,12 @@ interface IPhoneSubInfo {
     String getGroupIdLevel1ForSubscriber(int subId, String callingPackage,
             String callingFeatureId);
 
+    /**
+     * Retrieves the Group Identifier Level1 for GSM phones of a subId.
+     */
+    String getGroupIdLevel2ForSubscriber(int subId, String callingPackage,
+            String callingFeatureId);
+
     /** @deprecared Use {@link getIccSerialNumberWithFeature(String, String)} instead */
     @UnsupportedAppUsage
     String getIccSerialNumber(String callingPackage);
@@ -208,10 +214,9 @@ interface IPhoneSubInfo {
     /**
      * Fetches the ISIM public user identities (EF_IMPU) from UICC based on subId
      */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(" +
-    "anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})")
-     List<Uri> getImsPublicUserIdentities(int subId, String callingPackage,
-                                           String callingFeatureId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+     List<Uri> getImsPublicUserIdentities(int subId, String callingPackage);
 
     /**
      * Returns the IMS Service Table (IST) that was loaded from the ISIM.
@@ -225,6 +230,20 @@ interface IPhoneSubInfo {
      *      not present or not loaded
      */
     String[] getIsimPcscf(int subId);
+
+    /**
+      * Fetches IMS Proxy Call Session Control Function(P-CSCF) based on the subscription.
+      *
+      * @param subId subscriptionId
+      * @param callingPackage package name of the caller
+      * @return List of IMS Proxy Call Session Control Function strings.
+      * @throws IllegalArgumentException if the subscriptionId is not valid
+      * @throws IllegalStateException in case the ISIM hasn’t been loaded.
+      * @throws SecurityException if the caller does not have the required permission
+      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+    List<String> getImsPcscfAddresses(int subId, String callingPackage);
 
     /**
      * Returns the response of the SIM application on the UICC to authentication

@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.Display;
 import android.view.WindowManager;
 
 import java.util.Objects;
@@ -53,11 +54,12 @@ public class ScreenshotRequest implements Parcelable {
     private final Bitmap mBitmap;
     private final Rect mBoundsInScreen;
     private final Insets mInsets;
+    private final int mDisplayId;
 
     private ScreenshotRequest(
             @WindowManager.ScreenshotType int type, @WindowManager.ScreenshotSource int source,
             ComponentName topComponent, int taskId, int userId,
-            Bitmap bitmap, Rect boundsInScreen, Insets insets) {
+            Bitmap bitmap, Rect boundsInScreen, Insets insets, int displayId) {
         mType = type;
         mSource = source;
         mTopComponent = topComponent;
@@ -66,6 +68,7 @@ public class ScreenshotRequest implements Parcelable {
         mBitmap = bitmap;
         mBoundsInScreen = boundsInScreen;
         mInsets = insets;
+        mDisplayId = displayId;
     }
 
     ScreenshotRequest(Parcel in) {
@@ -77,6 +80,7 @@ public class ScreenshotRequest implements Parcelable {
         mBitmap = HardwareBitmapBundler.bundleToHardwareBitmap(in.readTypedObject(Bundle.CREATOR));
         mBoundsInScreen = in.readTypedObject(Rect.CREATOR);
         mInsets = in.readTypedObject(Insets.CREATOR);
+        mDisplayId = in.readInt();
     }
 
     @WindowManager.ScreenshotType
@@ -113,6 +117,10 @@ public class ScreenshotRequest implements Parcelable {
         return mTopComponent;
     }
 
+    public int getDisplayId() {
+        return mDisplayId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -128,6 +136,7 @@ public class ScreenshotRequest implements Parcelable {
         dest.writeTypedObject(HardwareBitmapBundler.hardwareBitmapToBundle(mBitmap), 0);
         dest.writeTypedObject(mBoundsInScreen, 0);
         dest.writeTypedObject(mInsets, 0);
+        dest.writeInt(mDisplayId);
     }
 
     @NonNull
@@ -161,6 +170,7 @@ public class ScreenshotRequest implements Parcelable {
         private int mTaskId = INVALID_TASK_ID;
         private int mUserId = USER_NULL;
         private ComponentName mTopComponent;
+        private int mDisplayId = Display.INVALID_DISPLAY;
 
         /**
          * Begin building a ScreenshotRequest.
@@ -193,7 +203,7 @@ public class ScreenshotRequest implements Parcelable {
             }
 
             return new ScreenshotRequest(mType, mSource, mTopComponent, mTaskId, mUserId, mBitmap,
-                    mBoundsInScreen, mInsets);
+                    mBoundsInScreen, mInsets, mDisplayId);
         }
 
         /**
@@ -253,6 +263,16 @@ public class ScreenshotRequest implements Parcelable {
          */
         public Builder setInsets(@NonNull Insets insets) {
             mInsets = insets;
+            return this;
+        }
+
+        /**
+         * Set the display ID for this request.
+         *
+         * @param displayId see {@link Display}
+         */
+        public Builder setDisplayId(int displayId) {
+            mDisplayId = displayId;
             return this;
         }
     }

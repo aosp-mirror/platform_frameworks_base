@@ -26,6 +26,9 @@ enum class WakeSleepReason(
     /** The physical power button was pressed to wake up or sleep the device. */
     POWER_BUTTON(isTouch = false, PowerManager.WAKE_REASON_POWER_BUTTON),
 
+    /** The sleep button was pressed to sleep the device. */
+    SLEEP_BUTTON(isTouch = false, PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON),
+
     /** The user has tapped or double tapped to wake the screen. */
     TAP(isTouch = true, PowerManager.WAKE_REASON_TAP),
 
@@ -78,6 +81,7 @@ enum class WakeSleepReason(
         fun fromPowerManagerSleepReason(reason: Int): WakeSleepReason {
             return when (reason) {
                 PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON -> POWER_BUTTON
+                PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON -> SLEEP_BUTTON
                 PowerManager.GO_TO_SLEEP_REASON_TIMEOUT -> TIMEOUT
                 PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD -> FOLD
                 else -> OTHER

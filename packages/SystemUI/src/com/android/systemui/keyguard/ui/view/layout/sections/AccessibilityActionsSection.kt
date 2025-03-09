@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.AccessibilityActionsViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.AccessibilityActionsViewModel
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.Utils
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
@@ -37,7 +38,7 @@ import kotlinx.coroutines.DisposableHandle
 class AccessibilityActionsSection
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val accessibilityActionsViewModel: AccessibilityActionsViewModel,
 ) : KeyguardSection() {

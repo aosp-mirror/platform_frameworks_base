@@ -12,3 +12,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "cont_auth_plugin"
+    namespace: "biometrics_framework"
+    description: "Plugin and related API hooks for contextual auth plugins"
+    bug: "373600589"
+}

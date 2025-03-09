@@ -8,8 +8,14 @@ package {
 }
 
 // used both for the android_app and android_library
-shell_srcs = ["src/**/*.java",":dumpstate_aidl"]
-shell_static_libs = ["androidx.legacy_legacy-support-v4"]
+shell_srcs = [
+    "src/**/*.java",
+    ":dumpstate_aidl",
+]
+shell_static_libs = [
+    "androidx.legacy_legacy-support-v4",
+    "wear_aconfig_declarations_flags_java_lib",
+]
 
 android_app {
     name: "Shell",
@@ -21,6 +27,11 @@ android_app {
     static_libs: shell_static_libs,
     libs: [
         "device_policy_aconfig_flags_lib",
+    ],
+    flags_packages: [
+        "android.security.flags-aconfig",
+        "android.permission.flags-aconfig",
+        "wear_aconfig_declarations",
     ],
     platform_apis: true,
     certificate: "platform",
@@ -43,4 +54,8 @@ android_library {
     static_libs: shell_static_libs,
     platform_apis: true,
     manifest: "AndroidManifest.xml",
+    flags_packages: [
+        "android.security.flags-aconfig",
+        "android.permission.flags-aconfig",
+    ],
 }

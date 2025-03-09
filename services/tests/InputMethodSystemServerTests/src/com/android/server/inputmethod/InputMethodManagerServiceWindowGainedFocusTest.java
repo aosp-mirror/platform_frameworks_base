@@ -39,8 +39,10 @@ import static org.mockito.Mockito.when;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.RemoteException;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.Log;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.Flags;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.IInputMethodClient;
@@ -89,6 +91,9 @@ public class InputMethodManagerServiceWindowGainedFocusTest
             };
     private static final int DEFAULT_SOFT_INPUT_FLAG =
             StartInputFlags.VIEW_HAS_FOCUS | StartInputFlags.IS_TEXT_EDITOR;
+
+    private final DeviceFlagsValueProvider mFlagsValueProvider = new DeviceFlagsValueProvider();
+
     @Mock
     VirtualDeviceManagerInternal mMockVdmInternal;
 
@@ -125,7 +130,7 @@ public class InputMethodManagerServiceWindowGainedFocusTest
             case SOFT_INPUT_STATE_UNSPECIFIED:
                 boolean showSoftInput =
                         (mSoftInputAdjustment == SOFT_INPUT_ADJUST_RESIZE) || mIsLargeScreen;
-                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
                     verifySetImeVisibility(true /* setVisible */, showSoftInput /* invoked */);
                     // A hide can only be triggered if there is no editorFocused, which this test
                     // always sets.
@@ -141,7 +146,7 @@ public class InputMethodManagerServiceWindowGainedFocusTest
                 break;
             case SOFT_INPUT_STATE_VISIBLE:
             case SOFT_INPUT_STATE_ALWAYS_VISIBLE:
-                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
                     verifySetImeVisibility(true /* setVisible */, true /* invoked */);
                     verifySetImeVisibility(false /* setVisible */, false /* invoked */);
                 } else {
@@ -150,7 +155,7 @@ public class InputMethodManagerServiceWindowGainedFocusTest
                 }
                 break;
             case SOFT_INPUT_STATE_UNCHANGED:
-                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
                     verifySetImeVisibility(true /* setVisible */, false /* invoked */);
                     verifySetImeVisibility(false /* setVisible */, false /* invoked */);
                 } else {
@@ -160,7 +165,7 @@ public class InputMethodManagerServiceWindowGainedFocusTest
                 break;
             case SOFT_INPUT_STATE_HIDDEN:
             case SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
                     verifySetImeVisibility(true /* setVisible */, false /* invoked */);
                     // In this case, we don't have to manipulate the requested visible types of
                     // the WindowState, as they're already in the correct state
@@ -192,7 +197,7 @@ public class InputMethodManagerServiceWindowGainedFocusTest
             case SOFT_INPUT_STATE_UNSPECIFIED:
                 boolean hideSoftInput =
                         (mSoftInputAdjustment != SOFT_INPUT_ADJUST_RESIZE) && !mIsLargeScreen;
-                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
                     // A show can only be triggered in forward navigation
                     verifySetImeVisibility(false /* setVisible */, false /* invoked */);
                     // A hide can only be triggered if there is no editorFocused, which this test
@@ -209,7 +214,7 @@ public class InputMethodManagerServiceWindowGainedFocusTest
             case SOFT_INPUT_STATE_VISIBLE:
             case SOFT_INPUT_STATE_HIDDEN:
             case SOFT_INPUT_STATE_UNCHANGED: // Do nothing
-                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
                     verifySetImeVisibility(true /* setVisible */, false /* invoked */);
                     verifySetImeVisibility(false /* setVisible */, false /* invoked */);
                 } else {
@@ -218,7 +223,7 @@ public class InputMethodManagerServiceWindowGainedFocusTest
                 }
                 break;
             case SOFT_INPUT_STATE_ALWAYS_VISIBLE:
-                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
                     verifySetImeVisibility(true /* setVisible */, true /* invoked */);
                     verifySetImeVisibility(false /* setVisible */, false /* invoked */);
                 } else {
@@ -227,7 +232,7 @@ public class InputMethodManagerServiceWindowGainedFocusTest
                 }
                 break;
             case SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
                     verifySetImeVisibility(true /* setVisible */, false /* invoked */);
                     // In this case, we don't have to manipulate the requested visible types of
                     // the WindowState, as they're already in the correct state

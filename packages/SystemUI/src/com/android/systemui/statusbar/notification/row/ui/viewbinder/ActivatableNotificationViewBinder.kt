@@ -28,7 +28,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModel
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds an [ActivatableNotificationView] to its [view model][ActivatableNotificationViewModel]. */
 object ActivatableNotificationViewBinder {

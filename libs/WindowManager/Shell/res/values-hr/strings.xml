@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemi s fotoaparatom?\nDodirnite za popravak"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Problem nije riješen?\nDodirnite za vraćanje"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nemate problema s fotoaparatom? Dodirnite za odbacivanje."</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Izbornik aplikacije možete pronaći ovdje"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Otvorite prikaz na računalu da biste otvorili više aplikacija zajedno"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Vratite se na cijeli zaslon bilo kad iz izbornika aplikacije"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Gledajte i učinite više"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Povucite drugu aplikaciju unutra da biste podijelili zaslon"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dvaput dodirnite izvan aplikacije da biste je premjestili"</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"Odaberite"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Snimka zaslona"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Otvori u pregledniku"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"Otvori u aplikaciji"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Novi prozor"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"Upravljanje prozorima"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"Promijeni omjer slike"</string>
     <string name="close_text" msgid="4986518933445178928">"Zatvorite"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Zatvorite izbornik"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Otvaranje izbornika"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maksimalno povećaj zaslon"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Izradi snimku zaslona"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Nije moguće promijeniti veličinu aplikacije"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Promijeni veličinu"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Aplikacija se ne može premjestiti ovdje"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Interaktivno"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Vrati"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maksimiziraj"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Vrati"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Poravnaj lijevo"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Poravnaj desno"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"Otvori prema zadanim postavkama"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"Odaberite način otvaranja web-veza za ovu aplikaciju"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"U aplikaciji"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"U pregledniku"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"U redu"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"Ovdje brzo otvorite aplikacije u pregledniku"</string>
 </resources>

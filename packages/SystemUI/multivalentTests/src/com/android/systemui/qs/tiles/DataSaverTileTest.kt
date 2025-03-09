@@ -17,8 +17,9 @@
 package com.android.systemui.qs.tiles
 
 import android.os.Handler
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.testing.TestableLooper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
@@ -29,8 +30,11 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QSComposeFragment
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.DataSaverController
@@ -42,11 +46,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class DataSaverTileTest : SysuiTestCase() {
+class DataSaverTileTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Mock private lateinit var mHost: QSHost
     @Mock private lateinit var mMetricsLogger: MetricsLogger
@@ -84,7 +94,7 @@ class DataSaverTileTest : SysuiTestCase() {
                 mQsLogger,
                 dataSaverController,
                 mDialogTransitionAnimator,
-                systemUIDialogFactory
+                systemUIDialogFactory,
             )
     }
 
@@ -100,8 +110,7 @@ class DataSaverTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, true)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_data_saver_icon_on))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_data_saver_icon_on))
     }
 
     @Test
@@ -110,7 +119,22 @@ class DataSaverTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, false)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_data_saver_icon_off))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_data_saver_icon_off))
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return allCombinationsOf(QSComposeFragment.FLAG_NAME)
+        }
     }
 }

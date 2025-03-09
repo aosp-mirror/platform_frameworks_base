@@ -76,6 +76,14 @@
     <dimen name="large_dialog_width">472dp</dimen>
 
     <dimen name="large_screen_shade_header_height">42dp</dimen>
+
+    <!--
+    The horizontal distance between the shade overlay panel (both notifications and quick settings)
+    and the edge of the screen. On Compact screens in portrait orientation (< w600dp) this is
+    ignored in the shade layout, which takes up the full screen width without margins.
+    -->
+    <dimen name="shade_panel_margin_horizontal">24dp</dimen>
+
     <!-- start padding is smaller to account for status icon margins coming from drawable itself -->
     <dimen name="hover_system_icons_container_padding_start">3dp</dimen>
     <dimen name="hover_system_icons_container_padding_end">4dp</dimen>
@@ -118,6 +126,4 @@
     <dimen name="controls_content_padding">24dp</dimen>
     <dimen name="control_list_vertical_spacing">8dp</dimen>
     <dimen name="control_list_horizontal_spacing">16dp</dimen>
-    <!-- For portrait direction in unfold foldable device, we don't need keyguard_smartspace_top_offset-->
-    <dimen name="keyguard_smartspace_top_offset">0dp</dimen>
 </resources>

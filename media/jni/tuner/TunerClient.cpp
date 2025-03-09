@@ -56,7 +56,7 @@ vector<int32_t> TunerClient::getFrontendIds() {
     return ids;
 }
 
-sp<FrontendClient> TunerClient::openFrontend(int32_t frontendHandle) {
+sp<FrontendClient> TunerClient::openFrontend(int64_t frontendHandle) {
     if (mTunerService != nullptr) {
         shared_ptr<ITunerFrontend> tunerFrontend;
         Status s = mTunerService->openFrontend(frontendHandle, &tunerFrontend);
@@ -94,7 +94,7 @@ shared_ptr<FrontendInfo> TunerClient::getFrontendInfo(int32_t id) {
     return nullptr;
 }
 
-sp<DemuxClient> TunerClient::openDemux(int32_t demuxHandle) {
+sp<DemuxClient> TunerClient::openDemux(int64_t demuxHandle) {
     if (mTunerService != nullptr) {
         shared_ptr<ITunerDemux> tunerDemux;
         Status s = mTunerService->openDemux(demuxHandle, &tunerDemux);
@@ -107,7 +107,7 @@ sp<DemuxClient> TunerClient::openDemux(int32_t demuxHandle) {
     return nullptr;
 }
 
-shared_ptr<DemuxInfo> TunerClient::getDemuxInfo(int32_t demuxHandle) {
+shared_ptr<DemuxInfo> TunerClient::getDemuxInfo(int64_t demuxHandle) {
     if (mTunerService != nullptr) {
         DemuxInfo aidlDemuxInfo;
         Status s = mTunerService->getDemuxInfo(demuxHandle, &aidlDemuxInfo);
@@ -141,7 +141,7 @@ shared_ptr<DemuxCapabilities> TunerClient::getDemuxCaps() {
     return nullptr;
 }
 
-sp<DescramblerClient> TunerClient::openDescrambler(int32_t descramblerHandle) {
+sp<DescramblerClient> TunerClient::openDescrambler(int64_t descramblerHandle) {
     if (mTunerService != nullptr) {
         shared_ptr<ITunerDescrambler> tunerDescrambler;
         Status s = mTunerService->openDescrambler(descramblerHandle, &tunerDescrambler);
@@ -154,7 +154,7 @@ sp<DescramblerClient> TunerClient::openDescrambler(int32_t descramblerHandle) {
     return nullptr;
 }
 
-sp<LnbClient> TunerClient::openLnb(int32_t lnbHandle) {
+sp<LnbClient> TunerClient::openLnb(int64_t lnbHandle) {
     if (mTunerService != nullptr) {
         shared_ptr<ITunerLnb> tunerLnb;
         Status s = mTunerService->openLnb(lnbHandle, &tunerLnb);

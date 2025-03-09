@@ -41,7 +41,7 @@ constructor(
 
     override fun tileData(
         user: UserHandle,
-        triggers: Flow<DataUpdateTrigger>
+        triggers: Flow<DataUpdateTrigger>,
     ): Flow<IssueRecordingModel> =
         conflatedCallbackFlow {
                 val listener = Runnable { trySend(IssueRecordingModel(state.isRecording)) }

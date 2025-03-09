@@ -38,7 +38,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.Future;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -324,9 +323,8 @@ public class BatteryStatsHistoryIteratorTest {
         private boolean mSyncScheduled;
 
         @Override
-        public Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis) {
+        public void scheduleCpuSyncDueToWakelockChange(long delayMillis) {
             mSyncScheduled = true;
-            return null;
         }
 
         public boolean isSyncScheduled() {

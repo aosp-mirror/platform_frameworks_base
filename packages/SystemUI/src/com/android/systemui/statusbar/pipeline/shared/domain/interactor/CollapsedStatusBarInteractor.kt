@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.pipeline.shared.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.domain.interactor.DisableFlagsInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.model.StatusBarDisableFlagsVisibilityModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -30,13 +30,13 @@ import kotlinx.coroutines.flow.map
 @SysUISingleton
 class CollapsedStatusBarInteractor
 @Inject
-constructor(disableFlagsRepository: DisableFlagsRepository) {
+constructor(disableFlagsInteractor: DisableFlagsInteractor) {
     /**
      * The visibilities of various status bar child views, based only on the information we received
      * from disable flags.
      */
     val visibilityViaDisableFlags: Flow<StatusBarDisableFlagsVisibilityModel> =
-        disableFlagsRepository.disableFlags.map {
+        disableFlagsInteractor.disableFlags.map {
             StatusBarDisableFlagsVisibilityModel(
                 isClockAllowed = it.isClockEnabled,
                 areNotificationIconsAllowed = it.areNotificationIconsEnabled,

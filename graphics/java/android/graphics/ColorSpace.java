@@ -768,7 +768,44 @@ public abstract class ColorSpace {
          * </table>
          */
         @FlaggedApi(Flags.FLAG_OK_LAB_COLORSPACE)
-        OK_LAB
+        OK_LAB,
+
+        /**
+         * <p>{@link ColorSpace.Rgb RGB} color space BT.2020 based on Rec. ITU-R BT.2020-1 and IEC 61966-2.1:1999.</p></p>
+         * <table summary="Color space definition">
+         *     <tr>
+         *         <th>Chromaticity</th><th>Red</th><th>Green</th><th>Blue</th><th>White point</th>
+         *     </tr>
+         *     <tr><td>x</td><td>0.708</td><td>0.170</td><td>0.131</td><td>0.3127</td></tr>
+         *     <tr><td>y</td><td>0.292</td><td>0.797</td><td>0.046</td><td>0.3290</td></tr>
+         *     <tr><th>Property</th><th colspan="4">Value</th></tr>
+         *     <tr><td>Name</td><td colspan="4">Rec. ITU-R BT.2020-1</td></tr>
+         *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
+         *     <tr>
+         *         <td>Opto-electronic transfer function (OETF)</td>
+         *         <td colspan="4">\(\begin{equation}
+         *             C_{DisplayBT2020} = \begin{cases} 12.92 \times C_{linear} & C_{linear} \lt 0.0030186 \\\
+         *             1.055 \times C_{linear}^{\frac{1}{2.4}} - 0.055 & C_{linear} \ge 0.0030186 \end{cases}
+         *             \end{equation}\)
+         *         </td>
+         *     </tr>
+         *     <tr>
+         *         <td>Electro-optical transfer function (EOTF)</td>
+         *         <td colspan="4">\(\begin{equation}
+         *             C_{linear} = \begin{cases}\frac{C_{DisplayBT2020}}{12.92} & C_{sRGB} \lt 0.04045 \\\
+         *             \left( \frac{C_{DisplayBT2020} + 0.055}{1.055} \right) ^{2.4} & C_{sRGB} \ge 0.04045 \end{cases}
+         *             \end{equation}\)
+         *         </td>
+         *     </tr>
+         *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
+         * </table>
+         * <p>
+         *     <img style="display: block; margin: 0 auto;" src="{@docRoot}reference/android/images/graphics/colorspace_bt2020.png" />
+         *     <figcaption style="text-align: center;">BT.2020 (orange) vs sRGB (white)</figcaption>
+         * </p>
+         */
+        @FlaggedApi(Flags.FLAG_DISPLAY_BT2020_COLORSPACE)
+        DISPLAY_BT2020
         // Update the initialization block next to #get(Named) when adding new values
     }
 
@@ -1720,6 +1757,19 @@ public abstract class ColorSpace {
                     "Oklab",
                     Named.OK_LAB.ordinal()
             ));
+        }
+
+        if (Flags.displayBt2020Colorspace()) {
+            sNamedColorSpaceMap.put(Named.DISPLAY_BT2020.ordinal(), new ColorSpace.Rgb(
+                    "Display BT. 2020",
+                    BT2020_PRIMARIES,
+                    ILLUMINANT_D65,
+                    null,
+                    SRGB_TRANSFER_PARAMETERS,
+                    Named.DISPLAY_BT2020.ordinal()
+            ));
+            sDataToColorSpaces.put(DataSpace.DATASPACE_DISPLAY_BT2020,
+                    Named.DISPLAY_BT2020.ordinal());
         }
     }
 

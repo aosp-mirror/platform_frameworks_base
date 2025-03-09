@@ -21,12 +21,16 @@ import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.Instant
+import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
@@ -133,43 +137,120 @@ constructor(
             }
         }
 
-    override fun expandNotificationShade(loggingReason: String) {
+    override fun expandNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {
         if (shadeModeInteractor.isDualShade) {
             if (Overlays.QuickSettingsShade in sceneInteractor.currentOverlays.value) {
                 sceneInteractor.replaceOverlay(
                     from = Overlays.QuickSettingsShade,
                     to = Overlays.NotificationsShade,
                     loggingReason = loggingReason,
+                    transitionKey = transitionKey,
                 )
             } else {
                 sceneInteractor.showOverlay(
                     overlay = Overlays.NotificationsShade,
                     loggingReason = loggingReason,
+                    transitionKey = transitionKey,
                 )
             }
         } else {
-            sceneInteractor.changeScene(toScene = Scenes.Shade, loggingReason = loggingReason)
+            sceneInteractor.changeScene(
+                toScene = Scenes.Shade,
+                loggingReason = loggingReason,
+                transitionKey =
+                    transitionKey ?: ToSplitShade.takeIf { shadeModeInteractor.isSplitShade },
+            )
         }
     }
 
-    override fun expandQuickSettingsShade(loggingReason: String) {
+    override fun expandQuickSettingsShade(loggingReason: String, transitionKey: TransitionKey?) {
         if (shadeModeInteractor.isDualShade) {
             if (Overlays.NotificationsShade in sceneInteractor.currentOverlays.value) {
                 sceneInteractor.replaceOverlay(
                     from = Overlays.NotificationsShade,
                     to = Overlays.QuickSettingsShade,
                     loggingReason = loggingReason,
+                    transitionKey = transitionKey,
                 )
             } else {
                 sceneInteractor.showOverlay(
                     overlay = Overlays.QuickSettingsShade,
                     loggingReason = loggingReason,
+                    transitionKey = transitionKey,
                 )
             }
         } else {
+            val isSplitShade = shadeModeInteractor.isSplitShade
             sceneInteractor.changeScene(
-                toScene = Scenes.QuickSettings,
+                toScene = if (isSplitShade) Scenes.Shade else Scenes.QuickSettings,
                 loggingReason = loggingReason,
+                transitionKey = transitionKey ?: ToSplitShade.takeIf { isSplitShade },
+            )
+        }
+    }
+
+    override fun collapseNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {
+        if (shadeModeInteractor.isDualShade) {
+            // TODO(b/356596436): Hide without animation if transitionKey is Instant.
+            sceneInteractor.hideOverlay(
+                overlay = Overlays.NotificationsShade,
+                loggingReason = loggingReason,
+                transitionKey = transitionKey,
+            )
+        } else if (transitionKey == Instant) {
+            // TODO(b/356596436): Define instant transition instead of snapToScene().
+            sceneInteractor.snapToScene(toScene = SceneFamilies.Home, loggingReason = loggingReason)
+        } else {
+            sceneInteractor.changeScene(
+                toScene = SceneFamilies.Home,
+                loggingReason = loggingReason,
+                transitionKey =
+                    transitionKey ?: ToSplitShade.takeIf { shadeModeInteractor.isSplitShade },
+            )
+        }
+    }
+
+    override fun collapseQuickSettingsShade(
+        loggingReason: String,
+        transitionKey: TransitionKey?,
+        bypassNotificationsShade: Boolean,
+    ) {
+        if (shadeModeInteractor.isDualShade) {
+            // TODO(b/356596436): Hide without animation if transitionKey is Instant.
+            sceneInteractor.hideOverlay(
+                overlay = Overlays.QuickSettingsShade,
+                loggingReason = loggingReason,
+                transitionKey = transitionKey,
+            )
+            return
+        }
+
+        val isSplitShade = shadeModeInteractor.isSplitShade
+        val targetScene =
+            if (bypassNotificationsShade || isSplitShade) SceneFamilies.Home else Scenes.Shade
+        if (transitionKey == Instant) {
+            // TODO(b/356596436): Define instant transition instead of snapToScene().
+            sceneInteractor.snapToScene(toScene = targetScene, loggingReason = loggingReason)
+        } else {
+            sceneInteractor.changeScene(
+                toScene = targetScene,
+                loggingReason = loggingReason,
+                transitionKey = transitionKey ?: ToSplitShade.takeIf { isSplitShade },
+            )
+        }
+    }
+
+    override fun collapseEitherShade(loggingReason: String, transitionKey: TransitionKey?) {
+        // Note: The notifications shade and QS shade may be both partially expanded simultaneously,
+        // so we don't use an 'else' clause here.
+        if (shadeExpansion.value > 0) {
+            collapseNotificationsShade(loggingReason = loggingReason, transitionKey = transitionKey)
+        }
+        if (isQsExpanded.value) {
+            collapseQuickSettingsShade(
+                loggingReason = loggingReason,
+                transitionKey = transitionKey,
+                bypassNotificationsShade = true,
             )
         }
     }

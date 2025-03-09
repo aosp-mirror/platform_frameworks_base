@@ -285,6 +285,52 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTaskLayerRankFreeform() {
+        mSetFlagsRule.enableFlags(com.android.window.flags.Flags
+                .FLAG_PROCESS_PRIORITY_POLICY_FOR_MULTI_WINDOW_MODE);
+        final Task[] freeformTasks = new Task[3];
+        final WindowProcessController[] processes = new WindowProcessController[3];
+        for (int i = 0; i < freeformTasks.length; i++) {
+            freeformTasks[i] = new TaskBuilder(mSupervisor)
+                    .setWindowingMode(WINDOWING_MODE_FREEFORM).setCreateActivity(true).build();
+            final ActivityRecord r = freeformTasks[i].getTopMostActivity();
+            r.setState(RESUMED, "test");
+            processes[i] = r.app;
+        }
+        resizeDisplay(mDisplayContent, 2400, 2000);
+        // ---------
+        // | 2 | 1 |
+        // ---------
+        // | 0 |   |
+        // ---------
+        freeformTasks[2].setBounds(0, 0, 1000, 1000);
+        freeformTasks[1].setBounds(1000, 0, 2000, 1000);
+        freeformTasks[0].setBounds(0, 1000, 1000, 2000);
+        mRootWindowContainer.rankTaskLayers();
+        assertEquals(1, freeformTasks[2].mLayerRank);
+        assertEquals(2, freeformTasks[1].mLayerRank);
+        assertEquals(3, freeformTasks[0].mLayerRank);
+        assertFalse("Top doesn't need perceptible hint", (processes[2].getActivityStateFlags()
+                & WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0);
+        assertTrue((processes[1].getActivityStateFlags()
+                & WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0);
+        assertTrue((processes[0].getActivityStateFlags()
+                & WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0);
+
+        // Make task2 occlude half of task0.
+        clearInvocations(mAtm);
+        freeformTasks[2].setBounds(0, 0, 1000, 1500);
+        waitHandlerIdle(mWm.mH);
+        // The process of task0 will demote from perceptible to visible.
+        final int stateFlags0 = processes[0].getActivityStateFlags();
+        assertTrue((stateFlags0
+                & WindowProcessController.ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE) != 0);
+        assertFalse((stateFlags0
+                & WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0);
+        verify(mAtm).updateOomAdj();
+    }
+
+    @Test
     public void testForceStopPackage() {
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopMostActivity();
@@ -331,6 +377,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final WindowProcessController proc = mSystemServicesTestRule.addProcess(
                 activity.packageName, activity.processName,
                 6789 /* pid */, activity.info.applicationInfo.uid);
+        mAtm.mInternal.preBindApplication(proc, proc.mInfo);
+        assertTrue(proc.registeredForActivityConfigChanges());
         assertFalse(proc.mHasEverAttached);
         try {
             mRootWindowContainer.attachApplication(proc);

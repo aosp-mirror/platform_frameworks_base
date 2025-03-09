@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -40,6 +41,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
@@ -50,6 +52,12 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.os.IBinaryTransparencyService;
+import com.android.server.pm.BackgroundInstallControlService;
+import com.android.server.pm.BackgroundInstallControlCallbackHelper;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackageSplit;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -68,6 +76,9 @@ import java.util.List;
 public class BinaryTransparencyServiceTest {
     private static final String TAG = "BinaryTransparencyServiceTest";
 
+    private static final String TEST_PKG_NAME = "testPackageName";
+    private static final long TEST_VERSION_CODE = 1L;
+
     private Context mContext;
     private BinaryTransparencyService mBinaryTransparencyService;
     private BinaryTransparencyService.BinaryTransparencyServiceImpl mTestInterface;
@@ -83,6 +94,8 @@ public class BinaryTransparencyServiceTest {
     private PackageManager mPackageManager;
     @Mock
     private PackageManagerInternal mPackageManagerInternal;
+    @Mock
+    private BinaryTransparencyService.BicCallbackHandler.IBicAppInfoHelper mBicAppInfoHelper;
 
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback>
@@ -90,6 +103,9 @@ public class BinaryTransparencyServiceTest {
     @Captor
     private ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback>
             mFaceAuthenticatorsRegisteredCaptor;
+
+    @Captor
+    private ArgumentCaptor<IBinaryTransparencyService.AppInfo> appInfoCaptor;
 
     @Before
     public void setUp() {
@@ -261,5 +277,70 @@ public class BinaryTransparencyServiceTest {
                 eq("00000001") /* serialNumber */,
                 eq("") /* softwareVersion */
         );
+    }
+
+    @Test
+    public void BicCallbackHandler_uploads_mba_metrics() {
+        Bundle data = setupBicCallbackHandlerTest(false,
+            BinaryTransparencyService.MBA_STATUS_NEW_INSTALL);
+
+        BinaryTransparencyService.BicCallbackHandler handler =
+            new BinaryTransparencyService.BicCallbackHandler(mBicAppInfoHelper);
+        handler.sendResult(data);
+
+        verify(mBicAppInfoHelper, times(1)).writeAppInfoToLog(appInfoCaptor.capture());
+        Assert.assertEquals(TEST_PKG_NAME, appInfoCaptor.getValue().packageName);
+        Assert.assertEquals(TEST_VERSION_CODE, appInfoCaptor.getValue().longVersion);
+    }
+
+    @Test
+    public void BicCallbackHandler_uploads_mba_metrics_for_preloads() {
+        Bundle data = setupBicCallbackHandlerTest(true,
+            BinaryTransparencyService.MBA_STATUS_UPDATED_PRELOAD);
+
+        BinaryTransparencyService.BicCallbackHandler handler =
+            new BinaryTransparencyService.BicCallbackHandler(mBicAppInfoHelper);
+        handler.sendResult(data);
+
+        verify(mBicAppInfoHelper, times(1)).writeAppInfoToLog(appInfoCaptor.capture());
+        Assert.assertEquals(TEST_PKG_NAME, appInfoCaptor.getValue().packageName);
+        Assert.assertEquals(TEST_VERSION_CODE, appInfoCaptor.getValue().longVersion);
+    }
+
+    @Test
+    public void BicCallbackHandler_uploads_mba_metrics_for_uninstalls() {
+        Bundle data = new Bundle();
+        data.putString(BackgroundInstallControlCallbackHelper.FLAGGED_PACKAGE_NAME_KEY,
+            TEST_PKG_NAME);
+        data.putInt(BackgroundInstallControlCallbackHelper.INSTALL_EVENT_TYPE_KEY,
+            BackgroundInstallControlService.INSTALL_EVENT_TYPE_UNINSTALL);
+
+        BinaryTransparencyService.BicCallbackHandler handler =
+                new BinaryTransparencyService.BicCallbackHandler(mBicAppInfoHelper);
+        handler.sendResult(data);
+
+        verify(mBicAppInfoHelper, times(1)).writeAppInfoToLog(appInfoCaptor.capture());
+        Assert.assertEquals(TEST_PKG_NAME ,appInfoCaptor.getValue().packageName);
+        Assert.assertEquals(BinaryTransparencyService.MBA_STATUS_UNINSTALLED,
+            appInfoCaptor.getValue().mbaStatus);
+    }
+
+    private Bundle setupBicCallbackHandlerTest(boolean isUpdatedSystemApp,
+            int expectedBtsMbaStatus) {
+        Bundle data = new Bundle();
+        data.putString(BackgroundInstallControlCallbackHelper.FLAGGED_PACKAGE_NAME_KEY,
+            TEST_PKG_NAME);
+        data.putInt(BackgroundInstallControlCallbackHelper.INSTALL_EVENT_TYPE_KEY,
+            BackgroundInstallControlService.INSTALL_EVENT_TYPE_INSTALL);
+        PackageStateInternal mockPackageState = mock(PackageStateInternal.class);
+        when(mPackageManagerInternal.getPackageStateInternal(TEST_PKG_NAME))
+            .thenReturn(mockPackageState);
+        when(mockPackageState.isUpdatedSystemApp()).thenReturn(isUpdatedSystemApp);
+        IBinaryTransparencyService.AppInfo appInfo = new IBinaryTransparencyService.AppInfo();
+        appInfo.packageName = TEST_PKG_NAME;
+        appInfo.longVersion = TEST_VERSION_CODE;
+        when(mBicAppInfoHelper.collectAppInfo(mockPackageState, expectedBtsMbaStatus))
+            .thenReturn(List.of(appInfo));
+        return data;
     }
 }

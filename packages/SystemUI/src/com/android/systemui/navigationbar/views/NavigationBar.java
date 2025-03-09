@@ -25,12 +25,10 @@ import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
-import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.InsetsSource.FLAG_SUPPRESS_SCRIM;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
@@ -153,6 +151,7 @@ import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.AutoHideControllerStore;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -263,8 +262,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final LightBarController mMainLightBarController;
     private final LightBarController.Factory mLightBarControllerFactory;
     private AutoHideController mAutoHideController;
-    private final AutoHideController mMainAutoHideController;
-    private final AutoHideController.Factory mAutoHideControllerFactory;
+    private final AutoHideControllerStore mAutoHideControllerStore;
     private final Optional<TelecomManager> mTelecomManagerOptional;
     private final InputMethodManager mInputMethodManager;
     private final TaskStackChangeListeners mTaskStackChangeListeners;
@@ -584,8 +582,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             NavBarHelper navBarHelper,
             LightBarController mainLightBarController,
             LightBarController.Factory lightBarControllerFactory,
-            AutoHideController mainAutoHideController,
-            AutoHideController.Factory autoHideControllerFactory,
+            AutoHideControllerStore autoHideControllerStore,
             Optional<TelecomManager> telecomManagerOptional,
             InputMethodManager inputMethodManager,
             DeadZone deadZone,
@@ -632,8 +629,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mNotificationShadeDepthController = notificationShadeDepthController;
         mMainLightBarController = mainLightBarController;
         mLightBarControllerFactory = lightBarControllerFactory;
-        mMainAutoHideController = mainAutoHideController;
-        mAutoHideControllerFactory = autoHideControllerFactory;
+        mAutoHideControllerStore = autoHideControllerStore;
         mTelecomManagerOptional = telecomManagerOptional;
         mInputMethodManager = inputMethodManager;
         mUserContextProvider = userContextProvider;
@@ -848,13 +844,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 ? mMainLightBarController : mLightBarControllerFactory.create(mContext);
         setLightBarController(lightBarController);
 
-        // TODO(b/118592525): to support multi-display, we start to add something which is
-        //                    per-display, while others may be global. I think it's time to
-        //                    add a new class maybe named DisplayDependency to solve
-        //                    per-display Dependency problem.
-        // Alternative: this is a good case for a Dagger subcomponent. Same with LightBarController.
-        AutoHideController autoHideController = mIsOnDefaultDisplay
-                ? mMainAutoHideController : mAutoHideControllerFactory.create(mContext);
+        AutoHideController autoHideController = mAutoHideControllerStore.forDisplay(mDisplayId);
         setAutoHideController(autoHideController);
         restoreAppearanceAndTransientState();
     }
@@ -1836,11 +1826,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private InsetsFrameProvider[] getInsetsFrameProvider(int insetsHeight, Context userContext) {
         final InsetsFrameProvider navBarProvider =
                 new InsetsFrameProvider(mInsetsSourceOwner, 0, WindowInsets.Type.navigationBars());
-        if (!ENABLE_HIDE_IME_CAPTION_BAR) {
-            navBarProvider.setInsetsSizeOverrides(new InsetsFrameProvider.InsetsSizeOverride[] {
-                    new InsetsFrameProvider.InsetsSizeOverride(TYPE_INPUT_METHOD, null)
-            });
-        }
         if (insetsHeight != -1 && !mEdgeBackGestureHandler.isButtonForcedVisible()) {
             navBarProvider.setInsetsSize(Insets.of(0, 0, 0, insetsHeight));
         }

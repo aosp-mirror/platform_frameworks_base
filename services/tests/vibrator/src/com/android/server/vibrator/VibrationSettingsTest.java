@@ -150,14 +150,15 @@ public class VibrationSettingsTest {
         // Make sure broadcast receivers are not registered for this test, to avoid flakes.
         doReturn(null).when(mContextSpy)
                 .registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class), anyInt());
+
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName(SYSUI_PACKAGE_NAME, ""));
 
         setDefaultIntensity(VIBRATION_INTENSITY_MEDIUM);
 
         setIgnoreVibrationsOnWirelessCharger(false);
-
         mockGoToSleep(/* goToSleepTime= */ 0, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+
         createSystemReadyVibrationSettings();
     }
 
@@ -243,6 +244,7 @@ public class VibrationSettingsTest {
         mVibrationSettings.removeListener(mListenerMock);
 
         // Trigger multiple observers manually.
+        mVibrationSettings.mSettingObserver.onChange(false);
         mVibrationSettings.mLowPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
         mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(USER_ID);
         mVibrationSettings.mRingerModeBroadcastReceiver.onReceive(mContextSpy,
@@ -313,6 +315,7 @@ public class VibrationSettingsTest {
         doReturn(nonWirelessChargingIntent).when(mContextSpy).registerReceiver(
                 any(BroadcastReceiver.class),
                 argThat(filter -> filter.matchAction(Intent.ACTION_BATTERY_CHANGED)), anyInt());
+
         setIgnoreVibrationsOnWirelessCharger(true);
         createSystemReadyVibrationSettings();
 
@@ -327,6 +330,7 @@ public class VibrationSettingsTest {
         doReturn(wirelessChargingIntent).when(mContextSpy).registerReceiver(
                 any(BroadcastReceiver.class),
                 argThat(filter -> filter.matchAction(Intent.ACTION_BATTERY_CHANGED)), anyInt());
+
         setIgnoreVibrationsOnWirelessCharger(true);
         createSystemReadyVibrationSettings();
 
@@ -447,8 +451,11 @@ public class VibrationSettingsTest {
 
     @Test
     public void shouldIgnoreVibration_withoutAudioManager_allowsAllVibrations() {
-        when(mContextSpy.getSystemService(eq(Context.AUDIO_SERVICE))).thenReturn(null);
-        createSystemReadyVibrationSettings();
+        mVibrationSettings = new VibrationSettings(mContextSpy,
+                new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
+        mVibrationSettings.onSystemReady(mPackageManagerInternalMock,
+                mPowerManagerInternalMock, mActivityManagerMock, mVirtualDeviceManagerInternalMock,
+                /* audioManager= */ null);
 
         for (int usage : ALL_USAGES) {
             assertVibrationNotIgnoredForUsage(usage);

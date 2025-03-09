@@ -32,4 +32,7 @@ object TransitionKeys {
      * normal collapse would.
      */
     val SlightlyFasterShadeCollapse = TransitionKey("SlightlyFasterShadeCollapse")
+
+    /** Reference to a content transition that should happen instantly, i.e. without animation. */
+    val Instant = TransitionKey("Instant")
 }

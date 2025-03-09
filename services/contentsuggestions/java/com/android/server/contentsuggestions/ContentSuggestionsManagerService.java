@@ -30,8 +30,6 @@ import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.SelectionsRequest;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.ColorSpace;
-import android.hardware.HardwareBuffer;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -147,6 +145,7 @@ public class ContentSuggestionsManagerService extends
             }
         }
 
+        @SuppressWarnings("GuardedBy")
         @Override
         public void provideContextImage(
                 int userId,
@@ -157,28 +156,19 @@ public class ContentSuggestionsManagerService extends
             }
             enforceCaller(UserHandle.getCallingUserId(), "provideContextImage");
 
-            HardwareBuffer snapshotBuffer = null;
-            int colorSpaceId = 0;
-
+            TaskSnapshot snapshot = null;
             // Skip taking TaskSnapshot when bitmap is provided.
             if (!imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)) {
                 // Can block, so call before acquiring the lock.
-                TaskSnapshot snapshot =
-                        mActivityTaskManagerInternal.getTaskSnapshotBlocking(taskId, false);
-                if (snapshot != null) {
-                    snapshotBuffer = snapshot.getHardwareBuffer();
-                    ColorSpace colorSpace = snapshot.getColorSpace();
-                    if (colorSpace != null) {
-                        colorSpaceId = colorSpace.getId();
-                    }
-                }
+                snapshot = mActivityTaskManagerInternal.getTaskSnapshotBlocking(
+                        taskId, false /* isLowResolution */,
+                        TaskSnapshot.REFERENCE_CONTENT_SUGGESTION);
             }
 
             synchronized (mLock) {
                 final ContentSuggestionsPerUserService service = getServiceForUserLocked(userId);
                 if (service != null) {
-                    service.provideContextImageLocked(taskId, snapshotBuffer, colorSpaceId,
-                            imageContextRequestExtras);
+                    service.provideContextImageLocked(taskId, snapshot, imageContextRequestExtras);
                 } else {
                     if (VERBOSE) {
                         Slog.v(TAG, "provideContextImageLocked: no service for " + userId);

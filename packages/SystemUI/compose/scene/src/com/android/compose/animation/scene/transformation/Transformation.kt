@@ -18,78 +18,140 @@ package com.android.compose.animation.scene.transformation
 
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceAtMost
 import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.Element
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
+import com.android.compose.animation.scene.ElementStateScope
+import com.android.compose.animation.scene.Scale
 import com.android.compose.animation.scene.content.state.TransitionState
+import kotlinx.coroutines.CoroutineScope
 
 /** A transformation applied to one or more elements during a transition. */
 sealed interface Transformation {
-    /**
-     * The matcher that should match the element(s) to which this transformation should be applied.
-     */
-    val matcher: ElementMatcher
-
-    /**
-     * The range during which the transformation is applied. If it is `null`, then the
-     * transformation will be applied throughout the whole scene transition.
-     */
-    // TODO(b/240432457): Move this back to PropertyTransformation.
-    val range: TransformationRange?
-        get() = null
-
-    /*
-     * Reverse this transformation. This is called when we use Transition(from = A, to = B) when
-     * animating from B to A and there is no Transition(from = B, to = A) defined.
-     */
-    fun reversed(): Transformation = this
+    fun interface Factory {
+        fun create(): Transformation
+    }
 }
 
-internal class SharedElementTransformation(
-    override val matcher: ElementMatcher,
+// Important: SharedElementTransformation must be a data class because we check that we don't
+// provide 2 different transformations for the same element in Element.kt
+internal data class SharedElementTransformation(
     internal val enabled: Boolean,
-) : Transformation
-
-/** A transformation that changes the value of an element property, like its size or offset. */
-internal sealed interface PropertyTransformation<T> : Transformation {
-    /**
-     * Transform [value], i.e. the value of the transformed property without this transformation.
-     */
-    // TODO(b/290184746): Figure out a public API for custom transformations that don't have access
-    // to these internal classes.
-    fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
-        content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
-        transition: TransitionState.Transition,
-        value: T,
-    ): T
+    internal val elevateInContent: ContentKey?,
+) : Transformation {
+    class Factory(
+        internal val matcher: ElementMatcher,
+        internal val enabled: Boolean,
+        internal val elevateInContent: ContentKey?,
+    ) : Transformation.Factory {
+        override fun create(): Transformation {
+            return SharedElementTransformation(enabled, elevateInContent)
+        }
+    }
 }
 
 /**
- * A [PropertyTransformation] associated to a range. This is a helper class so that normal
- * implementations of [PropertyTransformation] don't have to take care of reversing their range when
- * they are reversed.
+ * A transformation that changes the value of an element [Property], like its [size][Property.Size]
+ * or [offset][Property.Offset].
  */
-internal class RangedPropertyTransformation<T>(
-    val delegate: PropertyTransformation<T>,
-    override val range: TransformationRange,
-) : PropertyTransformation<T> by delegate {
-    override fun reversed(): Transformation {
-        return RangedPropertyTransformation(
-            delegate.reversed() as PropertyTransformation<T>,
-            range.reversed(),
-        )
+sealed interface PropertyTransformation<T> : Transformation {
+    /** The property to which this transformation is applied. */
+    val property: Property<T>
+
+    sealed class Property<T> {
+        /** The size of an element. */
+        data object Size : Property<IntSize>()
+
+        /** The offset (position) of an element. */
+        data object Offset : Property<androidx.compose.ui.geometry.Offset>()
+
+        /** The alpha of an element. */
+        data object Alpha : Property<Float>()
+
+        /**
+         * The drawing scale of an element. Animating the scale does not have any effect on the
+         * layout.
+         */
+        data object Scale : Property<com.android.compose.animation.scene.Scale>()
+    }
+}
+
+/**
+ * A transformation to a target/transformed value that is automatically interpolated using the
+ * transition progress and transformation range.
+ */
+interface InterpolatedPropertyTransformation<T> : PropertyTransformation<T> {
+    /**
+     * Return the transformed value for the given property, i.e.:
+     * - the value at progress = 0% for elements that are entering the layout (i.e. elements in the
+     *   content we are transitioning to).
+     * - the value at progress = 100% for elements that are leaving the layout (i.e. elements in the
+     *   content we are transitioning from).
+     *
+     * The returned value will be automatically interpolated using the [transition] progress, the
+     * transformation range and [idleValue], the value of the property when we are idle.
+     */
+    fun PropertyTransformationScope.transform(
+        content: ContentKey,
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        idleValue: T,
+    ): T
+}
+
+interface CustomPropertyTransformation<T> : PropertyTransformation<T> {
+    /**
+     * Return the value that the property should have in the current frame for the given [content]
+     * and [element].
+     *
+     * This transformation can use [transitionScope] to launch animations associated to
+     * [transition], which will not finish until at least one animation/job is still running in the
+     * scope.
+     *
+     * Important: Make sure to never launch long-running jobs in [transitionScope], otherwise
+     * [transition] will never be considered as finished.
+     */
+    fun PropertyTransformationScope.transform(
+        content: ContentKey,
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        transitionScope: CoroutineScope,
+    ): T
+}
+
+interface PropertyTransformationScope : Density, ElementStateScope {
+    /** The current [direction][LayoutDirection] of the layout. */
+    val layoutDirection: LayoutDirection
+}
+
+/** Defines the transformation-type to be applied to all elements matching [matcher]. */
+internal class TransformationMatcher(
+    val matcher: ElementMatcher,
+    val factory: Transformation.Factory,
+    val range: TransformationRange?,
+)
+
+/** A pair consisting of a [transformation] and optional [range]. */
+internal data class TransformationWithRange<out T : Transformation>(
+    val transformation: T,
+    val range: TransformationRange?,
+) {
+    fun reversed(): TransformationWithRange<T> {
+        if (range == null) return this
+
+        return TransformationWithRange(transformation = transformation, range = range.reversed())
     }
 }
 
 /** The progress-based range of a [PropertyTransformation]. */
-data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
+internal data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
     constructor(
         start: Float? = null,
         end: Float? = null,
@@ -103,7 +165,7 @@ data class TransformationRange(val start: Float, val end: Float, val easing: Eas
     }
 
     /** Reverse this range. */
-    fun reversed() =
+    internal fun reversed() =
         TransformationRange(start = reverseBound(end), end = reverseBound(start), easing = easing)
 
     /** Get the progress of this range given the global [transitionProgress]. */
@@ -130,6 +192,6 @@ data class TransformationRange(val start: Float, val end: Float, val easing: Eas
     }
 
     companion object {
-        const val BoundUnspecified = Float.MIN_VALUE
+        internal const val BoundUnspecified = Float.MIN_VALUE
     }
 }

@@ -143,6 +143,10 @@ class AppCompatActivityRobot {
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
     }
 
+    void setDisplayIgnoreActivitySizeRestrictions(boolean enabled) {
+        doReturn(enabled).when(mDisplayContent).isDisplayIgnoreActivitySizeRestrictions();
+    }
+
     void configureTaskBounds(@NonNull Rect taskBounds) {
         doReturn(taskBounds).when(mTaskStack.top()).getBounds();
     }
@@ -179,14 +183,23 @@ class AppCompatActivityRobot {
                 .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
     }
 
-    void enableTreatmentForTopActivity(boolean enabled) {
-        doReturn(enabled).when(mDisplayContent.mAppCompatCameraPolicy)
-                .isTreatmentEnabledForActivity(eq(mActivityStack.top()));
+    void enableFullscreenCameraCompatTreatmentForTopActivity(boolean enabled) {
+        if (mDisplayContent.mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy()) {
+            doReturn(enabled).when(
+                    mDisplayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy)
+                        .isTreatmentEnabledForActivity(eq(mActivityStack.top()));
+        }
     }
 
-    void setTopActivityCameraActive(boolean enabled) {
+    void setIsCameraRunningAndWindowingModeEligibleFullscreen(boolean enabled) {
         doReturn(enabled).when(getTopDisplayRotationCompatPolicy())
-                .isCameraActive(eq(mActivityStack.top()), /* mustBeFullscreen= */ eq(true));
+                .isCameraRunningAndWindowingModeEligible(eq(mActivityStack.top()),
+                        /* mustBeFullscreen= */ eq(true));
+    }
+
+    void setIsCameraRunningAndWindowingModeEligibleFreeform(boolean enabled) {
+        doReturn(enabled).when(getTopCameraCompatFreeformPolicy())
+                .isCameraRunningAndWindowingModeEligible(eq(mActivityStack.top()));
     }
 
     void setTopActivityEligibleForOrientationOverride(boolean enabled) {
@@ -230,12 +243,24 @@ class AppCompatActivityRobot {
         mDisplayContent.setIgnoreOrientationRequest(enabled);
     }
 
+    void setTopActivityOrganizedTask() {
+        doReturn(mTaskStack.top()).when(mActivityStack.top()).getOrganizedTask();
+    }
+
+    void setIsInLetterboxAnimation(boolean inAnimation) {
+        doReturn(inAnimation).when(mActivityStack.top()).isInLetterboxAnimation();
+    }
+
     void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
         doReturn(inMultiWindowMode).when(mTaskStack.top()).inMultiWindowMode();
     }
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityHasLetterboxedBounds(boolean letterboxed) {
+        doReturn(letterboxed).when(mActivityStack.top()).areBoundsLetterboxed();
     }
 
     void setTopActivityVisible(boolean isVisible) {
@@ -271,6 +296,10 @@ class AppCompatActivityRobot {
         }
     }
 
+    void setFixedRotationTransformDisplayBounds(@Nullable Rect bounds) {
+        doReturn(bounds).when(mActivityStack.top()).getFixedRotationTransformDisplayBounds();
+    }
+
     void destroyTopActivity() {
         mActivityStack.top().removeImmediately();
     }
@@ -294,6 +323,8 @@ class AppCompatActivityRobot {
     void createNewTaskWithBaseActivity() {
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setCreateActivity(true)
+                // Respect "@ChangeId" according to test package's target sdk.
+                .setPackage(mAtm.mContext.getPackageName())
                 .setDisplay(mDisplayContent).build();
         mTaskStack.push(newTask);
         pushActivity(newTask.getTopNonFinishingActivity());
@@ -503,8 +534,13 @@ class AppCompatActivityRobot {
     }
 
     private DisplayRotationCompatPolicy getTopDisplayRotationCompatPolicy() {
-        return mActivityStack.top().mDisplayContent
-                .mAppCompatCameraPolicy.mDisplayRotationCompatPolicy;
+        return mActivityStack.top().mDisplayContent.mAppCompatCameraPolicy
+                .mDisplayRotationCompatPolicy;
+    }
+
+    private CameraCompatFreeformPolicy getTopCameraCompatFreeformPolicy() {
+        return mActivityStack.top().mDisplayContent.mAppCompatCameraPolicy
+                .mCameraCompatFreeformPolicy;
     }
 
     // We add the activity to the stack and spyOn() on its properties.

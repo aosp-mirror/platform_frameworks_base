@@ -40,4 +40,9 @@ constructor(private val remoteInputRepository: RemoteInputRepository) {
     fun setRemoteInputRowBottomBound(bottom: Float?) {
         remoteInputRepository.setRemoteInputRowBottomBound(bottom)
     }
+
+    /** Close any active remote inputs */
+    fun closeRemoteInputs() {
+        remoteInputRepository.closeRemoteInputs()
+    }
 }

@@ -67,6 +67,13 @@ interface IStatusBarService
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
     RegisterStatusBarResult registerStatusBar(IStatusBar callbacks);
+    /**
+     * Registers the status bar for all displays.
+     *
+     * Returns a map of all display IDs (as strings) to their corresponding RegisterStatusBarResult
+     * objects.
+     */
+    Map<String, RegisterStatusBarResult> registerStatusBarForAllDisplays(IStatusBar callbacks);
     void onPanelRevealed(boolean clearNotificationEffects, int numItems);
     void onPanelHidden();
     // Mark current notifications as "seen" and stop ringing, vibrating, blinking.

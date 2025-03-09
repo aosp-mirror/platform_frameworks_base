@@ -15,7 +15,7 @@
   -->
 
 <!-- Extends Framelayout -->
-<com.android.systemui.statusbar.EmptyShadeView
+<com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
+            android:paddingHorizontal="8dp"
             >
         <TextView
                 android:id="@+id/no_notifications"
@@ -46,4 +47,4 @@
                 android:textAppearance="?android:attr/textAppearanceButton"
                 android:text="@string/unlock_to_see_notif_text"/>
     </LinearLayout>
-</com.android.systemui.statusbar.EmptyShadeView>
+</com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView>

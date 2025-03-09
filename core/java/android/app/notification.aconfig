@@ -6,6 +6,20 @@ container: "system"
 # flag relates to.
 
 flag {
+  name: "notifications_redesign_app_icons"
+  namespace: "systemui"
+  description: "Notifications Redesign: Use app icons in notification rows"
+  bug: "371174789"
+}
+
+flag {
+  name: "notifications_redesign_templates"
+  namespace: "systemui"
+  description: "Notifications Redesign: Update notification templates"
+  bug: "378660052"
+}
+
+flag {
   name: "modes_api"
   is_exported: true
   namespace: "systemui"
@@ -31,10 +45,40 @@ flag {
 }
 
 flag {
+  name: "modes_ui_empty_shade"
+  namespace: "systemui"
+  description: "Shows mode that is currently blocking notifications in the empty shade; dependent on flags modes_api and modes_ui"
+  bug: "366003631"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "modes_ui_test"
   namespace: "systemui"
   description: "Guards new CTS tests for Modes; dependent on flags modes_api and modes_ui"
   bug: "360862012"
+}
+
+flag {
+  name: "modes_hsum"
+  namespace: "systemui"
+  description: "Fixes for modes (and DND/Zen in general) with HSUM or secondary users"
+  bug: "366203070"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "modes_multiuser"
+  namespace: "systemui"
+  description: "Fixes for modes (and DND/Zen in general) when callers are not the current user"
+  bug: "323163267"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -63,45 +107,17 @@ flag {
 }
 
 flag {
-  name: "visit_person_uri"
-  namespace: "systemui"
-  description: "Guards the security fix that ensures all URIs Person.java are valid"
-  bug: "281044385"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-# vvv Prototypes for using app icons in notifications vvv
-
-flag {
-  name: "notifications_use_app_icon"
-  namespace: "systemui"
-  description: "Experiment to replace the small icon in a notification with the app icon. This includes the status bar, AOD, shelf and notification row itself."
-  bug: "335211019"
-}
-
-flag {
-  name: "notifications_use_app_icon_in_row"
-  namespace: "systemui"
-  description: "Experiment to replace the small icon in a notification row with the app icon."
-  bug: "335211019"
-}
-
-flag {
-  name: "notifications_use_monochrome_app_icon"
-  namespace: "systemui"
-  description: "Experiment to replace the notification icon in the status bar and shelf with the monochrome app icon, if available."
-  bug: "335211019"
-}
-
-# ^^^ Prototypes for using app icons in notifications ^^^
-
-flag {
   name: "notification_expansion_optional"
   namespace: "systemui"
   description: "Experiment to restore the pre-S behavior where standard notifications are not expandable unless they have actions."
   bug: "339523906"
+}
+
+flag {
+  name: "notification_no_custom_view_conversations"
+  namespace: "systemui"
+  description: "Ensures that conversations are not allowed to use Custom Views."
+  bug: "368817201"
 }
 
 flag {
@@ -234,7 +250,7 @@ flag {
   name: "api_rich_ongoing"
   is_exported: true
   namespace: "systemui"
-  description: "Guards new android.app.richongoingnotification api"
+  description: "[RONs] Guards new RON-related APIs, including Notification.ProgressStyle"
   bug: "337261753"
 }
 
@@ -242,6 +258,48 @@ flag {
   name: "ui_rich_ongoing"
   is_exported: true
   namespace: "systemui"
-  description: "Guards new android.app.richongoingnotification promotion and new uis"
-  bug: "337261753"
+  description: "[RONs] Guards new promotion logic and UI, including AOD notification and Colorization"
+  bug: "367705002"
+}
+
+flag {
+  name: "backup_restore_logging"
+  namespace: "systemui"
+  description: "Adds logging for notification/modes backup and restore events"
+  bug: "289524803"
+}
+
+flag {
+  name: "notification_classification_ui"
+  namespace: "systemui"
+  description: "Adds UI for NAS classification of notifications"
+  bug: "367996732"
+}
+
+flag {
+  name: "nm_binder_perf_permission_check"
+  namespace: "systemui"
+  description: "Use PermissionManager for areNotificationsEnabled() instead of NMS"
+  bug: "362981561"
+}
+
+flag {
+  name: "nm_binder_perf_cache_channels"
+  namespace: "systemui"
+  description: "Use IpcDataCache for notification channel/group lookups"
+  bug: "362981561"
+}
+
+flag {
+  name: "nm_binder_perf_throttle_notify"
+  namespace: "systemui"
+  description: "Rate-limit calls to enqueueNotificationWithTag client-side"
+  bug: "362981561"
+}
+
+flag {
+  name: "no_sbnholder"
+  namespace: "systemui"
+  description: "removes sbnholder from NLS"
+  bug: "362981561"
 }

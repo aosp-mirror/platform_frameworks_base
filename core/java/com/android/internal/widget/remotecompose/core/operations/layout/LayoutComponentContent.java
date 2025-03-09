@@ -15,54 +15,89 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 
 import java.util.List;
 
-/**
- * Represents the content of a LayoutComponent (i.e. the children components)
- */
+/** Represents the content of a LayoutComponent (i.e. the children components) */
 public class LayoutComponentContent extends Component implements ComponentStartOperation {
 
-    public static final LayoutComponentContent.Companion COMPANION =
-            new LayoutComponentContent.Companion();
-
-    public LayoutComponentContent(int componentId, float x, float y,
-                                  float width, float height, Component parent, int animationId) {
+    public LayoutComponentContent(
+            int componentId,
+            float x,
+            float y,
+            float width,
+            float height,
+            @Nullable Component parent,
+            int animationId) {
         super(parent, componentId, animationId, x, y, width, height);
     }
 
-    public static class Companion implements DocumentedCompanionOperation {
-        @Override
-        public String name() {
-            return "LayoutContent";
-        }
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
+    public static String name() {
+        return "LayoutContent";
+    }
 
-        @Override
-        public int id() {
-            return Operations.LAYOUT_CONTENT;
-        }
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
+    public static int id() {
+        return Operations.LAYOUT_CONTENT;
+    }
 
-        public void apply(WireBuffer buffer) {
-            buffer.start(Operations.LAYOUT_CONTENT);
-        }
+    @NonNull
+    @Override
+    protected String getSerializedName() {
+        return "CONTENT";
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            operations.add(new LayoutComponentContent(
-                    -1, 0, 0, 0, 0, null, -1));
-        }
+    public static void apply(@NonNull WireBuffer buffer, int componentId) {
+        buffer.start(Operations.LAYOUT_CONTENT);
+        buffer.writeInt(componentId);
+    }
 
-        @Override
-        public void documentation(DocumentationBuilder doc) {
-            doc.operation("Layout Operations", id(), name())
-                    .description("Container for components. BoxLayout, RowLayout and ColumnLayout "
-                           + "expects a LayoutComponentContent as a child, encapsulating the "
-                           + "components that needs to be laid out.");
-        }
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
+        int componentId = buffer.readInt();
+        operations.add(new LayoutComponentContent(componentId, 0, 0, 0, 0, null, -1));
+    }
+
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Layout Operations", id(), name())
+                .field(INT, "COMPONENT_ID", "unique id for this component")
+                .description(
+                        "Container for components. BoxLayout, RowLayout and ColumnLayout "
+                                + "expects a LayoutComponentContent as a child, encapsulating the "
+                                + "components that needs to be laid out.");
+    }
+
+    @Override
+    public void write(@NonNull WireBuffer buffer) {
+        apply(buffer, mComponentId);
     }
 }

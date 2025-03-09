@@ -104,6 +104,11 @@ public class SQLiteCompatibilityWalFlags {
                 sCallingGlobalSettings = true;
                 flags = Settings.Global.getString(app.getContentResolver(),
                         Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS);
+            } catch (Exception e) {
+                // The process is unable to read the flags.  Treat this condition the same as if
+                // the ActivityThread application was not available.
+                Log.w(TAG, "Cannot read global setting "
+                        + Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS + " - " + e.toString());
             } finally {
                 sCallingGlobalSettings = false;
             }

@@ -750,7 +750,7 @@ void RecyclingClippingPixelAllocator::copyIfNecessary() {
 
 std::optional<SkRect> RecyclingClippingPixelAllocator::getSourceBoundsForUpsample(
         std::optional<SkRect> subset) {
-    if (!uirenderer::Properties::resampleGainmapRegions || !subset || subset->isEmpty()) {
+    if (!uirenderer::Properties::resampleGainmapRegions() || !subset || subset->isEmpty()) {
         return std::nullopt;
     }
 

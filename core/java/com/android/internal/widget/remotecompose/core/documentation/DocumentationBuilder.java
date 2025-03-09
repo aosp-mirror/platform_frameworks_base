@@ -15,8 +15,14 @@
  */
 package com.android.internal.widget.remotecompose.core.documentation;
 
+import android.annotation.NonNull;
+
 public interface DocumentationBuilder {
-    void add(String value);
-    Operation operation(String category, int id, String name);
-    Operation wipOperation(String category, int id, String name);
+    void add(@NonNull String value);
+
+    @NonNull
+    DocumentedOperation operation(@NonNull String category, int id, @NonNull String name);
+
+    @NonNull
+    DocumentedOperation wipOperation(@NonNull String category, int id, @NonNull String name);
 }

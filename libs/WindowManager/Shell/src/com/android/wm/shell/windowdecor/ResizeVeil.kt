@@ -49,7 +49,7 @@ import java.util.function.Supplier
 /**
  * Creates and updates a veil that covers task contents on resize.
  */
-class ResizeVeil @JvmOverloads constructor(
+public class ResizeVeil @JvmOverloads constructor(
         private val context: Context,
         private val displayController: DisplayController,
         private val appIcon: Bitmap,
@@ -188,28 +188,16 @@ class ResizeVeil @JvmOverloads constructor(
             t.apply()
             return
         }
-        isVisible = true
         val background = backgroundSurface
         val icon = iconSurface
-        val veil = veilSurface
-        if (background == null || icon == null || veil == null) return
-
-        // Parent surface can change, ensure it is up to date.
-        if (parent != parentSurface) {
-            t.reparent(veil, parent)
-            parentSurface = parent
-        }
-
-        val backgroundColor = when (decorThemeUtil.getAppTheme(taskInfo)) {
-            Theme.LIGHT -> lightColors.surfaceContainer
-            Theme.DARK -> darkColors.surfaceContainer
-        }
-        t.show(veil)
-                .setLayer(veil, VEIL_CONTAINER_LAYER)
-                .setLayer(icon, VEIL_ICON_LAYER)
-                .setLayer(background, VEIL_BACKGROUND_LAYER)
-                .setColor(background, Color.valueOf(backgroundColor.toArgb()).components)
-        relayout(taskBounds, t)
+        if (background == null || icon == null) return
+        updateTransactionWithShowVeil(
+            t,
+            parent,
+            taskBounds,
+            taskInfo,
+            fadeIn,
+        )
         if (fadeIn) {
             cancelAnimation()
             val veilAnimT = surfaceControlTransactionSupplier.get()
@@ -259,11 +247,43 @@ class ResizeVeil @JvmOverloads constructor(
             iconAnimator.start()
         } else {
             // Show the veil immediately.
+            t.apply()
+        }
+    }
+
+    fun updateTransactionWithShowVeil(
+        t: SurfaceControl.Transaction,
+        parent: SurfaceControl,
+        taskBounds: Rect,
+        taskInfo: RunningTaskInfo,
+        fadeIn: Boolean = false,
+    ) {
+        if (!isReady || isVisible) return
+        isVisible = true
+        val background = backgroundSurface
+        val icon = iconSurface
+        val veil = veilSurface
+        if (background == null || icon == null || veil == null) return
+        // Parent surface can change, ensure it is up to date.
+        if (parent != parentSurface) {
+            t.reparent(veil, parent)
+            parentSurface = parent
+        }
+        val backgroundColor = when (decorThemeUtil.getAppTheme(taskInfo)) {
+            Theme.LIGHT -> lightColors.surfaceContainer
+            Theme.DARK -> darkColors.surfaceContainer
+        }
+        t.show(veil)
+            .setLayer(veil, VEIL_CONTAINER_LAYER)
+            .setLayer(icon, VEIL_ICON_LAYER)
+            .setLayer(background, VEIL_BACKGROUND_LAYER)
+            .setColor(background, Color.valueOf(backgroundColor.toArgb()).components)
+        relayout(taskBounds, t)
+        if (!fadeIn) {
             t.show(icon)
-                    .show(background)
-                    .setAlpha(icon, 1f)
-                    .setAlpha(background, 1f)
-                    .apply()
+                .show(background)
+                .setAlpha(icon, 1f)
+                .setAlpha(background, 1f)
         }
     }
 
@@ -314,8 +334,12 @@ class ResizeVeil @JvmOverloads constructor(
      * @param newBounds bounds to update veil to.
      */
     fun updateResizeVeil(t: SurfaceControl.Transaction, newBounds: Rect) {
+        updateTransactionWithResizeVeil(t, newBounds)
+        t.apply()
+    }
+
+    fun updateTransactionWithResizeVeil(t: SurfaceControl.Transaction, newBounds: Rect) {
         if (!isVisible) {
-            t.apply()
             return
         }
         veilAnimator?.let { animator ->
@@ -325,7 +349,6 @@ class ResizeVeil @JvmOverloads constructor(
             }
         }
         relayout(newBounds, t)
-        t.apply()
     }
 
     /**

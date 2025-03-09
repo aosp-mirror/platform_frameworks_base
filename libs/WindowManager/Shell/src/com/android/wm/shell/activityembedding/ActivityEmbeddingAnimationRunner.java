@@ -268,10 +268,7 @@ class ActivityEmbeddingAnimationRunner {
             final Animation animation =
                     animationProvider.get(info, change, openingWholeScreenBounds);
             if (shouldUseJumpCutForAnimation(animation)) {
-                if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-                    return new ArrayList<>();
-                }
-                continue;
+                return new ArrayList<>();
             }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
                     info, change, animation, openingWholeScreenBounds);
@@ -296,10 +293,7 @@ class ActivityEmbeddingAnimationRunner {
             final Animation animation =
                     animationProvider.get(info, change, closingWholeScreenBounds);
             if (shouldUseJumpCutForAnimation(animation)) {
-                if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-                    return new ArrayList<>();
-                }
-                continue;
+                return new ArrayList<>();
             }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
                     info, change, animation, closingWholeScreenBounds);
@@ -455,11 +449,9 @@ class ActivityEmbeddingAnimationRunner {
             final Animation[] animations =
                     mAnimationSpec.createChangeBoundsChangeAnimations(info, change, parentBounds);
             // Jump cut if either animation has zero for duration.
-            if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-                for (Animation animation : animations) {
-                    if (shouldUseJumpCutForAnimation(animation)) {
-                        return new ArrayList<>();
-                    }
+            for (Animation animation : animations) {
+                if (shouldUseJumpCutForAnimation(animation)) {
+                    return new ArrayList<>();
                 }
             }
             // Keep track as we might need to add background color for the animation.
@@ -516,10 +508,8 @@ class ActivityEmbeddingAnimationRunner {
                         mAnimationSpec.createChangeBoundsOpenAnimation(info, change, parentBounds);
                 shouldShowBackgroundColor = false;
             }
-            if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-                if (shouldUseJumpCutForAnimation(animation)) {
-                    return new ArrayList<>();
-                }
+            if (shouldUseJumpCutForAnimation(animation)) {
+                return new ArrayList<>();
             }
             adapters.add(new ActivityEmbeddingAnimationAdapter(animation, change,
                     TransitionUtil.getRootFor(change, info)));

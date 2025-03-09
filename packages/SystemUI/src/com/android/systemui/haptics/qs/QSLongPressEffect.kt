@@ -178,7 +178,11 @@ constructor(
             State.RUNNING_BACKWARDS_FROM_UP -> {
                 callback?.onEffectFinishedReversing()
                 setState(getStateForClick())
-                logEvent(qsTile?.tileSpec, state, "click action triggered")
+                logEvent(
+                    qsTile?.tileSpec,
+                    state,
+                    "click action triggered from handleAnimationComplete",
+                )
                 qsTile?.click(expandable)
             }
             State.RUNNING_BACKWARDS_FROM_CANCEL -> {
@@ -206,9 +210,24 @@ constructor(
         if (keyguardStateController.isPrimaryBouncerShowing || !isStateClickable) return false
 
         setState(getStateForClick())
-        logEvent(qsTile?.tileSpec, state, "click action triggered")
+        logEvent(qsTile?.tileSpec, state, "click action triggered from onTileClick")
         qsTile?.click(expandable)
         return true
+    }
+
+    fun onTileLongClick(): Boolean {
+        if (state == State.IDLE) {
+            // This case represents a long-click detected outside of the QSLongPressEffect. This can
+            // be due to accessibility services
+            qsTile?.longClick(expandable)
+            logEvent(
+                qsTile?.tileSpec,
+                state,
+                "long click action triggered from OnLongClickListener",
+            )
+            return true
+        }
+        return false
     }
 
     /**
@@ -265,6 +284,7 @@ constructor(
                     cookie: ActivityTransitionAnimator.TransitionCookie?,
                     component: ComponentName?,
                     returnCujType: Int?,
+                    isEphemeral: Boolean,
                 ): ActivityTransitionAnimator.Controller? {
                     val delegatedController =
                         ActivityTransitionAnimator.Controller.fromView(
@@ -273,6 +293,7 @@ constructor(
                             cookie,
                             component,
                             returnCujType,
+                            isEphemeral,
                         )
                     return delegatedController?.let { createTransitionControllerDelegate(it) }
                 }

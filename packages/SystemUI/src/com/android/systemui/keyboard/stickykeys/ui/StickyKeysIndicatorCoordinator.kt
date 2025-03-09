@@ -23,7 +23,7 @@ import com.android.systemui.keyboard.stickykeys.StickyKeysLogger
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class StickyKeysIndicatorCoordinator

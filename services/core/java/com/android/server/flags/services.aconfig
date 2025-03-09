@@ -67,3 +67,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "backstage_power"
+    name: "rate_limit_battery_changed_broadcast"
+    description: "Optimize the delivery of the battery changed broadcast by rate limiting the frequency of the updates"
+    bug: "362337621"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

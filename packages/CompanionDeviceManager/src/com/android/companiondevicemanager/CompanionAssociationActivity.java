@@ -61,6 +61,7 @@ import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.MacAddress;
 import android.os.Bundle;
 import android.os.Handler;
@@ -130,6 +131,8 @@ public class CompanionAssociationActivity extends FragmentActivity implements
 
     // Present for single device and multiple device only.
     private ImageView mProfileIcon;
+    // Present for self managed association only;
+    private ImageView mDeviceIcon;
 
     // Only present for selfManaged devices.
     private ImageView mVendorHeaderImage;
@@ -260,8 +263,8 @@ public class CompanionAssociationActivity extends FragmentActivity implements
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
 
         // TODO: handle config changes without cancelling.
         if (!isDone()) {
@@ -305,6 +308,8 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         mVendorHeaderImage = findViewById(R.id.vendor_header_image);
         mVendorHeaderName = findViewById(R.id.vendor_header_name);
         mVendorHeaderButton = findViewById(R.id.vendor_header_button);
+
+        mDeviceIcon = findViewById(R.id.device_icon);
 
         mDeviceListRecyclerView = findViewById(R.id.device_list);
 
@@ -430,6 +435,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         final Drawable vendorIcon;
         final CharSequence vendorName;
         final Spanned title;
+        final Icon deviceIcon = mRequest.getDeviceIcon();
 
         if (!SUPPORTED_SELF_MANAGED_PROFILES.contains(deviceProfile)) {
             throw new RuntimeException("Unsupported profile " + deviceProfile);
@@ -451,6 +457,11 @@ public class CompanionAssociationActivity extends FragmentActivity implements
 
         title = getHtmlFromResources(this, PROFILE_TITLES.get(deviceProfile), mAppLabel,
                 getString(R.string.device_type), deviceName);
+
+        if (deviceIcon != null) {
+            mDeviceIcon.setImageIcon(deviceIcon);
+            mDeviceIcon.setVisibility(View.VISIBLE);
+        }
 
         if (PROFILE_SUMMARIES.containsKey(deviceProfile)) {
             final int summaryResourceId = PROFILE_SUMMARIES.get(deviceProfile);

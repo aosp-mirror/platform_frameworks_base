@@ -25,11 +25,11 @@ fun isElement(element: ElementKey, content: ContentKey? = null): SemanticsMatche
     return if (content == null) {
         hasTestTag(element.testTag)
     } else {
-        hasTestTag(element.testTag) and inContent(content)
+        hasTestTag(element.testTag) and SemanticsMatcher.inContent(content)
     }
 }
 
 /** A [SemanticsMatcher] that matches anything inside [content]. */
-fun inContent(content: ContentKey): SemanticsMatcher {
+fun SemanticsMatcher.Companion.inContent(content: ContentKey): SemanticsMatcher {
     return hasAnyAncestor(hasTestTag(content.testTag))
 }

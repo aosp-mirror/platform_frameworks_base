@@ -17,6 +17,7 @@
 package com.android.systemui.shade.domain.interactor
 
 import androidx.annotation.FloatRange
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.shade.shared.model.ShadeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -27,19 +28,22 @@ import kotlinx.coroutines.flow.stateIn
 
 /** Business logic for shade interactions. */
 interface ShadeInteractor : BaseShadeInteractor {
-    /** Emits true if the shade is currently allowed and false otherwise. */
+    /** Emits true if the Notifications shade is currently allowed and false otherwise. */
     val isShadeEnabled: StateFlow<Boolean>
 
-    /** Emits true if QS is currently allowed and false otherwise. */
+    /** Emits true if QS shade is currently allowed and false otherwise. */
     val isQsEnabled: StateFlow<Boolean>
 
-    /** Whether either the shade or QS is fully expanded. */
+    /** Whether either the Notifications shade or QS shade is fully expanded. */
     val isAnyFullyExpanded: StateFlow<Boolean>
 
-    /** Whether the Shade is fully expanded. */
+    /** Whether the Notifications Shade is fully expanded. */
     val isShadeFullyExpanded: Flow<Boolean>
 
-    /** Whether the Shade is fully collapsed. */
+    /** Whether Notifications Shade is expanded a non-zero amount. */
+    val isShadeAnyExpanded: StateFlow<Boolean>
+
+    /** Whether the Notifications Shade is fully collapsed. */
     val isShadeFullyCollapsed: Flow<Boolean>
 
     /**
@@ -102,7 +106,7 @@ interface BaseShadeInteractor {
      */
     val isAnyExpanded: StateFlow<Boolean>
 
-    /** The amount [0-1] that the shade has been opened. */
+    /** The amount [0-1] that the Notifications Shade has been opened. */
     val shadeExpansion: StateFlow<Float>
 
     /**
@@ -111,7 +115,7 @@ interface BaseShadeInteractor {
      */
     val qsExpansion: StateFlow<Float>
 
-    /** Whether Quick Settings is expanded a non-zero amount. */
+    /** Whether Quick Settings Shade is expanded a non-zero amount. */
     val isQsExpanded: StateFlow<Boolean>
 
     /**
@@ -142,16 +146,38 @@ interface BaseShadeInteractor {
     val isUserInteractingWithQs: Flow<Boolean>
 
     /**
-     * Triggers the expansion (opening) of the notification shade. If the notification shade is
-     * already open, this has no effect.
+     * Triggers the expansion (opening) of the notifications shade. If it is already expanded, this
+     * has no effect.
      */
-    fun expandNotificationShade(loggingReason: String)
+    fun expandNotificationsShade(loggingReason: String, transitionKey: TransitionKey? = null)
 
     /**
-     * Triggers the expansion (opening) of the quick settings shade. If the quick settings shade is
-     * already open, this has no effect.
+     * Triggers the expansion (opening) of the quick settings shade. If it is already expanded, this
+     * has no effect.
      */
-    fun expandQuickSettingsShade(loggingReason: String)
+    fun expandQuickSettingsShade(loggingReason: String, transitionKey: TransitionKey? = null)
+
+    /**
+     * Triggers the collapse (closing) of the notifications shade. If it is already collapsed, this
+     * has no effect.
+     */
+    fun collapseNotificationsShade(loggingReason: String, transitionKey: TransitionKey? = null)
+
+    /**
+     * Triggers the collapse (closing) of the quick settings shade. If it is already collapsed, this
+     * has no effect.
+     */
+    fun collapseQuickSettingsShade(
+        loggingReason: String,
+        transitionKey: TransitionKey? = null,
+        bypassNotificationsShade: Boolean = false,
+    )
+
+    /**
+     * Triggers the collapse (closing) of the notifications shade or quick settings shade, whichever
+     * is open. If both are already collapsed, this has no effect.
+     */
+    fun collapseEitherShade(loggingReason: String, transitionKey: TransitionKey? = null)
 }
 
 fun createAnyExpansionFlow(

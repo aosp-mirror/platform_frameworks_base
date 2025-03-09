@@ -124,3 +124,24 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "primitive_composition_absolute_delay"
+    is_exported: true
+    description: "Enables functionality to create primitive compositions with absolute delays"
+    bug: "373357740"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "vibration_pipeline_enabled"
+    description: "Enables functionality to pipeline vibration effects to avoid cancelling short vibrations"
+    bug: "344494220"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}

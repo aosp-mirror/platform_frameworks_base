@@ -32,7 +32,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import javax.inject.Inject
 
 /**
@@ -71,7 +71,7 @@ class MuteQuickAffordanceCoreStartable @Inject constructor(
     }
 
     private fun updateLastNonSilentRingerMode(lastRingerMode: Int) {
-        coroutineScope.launch(backgroundDispatcher) {
+        coroutineScope.launch(context = backgroundDispatcher) {
             if (AudioManager.RINGER_MODE_SILENT != lastRingerMode) {
                 userFileManager.getSharedPreferences(
                         MuteQuickAffordanceConfig.MUTE_QUICK_AFFORDANCE_PREFS_FILE_NAME,

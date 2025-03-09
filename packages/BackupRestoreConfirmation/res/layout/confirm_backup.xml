@@ -24,6 +24,7 @@
               android:orientation="vertical" >
 
     <ScrollView
+            android:id="@+id/scroll_view"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_width="match_parent"
@@ -84,11 +85,11 @@
           android:layout_width="match_parent" />
 
     <!-- button bar -->
-    <LinearLayout android:orientation="horizontal"
-                  style="?android:attr/buttonBarStyle"                 
+    <LinearLayout android:id="@+id/button_bar"
+                  android:orientation="horizontal"
+                  style="?android:attr/buttonBarStyle"
                   android:layout_height="wrap_content"
-                  android:layout_width="match_parent"
-                  android:layout_gravity="bottom">
+                  android:layout_width="match_parent">
 
     <Button android:id="@+id/button_deny"
             style="?android:attr/buttonBarButtonStyle"

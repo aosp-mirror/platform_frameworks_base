@@ -935,7 +935,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static final int KEYCODE_MACRO_4 = 316;
     /** Key code constant: To open emoji picker */
-    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
     public static final int KEYCODE_EMOJI_PICKER = 317;
     /**
      * Key code constant: To take a screenshot
@@ -944,15 +943,424 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * unlike {@code KEYCODE_SYSRQ} which is sent to the app first and only if the app
      * doesn't handle it, the framework handles it (to take a screenshot).
      */
-    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
     public static final int KEYCODE_SCREENSHOT = 318;
+    /** Key code constant: To start dictate to an input field */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_DICTATE = 319;
+    /**
+     * Key code constant: AC New
+     *
+     * e.g. To create a new instance of a window, open a new tab, etc.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_NEW = 320;
+    /**
+     * Key code constant: AC Close
+     *
+     * e.g. To close current instance of the application window, close the current tab, etc.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_CLOSE = 321;
+    /** Key code constant: To toggle 'Do Not Disturb' mode */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_DO_NOT_DISTURB = 322;
+    /** Key code constant: To Print */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_PRINT = 323;
+    /** Key code constant: To Lock the screen */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_LOCK = 324;
+    /** Key code constant: To toggle fullscreen mode (on the current application) */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_FULLSCREEN = 325;
+    /** Key code constant: F13 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F13 = 326;
+    /** Key code constant: F14 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F14 = 327;
+    /** Key code constant: F15 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F15 = 328;
+    /** Key code constant: F16 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F16 = 329;
+    /** Key code constant: F17 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F17 = 330;
+    /** Key code constant: F18 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F18 = 331;
+    /** Key code constant: F19 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F19 = 332;
+    /** Key code constant: F20 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F20 = 333;
+    /** Key code constant: F21 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F21 = 334;
+    /** Key code constant: F22 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F22 = 335;
+    /** Key code constant: F23 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F23 = 336;
+    /** Key code constant: F24 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F24 = 337;
 
     /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_SCREENSHOT;
+    @SuppressWarnings("FlaggedApi")
+    public static final int LAST_KEYCODE = KEYCODE_F24;
+
+    /** @hide */
+    @IntDef(prefix = {"KEYCODE_"}, value = {
+            KEYCODE_UNKNOWN,
+            KEYCODE_SOFT_LEFT,
+            KEYCODE_SOFT_RIGHT,
+            KEYCODE_HOME,
+            KEYCODE_BACK,
+            KEYCODE_CALL,
+            KEYCODE_ENDCALL,
+            KEYCODE_0,
+            KEYCODE_1,
+            KEYCODE_2,
+            KEYCODE_3,
+            KEYCODE_4,
+            KEYCODE_5,
+            KEYCODE_6,
+            KEYCODE_7,
+            KEYCODE_8,
+            KEYCODE_9,
+            KEYCODE_STAR,
+            KEYCODE_POUND,
+            KEYCODE_DPAD_UP,
+            KEYCODE_DPAD_DOWN,
+            KEYCODE_DPAD_LEFT,
+            KEYCODE_DPAD_RIGHT,
+            KEYCODE_DPAD_CENTER,
+            KEYCODE_VOLUME_UP,
+            KEYCODE_VOLUME_DOWN,
+            KEYCODE_POWER,
+            KEYCODE_CAMERA,
+            KEYCODE_CLEAR,
+            KEYCODE_A,
+            KEYCODE_B,
+            KEYCODE_C,
+            KEYCODE_D,
+            KEYCODE_E,
+            KEYCODE_F,
+            KEYCODE_G,
+            KEYCODE_H,
+            KEYCODE_I,
+            KEYCODE_J,
+            KEYCODE_K,
+            KEYCODE_L,
+            KEYCODE_M,
+            KEYCODE_N,
+            KEYCODE_O,
+            KEYCODE_P,
+            KEYCODE_Q,
+            KEYCODE_R,
+            KEYCODE_S,
+            KEYCODE_T,
+            KEYCODE_U,
+            KEYCODE_V,
+            KEYCODE_W,
+            KEYCODE_X,
+            KEYCODE_Y,
+            KEYCODE_Z,
+            KEYCODE_COMMA,
+            KEYCODE_PERIOD,
+            KEYCODE_ALT_LEFT,
+            KEYCODE_ALT_RIGHT,
+            KEYCODE_SHIFT_LEFT,
+            KEYCODE_SHIFT_RIGHT,
+            KEYCODE_TAB,
+            KEYCODE_SPACE,
+            KEYCODE_SYM,
+            KEYCODE_EXPLORER,
+            KEYCODE_ENVELOPE,
+            KEYCODE_ENTER,
+            KEYCODE_DEL,
+            KEYCODE_GRAVE,
+            KEYCODE_MINUS,
+            KEYCODE_EQUALS,
+            KEYCODE_LEFT_BRACKET,
+            KEYCODE_RIGHT_BRACKET,
+            KEYCODE_BACKSLASH,
+            KEYCODE_SEMICOLON,
+            KEYCODE_APOSTROPHE,
+            KEYCODE_SLASH,
+            KEYCODE_AT,
+            KEYCODE_NUM,
+            KEYCODE_HEADSETHOOK,
+            KEYCODE_FOCUS,
+            KEYCODE_PLUS,
+            KEYCODE_MENU,
+            KEYCODE_NOTIFICATION,
+            KEYCODE_SEARCH,
+            KEYCODE_MEDIA_PLAY_PAUSE,
+            KEYCODE_MEDIA_STOP,
+            KEYCODE_MEDIA_NEXT,
+            KEYCODE_MEDIA_PREVIOUS,
+            KEYCODE_MEDIA_REWIND,
+            KEYCODE_MEDIA_FAST_FORWARD,
+            KEYCODE_MUTE,
+            KEYCODE_PAGE_UP,
+            KEYCODE_PAGE_DOWN,
+            KEYCODE_PICTSYMBOLS,
+            KEYCODE_SWITCH_CHARSET,
+            KEYCODE_BUTTON_A,
+            KEYCODE_BUTTON_B,
+            KEYCODE_BUTTON_C,
+            KEYCODE_BUTTON_X,
+            KEYCODE_BUTTON_Y,
+            KEYCODE_BUTTON_Z,
+            KEYCODE_BUTTON_L1,
+            KEYCODE_BUTTON_R1,
+            KEYCODE_BUTTON_L2,
+            KEYCODE_BUTTON_R2,
+            KEYCODE_BUTTON_THUMBL,
+            KEYCODE_BUTTON_THUMBR,
+            KEYCODE_BUTTON_START,
+            KEYCODE_BUTTON_SELECT,
+            KEYCODE_BUTTON_MODE,
+            KEYCODE_ESCAPE,
+            KEYCODE_FORWARD_DEL,
+            KEYCODE_CTRL_LEFT,
+            KEYCODE_CTRL_RIGHT,
+            KEYCODE_CAPS_LOCK,
+            KEYCODE_SCROLL_LOCK,
+            KEYCODE_META_LEFT,
+            KEYCODE_META_RIGHT,
+            KEYCODE_FUNCTION,
+            KEYCODE_SYSRQ,
+            KEYCODE_BREAK,
+            KEYCODE_MOVE_HOME,
+            KEYCODE_MOVE_END,
+            KEYCODE_INSERT,
+            KEYCODE_FORWARD,
+            KEYCODE_MEDIA_PLAY,
+            KEYCODE_MEDIA_PAUSE,
+            KEYCODE_MEDIA_CLOSE,
+            KEYCODE_MEDIA_EJECT,
+            KEYCODE_MEDIA_RECORD,
+            KEYCODE_F1,
+            KEYCODE_F2,
+            KEYCODE_F3,
+            KEYCODE_F4,
+            KEYCODE_F5,
+            KEYCODE_F6,
+            KEYCODE_F7,
+            KEYCODE_F8,
+            KEYCODE_F9,
+            KEYCODE_F10,
+            KEYCODE_F11,
+            KEYCODE_F12,
+            KEYCODE_NUM_LOCK,
+            KEYCODE_NUMPAD_0,
+            KEYCODE_NUMPAD_1,
+            KEYCODE_NUMPAD_2,
+            KEYCODE_NUMPAD_3,
+            KEYCODE_NUMPAD_4,
+            KEYCODE_NUMPAD_5,
+            KEYCODE_NUMPAD_6,
+            KEYCODE_NUMPAD_7,
+            KEYCODE_NUMPAD_8,
+            KEYCODE_NUMPAD_9,
+            KEYCODE_NUMPAD_DIVIDE,
+            KEYCODE_NUMPAD_MULTIPLY,
+            KEYCODE_NUMPAD_SUBTRACT,
+            KEYCODE_NUMPAD_ADD,
+            KEYCODE_NUMPAD_DOT,
+            KEYCODE_NUMPAD_COMMA,
+            KEYCODE_NUMPAD_ENTER,
+            KEYCODE_NUMPAD_EQUALS,
+            KEYCODE_NUMPAD_LEFT_PAREN,
+            KEYCODE_NUMPAD_RIGHT_PAREN,
+            KEYCODE_VOLUME_MUTE,
+            KEYCODE_INFO,
+            KEYCODE_CHANNEL_UP,
+            KEYCODE_CHANNEL_DOWN,
+            KEYCODE_ZOOM_IN,
+            KEYCODE_ZOOM_OUT,
+            KEYCODE_TV,
+            KEYCODE_WINDOW,
+            KEYCODE_GUIDE,
+            KEYCODE_DVR,
+            KEYCODE_BOOKMARK,
+            KEYCODE_CAPTIONS,
+            KEYCODE_SETTINGS,
+            KEYCODE_TV_POWER,
+            KEYCODE_TV_INPUT,
+            KEYCODE_STB_POWER,
+            KEYCODE_STB_INPUT,
+            KEYCODE_AVR_POWER,
+            KEYCODE_AVR_INPUT,
+            KEYCODE_PROG_RED,
+            KEYCODE_PROG_GREEN,
+            KEYCODE_PROG_YELLOW,
+            KEYCODE_PROG_BLUE,
+            KEYCODE_APP_SWITCH,
+            KEYCODE_BUTTON_1,
+            KEYCODE_BUTTON_2,
+            KEYCODE_BUTTON_3,
+            KEYCODE_BUTTON_4,
+            KEYCODE_BUTTON_5,
+            KEYCODE_BUTTON_6,
+            KEYCODE_BUTTON_7,
+            KEYCODE_BUTTON_8,
+            KEYCODE_BUTTON_9,
+            KEYCODE_BUTTON_10,
+            KEYCODE_BUTTON_11,
+            KEYCODE_BUTTON_12,
+            KEYCODE_BUTTON_13,
+            KEYCODE_BUTTON_14,
+            KEYCODE_BUTTON_15,
+            KEYCODE_BUTTON_16,
+            KEYCODE_LANGUAGE_SWITCH,
+            KEYCODE_MANNER_MODE,
+            KEYCODE_3D_MODE,
+            KEYCODE_CONTACTS,
+            KEYCODE_CALENDAR,
+            KEYCODE_MUSIC,
+            KEYCODE_CALCULATOR,
+            KEYCODE_ZENKAKU_HANKAKU,
+            KEYCODE_EISU,
+            KEYCODE_MUHENKAN,
+            KEYCODE_HENKAN,
+            KEYCODE_KATAKANA_HIRAGANA,
+            KEYCODE_YEN,
+            KEYCODE_RO,
+            KEYCODE_KANA,
+            KEYCODE_ASSIST,
+            KEYCODE_BRIGHTNESS_DOWN,
+            KEYCODE_BRIGHTNESS_UP,
+            KEYCODE_MEDIA_AUDIO_TRACK,
+            KEYCODE_SLEEP,
+            KEYCODE_WAKEUP,
+            KEYCODE_PAIRING,
+            KEYCODE_MEDIA_TOP_MENU,
+            KEYCODE_11,
+            KEYCODE_12,
+            KEYCODE_LAST_CHANNEL,
+            KEYCODE_TV_DATA_SERVICE,
+            KEYCODE_VOICE_ASSIST,
+            KEYCODE_TV_RADIO_SERVICE,
+            KEYCODE_TV_TELETEXT,
+            KEYCODE_TV_NUMBER_ENTRY,
+            KEYCODE_TV_TERRESTRIAL_ANALOG,
+            KEYCODE_TV_TERRESTRIAL_DIGITAL,
+            KEYCODE_TV_SATELLITE,
+            KEYCODE_TV_SATELLITE_BS,
+            KEYCODE_TV_SATELLITE_CS,
+            KEYCODE_TV_SATELLITE_SERVICE,
+            KEYCODE_TV_NETWORK,
+            KEYCODE_TV_ANTENNA_CABLE,
+            KEYCODE_TV_INPUT_HDMI_1,
+            KEYCODE_TV_INPUT_HDMI_2,
+            KEYCODE_TV_INPUT_HDMI_3,
+            KEYCODE_TV_INPUT_HDMI_4,
+            KEYCODE_TV_INPUT_COMPOSITE_1,
+            KEYCODE_TV_INPUT_COMPOSITE_2,
+            KEYCODE_TV_INPUT_COMPONENT_1,
+            KEYCODE_TV_INPUT_COMPONENT_2,
+            KEYCODE_TV_INPUT_VGA_1,
+            KEYCODE_TV_AUDIO_DESCRIPTION,
+            KEYCODE_TV_AUDIO_DESCRIPTION_MIX_UP,
+            KEYCODE_TV_AUDIO_DESCRIPTION_MIX_DOWN,
+            KEYCODE_TV_ZOOM_MODE,
+            KEYCODE_TV_CONTENTS_MENU,
+            KEYCODE_TV_MEDIA_CONTEXT_MENU,
+            KEYCODE_TV_TIMER_PROGRAMMING,
+            KEYCODE_HELP,
+            KEYCODE_NAVIGATE_PREVIOUS,
+            KEYCODE_NAVIGATE_NEXT,
+            KEYCODE_NAVIGATE_IN,
+            KEYCODE_NAVIGATE_OUT,
+            KEYCODE_STEM_PRIMARY,
+            KEYCODE_STEM_1,
+            KEYCODE_STEM_2,
+            KEYCODE_STEM_3,
+            KEYCODE_DPAD_UP_LEFT,
+            KEYCODE_DPAD_DOWN_LEFT,
+            KEYCODE_DPAD_UP_RIGHT,
+            KEYCODE_DPAD_DOWN_RIGHT,
+            KEYCODE_MEDIA_SKIP_FORWARD,
+            KEYCODE_MEDIA_SKIP_BACKWARD,
+            KEYCODE_MEDIA_STEP_FORWARD,
+            KEYCODE_MEDIA_STEP_BACKWARD,
+            KEYCODE_SOFT_SLEEP,
+            KEYCODE_CUT,
+            KEYCODE_COPY,
+            KEYCODE_PASTE,
+            KEYCODE_SYSTEM_NAVIGATION_UP,
+            KEYCODE_SYSTEM_NAVIGATION_DOWN,
+            KEYCODE_SYSTEM_NAVIGATION_LEFT,
+            KEYCODE_SYSTEM_NAVIGATION_RIGHT,
+            KEYCODE_ALL_APPS,
+            KEYCODE_REFRESH,
+            KEYCODE_THUMBS_UP,
+            KEYCODE_THUMBS_DOWN,
+            KEYCODE_PROFILE_SWITCH,
+            KEYCODE_VIDEO_APP_1,
+            KEYCODE_VIDEO_APP_2,
+            KEYCODE_VIDEO_APP_3,
+            KEYCODE_VIDEO_APP_4,
+            KEYCODE_VIDEO_APP_5,
+            KEYCODE_VIDEO_APP_6,
+            KEYCODE_VIDEO_APP_7,
+            KEYCODE_VIDEO_APP_8,
+            KEYCODE_FEATURED_APP_1,
+            KEYCODE_FEATURED_APP_2,
+            KEYCODE_FEATURED_APP_3,
+            KEYCODE_FEATURED_APP_4,
+            KEYCODE_DEMO_APP_1,
+            KEYCODE_DEMO_APP_2,
+            KEYCODE_DEMO_APP_3,
+            KEYCODE_DEMO_APP_4,
+            KEYCODE_KEYBOARD_BACKLIGHT_DOWN,
+            KEYCODE_KEYBOARD_BACKLIGHT_UP,
+            KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE,
+            KEYCODE_STYLUS_BUTTON_PRIMARY,
+            KEYCODE_STYLUS_BUTTON_SECONDARY,
+            KEYCODE_STYLUS_BUTTON_TERTIARY,
+            KEYCODE_STYLUS_BUTTON_TAIL,
+            KEYCODE_RECENT_APPS,
+            KEYCODE_MACRO_1,
+            KEYCODE_MACRO_2,
+            KEYCODE_MACRO_3,
+            KEYCODE_MACRO_4,
+            KEYCODE_EMOJI_PICKER,
+            KEYCODE_SCREENSHOT,
+            KEYCODE_DICTATE,
+            KEYCODE_NEW,
+            KEYCODE_CLOSE,
+            KEYCODE_DO_NOT_DISTURB,
+            KEYCODE_PRINT,
+            KEYCODE_LOCK,
+            KEYCODE_FULLSCREEN,
+            KEYCODE_F13,
+            KEYCODE_F14,
+            KEYCODE_F15,
+            KEYCODE_F16,
+            KEYCODE_F17,
+            KEYCODE_F18,
+            KEYCODE_F19,
+            KEYCODE_F20,
+            KEYCODE_F21,
+            KEYCODE_F22,
+            KEYCODE_F23,
+            KEYCODE_F24,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface KeyCode {}
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()

@@ -16,6 +16,7 @@
 
 package com.android.server.wallpaper;
 
+import static android.app.Flags.liveWallpaperContentHandling;
 import static android.app.Flags.removeNextWallpaperComponent;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
@@ -30,11 +31,13 @@ import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
 import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
 import static com.android.window.flags.Flags.multiCrop;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.app.WallpaperManager.SetWallpaperFlags;
 import android.app.backup.WallpaperBackupHelper;
+import android.app.wallpaper.WallpaperDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -177,15 +180,8 @@ public class WallpaperDataParser {
             success = true;
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "no current wallpaper -- first boot?");
-        } catch (NullPointerException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (XmlPullParserException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (IOException e) {
-            Slog.w(TAG, "failed parsing " + file + " " + e);
-        } catch (IndexOutOfBoundsException e) {
+        } catch (NullPointerException | NumberFormatException | XmlPullParserException
+                 | IOException | IndexOutOfBoundsException e) {
             Slog.w(TAG, "failed parsing " + file + " " + e);
         }
         IoUtils.closeQuietly(stream);
@@ -194,9 +190,12 @@ public class WallpaperDataParser {
 
         if (loadSystem) {
             if (!success) {
+                // Set safe values that won't cause crashes
                 wallpaper.cropHint.set(0, 0, 0, 0);
                 wpdData.mPadding.set(0, 0, 0, 0);
                 wallpaper.name = "";
+                // TODO (b/379936272) Find a safe value for wallpaper component. mImageComponent
+                // does not work at least on some platforms.
             } else {
                 if (wallpaper.wallpaperId <= 0) {
                     wallpaper.wallpaperId = makeWallpaperIdLocked();
@@ -245,27 +244,14 @@ public class WallpaperDataParser {
                         parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
                     }
 
-                    String comp = parser.getAttributeValue(null, "component");
-                    if (removeNextWallpaperComponent()) {
-                        wallpaperToParse.setComponent(comp != null
-                                ? ComponentName.unflattenFromString(comp)
-                                : null);
-                        if (wallpaperToParse.getComponent() == null
-                                || "android".equals(wallpaperToParse.getComponent()
-                                .getPackageName())) {
-                            wallpaperToParse.setComponent(mImageWallpaper);
-                        }
-                    } else {
-                        wallpaperToParse.nextWallpaperComponent = comp != null
-                                ? ComponentName.unflattenFromString(comp)
-                                : null;
-                        if (wallpaperToParse.nextWallpaperComponent == null
-                                || "android".equals(wallpaperToParse.nextWallpaperComponent
-                                .getPackageName())) {
-                            wallpaperToParse.nextWallpaperComponent = mImageWallpaper;
+                    ComponentName comp = parseComponentName(parser);
+                    if (!liveWallpaperContentHandling()) {
+                        if (removeNextWallpaperComponent()) {
+                            wallpaperToParse.setComponent(comp);
+                        } else {
+                            wallpaperToParse.nextWallpaperComponent = comp;
                         }
                     }
-
                     if (multiCrop()) {
                         parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
                     }
@@ -288,6 +274,17 @@ public class WallpaperDataParser {
         } while (type != XmlPullParser.END_DOCUMENT);
 
         return lockWallpaper;
+    }
+
+    @NonNull
+    private ComponentName parseComponentName(TypedXmlPullParser parser) {
+        String comp = parser.getAttributeValue(null, "component");
+        ComponentName c = (comp != null) ? ComponentName.unflattenFromString(comp) : null;
+        if (c == null || "android".equals(c.getPackageName())) {
+            c = mImageWallpaper;
+        }
+
+        return c;
     }
 
     private void ensureSaneWallpaperData(WallpaperData wallpaper) {
@@ -332,9 +329,29 @@ public class WallpaperDataParser {
         }
     }
 
+    void parseWallpaperDescription(TypedXmlPullParser parser, WallpaperData wallpaper)
+            throws XmlPullParserException, IOException {
+
+        int type = parser.next();
+        if (type == XmlPullParser.START_TAG && "description".equals(parser.getName())) {
+            // Always read the description if it's there - there may be one from a previous save
+            // with content handling enabled even if it's enabled now
+            WallpaperDescription description = WallpaperDescription.restoreFromXml(parser);
+            if (liveWallpaperContentHandling()) {
+                // null component means that wallpaper was last saved without content handling, so
+                // populate description from saved component
+                if (description.getComponent() == null) {
+                    description = description.toBuilder().setComponent(
+                            parseComponentName(parser)).build();
+                }
+                wallpaper.setDescription(description);
+            }
+        }
+    }
+
     @VisibleForTesting
     void parseWallpaperAttributes(TypedXmlPullParser parser, WallpaperData wallpaper,
-            boolean keepDimensionHints) throws XmlPullParserException {
+            boolean keepDimensionHints) throws XmlPullParserException, IOException {
         final int id = parser.getAttributeInt(null, "id", -1);
         if (id != -1) {
             wallpaper.wallpaperId = id;
@@ -355,8 +372,7 @@ public class WallpaperDataParser {
                 getAttributeInt(parser, "totalCropTop", 0),
                 getAttributeInt(parser, "totalCropRight", 0),
                 getAttributeInt(parser, "totalCropBottom", 0));
-        ComponentName componentName = removeNextWallpaperComponent() ? wallpaper.getComponent()
-                : wallpaper.nextWallpaperComponent;
+        ComponentName componentName = parseComponentName(parser);
         if (multiCrop() && mImageWallpaper.equals(componentName)) {
             wallpaper.mCropHints = new SparseArray<>();
             for (Pair<Integer, String> pair: screenDimensionPairs()) {
@@ -443,6 +459,15 @@ public class WallpaperDataParser {
         }
         wallpaper.name = parser.getAttributeValue(null, "name");
         wallpaper.allowBackup = parser.getAttributeBoolean(null, "backup", false);
+
+        parseWallpaperDescription(parser, wallpaper);
+        if (liveWallpaperContentHandling() && wallpaper.getDescription().getComponent() == null) {
+            // The last save was done before the content handling flag was enabled and has no
+            // WallpaperDescription, so create a default one with the correct component.
+            // CSP: log boot after flag change to false -> true
+            wallpaper.setDescription(
+                    new WallpaperDescription.Builder().setComponent(componentName).build());
+        }
     }
 
     private static int getAttributeInt(TypedXmlPullParser parser, String name, int defValue) {
@@ -610,9 +635,27 @@ public class WallpaperDataParser {
             out.attributeBoolean(null, "backup", true);
         }
 
+        writeWallpaperDescription(out, wallpaper);
+
         out.endTag(null, tag);
     }
 
+    void writeWallpaperDescription(TypedXmlSerializer out, WallpaperData wallpaper)
+            throws IOException {
+        if (liveWallpaperContentHandling()) {
+            WallpaperDescription description = wallpaper.getDescription();
+            if (description != null) {
+                String descriptionTag = "description";
+                out.startTag(null, descriptionTag);
+                try {
+                    description.saveToXml(out);
+                } catch (XmlPullParserException e) {
+                    Slog.e(TAG, "Error writing wallpaper description", e);
+                }
+                out.endTag(null, descriptionTag);
+            }
+        }
+    }
     // Restore the named resource bitmap to both source + crop files
     boolean restoreNamedResourceLocked(WallpaperData wallpaper) {
         if (wallpaper.name.length() > 4 && "res:".equals(wallpaper.name.substring(0, 4))) {
@@ -692,9 +735,9 @@ public class WallpaperDataParser {
 
     private static List<Pair<Integer, String>> screenDimensionPairs() {
         return List.of(
-                new Pair<>(WallpaperManager.PORTRAIT, "Portrait"),
-                new Pair<>(WallpaperManager.LANDSCAPE, "Landscape"),
-                new Pair<>(WallpaperManager.SQUARE_PORTRAIT, "SquarePortrait"),
-                new Pair<>(WallpaperManager.SQUARE_LANDSCAPE, "SquareLandscape"));
+                new Pair<>(WallpaperManager.ORIENTATION_PORTRAIT, "Portrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_LANDSCAPE, "Landscape"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_PORTRAIT, "SquarePortrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_LANDSCAPE, "SquareLandscape"));
     }
 }

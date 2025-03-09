@@ -57,10 +57,7 @@ class CustomTileMapperTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply { customTileSpec = TileSpec.Companion.create(TEST_COMPONENT) }
     private val underTest by lazy {
-        CustomTileMapper(
-            context = mockContext,
-            uriGrantsManager = uriGrantsManager,
-        )
+        CustomTileMapper(context = mockContext, uriGrantsManager = uriGrantsManager)
     }
 
     @Test
@@ -68,10 +65,7 @@ class CustomTileMapperTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 val actual =
-                    underTest.map(
-                        customTileQsTileConfig,
-                        createModel(hasPendingBind = true),
-                    )
+                    underTest.map(customTileQsTileConfig, createModel(hasPendingBind = true))
                 val expected =
                     createTileState(
                         activationState = QSTileState.ActivationState.UNAVAILABLE,
@@ -91,10 +85,7 @@ class CustomTileMapperTest : SysuiTestCase() {
                         customTileQsTileConfig,
                         createModel(tileState = Tile.STATE_ACTIVE),
                     )
-                val expected =
-                    createTileState(
-                        activationState = QSTileState.ActivationState.ACTIVE,
-                    )
+                val expected = createTileState(activationState = QSTileState.ActivationState.ACTIVE)
 
                 assertThat(actual).isEqualTo(expected)
             }
@@ -110,9 +101,7 @@ class CustomTileMapperTest : SysuiTestCase() {
                         createModel(tileState = Tile.STATE_INACTIVE),
                     )
                 val expected =
-                    createTileState(
-                        activationState = QSTileState.ActivationState.INACTIVE,
-                    )
+                    createTileState(activationState = QSTileState.ActivationState.INACTIVE)
 
                 assertThat(actual).isEqualTo(expected)
             }
@@ -142,10 +131,7 @@ class CustomTileMapperTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 val actual =
-                    underTest.map(
-                        customTileQsTileConfig,
-                        createModel(isToggleable = false),
-                    )
+                    underTest.map(customTileQsTileConfig, createModel(isToggleable = false))
                 val expected =
                     createTileState(
                         sideIcon = QSTileState.SideViewIcon.Chevron,
@@ -184,7 +170,7 @@ class CustomTileMapperTest : SysuiTestCase() {
                         customTileQsTileConfig,
                         createModel(
                             tileIcon = createIcon(RuntimeException(), false),
-                            defaultTileIcon = createIcon(null, true)
+                            defaultTileIcon = createIcon(null, true),
                         ),
                     )
                 val expected =
@@ -266,7 +252,7 @@ class CustomTileMapperTest : SysuiTestCase() {
         a11yClass: String? = Switch::class.qualifiedName,
     ): QSTileState {
         return QSTileState(
-            { icon?.let { com.android.systemui.common.shared.model.Icon.Loaded(icon, null) } },
+            icon?.let { com.android.systemui.common.shared.model.Icon.Loaded(icon, null) },
             null,
             "test label",
             activationState,

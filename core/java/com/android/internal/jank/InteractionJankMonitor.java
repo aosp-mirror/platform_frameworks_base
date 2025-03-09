@@ -31,6 +31,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
@@ -184,10 +185,12 @@ public class InteractionJankMonitor {
     @GuardedBy("mLock")
     private final SparseArray<RunningTracker> mRunningTrackers = new SparseArray<>();
     private final Handler mWorker;
+    private final Application mCurrentApplication;
     private final DisplayResolutionTracker mDisplayResolutionTracker;
     private final Object mLock = new Object();
     private @ColorInt int mDebugBgColor = Color.CYAN;
     private double mDebugYOffset = 0.1;
+    @GuardedBy("mLock")
     private InteractionMonitorDebugOverlay mDebugOverlay;
 
     private volatile boolean mEnabled = DEFAULT_ENABLED;
@@ -216,13 +219,15 @@ public class InteractionJankMonitor {
         mWorker = worker.getThreadHandler();
         mDisplayResolutionTracker = new DisplayResolutionTracker(mWorker);
 
-        final Context context = ActivityThread.currentApplication();
-        if (context == null || context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) != PERMISSION_GRANTED) {
+        mCurrentApplication = ActivityThread.currentApplication();
+        if (mCurrentApplication == null || mCurrentApplication.checkCallingOrSelfPermission(
+                READ_DEVICE_CONFIG) != PERMISSION_GRANTED) {
             Log.w(TAG, "Initializing without READ_DEVICE_CONFIG permission."
                     + " enabled=" + mEnabled + ", interval=" + mSamplingInterval
                     + ", missedFrameThreshold=" + mTraceThresholdMissedFrames
                     + ", frameTimeThreshold=" + mTraceThresholdFrameTimeMillis
-                    + ", package=" + (context == null ? "null" : context.getPackageName()));
+                    + ", package=" + (mCurrentApplication == null ? "null"
+                    : mCurrentApplication.getPackageName()));
             return;
         }
 
@@ -234,8 +239,8 @@ public class InteractionJankMonitor {
                         new HandlerExecutor(mWorker), this::updateProperties);
             } catch (SecurityException ex) {
                 Log.d(TAG, "Can't get properties: READ_DEVICE_CONFIG granted="
-                        + context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
-                        + ", package=" + context.getPackageName());
+                        + mCurrentApplication.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
+                        + ", package=" + mCurrentApplication.getPackageName());
             }
         });
     }
@@ -405,7 +410,11 @@ public class InteractionJankMonitor {
 
         RunningTracker tracker = putTrackerIfNoCurrent(cujType, () ->
                 new RunningTracker(
-                    conf, createFrameTracker(conf), () -> cancel(cujType, REASON_CANCEL_TIMEOUT)));
+                    conf, createFrameTracker(conf), () -> {
+                        Log.w(TAG, "CUJ cancelled due to timeout, CUJ="
+                                + Cuj.getNameOfCuj(cujType));
+                        cancel(cujType, REASON_CANCEL_TIMEOUT);
+                    }));
         if (tracker == null) {
             return false;
         }
@@ -534,7 +543,7 @@ public class InteractionJankMonitor {
 
             mRunningTrackers.put(cuj, tracker);
             if (mDebugOverlay != null) {
-                mDebugOverlay.onTrackerAdded(cuj, tracker);
+                mDebugOverlay.onTrackerAdded(cuj, tracker.mTracker.hashCode());
             }
 
             return tracker;
@@ -569,7 +578,7 @@ public class InteractionJankMonitor {
             running.mConfig.getHandler().removeCallbacks(running.mTimeoutAction);
             mRunningTrackers.remove(cuj);
             if (mDebugOverlay != null) {
-                mDebugOverlay.onTrackerRemoved(cuj, reason, mRunningTrackers);
+                mDebugOverlay.onTrackerRemoved(cuj, reason, tracker.hashCode());
             }
             return false;
         }
@@ -592,14 +601,18 @@ public class InteractionJankMonitor {
                         mEnabled = properties.getBoolean(property, DEFAULT_ENABLED);
                 case SETTINGS_DEBUG_OVERLAY_ENABLED_KEY -> {
                     // Never allow the debug overlay to be used on user builds
-                    boolean debugOverlayEnabled = Build.IS_DEBUGGABLE
-                            && properties.getBoolean(property, DEFAULT_DEBUG_OVERLAY_ENABLED);
-                    if (debugOverlayEnabled && mDebugOverlay == null) {
-                        mDebugOverlay = new InteractionMonitorDebugOverlay(
-                                mLock, mDebugBgColor, mDebugYOffset);
-                    } else if (!debugOverlayEnabled && mDebugOverlay != null) {
-                        mDebugOverlay.dispose();
-                        mDebugOverlay = null;
+                    if (Build.IS_USER) break;
+                    boolean debugOverlayEnabled = properties.getBoolean(property,
+                            DEFAULT_DEBUG_OVERLAY_ENABLED);
+                    synchronized (mLock) {
+                        if (debugOverlayEnabled && mDebugOverlay == null) {
+                            // Use the worker thread as the UI thread for the debug overlay:
+                            mDebugOverlay = new InteractionMonitorDebugOverlay(
+                                    mCurrentApplication, mWorker, mDebugBgColor, mDebugYOffset);
+                        } else if (!debugOverlayEnabled && mDebugOverlay != null) {
+                            mDebugOverlay.dispose();
+                            mDebugOverlay = null;
+                        }
                     }
                 }
                 default -> Log.w(TAG, "Got a change event for an unknown property: "

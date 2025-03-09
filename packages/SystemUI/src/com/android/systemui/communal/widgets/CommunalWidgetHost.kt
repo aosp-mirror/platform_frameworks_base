@@ -26,6 +26,8 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.widget.RemoteViews
 import androidx.annotation.WorkerThread
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -38,7 +40,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Widget host that interacts with AppWidget service and host to bind and provide info for widgets
@@ -52,7 +53,14 @@ constructor(
     private val appWidgetHost: CommunalAppWidgetHost,
     private val selectedUserInteractor: SelectedUserInteractor,
     @CommunalLog logBuffer: LogBuffer,
+    glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper,
 ) : CommunalAppWidgetHost.Observer {
+
+    init {
+        // The communal widget host should never be accessed from a headless system user.
+        glanceableHubMultiUserHelper.assertNotInHeadlessSystemUser()
+    }
+
     companion object {
         private const val TAG = "CommunalWidgetHost"
 
@@ -96,7 +104,7 @@ constructor(
             bindWidget(
                 widgetId = id,
                 user = user ?: UserHandle(selectedUserInteractor.getSelectedUserId()),
-                provider = provider
+                provider = provider,
             )
         ) {
             logger.d("Successfully bound the widget $provider")

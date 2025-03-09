@@ -16,13 +16,12 @@
 
 package com.android.systemui.qs.tiles
 
-import android.content.Context
 import android.os.Handler
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.testing.TestableLooper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -30,9 +29,13 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QSComposeFragment
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.LocationController
 import com.android.systemui.util.mockito.argumentCaptor
@@ -46,33 +49,28 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class LocationTileTest : SysuiTestCase() {
+class LocationTileTest(flags: FlagsParameterization) : SysuiTestCase() {
 
-    @Mock
-    private lateinit var mockContext: Context
-    @Mock
-    private lateinit var qsLogger: QSLogger
-    @Mock
-    private lateinit var qsHost: QSHost
-    @Mock
-    private lateinit var metricsLogger: MetricsLogger
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    @Mock private lateinit var qsLogger: QSLogger
+    @Mock private lateinit var qsHost: QSHost
+    @Mock private lateinit var metricsLogger: MetricsLogger
     private val falsingManager = FalsingManagerFake()
-    @Mock
-    private lateinit var statusBarStateController: StatusBarStateController
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var locationController: LocationController
-    @Mock
-    private lateinit var keyguardStateController: KeyguardStateController
-    @Mock
-    private lateinit var panelInteractor: PanelInteractor
-    @Mock
-    private lateinit var uiEventLogger: QsEventLogger
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var locationController: LocationController
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var panelInteractor: PanelInteractor
+    @Mock private lateinit var uiEventLogger: QsEventLogger
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: LocationTile
@@ -81,22 +79,23 @@ class LocationTileTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        `when`(qsHost.context).thenReturn(mockContext)
+        `when`(qsHost.context).thenReturn(mContext)
 
-        tile = LocationTile(
-            qsHost,
-            uiEventLogger,
-            testableLooper.looper,
-            Handler(testableLooper.looper),
-            falsingManager,
-            metricsLogger,
-            statusBarStateController,
-            activityStarter,
-            qsLogger,
-            locationController,
-            keyguardStateController,
-            panelInteractor,
-        )
+        tile =
+            LocationTile(
+                qsHost,
+                uiEventLogger,
+                testableLooper.looper,
+                Handler(testableLooper.looper),
+                falsingManager,
+                metricsLogger,
+                statusBarStateController,
+                activityStarter,
+                qsLogger,
+                locationController,
+                keyguardStateController,
+                panelInteractor,
+            )
     }
 
     @After
@@ -112,8 +111,7 @@ class LocationTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_location_icon_off))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_location_icon_off))
     }
 
     @Test
@@ -123,8 +121,7 @@ class LocationTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_location_icon_on))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_location_icon_on))
     }
 
     @Test
@@ -139,5 +136,21 @@ class LocationTileTest : SysuiTestCase() {
         captor.value.run()
 
         verify(panelInteractor).openPanels()
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return allCombinationsOf(QSComposeFragment.FLAG_NAME)
+        }
     }
 }

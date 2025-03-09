@@ -45,7 +45,7 @@ enum class SizeClass {
 fun calculateLayoutInternal(
     width: SizeClass,
     height: SizeClass,
-    isSideBySideSupported: Boolean,
+    isOneHandedModeSupported: Boolean,
 ): BouncerSceneLayout {
     return when (height) {
         SizeClass.COMPACT -> BouncerSceneLayout.SPLIT_BOUNCER
@@ -61,6 +61,6 @@ fun calculateLayoutInternal(
                 SizeClass.MEDIUM -> BouncerSceneLayout.BELOW_USER_SWITCHER
                 SizeClass.EXPANDED -> BouncerSceneLayout.BESIDE_USER_SWITCHER
             }
-    }.takeIf { it != BouncerSceneLayout.BESIDE_USER_SWITCHER || isSideBySideSupported }
+    }.takeIf { it != BouncerSceneLayout.BESIDE_USER_SWITCHER || isOneHandedModeSupported }
         ?: BouncerSceneLayout.STANDARD_BOUNCER
 }

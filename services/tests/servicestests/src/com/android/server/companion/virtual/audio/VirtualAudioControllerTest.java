@@ -200,7 +200,9 @@ public class VirtualAudioControllerTest {
             AudioPlaybackConfiguration audioPlaybackConfiguration =
                     new AudioPlaybackConfiguration(
                             playerIdCard, /* piid= */ 1000, appUid, /* pid= */ 1000);
-            audioPlaybackConfiguration.handleStateEvent(PLAYER_STATE_STARTED, /* deviceId= */1);
+            int[] deviceIds = new int[1];
+            deviceIds[0] = 1;
+            audioPlaybackConfiguration.handleStateEvent(PLAYER_STATE_STARTED, deviceIds);
             configs.add(audioPlaybackConfiguration);
         }
         return configs;

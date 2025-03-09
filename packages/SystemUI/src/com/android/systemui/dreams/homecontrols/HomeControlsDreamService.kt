@@ -16,74 +16,109 @@
 
 package com.android.systemui.dreams.homecontrols
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.PowerManager
 import android.service.controls.ControlsProviderService
 import android.service.dreams.DreamService
 import android.window.TaskFragmentInfo
-import com.android.systemui.controls.settings.ControlsSettingsRepository
-import com.android.systemui.dagger.qualifiers.Background
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ServiceLifecycleDispatcher
+import androidx.lifecycle.lifecycleScope
 import com.android.systemui.dreams.DreamLogger
-import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
-import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor.Companion.MAX_UPDATE_CORRELATION_DELAY
+import com.android.systemui.dreams.homecontrols.service.TaskFragmentComponent
+import com.android.systemui.dreams.homecontrols.shared.model.HomeControlsDataSource
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.DreamLog
+import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.wakelock.WakeLock
-import com.android.systemui.util.wakelock.WakeLock.Builder.NO_TIMEOUT
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import com.android.app.tracing.coroutines.createCoroutineTracingContext
 
+/**
+ * [DreamService] which embeds the user's chosen home controls app to allow it to display as a
+ * screensaver. This service will run in the foreground user context.
+ */
 class HomeControlsDreamService
 @Inject
-constructor(
-    private val controlsSettingsRepository: ControlsSettingsRepository,
-    private val taskFragmentFactory: TaskFragmentComponent.Factory,
-    private val homeControlsComponentInteractor: HomeControlsComponentInteractor,
-    private val wakeLockBuilder: WakeLock.Builder,
-    private val dreamServiceDelegate: DreamServiceDelegate,
-    @Background private val bgDispatcher: CoroutineDispatcher,
-    @DreamLog logBuffer: LogBuffer
-) : DreamService() {
+constructor(private val factory: HomeControlsDreamServiceImpl.Factory) :
+    DreamService(), LifecycleOwner {
 
-    private val serviceJob = SupervisorJob()
-    private val serviceScope = CoroutineScope(bgDispatcher + serviceJob + createCoroutineTracingContext("HomeControlsDreamService"))
+    private val dispatcher = ServiceLifecycleDispatcher(this)
+    override val lifecycle: Lifecycle
+        get() = dispatcher.lifecycle
+
+    private val impl: HomeControlsDreamServiceImpl by lazy { factory.create(this, this) }
+
+    override fun onCreate() {
+        dispatcher.onServicePreSuperOnCreate()
+        super.onCreate()
+    }
+
+    override fun onDreamingStarted() {
+        dispatcher.onServicePreSuperOnStart()
+        super.onDreamingStarted()
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        impl.onAttachedToWindow()
+    }
+
+    override fun onDetachedFromWindow() {
+        dispatcher.onServicePreSuperOnDestroy()
+        super.onDetachedFromWindow()
+        impl.onDetachedFromWindow()
+    }
+}
+
+/**
+ * Implementation of the home controls dream service, which allows for injecting a [DreamService]
+ * and [LifecycleOwner] for testing.
+ */
+class HomeControlsDreamServiceImpl
+@AssistedInject
+constructor(
+    private val taskFragmentFactory: TaskFragmentComponent.Factory,
+    private val wakeLockBuilder: WakeLock.Builder,
+    private val powerManager: PowerManager,
+    private val systemClock: SystemClock,
+    private val dataSource: HomeControlsDataSource,
+    @DreamLog logBuffer: LogBuffer,
+    @Assisted private val service: DreamService,
+    @Assisted lifecycleOwner: LifecycleOwner,
+) : LifecycleOwner by lifecycleOwner {
+
     private val logger = DreamLogger(logBuffer, TAG)
     private lateinit var taskFragmentComponent: TaskFragmentComponent
     private val wakeLock: WakeLock by lazy {
         wakeLockBuilder
-            .setMaxTimeout(NO_TIMEOUT)
+            .setMaxTimeout(WakeLock.Builder.NO_TIMEOUT)
             .setTag(TAG)
             .setLevelsAndFlags(PowerManager.SCREEN_BRIGHT_WAKE_LOCK)
             .build()
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        val activity = dreamServiceDelegate.getActivity(this)
+    fun onAttachedToWindow() {
+        val activity = service.activity
         if (activity == null) {
-            finish()
+            service.finish()
             return
         }
-
-        // Start monitoring package updates to possibly restart the dream if the home controls
-        // package is updated while we are dreaming.
-        serviceScope.launch { homeControlsComponentInteractor.monitorUpdatesAndRestart() }
-
         taskFragmentComponent =
             taskFragmentFactory
                 .create(
                     activity = activity,
                     onCreateCallback = { launchActivity() },
                     onInfoChangedCallback = this::onTaskFragmentInfoChanged,
-                    hide = { endDream(false) }
+                    hide = { endDream(false) },
                 )
                 .apply { createTaskFragment() }
 
@@ -98,53 +133,61 @@ constructor(
     }
 
     private fun endDream(handleRedirect: Boolean) {
-        homeControlsComponentInteractor.onDreamEndUnexpectedly()
-        if (handleRedirect && dreamServiceDelegate.redirectWake(this)) {
-            dreamServiceDelegate.wakeUp(this)
-            serviceScope.launch {
+        pokeUserActivity()
+        if (handleRedirect && service.redirectWake) {
+            service.wakeUp()
+            lifecycleScope.launch {
                 delay(ACTIVITY_RESTART_DELAY)
                 launchActivity()
             }
         } else {
-            dreamServiceDelegate.finish(this)
+            service.finish()
         }
     }
 
     private fun launchActivity() {
-        val setting = controlsSettingsRepository.allowActionOnTrivialControlsInLockscreen.value
-        val componentName = homeControlsComponentInteractor.panelComponent.value
-        logger.d("Starting embedding $componentName")
-        val intent =
-            Intent().apply {
-                component = componentName
-                putExtra(ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, setting)
-                putExtra(
-                    ControlsProviderService.EXTRA_CONTROLS_SURFACE,
-                    ControlsProviderService.CONTROLS_SURFACE_DREAM
-                )
-            }
-        taskFragmentComponent.startActivityInTaskFragment(intent)
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        wakeLock.release(TAG)
-        taskFragmentComponent.destroy()
-        serviceScope.launch {
-            delay(CANCELLATION_DELAY_AFTER_DETACHED)
-            serviceJob.cancel("Dream detached from window")
+        lifecycleScope.launch {
+            val (componentName, setting) = dataSource.componentInfo.first()
+            logger.d("Starting embedding $componentName")
+            val intent =
+                Intent().apply {
+                    component = componentName
+                    putExtra(
+                        ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                        setting,
+                    )
+                    putExtra(
+                        ControlsProviderService.EXTRA_CONTROLS_SURFACE,
+                        ControlsProviderService.CONTROLS_SURFACE_DREAM,
+                    )
+                }
+            taskFragmentComponent.startActivityInTaskFragment(intent)
         }
     }
 
-    private companion object {
-        /**
-         * Defines how long after the dream ends that we should keep monitoring for package updates
-         * to attempt a restart of the dream. This should be larger than
-         * [MAX_UPDATE_CORRELATION_DELAY] as it also includes the time the package update takes to
-         * complete.
-         */
-        val CANCELLATION_DELAY_AFTER_DETACHED = 5.seconds
+    fun onDetachedFromWindow() {
+        wakeLock.release(TAG)
+        taskFragmentComponent.destroy()
+    }
 
+    @SuppressLint("MissingPermission")
+    private fun pokeUserActivity() {
+        powerManager.userActivity(
+            systemClock.uptimeMillis(),
+            PowerManager.USER_ACTIVITY_EVENT_OTHER,
+            PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS,
+        )
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            service: DreamService,
+            lifecycleOwner: LifecycleOwner,
+        ): HomeControlsDreamServiceImpl
+    }
+
+    companion object {
         /**
          * Defines the delay after wakeup where we should attempt to restart the embedded activity.
          * When a wakeup is redirected, the dream service may keep running. In this case, we should
@@ -152,6 +195,6 @@ constructor(
          * after the wakeup transition has played.
          */
         val ACTIVITY_RESTART_DELAY = 334.milliseconds
-        const val TAG = "HomeControlsDreamService"
+        private const val TAG = "HomeControlsDreamServiceImpl"
     }
 }

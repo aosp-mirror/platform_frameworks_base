@@ -16,6 +16,8 @@
 
 package android.window;
 
+import static com.android.window.flags.Flags.predictiveBackPrioritySystemNavigationObserver;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -95,7 +97,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         synchronized (mLock) {
             mCallbacks.add(Pair.create(callback, priority));
             if (mActualDispatcher != null) {
-                if (priority <= PRIORITY_SYSTEM) {
+                if (priority == PRIORITY_SYSTEM) {
                     mActualDispatcher.registerSystemOnBackInvokedCallback(callback);
                 } else {
                     mActualDispatcher.registerOnBackInvokedCallback(priority, callback);
@@ -123,10 +125,19 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
         for (Pair<OnBackInvokedCallback, Integer> callbackPair : mCallbacks) {
             int priority = callbackPair.second;
-            if (priority >= PRIORITY_DEFAULT) {
-                mActualDispatcher.registerOnBackInvokedCallback(priority, callbackPair.first);
+            if (predictiveBackPrioritySystemNavigationObserver()) {
+                if (priority >= PRIORITY_DEFAULT
+                        || priority == PRIORITY_SYSTEM_NAVIGATION_OBSERVER) {
+                    mActualDispatcher.registerOnBackInvokedCallback(priority, callbackPair.first);
+                } else {
+                    mActualDispatcher.registerSystemOnBackInvokedCallback(callbackPair.first);
+                }
             } else {
-                mActualDispatcher.registerSystemOnBackInvokedCallback(callbackPair.first);
+                if (priority >= PRIORITY_DEFAULT) {
+                    mActualDispatcher.registerOnBackInvokedCallback(priority, callbackPair.first);
+                } else {
+                    mActualDispatcher.registerSystemOnBackInvokedCallback(callbackPair.first);
+                }
             }
         }
         mCallbacks.clear();

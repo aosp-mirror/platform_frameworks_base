@@ -71,6 +71,12 @@ public final class Light implements Parcelable {
     public static final int LIGHT_TYPE_KEYBOARD_MIC_MUTE = 10004;
 
     /**
+     * Type for keyboard volume mute light.
+     * @hide
+     */
+    public static final int LIGHT_TYPE_KEYBOARD_VOLUME_MUTE = 10005;
+
+    /**
      * Capability for lights that could adjust its LED brightness. If the capability is not present
      * the LED can only be turned either on or off.
      */
@@ -99,6 +105,7 @@ public final class Light implements Parcelable {
             LIGHT_TYPE_PLAYER_ID,
             LIGHT_TYPE_KEYBOARD_BACKLIGHT,
             LIGHT_TYPE_KEYBOARD_MIC_MUTE,
+            LIGHT_TYPE_KEYBOARD_VOLUME_MUTE,
         })
     public @interface LightType {}
 

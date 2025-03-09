@@ -17,8 +17,10 @@
 package android.media;
 
 import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+import static android.media.audio.Flags.FLAG_ROUTED_DEVICE_IDS;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -54,7 +56,9 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -3019,7 +3023,7 @@ public class AudioTrack extends PlayerBase
             }
         }
         synchronized(mPlayStateLock) {
-            baseStart(0); // unknown device at this point
+            baseStart(new int[0]); // unknown device at this point
             native_start();
             // FIXME see b/179218630
             //baseStart(native_getRoutedDeviceId());
@@ -3780,17 +3784,51 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
+     * Internal API of getRoutedDevices(). We should not call flag APIs internally.
+     */
+    private @NonNull List<AudioDeviceInfo> getRoutedDevicesInternal() {
+        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
+        final int[] deviceIds = native_getRoutedDeviceIds();
+        if (deviceIds == null || deviceIds.length == 0) {
+            return audioDeviceInfos;
+        }
+
+        for (int i = 0; i < deviceIds.length; i++) {
+            AudioDeviceInfo audioDeviceInfo = AudioManager.getDeviceForPortId(deviceIds[i],
+                    AudioManager.GET_DEVICES_OUTPUTS);
+            if (audioDeviceInfo != null) {
+                audioDeviceInfos.add(audioDeviceInfo);
+            }
+        }
+        return audioDeviceInfos;
+    }
+
+    /**
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioTrack.
      * Note: The query is only valid if the AudioTrack is currently playing. If it is not,
      * <code>getRoutedDevice()</code> will return null.
+     * Audio may play on multiple devices simultaneously (e.g. an alarm playing on headphones and
+     * speaker on a phone), so prefer using {@link #getRoutedDevices}.
      */
     @Override
     public AudioDeviceInfo getRoutedDevice() {
-        int deviceId = native_getRoutedDeviceId();
-        if (deviceId == 0) {
+        final List<AudioDeviceInfo> audioDeviceInfos = getRoutedDevicesInternal();
+        if (audioDeviceInfos.isEmpty()) {
             return null;
         }
-        return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_OUTPUTS);
+        return audioDeviceInfos.get(0);
+    }
+
+    /**
+     * Returns a List of {@link AudioDeviceInfo} identifying the current routing of this
+     * AudioTrack.
+     * Note: The query is only valid if the AudioTrack is currently playing. If it is not,
+     * <code>getRoutedDevices()</code> will return an empty list.
+     */
+    @Override
+    @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
+    public @NonNull List<AudioDeviceInfo> getRoutedDevices() {
+        return getRoutedDevicesInternal();
     }
 
     private void tryToDisableNativeRoutingCallback() {
@@ -3950,7 +3988,7 @@ public class AudioTrack extends PlayerBase
      */
     private void broadcastRoutingChange() {
         AudioManager.resetAudioPortGeneration();
-        baseUpdateDeviceId(getRoutedDevice());
+        baseUpdateDeviceIds(getRoutedDevicesInternal());
         synchronized (mRoutingChangeListeners) {
             for (NativeRoutingEventHandlerDelegate delegate : mRoutingChangeListeners.values()) {
                 delegate.notifyClient();
@@ -4507,7 +4545,7 @@ public class AudioTrack extends PlayerBase
     private native final int native_setAuxEffectSendLevel(float level);
 
     private native final boolean native_setOutputDevice(int deviceId);
-    private native final int native_getRoutedDeviceId();
+    private native int[] native_getRoutedDeviceIds();
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
 

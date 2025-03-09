@@ -24,7 +24,8 @@ import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
-import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
@@ -261,24 +262,28 @@ public class ContextualSearchManagerService extends SystemService {
         }
     }
 
-    private Intent getResolvedLaunchIntent() {
+    private Intent getResolvedLaunchIntent(int userId) {
         synchronized (this) {
+            if(DEBUG_USER) Log.d(TAG, "Attempting to getResolvedLaunchIntent");
             // If mTemporaryPackage is not null, use it to get the ContextualSearch intent.
             String csPkgName = getContextualSearchPackageName();
             if (csPkgName.isEmpty()) {
                 // Return null if csPackageName is not specified.
+                if (DEBUG_USER) Log.w(TAG, "getContextualSearchPackageName is empty");
                 return null;
             }
             Intent launchIntent = new Intent(
                     ContextualSearchManager.ACTION_LAUNCH_CONTEXTUAL_SEARCH);
             launchIntent.setPackage(csPkgName);
-            ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(
-                    launchIntent, MATCH_FACTORY_ONLY);
+            ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivityAsUser(
+                    launchIntent, MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
             if (resolveInfo == null) {
+                if (DEBUG_USER) Log.w(TAG, "resolveInfo is null");
                 return null;
             }
             ComponentName componentName = resolveInfo.getComponentInfo().getComponentName();
             if (componentName == null) {
+                if (DEBUG_USER) Log.w(TAG, "componentName is null");
                 return null;
             }
             launchIntent.setComponent(componentName);
@@ -286,9 +291,10 @@ public class ContextualSearchManagerService extends SystemService {
         }
     }
 
-    private Intent getContextualSearchIntent(int entrypoint, CallbackToken mToken) {
-        final Intent launchIntent = getResolvedLaunchIntent();
+    private Intent getContextualSearchIntent(int entrypoint, int userId, CallbackToken mToken) {
+        final Intent launchIntent = getResolvedLaunchIntent(userId);
         if (launchIntent == null) {
+            if (DEBUG_USER) Log.w(TAG, "Failed getContextualSearchIntent: launchIntent is null");
             return null;
         }
 
@@ -341,6 +347,7 @@ public class ContextualSearchManagerService extends SystemService {
                     TYPE_NAVIGATION_BAR_PANEL,
                     TYPE_POINTER));
         } else {
+            if (DEBUG_USER) Log.w(TAG, "Can't capture contextual screenshot: mWmInternal is null");
             shb = null;
         }
         final Bitmap bm = shb != null ? shb.asBitmap() : null;
@@ -444,7 +451,7 @@ public class ContextualSearchManagerService extends SystemService {
         @Override
         public void startContextualSearch(int entrypoint) {
             synchronized (this) {
-                if (DEBUG_USER) Log.d(TAG, "startContextualSearch");
+                if (DEBUG_USER) Log.d(TAG, "startContextualSearch entrypoint: " + entrypoint);
                 enforcePermission("startContextualSearch");
                 final int callingUserId = Binder.getCallingUserHandle().getIdentifier();
 
@@ -455,7 +462,8 @@ public class ContextualSearchManagerService extends SystemService {
                 // server has READ_FRAME_BUFFER permission to get the screenshot and because only
                 // the system server can invoke non-exported activities.
                 Binder.withCleanCallingIdentity(() -> {
-                    Intent launchIntent = getContextualSearchIntent(entrypoint, mToken);
+                    Intent launchIntent =
+                        getContextualSearchIntent(entrypoint, callingUserId, mToken);
                     if (launchIntent != null) {
                         int result = invokeContextualSearchIntent(launchIntent, callingUserId);
                         if (DEBUG_USER) Log.d(TAG, "Launch result: " + result);

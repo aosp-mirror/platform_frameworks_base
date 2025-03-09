@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.Dp
 import com.android.settingslib.development.DevelopmentSettingsEnabler
 import com.android.settingslib.spa.framework.compose.rememberDrawablePainter
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
+import com.android.settingslib.spa.widget.preference.IntroAppPreference
 import com.android.settingslib.spa.widget.ui.CopyableBody
 import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsTitle
@@ -48,23 +50,53 @@ import com.android.settingslib.spaprivileged.model.app.rememberAppRepository
 class AppInfoProvider(private val packageInfo: PackageInfo) {
     @Composable
     fun AppInfo(displayVersion: Boolean = false, isClonedAppPage: Boolean = false) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = SettingsDimension.itemPaddingStart,
-                    vertical = SettingsDimension.itemPaddingVertical,
-                )
-                .semantics(mergeDescendants = true) {},
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        if (isSpaExpressiveEnabled) {
+            val appRepository = rememberAppRepository()
             val app = checkNotNull(packageInfo.applicationInfo)
-            Box(modifier = Modifier.padding(SettingsDimension.itemPaddingAround)) {
-                AppIcon(app = app, size = SettingsDimension.appIconInfoSize)
+            val title = appRepository.produceLabel(app, isClonedAppPage).value
+
+            val descriptions = mutableListOf<String>()
+            if (app.isInstantApp) {
+                descriptions.add(
+                    stringResource(
+                        com.android.settingslib.widget.preference.app.R.string.install_type_instant
+                    )
+                )
             }
-            AppLabel(app, isClonedAppPage)
-            InstallType(app)
-            if (displayVersion) AppVersion()
+            if (displayVersion) {
+                val versionName = packageInfo.versionNameBidiWrapped
+                if (versionName != null) descriptions.add(versionName)
+            }
+
+            IntroAppPreference(
+                title = title,
+                descriptions = descriptions,
+                appIcon = {
+                    Image(
+                        painter = rememberDrawablePainter(appRepository.produceIcon(app).value),
+                        contentDescription = appRepository.produceIconContentDescription(app).value,
+                    )
+                },
+            )
+        } else {
+            Column(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(
+                            horizontal = SettingsDimension.itemPaddingStart,
+                            vertical = SettingsDimension.itemPaddingVertical,
+                        )
+                        .semantics(mergeDescendants = true) {},
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                val app = checkNotNull(packageInfo.applicationInfo)
+                Box(modifier = Modifier.padding(SettingsDimension.itemPaddingAround)) {
+                    AppIcon(app = app, size = SettingsDimension.appIconInfoSize)
+                }
+                AppLabel(app, isClonedAppPage)
+                InstallType(app)
+                if (displayVersion) AppVersion()
+            }
         }
     }
 
@@ -89,19 +121,24 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
     @Composable
     fun FooterAppVersion(showPackageName: Boolean = rememberIsDevelopmentSettingsEnabled()) {
         val context = LocalContext.current
-        val footer = remember(packageInfo, showPackageName) {
-            val list = mutableListOf<String>()
-            packageInfo.versionNameBidiWrapped?.let {
-                list += context.getString(R.string.version_text, it)
+        val footer =
+            remember(packageInfo, showPackageName) {
+                val list = mutableListOf<String>()
+                packageInfo.versionNameBidiWrapped?.let {
+                    list += context.getString(R.string.version_text, it)
+                }
+                if (showPackageName) {
+                    list += packageInfo.packageName
+                }
+                list.joinToString(separator = System.lineSeparator())
             }
-            if (showPackageName) {
-                list += packageInfo.packageName
-            }
-            list.joinToString(separator = System.lineSeparator())
-        }
         if (footer.isBlank()) return
-        HorizontalDivider()
-        Column(modifier = Modifier.padding(SettingsDimension.itemPadding)) {
+        if (!isSpaExpressiveEnabled) HorizontalDivider()
+        Column(
+            modifier =
+                if (isSpaExpressiveEnabled) Modifier.padding(SettingsDimension.footerItemPadding)
+                else Modifier.padding(SettingsDimension.itemPadding)
+        ) {
             CopyableBody(footer)
         }
     }
@@ -109,9 +146,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
     @Composable
     private fun rememberIsDevelopmentSettingsEnabled(): Boolean {
         val context = LocalContext.current
-        return remember {
-            DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(context)
-        }
+        return remember { DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(context) }
     }
 
     private companion object {

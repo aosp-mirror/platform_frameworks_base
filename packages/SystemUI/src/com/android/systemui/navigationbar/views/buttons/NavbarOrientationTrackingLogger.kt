@@ -31,7 +31,7 @@ constructor(@NavbarOrientationTrackingLog private val buffer: LogBuffer) {
         isImmersiveMode: Boolean,
         isSecondaryHandleVisible: Boolean,
         currentRotation: Int,
-        startingQuickSwitchRotation: Int
+        startingQuickSwitchRotation: Int,
     ) {
         buffer.log(
             TAG,
@@ -52,7 +52,7 @@ constructor(@NavbarOrientationTrackingLog private val buffer: LogBuffer) {
                     "\tDelta Rotation: ${getDeltaRotation(int1, int2)}\n" +
                     "\tStarting QuickSwitch Rotation: $int1\n" +
                     "\tCurrent Rotation: $int2\n"
-            }
+            },
         )
     }
 

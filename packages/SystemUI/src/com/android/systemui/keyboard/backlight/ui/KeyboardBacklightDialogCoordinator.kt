@@ -25,7 +25,7 @@ import com.android.systemui.keyboard.backlight.ui.viewmodel.BacklightDialogConte
 import com.android.systemui.keyboard.backlight.ui.viewmodel.BacklightDialogViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 private fun defaultCreateDialog(context: Context): (Int, Int) -> KeyboardBacklightDialog {
     return { currentLevel: Int, maxLevel: Int ->

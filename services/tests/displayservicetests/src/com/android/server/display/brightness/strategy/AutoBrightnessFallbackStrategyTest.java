@@ -129,7 +129,8 @@ public class AutoBrightnessFallbackStrategyTest {
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mAutoBrightnessFallbackStrategy.updateBrightness(
                         new StrategyExecutionRequest(displayPowerRequest, 0.2f,
-                                /* userSetBrightnessChanged= */ false));
+                                /* userSetBrightnessChanged= */ false,
+                                /* isStylusBeingUsed */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 
@@ -149,7 +150,8 @@ public class AutoBrightnessFallbackStrategyTest {
                 /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userSetBrightnessChanged= */ false,
                 /* allowAutoBrightnessWhileDozingConfig= */ false,
-                /* isAutoBrightnessEnabled= */ true);
+                /* isAutoBrightnessEnabled= */ true,
+                /* isBedtimeModeWearEnabled= */ false);
         mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
 
         verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(true);
@@ -171,7 +173,8 @@ public class AutoBrightnessFallbackStrategyTest {
                 /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userSetBrightnessChanged= */ false,
                 /* allowAutoBrightnessWhileDozingConfig= */ false,
-                /* isAutoBrightnessEnabled= */ true);
+                /* isAutoBrightnessEnabled= */ true,
+                /* isBedtimeModeWearEnabled= */ false);
         mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
 
         verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(true);
@@ -193,7 +196,8 @@ public class AutoBrightnessFallbackStrategyTest {
                 /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userSetBrightnessChanged= */ false,
                 /* allowAutoBrightnessWhileDozingConfig= */ false,
-                /* isAutoBrightnessEnabled= */ false);
+                /* isAutoBrightnessEnabled= */ false,
+                /* isBedtimeModeWearEnabled= */ false);
         mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
 
         verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);
@@ -215,7 +219,8 @@ public class AutoBrightnessFallbackStrategyTest {
                 /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userSetBrightnessChanged= */ false,
                 /* allowAutoBrightnessWhileDozingConfig= */ false,
-                /* isAutoBrightnessEnabled= */ true);
+                /* isAutoBrightnessEnabled= */ true,
+                /* isBedtimeModeWearEnabled= */ false);
         mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
 
         verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);
@@ -237,7 +242,8 @@ public class AutoBrightnessFallbackStrategyTest {
                 /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userSetBrightnessChanged= */ false,
                 /* allowAutoBrightnessWhileDozingConfig= */ false,
-                /* isAutoBrightnessEnabled= */ true);
+                /* isAutoBrightnessEnabled= */ true,
+                /* isBedtimeModeWearEnabled= */ false);
         mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
 
         verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);
@@ -259,7 +265,8 @@ public class AutoBrightnessFallbackStrategyTest {
                 /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userSetBrightnessChanged= */ false,
                 /* allowAutoBrightnessWhileDozingConfig= */ true,
-                /* isAutoBrightnessEnabled= */ true);
+                /* isAutoBrightnessEnabled= */ true,
+                /* isBedtimeModeWearEnabled= */ false);
         mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
 
         verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);
@@ -281,7 +288,8 @@ public class AutoBrightnessFallbackStrategyTest {
                 /* lastUserSetScreenBrightness= */ PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userSetBrightnessChanged= */ false,
                 /* allowAutoBrightnessWhileDozingConfig= */ false,
-                /* isAutoBrightnessEnabled= */ true);
+                /* isAutoBrightnessEnabled= */ true,
+                /* isBedtimeModeWearEnabled= */ false);
         mAutoBrightnessFallbackStrategy.strategySelectionPostProcessor(ssnr);
 
         verify(mScreenOffBrightnessSensorController).setLightSensorEnabled(false);

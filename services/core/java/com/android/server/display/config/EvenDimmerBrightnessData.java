@@ -34,72 +34,76 @@ public class EvenDimmerBrightnessData {
     /**
      * Brightness value at which even dimmer methods are used.
      */
-    public final float mTransitionPoint;
+    public final float transitionPoint;
 
     /**
      * Nits array, maps to mBacklight
      */
-    public final float[] mNits;
+    public final float[] nits;
 
     /**
      * Backlight array, maps to mBrightness and mNits
      */
-    public final float[] mBacklight;
+    public final float[] backlight;
 
     /**
      * Brightness array, maps to mBacklight
      */
-    public final float[] mBrightness;
+    public final float[] brightness;
+
     /**
      * Spline, mapping between backlight and nits
      */
-    public final Spline mBacklightToNits;
+    public final Spline backlightToNits;
+
     /**
      * Spline, mapping between nits and backlight
      */
-    public final Spline mNitsToBacklight;
+    public final Spline nitsToBacklight;
+
     /**
      * Spline, mapping between brightness and backlight
      */
-    public final Spline mBrightnessToBacklight;
+    public final Spline brightnessToBacklight;
+
     /**
      * Spline, mapping between backlight and brightness
      */
-    public final Spline mBacklightToBrightness;
+    public final Spline backlightToBrightness;
 
     /**
      * Spline, mapping the minimum nits for each lux condition.
      */
-    public final Spline mMinLuxToNits;
+    public final Spline minLuxToNits;
 
     @VisibleForTesting
     public EvenDimmerBrightnessData(float transitionPoint, float[] nits,
             float[] backlight, float[] brightness, Spline backlightToNits,
             Spline nitsToBacklight, Spline brightnessToBacklight, Spline backlightToBrightness,
             Spline minLuxToNits) {
-        mTransitionPoint = transitionPoint;
-        mNits = nits;
-        mBacklight = backlight;
-        mBrightness = brightness;
-        mBacklightToNits = backlightToNits;
-        mNitsToBacklight = nitsToBacklight;
-        mBrightnessToBacklight = brightnessToBacklight;
-        mBacklightToBrightness = backlightToBrightness;
-        mMinLuxToNits = minLuxToNits;
+        this.transitionPoint = transitionPoint;
+        this.nits = nits;
+        this.backlight = backlight;
+        this.brightness = brightness;
+        this.backlightToNits = backlightToNits;
+        this.nitsToBacklight = nitsToBacklight;
+        this.brightnessToBacklight = brightnessToBacklight;
+        this.backlightToBrightness = backlightToBrightness;
+        this.minLuxToNits = minLuxToNits;
     }
 
     @Override
     public String toString() {
         return "EvenDimmerBrightnessData {"
-                + "mTransitionPoint: " + mTransitionPoint
-                + ", mNits: " + Arrays.toString(mNits)
-                + ", mBacklight: " + Arrays.toString(mBacklight)
-                + ", mBrightness: " + Arrays.toString(mBrightness)
-                + ", mBacklightToNits: " + mBacklightToNits
-                + ", mNitsToBacklight: " + mNitsToBacklight
-                + ", mBrightnessToBacklight: " + mBrightnessToBacklight
-                + ", mBacklightToBrightness: " + mBacklightToBrightness
-                + ", mMinLuxToNits: " + mMinLuxToNits
+                + "transitionPoint: " + transitionPoint
+                + ", nits: " + Arrays.toString(nits)
+                + ", backlight: " + Arrays.toString(backlight)
+                + ", brightness: " + Arrays.toString(brightness)
+                + ", backlightToNits: " + backlightToNits
+                + ", nitsToBacklight: " + nitsToBacklight
+                + ", brightnessToBacklight: " + brightnessToBacklight
+                + ", backlightToBrightness: " + backlightToBrightness
+                + ", minLuxToNits: " + minLuxToNits
                 + "} ";
     }
 
@@ -122,7 +126,6 @@ public class EvenDimmerBrightnessData {
         if (map == null) {
             return null;
         }
-        String interpolation = map.getInterpolation();
 
         List<BrightnessPoint> brightnessPoints = map.getBrightnessPoint();
         if (brightnessPoints.isEmpty()) {
@@ -169,22 +172,11 @@ public class EvenDimmerBrightnessData {
             ++i;
         }
 
-        // Explicitly choose linear interpolation.
-        if ("linear".equals(interpolation)) {
-            return new EvenDimmerBrightnessData(transitionPoint, nits, backlight, brightness,
-                    new Spline.LinearSpline(backlight, nits),
-                    new Spline.LinearSpline(nits, backlight),
-                    new Spline.LinearSpline(brightness, backlight),
-                    new Spline.LinearSpline(backlight, brightness),
-                    new Spline.LinearSpline(minLux, minNits)
-            );
-        }
-
         return new EvenDimmerBrightnessData(transitionPoint, nits, backlight, brightness,
-                Spline.createSpline(backlight, nits),
-                Spline.createSpline(nits, backlight),
-                Spline.createSpline(brightness, backlight),
-                Spline.createSpline(backlight, brightness),
+                new Spline.LinearSpline(backlight, nits),
+                new Spline.LinearSpline(nits, backlight),
+                new Spline.LinearSpline(brightness, backlight),
+                new Spline.LinearSpline(backlight, brightness),
                 Spline.createSpline(minLux, minNits)
         );
     }

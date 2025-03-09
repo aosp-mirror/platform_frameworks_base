@@ -115,13 +115,13 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.util.NotificationBigTextNormalizer;
+import com.android.internal.widget.NotificationProgressModel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -155,7 +155,7 @@ public class Notification implements Parcelable
             FOREGROUND_SERVICE_IMMEDIATE,
             FOREGROUND_SERVICE_DEFERRED
     })
-    public @interface ServiceNotificationPolicy {};
+    public @interface ServiceNotificationPolicy {}
 
     /**
      * If the Notification associated with starting a foreground service has been
@@ -441,8 +441,8 @@ public class Notification implements Parcelable
 
     /**
      * A large-format version of {@link #contentView}, giving the Notification an
-     * opportunity to show more detail. The system UI may choose to show this
-     * instead of the normal content view at its discretion.
+     * opportunity to show more detail when expanded. The system UI may choose
+     * to show this instead of the normal content view at its discretion.
      *
      * As of N, this field may be null. The expanded notification view is determined by the
      * inputs to {@link Notification.Builder}; a custom RemoteViews can optionally be
@@ -783,10 +783,62 @@ public class Notification implements Parcelable
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public static final int FLAG_PROMOTED_ONGOING = 0x00040000;
 
-    private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
-            BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
-            DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
-            MessagingStyle.class, CallStyle.class);
+    private static final Set<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Set.of(
+            BigTextStyle.class,
+            BigPictureStyle.class,
+            InboxStyle.class,
+            MediaStyle.class,
+            DecoratedCustomViewStyle.class,
+            DecoratedMediaCustomViewStyle.class,
+            MessagingStyle.class,
+            CallStyle.class
+    );
+
+    private static boolean isPlatformStyle(Style style) {
+        if (style == null) {
+            return false;
+        }
+
+        if (PLATFORM_STYLE_CLASSES.contains(style.getClass())) {
+            return true;
+        }
+
+        if (Flags.apiRichOngoing()) {
+            return style.getClass() == ProgressStyle.class;
+        }
+
+        return false;
+    }
+
+    private static boolean isStandardLayout(int layoutId) {
+        if (Flags.notificationsRedesignTemplates()) {
+            return switch (layoutId) {
+                case R.layout.notification_2025_template_collapsed_base,
+                     R.layout.notification_2025_template_expanded_base,
+                     R.layout.notification_2025_template_heads_up_base,
+                     R.layout.notification_2025_template_header,
+                     R.layout.notification_2025_template_conversation,
+                     R.layout.notification_2025_template_collapsed_call,
+                     R.layout.notification_2025_template_expanded_call,
+                     R.layout.notification_2025_template_collapsed_messaging,
+                     R.layout.notification_2025_template_expanded_messaging,
+                     R.layout.notification_2025_template_collapsed_media,
+                     R.layout.notification_2025_template_expanded_media,
+                     R.layout.notification_2025_template_expanded_big_picture,
+                     R.layout.notification_2025_template_expanded_big_text,
+                     R.layout.notification_2025_template_expanded_inbox -> true;
+                case R.layout.notification_2025_template_expanded_progress
+                        -> Flags.apiRichOngoing();
+                default -> false;
+            };
+        }
+        if (Flags.apiRichOngoing()) {
+            if (layoutId == R.layout.notification_template_material_progress) {
+                return true;
+            }
+        }
+        return STANDARD_LAYOUTS.contains(layoutId);
+    }
 
     /** @hide */
     @IntDef(flag = true, prefix = {"FLAG_"}, value = {
@@ -1285,7 +1337,7 @@ public class Notification implements Parcelable
     public static final String EXTRA_SUMMARY_TEXT = "android.summaryText";
 
     /**
-     * {@link #extras} key: this is the longer text shown in the big form of a
+     * {@link #extras} key: this is the longer text shown in the expanded form of a
      * {@link BigTextStyle} notification, as supplied to
      * {@link BigTextStyle#bigText(CharSequence)}.
      */
@@ -1598,26 +1650,70 @@ public class Notification implements Parcelable
     public static final String EXTRA_DECLINE_COLOR = "android.declineColor";
 
     /**
-     * {@link #extras} key: {@link Icon} of an image used as an overlay Icon on
-     * {@link Notification#mLargeIcon} for {@link EnRouteStyle} notifications.
-     * This extra is an {@code Icon}.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public static final String EXTRA_ENROUTE_OVERLAY_ICON = "android.enrouteOverlayIcon";
-
-    /**
-     * {@link #extras} key: text used as a sub-text for the largeIcon of
-     * {@link EnRouteStyle} notification. This extra is a {@code CharSequence}.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public static final String EXTRA_ENROUTE_LARGE_ICON_SUBTEXT = "android.enrouteLargeIconSubText";
-    /**
      * {@link #extras} key: whether the notification should be colorized as
      * supplied to {@link Builder#setColorized(boolean)}.
      */
     public static final String EXTRA_COLORIZED = "android.colorized";
+
+    /**
+     * {@link #extras} key: an arraylist of {@link android.app.Notification.ProgressStyle.Segment}
+     * bundles provided by a
+     * {@link android.app.Notification.ProgressStyle} notification as supplied to
+     * {@link ProgressStyle#setProgressSegments}
+     * or {@link ProgressStyle#addProgressSegment(ProgressStyle.Segment)}.
+     * This extra is a parcelable array list of bundles.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_SEGMENTS = "android.progressSegments";
+
+    /**
+     * {@link #extras} key: an arraylist of {@link ProgressStyle.Point}
+     * bundles provided by a
+     * {@link android.app.Notification.ProgressStyle} notification as supplied to
+     * {@link ProgressStyle#setProgressPoints}
+     * or {@link ProgressStyle#addProgressPoint(ProgressStyle.Point)}.
+     * This extra is a parcelable array list of bundles.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_POINTS = "android.progressPoints";
+
+    /**
+     * {@link #extras} key: whether the progress bar should be styled by its progress as
+     * supplied to {@link ProgressStyle#setStyledByProgress}.
+     * This extra is a boolean.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_STYLED_BY_PROGRESS = "android.styledByProgress";
+
+    /**
+     * {@link #extras} key: this is an {@link Icon} of an image to be
+     * shown as progress bar progress tracker icon in {@link ProgressStyle}, supplied to
+     *{@link ProgressStyle#setProgressTrackerIcon(Icon)}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_TRACKER_ICON = "android.progressTrackerIcon";
+
+    /**
+     * {@link #extras} key: this is an {@link Icon} of an image to be
+     * shown at the beginning of the progress bar in {@link ProgressStyle}, supplied to
+     *{@link ProgressStyle#setProgressStartIcon(Icon)}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_START_ICON = "android.progressStartIcon";
+
+    /**
+     * {@link #extras} key: this is an {@link Icon} of an image to be
+     * shown at the end of the progress bar in {@link ProgressStyle}, supplied to
+     *{@link ProgressStyle#setProgressEndIcon(Icon)}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_PROGRESS_END_ICON = "android.progressEndIcon";
 
     /**
      * @hide
@@ -1679,10 +1775,6 @@ public class Notification implements Parcelable
     private Icon mSmallIcon;
     @UnsupportedAppUsage
     private Icon mLargeIcon;
-    private Icon mAppIcon;
-
-    /** Cache for whether the notification was posted by a headless system app. */
-    private Boolean mBelongsToHeadlessSystemApp = null;
 
     @UnsupportedAppUsage
     private String mChannelId;
@@ -3068,10 +3160,16 @@ public class Notification implements Parcelable
                 callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
-        }
 
-        if (Flags.apiRichOngoing()) {
-            visitIconUri(visitor, extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class));
+
+            if (Flags.apiRichOngoing()) {
+                visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_TRACKER_ICON,
+                    Icon.class));
+                visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_START_ICON,
+                    Icon.class));
+                visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_END_ICON,
+                    Icon.class));
+            }
         }
 
         if (mBubbleMetadata != null) {
@@ -3123,7 +3221,6 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
     public boolean containsCustomViews() {
         return contentView != null
                 || bigContentView != null
@@ -3137,7 +3234,6 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
     public boolean hasTitle() {
         return extras != null
                 && (!TextUtils.isEmpty(extras.getCharSequence(EXTRA_TITLE))
@@ -3147,104 +3243,32 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public boolean hasPromotableStyle() {
-        //TODO(b/367739672): Add progress style
-        return extras == null || !extras.containsKey(Notification.EXTRA_TEMPLATE)
-                || isStyle(Notification.BigPictureStyle.class)
-                || isStyle(Notification.BigTextStyle.class)
-                || isStyle(Notification.CallStyle.class);
+        final Class<? extends Style> notificationStyle = getNotificationStyle();
+
+        return notificationStyle == null
+                || BigPictureStyle.class.equals(notificationStyle)
+                || BigTextStyle.class.equals(notificationStyle)
+                || CallStyle.class.equals(notificationStyle)
+                || ProgressStyle.class.equals(notificationStyle);
     }
 
     /**
-     * @hide
+     * Returns whether the notification has all the characteristics that make it eligible for
+     * {@link #FLAG_PROMOTED_ONGOING}. This method does not factor in other criteria such user
+     * preferences for the app or channel. If this returns true, it does not guarantee that the
+     * notification will be assigned FLAG_PROMOTED_ONGOING by the system, but if this returns false,
+     * it will not.
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public boolean hasPromotableCharacteristics() {
-        return isColorized()
+        return isColorizedRequested()
+                && isOngoingEvent()
                 && hasTitle()
+                && !isGroupSummary()
                 && !containsCustomViews()
                 && hasPromotableStyle();
-    }
-
-    /**
-     * Whether this notification was posted by a headless system app.
-     *
-     * If we don't have enough information to figure this out, this will return false. Therefore,
-     * false negatives are possible, but false positives should not be.
-     *
-     * @hide
-     */
-    public boolean belongsToHeadlessSystemApp(Context context) {
-        Trace.beginSection("Notification#belongsToHeadlessSystemApp");
-
-        try {
-            if (mBelongsToHeadlessSystemApp != null) {
-                return mBelongsToHeadlessSystemApp;
-            }
-
-            if (context == null) {
-                // Without a valid context, we don't know exactly. Let's assume it doesn't belong to
-                // a system app, but not cache the value.
-                return false;
-            }
-
-            ApplicationInfo info = getApplicationInfo(context);
-            if (info != null) {
-                if ((info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    // It's not a system app at all.
-                    mBelongsToHeadlessSystemApp = false;
-                } else {
-                    // If there's no launch intent, it's probably a headless app.
-                    final PackageManager pm = context.getPackageManager();
-                    mBelongsToHeadlessSystemApp = pm.getLaunchIntentForPackage(info.packageName)
-                            == null;
-                }
-            } else {
-                // If for some reason we don't have the app info, we don't know; best assume it's
-                // not a system app.
-                return false;
-            }
-            return mBelongsToHeadlessSystemApp;
-        } finally {
-            Trace.endSection();
-        }
-    }
-
-    /**
-     * Get the resource ID of the app icon from application info.
-     * @hide
-     */
-    public int getHeaderAppIconRes(Context context) {
-        ApplicationInfo info = getApplicationInfo(context);
-        if (info != null) {
-            return info.icon;
-        }
-        return 0;
-    }
-
-    /**
-     * Load the app icon drawable from the package manager. This could result in a binder call.
-     * @hide
-     */
-    public Drawable loadHeaderAppIcon(Context context) {
-        Trace.beginSection("Notification#loadHeaderAppIcon");
-
-        try {
-            if (context == null) {
-                Log.e(TAG, "Cannot load the app icon drawable with a null context");
-                return null;
-            }
-            final PackageManager pm = context.getPackageManager();
-            ApplicationInfo info = getApplicationInfo(context);
-            if (info == null) {
-                Log.e(TAG, "Cannot load the app icon drawable: no application info");
-                return null;
-            }
-            return pm.getApplicationIcon(info);
-        } finally {
-            Trace.endSection();
-        }
     }
 
     /**
@@ -4067,6 +4091,12 @@ public class Notification implements Parcelable
                 flags &= ~FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
             }
         }
+        if (Flags.apiRichOngoing()) {
+            if ((flags & FLAG_PROMOTED_ONGOING) != 0) {
+                flagStrings.add("PROMOTED_ONGOING");
+                flags &= ~FLAG_PROMOTED_ONGOING;
+            }
+        }
 
         if (android.service.notification.Flags.notificationSilentFlag()) {
             if ((flags & FLAG_SILENT) != 0) {
@@ -4126,6 +4156,13 @@ public class Notification implements Parcelable
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public String getShortCriticalText() {
         return extras.getString(EXTRA_SHORT_CRITICAL_TEXT);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isOngoingEvent() {
+        return (flags & FLAG_ONGOING_EVENT) != 0;
     }
 
     /**
@@ -4279,55 +4316,6 @@ public class Notification implements Parcelable
     @UnsupportedAppUsage
     public void setSmallIcon(Icon icon) {
         mSmallIcon = icon;
-    }
-
-    /**
-     * The colored app icon that can replace the small icon in the notification starting in V.
-     *
-     * Before using this value, you should first check whether it's actually being used by the
-     * notification by calling {@link Notification#shouldUseAppIcon()}.
-     *
-     * @hide
-     */
-    public Icon getAppIcon() {
-        if (mAppIcon != null) {
-            return mAppIcon;
-        }
-        // If the app icon hasn't been loaded yet, check if we can load it without a context.
-        if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
-            final ApplicationInfo info = extras.getParcelable(
-                    EXTRA_BUILDER_APPLICATION_INFO,
-                    ApplicationInfo.class);
-            if (info != null) {
-                int appIconRes = info.icon;
-                if (appIconRes == 0) {
-                    Log.w(TAG, "Failed to get the app icon: no icon in application info");
-                    return null;
-                }
-                mAppIcon = Icon.createWithResource(info.packageName, appIconRes);
-                return mAppIcon;
-            } else {
-                Log.e(TAG, "Failed to get the app icon: "
-                        + "there's an EXTRA_BUILDER_APPLICATION_INFO in extras but it's null");
-            }
-        } else {
-            Log.w(TAG, "Failed to get the app icon: no application info in extras");
-        }
-        return null;
-    }
-
-    /**
-     * Whether the notification is using the app icon instead of the small icon.
-     * @hide
-     */
-    public boolean shouldUseAppIcon() {
-        if (Flags.notificationsUseAppIconInRow()) {
-            if (belongsToHeadlessSystemApp(/* context = */ null)) {
-                return false;
-            }
-            return getAppIcon() != null;
-        }
-        return false;
     }
 
     /**
@@ -4486,19 +4474,6 @@ public class Notification implements Parcelable
 
         private static final boolean USE_ONLY_TITLE_IN_LOW_PRIORITY_SUMMARY =
                 SystemProperties.getBoolean("notifications.only_title", true);
-
-        /**
-         * The lightness difference that has to be added to the primary text color to obtain the
-         * secondary text color when the background is light.
-         */
-        private static final int LIGHTNESS_TEXT_DIFFERENCE_LIGHT = 20;
-
-        /**
-         * The lightness difference that has to be added to the primary text color to obtain the
-         * secondary text color when the background is dark.
-         * A bit less then the above value, since it looks better on dark backgrounds.
-         */
-        private static final int LIGHTNESS_TEXT_DIFFERENCE_DARK = -10;
 
         private Context mContext;
         private Notification mN;
@@ -5070,7 +5045,7 @@ public class Notification implements Parcelable
 
         /**
          * Sets a very short string summarizing the most critical information contained in the
-         * notification. Suggested max length is 5 characters, and there is no guarantee how much or
+         * notification. Suggested max length is 7 characters, and there is no guarantee how much or
          * how little of this text will be shown.
          */
         @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
@@ -5914,9 +5889,9 @@ public class Notification implements Parcelable
                 }
             }
             boolean contentViewUsesHeader = mN.contentView == null
-                    || STANDARD_LAYOUTS.contains(mN.contentView.getLayoutId());
+                    || isStandardLayout(mN.contentView.getLayoutId());
             boolean bigContentViewUsesHeader = mN.bigContentView == null
-                    || STANDARD_LAYOUTS.contains(mN.bigContentView.getLayoutId());
+                    || isStandardLayout(mN.bigContentView.getLayoutId());
             return contentViewUsesHeader && bigContentViewUsesHeader;
         }
 
@@ -5954,12 +5929,12 @@ public class Notification implements Parcelable
 
         private RemoteViews applyStandardTemplate(int resId, StandardTemplateParams p,
                 TemplateBindResult result) {
-            p.headerless(resId == getBaseLayoutResource()
+            p.headerless(resId == getCollapsedBaseLayoutResource()
                     || resId == getHeadsUpBaseLayoutResource()
                     || resId == getCompactHeadsUpBaseLayoutResource()
                     || resId == getMessagingCompactHeadsUpLayoutResource()
-                    || resId == getMessagingLayoutResource()
-                    || resId == R.layout.notification_template_material_media);
+                    || resId == getCollapsedMessagingLayoutResource()
+                    || resId == getCollapsedMediaLayoutResource());
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
@@ -5999,7 +5974,7 @@ public class Notification implements Parcelable
 
         private static void setHeaderlessVerticalMargins(RemoteViews contentView,
                 StandardTemplateParams p, boolean hasSecondLine) {
-            if (!p.mHeaderless) {
+            if (Flags.notificationsRedesignTemplates() || !p.mHeaderless) {
                 return;
             }
             int marginDimen = hasSecondLine
@@ -6372,36 +6347,12 @@ public class Notification implements Parcelable
         }
 
         private void bindSmallIcon(RemoteViews contentView, StandardTemplateParams p) {
-            if (Flags.notificationsUseAppIcon()) {
-                // Override small icon with app icon
-                mN.mSmallIcon = Icon.createWithResource(mContext,
-                        mN.getHeaderAppIconRes(mContext));
-            } else if (mN.mSmallIcon == null && mN.icon != 0) {
+            if (mN.mSmallIcon == null && mN.icon != 0) {
                 mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
             }
-
-            boolean usingAppIcon = false;
-            if (Flags.notificationsUseAppIconInRow() && !mN.belongsToHeadlessSystemApp(mContext)) {
-                // Use the app icon in the view
-                int appIconRes = mN.getHeaderAppIconRes(mContext);
-                if (appIconRes != 0) {
-                    mN.mAppIcon = Icon.createWithResource(mContext, appIconRes);
-                    contentView.setImageViewIcon(R.id.icon, mN.mAppIcon);
-                    contentView.setBoolean(R.id.icon, "setShouldShowAppIcon", true);
-                    usingAppIcon = true;
-                } else {
-                    Log.w(TAG, "bindSmallIcon: could not get the app icon");
-                }
-            }
-            if (!usingAppIcon) {
-                contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
-            }
+            contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
             contentView.setInt(R.id.icon, "setImageLevel", mN.iconLevel);
-
-            // Don't change color if we're using the app icon.
-            if (!Flags.notificationsUseAppIcon() && !usingAppIcon) {
-                processSmallIconColor(mN.mSmallIcon, contentView, p);
-            }
+            processSmallIconColor(mN.mSmallIcon, contentView, p);
         }
 
         /**
@@ -6437,7 +6388,7 @@ public class Notification implements Parcelable
             boolean hideSnoozeButton = mN.isFgsOrUij()
                     || mN.fullScreenIntent != null
                     || isBackgroundColorized(p)
-                    || p.mViewType != StandardTemplateParams.VIEW_TYPE_BIG;
+                    || p.mViewType != StandardTemplateParams.VIEW_TYPE_EXPANDED;
             big.setBoolean(R.id.snooze_button, "setEnabled", !hideSnoozeButton);
             if (hideSnoozeButton) {
                 // Only hide; NotificationContentView will show it when it adds the click listener
@@ -6504,10 +6455,13 @@ public class Notification implements Parcelable
                 // Clear view padding to allow buttons to start on the left edge.
                 // This must be done before 'setEmphasizedMode' which sets top/bottom margins.
                 big.setViewPadding(R.id.actions, 0, 0, 0, 0);
-                // Add an optional indent that will make buttons start at the correct column when
-                // there is enough space to do so (and fall back to the left edge if not).
-                big.setInt(R.id.actions, "setCollapsibleIndentDimen",
-                        R.dimen.call_notification_collapsible_indent);
+                if (!Flags.notificationsRedesignTemplates()) {
+                    // Add an optional indent that will make buttons start at the correct column
+                    // when there is enough space to do so (and fall back to the left edge if not).
+                    // This is handled directly in NotificationActionListLayout in the new design.
+                    big.setInt(R.id.actions, "setCollapsibleIndentDimen",
+                            R.dimen.call_notification_collapsible_indent);
+                }
                 if (evenlyDividedCallStyleActionLayout()) {
                     if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
                         Log.d(TAG, "setting evenly divided mode on action list");
@@ -6630,7 +6584,7 @@ public class Notification implements Parcelable
             // Custom views which come from a platform style class are safe, and thus do not need to
             // be wrapped.  Any subclass of those styles has the opportunity to make arbitrary
             // changes to the RemoteViews, and thus can't be trusted as a fully vetted view.
-            if (fromStyle && PLATFORM_STYLE_CLASSES.contains(mStyle.getClass())) {
+            if (fromStyle && isPlatformStyle(mStyle)) {
                 return false;
             }
             return mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S;
@@ -6642,19 +6596,21 @@ public class Notification implements Parcelable
                     .decorationType(StandardTemplateParams.DECORATION_MINIMAL)
                     .fillTextsFrom(this);
             TemplateBindResult result = new TemplateBindResult();
-            RemoteViews standard = applyStandardTemplate(getBaseLayoutResource(), p, result);
+            RemoteViews standard = applyStandardTemplate(getCollapsedBaseLayoutResource(),
+                    p, result);
             buildCustomContentIntoTemplate(mContext, standard, customContent,
                     p, result);
             return standard;
         }
 
-        private RemoteViews minimallyDecoratedBigContentView(@NonNull RemoteViews customContent) {
+        private RemoteViews minimallyDecoratedExpandedContentView(
+                @NonNull RemoteViews customContent) {
             StandardTemplateParams p = mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .decorationType(StandardTemplateParams.DECORATION_MINIMAL)
                     .fillTextsFrom(this);
             TemplateBindResult result = new TemplateBindResult();
-            RemoteViews standard = applyStandardTemplateWithActions(getBigBaseLayoutResource(),
+            RemoteViews standard = applyStandardTemplateWithActions(getExpandedBaseLayoutResource(),
                     p, result);
             buildCustomContentIntoTemplate(mContext, standard, customContent,
                     p, result);
@@ -6700,7 +6656,7 @@ public class Notification implements Parcelable
             StandardTemplateParams p = mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
                     .fillTextsFrom(this);
-            return applyStandardTemplate(getBaseLayoutResource(), p, null /* result */);
+            return applyStandardTemplate(getCollapsedBaseLayoutResource(), p, null /* result */);
         }
 
         private boolean useExistingRemoteView(RemoteViews customContent) {
@@ -6712,7 +6668,7 @@ public class Notification implements Parcelable
                 return false;
             }
             if (fullyCustomViewRequiresDecoration(false)
-                    && STANDARD_LAYOUTS.contains(customContent.getLayoutId())) {
+                    && isStandardLayout(customContent.getLayoutId())) {
                 // If the app's custom views are objects returned from Builder.create*ContentView()
                 // then the app is most likely attempting to spoof the user.  Even if they are not,
                 // the result would be broken (b/189189308) so we will ignore it.
@@ -6738,24 +6694,29 @@ public class Notification implements Parcelable
          */
         @Deprecated
         public RemoteViews createBigContentView() {
+            return createExpandedContentView();
+        }
+
+        private RemoteViews createExpandedContentView() {
             RemoteViews result = null;
             if (useExistingRemoteView(mN.bigContentView)) {
                 return fullyCustomViewRequiresDecoration(false /* fromStyle */)
-                        ? minimallyDecoratedBigContentView(mN.bigContentView) : mN.bigContentView;
+                        ? minimallyDecoratedExpandedContentView(mN.bigContentView)
+                        : mN.bigContentView;
             }
             if (mStyle != null) {
-                result = mStyle.makeBigContentView();
+                result = mStyle.makeExpandedContentView();
                 if (fullyCustomViewRequiresDecoration(true /* fromStyle */)) {
-                    result = minimallyDecoratedBigContentView(result);
+                    result = minimallyDecoratedExpandedContentView(result);
                 }
             }
             if (result == null) {
-                if (bigContentViewRequired()) {
+                if (expandedContentViewRequired()) {
                     StandardTemplateParams p = mParams.reset()
-                            .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                            .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                             .allowTextWithProgress(true)
                             .fillTextsFrom(this);
-                    result = applyStandardTemplateWithActions(getBigBaseLayoutResource(), p,
+                    result = applyStandardTemplateWithActions(getExpandedBaseLayoutResource(), p,
                             null /* result */);
                 }
             }
@@ -6769,7 +6730,7 @@ public class Notification implements Parcelable
         // apps can detect the change, it's most likely that the changes will simply result in
         // visual regressions.
         @SuppressWarnings("AndroidFrameworkCompatChange")
-        private boolean bigContentViewRequired() {
+        private boolean expandedContentViewRequired() {
             if (Flags.notificationExpansionOptional()) {
                 // Notifications without a bigContentView, style, or actions do not need to expand
                 boolean exempt = mN.bigContentView == null
@@ -6809,23 +6770,10 @@ public class Notification implements Parcelable
             // Headers on their own are never colorized
             p.disallowColorization();
             RemoteViews header = new BuilderRemoteViews(mContext.getApplicationInfo(),
-                    R.layout.notification_template_header);
+                    getHeaderLayoutResource());
             resetNotificationHeader(header);
             bindNotificationHeader(header, p);
             return header;
-        }
-
-        /**
-         * Construct a RemoteViews for the ambient version of the notification.
-         *
-         * @hide
-         */
-        public RemoteViews makeAmbientNotification() {
-            RemoteViews headsUpContentView = createHeadsUpContentView(false /* increasedHeight */);
-            if (headsUpContentView != null) {
-                return headsUpContentView;
-            }
-            return createContentView();
         }
 
         /**
@@ -7198,7 +7146,9 @@ public class Notification implements Parcelable
          */
         public CharSequence ensureColorSpanContrastOrStripStyling(CharSequence cs,
                 int buttonFillColor) {
-            if (Flags.cleanUpSpansAndNewLines()) {
+            // Ongoing promoted notifications are allowed to have styling.
+            final boolean isPromotedOngoing = mN.isPromotedOngoing();
+            if (!isPromotedOngoing && Flags.cleanUpSpansAndNewLines()) {
                 return stripStyling(cs);
             }
 
@@ -7240,11 +7190,15 @@ public class Notification implements Parcelable
          */
         @VisibleForTesting
         public static int ensureButtonFillContrast(int color, int bg) {
-            return isColorDark(bg)
-                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, 1.3)
-                    : ContrastColorUtil.findContrastColor(color, bg, true, 1.3);
+            return ensureColorContrast(color, bg, 1.3);
         }
 
+
+        private static int ensureColorContrast(int color, int bg, double contrastRatio) {
+            return isColorDark(bg)
+                    ? ContrastColorUtil.findContrastColorAgainstDark(color, bg, true, contrastRatio)
+                    : ContrastColorUtil.findContrastColor(color, bg, true, contrastRatio);
+        }
 
         /**
          * @return Whether we are currently building a notification from a legacy (an app that
@@ -7565,13 +7519,29 @@ public class Notification implements Parcelable
             return clone;
         }
 
+        private int getHeaderLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_header;
+            } else {
+                return R.layout.notification_template_header;
+            }
+        }
+
         @UnsupportedAppUsage
-        private int getBaseLayoutResource() {
-            return R.layout.notification_template_material_base;
+        private int getCollapsedBaseLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_base;
+            } else {
+                return R.layout.notification_template_material_base;
+            }
         }
 
         private int getHeadsUpBaseLayoutResource() {
-            return R.layout.notification_template_material_heads_up_base;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_heads_up_base;
+            } else {
+                return R.layout.notification_template_material_heads_up_base;
+            }
         }
 
         private int getCompactHeadsUpBaseLayoutResource() {
@@ -7582,32 +7552,100 @@ public class Notification implements Parcelable
             return R.layout.notification_template_material_messaging_compact_heads_up;
         }
 
-        private int getBigBaseLayoutResource() {
-            return R.layout.notification_template_material_big_base;
+        private int getExpandedBaseLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_base;
+            } else {
+                return R.layout.notification_template_material_big_base;
+            }
         }
 
         private int getBigPictureLayoutResource() {
-            return R.layout.notification_template_material_big_picture;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_big_picture;
+            } else {
+                return R.layout.notification_template_material_big_picture;
+            }
         }
 
         private int getBigTextLayoutResource() {
-            return R.layout.notification_template_material_big_text;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_big_text;
+            } else {
+                return R.layout.notification_template_material_big_text;
+            }
         }
 
         private int getInboxLayoutResource() {
-            return R.layout.notification_template_material_inbox;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_inbox;
+            } else {
+                return R.layout.notification_template_material_inbox;
+            }
         }
 
-        private int getMessagingLayoutResource() {
-            return R.layout.notification_template_material_messaging;
+        private int getCollapsedMessagingLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_messaging;
+            } else {
+                return R.layout.notification_template_material_messaging;
+            }
         }
 
-        private int getBigMessagingLayoutResource() {
-            return R.layout.notification_template_material_big_messaging;
+        private int getExpandedMessagingLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_messaging;
+            } else {
+                return R.layout.notification_template_material_big_messaging;
+            }
+        }
+
+        private int getCollapsedMediaLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_media;
+            } else {
+                return R.layout.notification_template_material_media;
+            }
+        }
+
+        private int getExpandedMediaLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_media;
+            } else {
+                return R.layout.notification_template_material_big_media;
+            }
         }
 
         private int getConversationLayoutResource() {
-            return R.layout.notification_template_material_conversation;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_conversation;
+            } else {
+                return R.layout.notification_template_material_conversation;
+            }
+        }
+
+        private int getCollapsedCallLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_call;
+            } else {
+                return R.layout.notification_template_material_call;
+            }
+        }
+
+        private int getExpandedCallLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_call;
+            } else {
+                return R.layout.notification_template_material_big_call;
+            }
+        }
+
+        private int getProgressLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_progress;
+            } else {
+                return R.layout.notification_template_material_progress;
+            }
         }
 
         private int getActionLayoutResource() {
@@ -7838,8 +7876,16 @@ public class Notification implements Parcelable
      * @hide
      */
     public boolean isColorized() {
-        return extras.getBoolean(EXTRA_COLORIZED)
-                && (hasColorizedPermission() || isFgsOrUij());
+        return isColorizedRequested()
+                && (hasColorizedPermission() || isFgsOrUij() || isPromotedOngoing());
+    }
+
+    /**
+     * @return true if this notification has requested to be colorized, regardless of whether it
+     * meets the requirements to be displayed that way.
+     */
+    private boolean isColorizedRequested() {
+        return extras.getBoolean(EXTRA_COLORIZED);
     }
 
     /**
@@ -7850,6 +7896,19 @@ public class Notification implements Parcelable
      */
     public boolean hasColorizedPermission() {
         return (flags & Notification.FLAG_CAN_COLORIZE) != 0;
+    }
+
+    /**
+     * Returns whether this notification is a promoted ongoing notification.
+     *
+     * This requires the Notification.FLAG_PROMOTED_ONGOING flag to be set
+     * (which may be true once the api_rich_ongoing feature flag is enabled),
+     * and requires that the ui_rich_ongoing feature flag is enabled.
+     *
+     * @hide
+     */
+    public boolean isPromotedOngoing() {
+        return Flags.uiRichOngoing() && (flags & Notification.FLAG_PROMOTED_ONGOING) != 0;
     }
 
     /**
@@ -7971,6 +8030,12 @@ public class Notification implements Parcelable
                 return innerClass;
             }
         }
+
+        if (Flags.apiRichOngoing()) {
+            if (templateClass.equals(ProgressStyle.class.getName())) {
+                return ProgressStyle.class;
+            }
+        }
         return null;
     }
 
@@ -8040,7 +8105,7 @@ public class Notification implements Parcelable
         protected Builder mBuilder;
 
         /**
-         * Overrides ContentTitle in the big form of the template.
+         * Overrides ContentTitle in the expanded form of the template.
          * This defaults to the value passed to setContentTitle().
          */
         protected void internalSetBigContentTitle(CharSequence title) {
@@ -8048,7 +8113,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the first line of text after the detail section in the big form of the template.
+         * Set the first line of text after the detail section in the expanded form of the template.
          */
         protected void internalSetSummaryText(CharSequence cs) {
             mSummaryText = cs;
@@ -8111,10 +8176,10 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Construct a Style-specific RemoteViews for the final big notification layout.
+         * Construct a Style-specific RemoteViews for the final expanded notification layout.
          * @hide
          */
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             return null;
         }
 
@@ -8278,7 +8343,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Overrides ContentTitle in the big form of the template.
+         * Overrides ContentTitle in the expanded form of the template.
          * This defaults to the value passed to setContentTitle().
          */
         @NonNull
@@ -8288,7 +8353,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the first line of text after the detail section in the big form of the template.
+         * Set the first line of text after the detail section in the expanded form of the template.
          */
         @NonNull
         public BigPictureStyle setSummaryText(@Nullable CharSequence cs) {
@@ -8347,7 +8412,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Override the large icon when the big notification is shown.
+         * Override the large icon when the expanded notification is shown.
          */
         @NonNull
         public BigPictureStyle bigLargeIcon(@Nullable Bitmap b) {
@@ -8355,7 +8420,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Override the large icon when the big notification is shown.
+         * Override the large icon when the expanded notification is shown.
          */
         @NonNull
         public BigPictureStyle bigLargeIcon(@Nullable Icon icon) {
@@ -8419,7 +8484,7 @@ public class Notification implements Parcelable
                     .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
                     .fillTextsFrom(mBuilder)
                     .promotedPicture(mPictureIcon);
-            return getStandardView(mBuilder.getBaseLayoutResource(), p, null /* result */);
+            return getStandardView(mBuilder.getCollapsedBaseLayoutResource(), p, null /* result */);
         }
 
         /**
@@ -8441,7 +8506,7 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             // Replace mN.mLargeIcon with mBigLargeIcon if mBigLargeIconSet
             // This covers the following cases:
             //   1. mBigLargeIconSet -> mBigLargeIcon (null or non-null) applies, overrides
@@ -8460,7 +8525,7 @@ public class Notification implements Parcelable
             }
 
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG).fillTextsFrom(mBuilder);
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED).fillTextsFrom(mBuilder);
             RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource(),
                     p, null /* result */);
             if (mSummaryTextSet) {
@@ -8607,7 +8672,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Overrides ContentTitle in the big form of the template.
+         * Overrides ContentTitle in the expanded form of the template.
          * This defaults to the value passed to setContentTitle().
          */
         public BigTextStyle setBigContentTitle(CharSequence title) {
@@ -8616,7 +8681,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the first line of text after the detail section in the big form of the template.
+         * Set the first line of text after the detail section in the expanded form of the template.
          */
         public BigTextStyle setSummaryText(CharSequence cs) {
             internalSetSummaryText(safeCharSequence(cs));
@@ -8624,7 +8689,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Provide the longer text to be displayed in the big form of the
+         * Provide the longer text to be displayed in the expanded form of the
          * template in place of the content text.
          */
         public BigTextStyle bigText(CharSequence cs) {
@@ -8668,7 +8733,7 @@ public class Notification implements Parcelable
             if (increasedHeight) {
                 ArrayList<Action> originalActions = mBuilder.mActions;
                 mBuilder.mActions = new ArrayList<>();
-                RemoteViews remoteViews = makeBigContentView();
+                RemoteViews remoteViews = makeExpandedContentView();
                 mBuilder.mActions = originalActions;
                 return remoteViews;
             }
@@ -8682,7 +8747,7 @@ public class Notification implements Parcelable
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             if (increasedHeight && mBuilder.mActions.size() > 0) {
                 // TODO(b/163626038): pass VIEW_TYPE_HEADS_UP?
-                return makeBigContentView();
+                return makeExpandedContentView();
             }
             return super.makeHeadsUpContentView(increasedHeight);
         }
@@ -8690,16 +8755,18 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .allowTextWithProgress(true)
                     .textViewId(R.id.big_text)
                     .fillTextsFrom(mBuilder);
 
             // Replace the text with the big text, but only if the big text is not empty.
             CharSequence bigTextText = mBuilder.processLegacyText(mBigText);
-            if (Flags.cleanUpSpansAndNewLines()) {
+            // Ongoing promoted notifications are allowed to have styling.
+            final boolean isPromotedOngoing = mBuilder.mN.isPromotedOngoing();
+            if (!isPromotedOngoing && Flags.cleanUpSpansAndNewLines()) {
                 bigTextText = normalizeBigText(stripStyling(bigTextText));
             }
             if (!TextUtils.isEmpty(bigTextText)) {
@@ -8836,6 +8903,16 @@ public class Notification implements Parcelable
                     >= Build.VERSION_CODES.P && (mUser == null || mUser.getName() == null)) {
                 throw new RuntimeException("User must be valid and have a name.");
             }
+        }
+
+        /**
+         * @hide
+         */
+        public boolean displayCustomViewInline() {
+            // This is a lie; True is returned for conversations to make sure that the custom
+            // view is not used instead of the template, but it will not actually be included.
+            return Flags.notificationNoCustomViewConversations()
+                    && mConversationType != CONVERSATION_TYPE_LEGACY;
         }
 
         /**
@@ -9352,20 +9429,20 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeBigContentView() {
-            return makeMessagingView(StandardTemplateParams.VIEW_TYPE_BIG);
+        public RemoteViews makeExpandedContentView() {
+            return makeMessagingView(StandardTemplateParams.VIEW_TYPE_EXPANDED);
         }
 
         /**
          * Create a messaging layout.
          *
-         * @param viewType one of StandardTemplateParams.VIEW_TYPE_NORMAL, VIEW_TYPE_BIG,
+         * @param viewType one of StandardTemplateParams.VIEW_TYPE_NORMAL, VIEW_TYPE_EXPANDEDIG,
          *                VIEW_TYPE_HEADS_UP
          * @return the created remoteView.
          */
         @NonNull
         private RemoteViews makeMessagingView(int viewType) {
-            boolean isCollapsed = viewType != StandardTemplateParams.VIEW_TYPE_BIG;
+            boolean isCollapsed = viewType != StandardTemplateParams.VIEW_TYPE_EXPANDED;
             boolean hideRightIcons = viewType != StandardTemplateParams.VIEW_TYPE_NORMAL;
             boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
             boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
@@ -9409,8 +9486,8 @@ public class Notification implements Parcelable
                     isConversationLayout
                             ? mBuilder.getConversationLayoutResource()
                             : isCollapsed
-                                    ? mBuilder.getMessagingLayoutResource()
-                                    : mBuilder.getBigMessagingLayoutResource(),
+                                    ? mBuilder.getCollapsedMessagingLayoutResource()
+                                    : mBuilder.getExpandedMessagingLayoutResource(),
                     p,
                     bindResult);
             if (isConversationLayout) {
@@ -9566,7 +9643,6 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.icon, View.GONE);
                 contentView.setViewVisibility(R.id.conversation_face_pile, View.GONE);
                 contentView.setViewVisibility(R.id.conversation_icon, View.VISIBLE);
-                contentView.setBoolean(R.id.conversation_icon, "setApplyCircularCrop", true);
                 contentView.setImageViewIcon(R.id.conversation_icon, conversationIcon);
             } else if (mIsGroupConversation) {
                 contentView.setViewVisibility(R.id.icon, View.GONE);
@@ -10034,7 +10110,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Overrides ContentTitle in the big form of the template.
+         * Overrides ContentTitle in the expanded form of the template.
          * This defaults to the value passed to setContentTitle().
          */
         public InboxStyle setBigContentTitle(CharSequence title) {
@@ -10043,7 +10119,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the first line of text after the detail section in the big form of the template.
+         * Set the first line of text after the detail section in the expanded form of the template.
          */
         public InboxStyle setSummaryText(CharSequence cs) {
             internalSetSummaryText(safeCharSequence(cs));
@@ -10091,9 +10167,9 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .fillTextsFrom(mBuilder).text(null);
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews contentView = getStandardView(mBuilder.getInboxLayoutResource(), p, result);
@@ -10348,8 +10424,8 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeBigContentView() {
-            return makeMediaBigContentView(null /* customContent */);
+        public RemoteViews makeExpandedContentView() {
+            return makeMediaExpandedContentView(null /* customContent */);
         }
 
         /**
@@ -10464,7 +10540,7 @@ public class Notification implements Parcelable
                     .fillTextsFrom(mBuilder);
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews template = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_media, p,
+                    mBuilder.getCollapsedMediaLayoutResource(), p,
                     null /* result */);
 
             for (int i = 0; i < MAX_MEDIA_BUTTONS_IN_COMPACT; i++) {
@@ -10485,15 +10561,15 @@ public class Notification implements Parcelable
         }
 
         /** @hide */
-        protected RemoteViews makeMediaBigContentView(@Nullable RemoteViews customContent) {
+        protected RemoteViews makeMediaExpandedContentView(@Nullable RemoteViews customContent) {
             final int actionCount = Math.min(mBuilder.mActions.size(), MAX_MEDIA_BUTTONS);
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .hideProgress(true)
                     .fillTextsFrom(mBuilder);
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews template = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_big_media, p , result);
+                    mBuilder.getExpandedMediaLayoutResource(), p , result);
 
             for (int i = 0; i < MAX_MEDIA_BUTTONS; i++) {
                 if (i < actionCount) {
@@ -10794,8 +10870,8 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public RemoteViews makeBigContentView() {
-            return makeCallLayout(StandardTemplateParams.VIEW_TYPE_BIG);
+        public RemoteViews makeExpandedContentView() {
+            return makeCallLayout(StandardTemplateParams.VIEW_TYPE_EXPANDED);
         }
 
         @NonNull
@@ -10916,10 +10992,10 @@ public class Notification implements Parcelable
             final RemoteViews contentView;
             if (isCollapsed) {
                 contentView = mBuilder.applyStandardTemplate(
-                        R.layout.notification_template_material_call, p, null /* result */);
+                        mBuilder.getCollapsedCallLayoutResource(), p, null /* result */);
             } else {
                 contentView = mBuilder.applyStandardTemplateWithActions(
-                        R.layout.notification_template_material_big_call, p, null /* result */);
+                    mBuilder.getExpandedCallLayoutResource(), p, null /* result */);
             }
 
             // Bind some extra conversation-specific header fields.
@@ -11073,81 +11149,73 @@ public class Notification implements Parcelable
     }
 
     /**
-     * TODO(b/360827871): Make EnRouteStyle public.
-     * A style used to represent the progress of a real-world journey with a known destination.
-     * For example:
-     * <ul>
-     *     <li>Delivery tracking</li>
-     *     <li>Ride progress</li>
-     *     <li>Flight tracking</li>
-     * </ul>
+     * A Notification Style used to define a notification whose expanded state includes
+     * a highly customizable progress bar with segments, points, a custom tracker icon,
+     * and custom icons at the start and end of the progress bar.
      *
-     * The exact fields from {@link Notification} that are shown with this style may vary by
-     * the surface where this update appears, but the following fields are recommended:
-     * <ul>
-     *     <li>{@link Notification.Builder#setContentTitle}</li>
-     *     <li>{@link Notification.Builder#setContentText}</li>
-     *     <li>{@link Notification.Builder#setSubText}</li>
-     *     <li>{@link Notification.Builder#setLargeIcon}</li>
-     *     <li>{@link Notification.Builder#setProgress}</li>
-     *     <li>{@link Notification.Builder#setWhen} - This should be the future time of the next,
-     *     final, or most important stop on this journey.</li>
-     * </ul>
-     * @hide
+     * This style is suggested for use cases where the app is showing a tracker to the
+     * user of a thing they are interested in: the location of a car on its way
+     * to pick them up, food being delivered, or their own progress in a navigation
+     * journey.
+     *
+     * To use this style with your Notification, feed it to
+     * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
+     * <pre class="prettyprint">
+     * new Notification.Builder(context)
+     *   .setSmallIcon(R.drawable.ic_notification)
+     *   .setColor(Color.GREEN)
+     *   .setColorized(true)
+     *   .setContentTitle("Arrive 10:08 AM").
+     *   .setContentText("Dominique Ansel Bakery Soho")
+     *   .addAction(new Notification.Action("Exit navigation",...))
+     *   .setStyle(new Notification.ProgressStyle()
+     *       .setStyledByProgress(false)
+     *       .setProgress(456)
+     *       .setProgressTrackerIcon(Icon.createWithResource(R.drawable.ic_driving_tracker))
+     *       .addProgressSegment(new Segment(41).setColor(Color.BLACK))
+     *       .addProgressSegment(new Segment(552).setColor(Color.YELLOW))
+     *       .addProgressSegment(new Segment(253).setColor(Color.YELLOW))
+     *       .addProgressSegment(new Segment(94).setColor(Color.BLUE))
+     *       .addProgressPoint(new Point(60).setColor(Color.RED))
+     *       .addProgressPoint(new Point(560).setColor(Color.YELLOW))
+     *   )
+     * </pre>
+     *
+     *
+     *
+     * NOTE: The progress bar layout will be mirrored for RTL layout.
+     * NOTE: The extras set by {@link Notification.Builder#setProgress} will be overridden by
+     * the values set on this style object when the notification is built.
+     *
      */
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public static class EnRouteStyle extends Notification.Style {
+    public static class ProgressStyle extends Notification.Style {
+        private static final String KEY_ELEMENT_ID = "id";
+        private static final String KEY_ELEMENT_COLOR = "colorInt";
+        private static final String KEY_SEGMENT_LENGTH = "length";
+        private static final String KEY_POINT_POSITION = "position";
+
+        private static final int MAX_PROGRESS_SEGMENT_LIMIT = 15;
+        private static final int MAX_PROGRESS_STOP_LIMIT = 5;
+        private static final int DEFAULT_PROGRESS_MAX = 100;
+
+        private List<Segment> mProgressSegments = new ArrayList<>();
+        private List<Point> mProgressPoints = new ArrayList<>();
+
+        private int mProgress = 0;
+
+        private boolean mIndeterminate;
+
+        private boolean mIsStyledByProgress = true;
 
         @Nullable
-        private Icon mOverlayIcon = null;
-
+        private Icon mTrackerIcon;
         @Nullable
-        private CharSequence mLargeIconSubText = null;
-
-        public EnRouteStyle() {
-        }
-
-        /**
-         * Returns the overlay icon to be displayed on {@link Notification#mLargeIcon}.
-         * @see EnRouteStyle#setOverlayIcon
-         */
+        private Icon mStartIcon;
         @Nullable
-        public Icon getOverlayIcon() {
-            return mOverlayIcon;
-        }
+        private Icon mEndIcon;
 
         /**
-         * Optional icon to be displayed on {@link Notification#mLargeIcon}.
-         *
-         * This image will be cropped to a circle and will obscure
-         * a semicircle of the right side of the large icon.
-         */
-        @NonNull
-        public EnRouteStyle setOverlayIcon(@Nullable Icon overlayIcon) {
-            mOverlayIcon = overlayIcon;
-            return this;
-        }
-
-        /**
-         * Returns the sub-text for {@link Notification#mLargeIcon}.
-         * @see EnRouteStyle#setLargeIconSubText
-         */
-        @Nullable
-        public CharSequence getLargeIconSubText() {
-            return mLargeIconSubText;
-        }
-
-        /**
-         * Optional text which generally related to
-         * the {@link Notification.Builder#setLargeIcon} or {@link #setOverlayIcon} or both.
-         */
-        @NonNull
-        public EnRouteStyle setLargeIconSubText(@Nullable CharSequence largeIconSubText) {
-            mLargeIconSubText = stripStyling(largeIconSubText);
-            return this;
-        }
-
-         /**
          * @hide
          */
         @Override
@@ -11156,29 +11224,281 @@ public class Notification implements Parcelable
                 return true;
             }
 
-            final EnRouteStyle enRouteStyle = (EnRouteStyle) other;
-            return !Objects.equals(mOverlayIcon, enRouteStyle.mOverlayIcon)
-                    || !Objects.equals(mLargeIconSubText, enRouteStyle.mLargeIconSubText);
+            final ProgressStyle progressStyle = (ProgressStyle) other;
+
+            /**
+             * @see #setProgressIndeterminate
+             */
+            if (!Objects.equals(mIndeterminate, progressStyle.mIndeterminate)) {
+                return true;
+            }
+            boolean nonIndeterminateCheckResult = false;
+            if (!mIndeterminate) {
+                nonIndeterminateCheckResult = !Objects.equals(mProgress, progressStyle.mProgress)
+                        || !Objects.equals(mIsStyledByProgress, progressStyle.mIsStyledByProgress)
+                        || !Objects.equals(mProgressSegments, progressStyle.mProgressSegments)
+                        || !Objects.equals(mProgressPoints, progressStyle.mProgressPoints)
+                        || !Objects.equals(mTrackerIcon, progressStyle.mTrackerIcon);
+            }
+
+            return !Objects.equals(mStartIcon, progressStyle.mStartIcon)
+                    || !Objects.equals(mEndIcon, progressStyle.mEndIcon)
+                    || nonIndeterminateCheckResult;
         }
 
         /**
-         * @hide
+         * Gets the segments that define the background layer of the progress bar.
+         *
+         * If no segments are provided, the progress bar will be rendered with a single segment
+         * with length 100 and default color.
+         *
+         * @see #setProgressSegments
+         * @see #addProgressSegment
+         * @see Segment
          */
-        @Override
-        public void addExtras(Bundle extras) {
-            super.addExtras(extras);
-            extras.putParcelable(EXTRA_ENROUTE_OVERLAY_ICON, mOverlayIcon);
-            extras.putCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT, mLargeIconSubText);
+        public @NonNull List<Segment> getProgressSegments() {
+            return mProgressSegments;
         }
 
         /**
-         * @hide
+         * Sets or replaces the segments of the progress bar.
+         *
+         * Segments allow for creating progress bars with multiple colors or sections
+         * to represent different stages or categories of progress.
+         * For example, Traffic conditions along a navigation journey.
+         * @see Segment
          */
-        @Override
-        protected void restoreFromExtras(Bundle extras) {
-            super.restoreFromExtras(extras);
-            mOverlayIcon = extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class);
-            mLargeIconSubText = extras.getCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT);
+        public @NonNull ProgressStyle setProgressSegments(@NonNull List<Segment> progressSegments) {
+            if (mProgressSegments == null) {
+                mProgressSegments = new ArrayList<>();
+            }
+            mProgressSegments.clear();
+            mProgressSegments.addAll(progressSegments);
+            return this;
+        }
+
+        /**
+         * Appends a segment to the end of the progress bar.
+         *
+         * Segments allow for creating progress bars with multiple colors or sections
+         * to represent different stages or categories of progress.
+         * For example, Traffic conditions along a navigation journey.
+         * @see Segment
+         */
+        public @NonNull ProgressStyle addProgressSegment(@NonNull Segment segment) {
+            if (mProgressSegments == null) {
+                mProgressSegments = new ArrayList<>();
+            }
+            mProgressSegments.add(segment);
+
+            return this;
+        }
+
+        /**
+         * Gets the points that are displayed on the progress bar.
+         *.
+         * @see #setProgressPoints
+         * @see #addProgressPoint
+         * @see Point
+         */
+        public @NonNull List<Point> getProgressPoints() {
+            return mProgressPoints;
+        }
+
+        /**
+         * Replaces all the progress points.
+         *
+         * Points within a progress bar are used to visualize distinct stages or milestones.
+         * For example, you might use points to mark stops in a multi-stop
+         * navigation journey, where each point represents a destination.
+         * @see Point
+         */
+        public @NonNull ProgressStyle setProgressPoints(@NonNull List<Point> points) {
+            mProgressPoints = new ArrayList<>(points);
+            return this;
+        }
+
+        /**
+         * Adds another point.
+         *
+         * Points within a progress bar are used to visualize distinct stages or milestones.
+         *
+         * For example, you might use points to mark stops in a multi-stop
+         * navigation journey, where each point represents a destination.
+         *
+         * Points can be added in any order, as their
+         * position within the progress bar is determined by their individual
+         * {@link Point#getPosition()}.
+         * @see Point
+         */
+        public @NonNull ProgressStyle addProgressPoint(@NonNull Point point) {
+            if (mProgressPoints == null) {
+                mProgressPoints = new ArrayList<>();
+            }
+            mProgressPoints.add(point);
+
+            return this;
+        }
+
+        /**
+         * Gets the progress value of the progress bar.
+         * @see #setProgress
+         */
+        public int getProgress() {
+            return mProgress;
+        }
+
+        /**
+        * Specifies the progress (in the same units as {@link Segment#getLength()})
+        * of the tracker along the length of the bar.
+        *
+        * The max progress value is the sum of all Segment lengths.
+        * The default value is 0.
+        */
+        public @NonNull ProgressStyle setProgress(int progress) {
+            mProgress = progress;
+            return this;
+        }
+
+        /**
+         * Gets the sum of the lengths of all Segments in the style, which
+         * defines the maximum progress. Defaults to 100 when segments are omitted.
+         */
+        public int getProgressMax() {
+            final List<Segment> progressSegment = mProgressSegments;
+            if (progressSegment == null || progressSegment.isEmpty()) {
+                return DEFAULT_PROGRESS_MAX;
+            } else {
+                int progressMax = 0;
+                int validSegmentCount = 0;
+                for (int i = 0; i < progressSegment.size()
+                        && validSegmentCount < MAX_PROGRESS_SEGMENT_LIMIT; i++) {
+                    int segmentLength = progressSegment.get(i).getLength();
+                    if (segmentLength > 0) {
+                        try {
+                            progressMax = Math.addExact(progressMax, segmentLength);
+                            validSegmentCount++;
+                        } catch (ArithmeticException e) {
+                            Log.e(TAG,
+                                    "Notification.ProgressStyle segment total overflowed.", e);
+                            return DEFAULT_PROGRESS_MAX;
+                        }
+                    }
+                }
+
+                if (validSegmentCount == 0) {
+                    return DEFAULT_PROGRESS_MAX;
+                }
+
+                return progressMax;
+            }
+
+        }
+
+        /**
+         * Get indeterminate value of the progress bar.
+         * @see #setProgressIndeterminate
+         */
+        public boolean isProgressIndeterminate() {
+            return mIndeterminate;
+        }
+
+        /**
+         * Used to indicate an initialization state without a known progress amount.
+         * When specified, the following fields are ignored:
+         * @see #setProgress
+         * @see #setProgressSegments
+         * @see #setProgressPoints
+         * @see #setProgressTrackerIcon
+         * @see #setStyledByProgress
+         *
+         * If the app provides exactly one Segment, that segment's color will be
+         * used to style the indeterminate bar.
+         */
+        public @NonNull ProgressStyle setProgressIndeterminate(boolean indeterminate) {
+            mIndeterminate = indeterminate;
+            return this;
+        }
+
+        /**
+         * Gets whether the progress bar's style is based on its progress.
+         * @see #setStyledByProgress
+         */
+        public boolean isStyledByProgress() {
+            return mIsStyledByProgress;
+        }
+
+        /**
+         * Indicates whether the segments and points will be styled differently
+         * based on whether they are behind or ahead of the current progress.
+         * When true, segments appearing ahead of the current progress will be given a
+         * slightly different appearance to indicate that it is part of the progress bar
+         * that is not "filled".
+         * When false, all segments will be given the filled appearance, and it will be
+         * the app's responsibility to use #setProgressTrackerIcon or segment colors
+         * to make the current progress clear to the user.
+         * the default value is true.
+         */
+        public @NonNull ProgressStyle setStyledByProgress(boolean enabled) {
+            mIsStyledByProgress = enabled;
+            return this;
+        }
+
+
+        /**
+         * Gets the progress tracker icon for the progress bar.
+         * @see #setProgressTrackerIcon
+         */
+        public @Nullable Icon getProgressTrackerIcon() {
+            return mTrackerIcon;
+        }
+
+        /**
+         * An optional icon that can appear as an overlay on the bar at the point of
+         * current progress.
+         * Aspect ratio may be anywhere from 2:1 to 1:2; content outside that
+         * aspect ratio range will be cropped.
+         * This icon will be mirrored in RTL.
+         */
+        public @NonNull ProgressStyle setProgressTrackerIcon(@Nullable Icon trackerIcon) {
+            mTrackerIcon = trackerIcon;
+            return this;
+        }
+
+        /**
+         * Gets the progress bar start icon.
+         * @see #setProgressStartIcon
+         */
+        public @Nullable Icon getProgressStartIcon() {
+            return mStartIcon;
+        }
+
+        /**
+         * An optional square icon that appears at the start of the progress bar.
+         * This icon will be cropped to its central square.
+         * This icon will NOT be mirrored in RTL layouts.
+         */
+        public @NonNull ProgressStyle setProgressStartIcon(@Nullable Icon startIcon) {
+            mStartIcon = startIcon;
+            return this;
+        }
+
+        /**
+         * Gets the progress bar end icon.
+         * @see #setProgressEndIcon(Icon)
+         */
+        public @Nullable Icon getProgressEndIcon() {
+            return mEndIcon;
+        }
+
+        /**
+         * An optional square icon that appears at the end of the progress bar.
+         * This icon will be cropped to its central square.
+         * This icon will NOT be mirrored in RTL layouts.
+         */
+        public @NonNull ProgressStyle setProgressEndIcon(@Nullable Icon endIcon) {
+            mEndIcon = endIcon;
+            return this;
         }
 
         /**
@@ -11187,8 +11507,14 @@ public class Notification implements Parcelable
         @Override
         public void purgeResources() {
             super.purgeResources();
-            if (mOverlayIcon != null) {
-                mOverlayIcon.convertToAshmem();
+            if (mTrackerIcon != null) {
+                mTrackerIcon.convertToAshmem();
+            }
+            if (mStartIcon != null) {
+                mStartIcon.convertToAshmem();
+            }
+            if (mEndIcon != null) {
+                mEndIcon.convertToAshmem();
             }
         }
 
@@ -11198,14 +11524,512 @@ public class Notification implements Parcelable
         @Override
         public void reduceImageSizes(Context context) {
             super.reduceImageSizes(context);
-            if (mOverlayIcon != null) {
-                final Resources resources = context.getResources();
-                final boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
 
-                int rightIconSize = resources.getDimensionPixelSize(isLowRam
-                        ? R.dimen.notification_right_icon_size_low_ram
-                        : R.dimen.notification_right_icon_size);
-                mOverlayIcon.scaleDownIfNecessary(rightIconSize, rightIconSize);
+            final Resources resources = context.getResources();
+
+            int progressIconSize =
+                    resources.getDimensionPixelSize(R.dimen.notification_progress_icon_size);
+            if (mStartIcon != null) {
+                mStartIcon.scaleDownIfNecessary(progressIconSize, progressIconSize);
+            }
+            if (mEndIcon != null) {
+                mEndIcon.scaleDownIfNecessary(progressIconSize, progressIconSize);
+            }
+            if (mTrackerIcon != null) {
+                int progressTrackerWidth = resources.getDimensionPixelSize(
+                        R.dimen.notification_progress_tracker_width);
+                int progressTrackerHeight = resources.getDimensionPixelSize(
+                        R.dimen.notification_progress_tracker_height);
+                mTrackerIcon.scaleDownIfNecessary(progressTrackerWidth, progressTrackerHeight);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void addExtras(Bundle extras) {
+            super.addExtras(extras);
+            extras.putParcelableArrayList(EXTRA_PROGRESS_SEGMENTS,
+                    getProgressSegmentsAsBundleList(mProgressSegments));
+            extras.putParcelableArrayList(EXTRA_PROGRESS_POINTS,
+                    getProgressPointsAsBundleList(mProgressPoints));
+
+            extras.putInt(EXTRA_PROGRESS, mProgress);
+            extras.putBoolean(EXTRA_PROGRESS_INDETERMINATE, mIndeterminate);
+            extras.putInt(EXTRA_PROGRESS_MAX, getProgressMax());
+            extras.putBoolean(EXTRA_STYLED_BY_PROGRESS, mIsStyledByProgress);
+
+            if (mTrackerIcon != null) {
+                extras.putParcelable(EXTRA_PROGRESS_TRACKER_ICON, mTrackerIcon);
+            } else {
+                extras.remove(EXTRA_PROGRESS_TRACKER_ICON);
+            }
+
+            if (mStartIcon != null) {
+                extras.putParcelable(EXTRA_PROGRESS_START_ICON, mStartIcon);
+            } else {
+                extras.remove(EXTRA_PROGRESS_START_ICON);
+            }
+
+            if (mEndIcon != null) {
+                extras.putParcelable(EXTRA_PROGRESS_END_ICON, mEndIcon);
+            } else {
+                extras.remove(EXTRA_PROGRESS_END_ICON);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        protected void restoreFromExtras(Bundle extras) {
+            super.restoreFromExtras(extras);
+            mProgressSegments = getProgressSegmentsFromBundleList(
+                    extras.getParcelableArrayList(EXTRA_PROGRESS_SEGMENTS, Bundle.class));
+            mProgress = extras.getInt(EXTRA_PROGRESS, 0);
+            mIndeterminate = extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE, false);
+            mIsStyledByProgress = extras.getBoolean(EXTRA_STYLED_BY_PROGRESS, true);
+            mTrackerIcon = extras.getParcelable(EXTRA_PROGRESS_TRACKER_ICON, Icon.class);
+            mStartIcon = extras.getParcelable(EXTRA_PROGRESS_START_ICON, Icon.class);
+            mEndIcon = extras.getParcelable(EXTRA_PROGRESS_END_ICON, Icon.class);
+            mProgressPoints = getProgressPointsFromBundleList(
+                    extras.getParcelableArrayList(EXTRA_PROGRESS_POINTS, Bundle.class));
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean displayCustomViewInline() {
+            // This is a lie; True is returned for progress notifications to make sure
+            // that the custom view is not used instead of the template, but it will not
+            // actually be included.
+            return true;
+        }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeContentView(boolean increasedHeight) {
+            final StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
+                    .hideProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            return getStandardView(mBuilder.getCollapsedBaseLayoutResource(), p, null /* result */);
+        }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+            final StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .hideProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            return getStandardView(mBuilder.getHeadsUpBaseLayoutResource(), p, null /* result */);
+        }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeExpandedContentView() {
+            StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
+                    .allowTextWithProgress(true)
+                    .hideProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            // Replace the text with the big text, but only if the big text is not empty.
+            RemoteViews contentView = getStandardView(mBuilder.getProgressLayoutResource(), p,
+                    null /* result */);
+
+            // Bind progress start and end icons.
+            if (mStartIcon != null) {
+                contentView.setViewVisibility(R.id.notification_progress_start_icon, View.VISIBLE);
+                contentView.setImageViewIcon(R.id.notification_progress_start_icon, mStartIcon);
+            } else {
+                contentView.setViewVisibility(R.id.notification_progress_start_icon, View.GONE);
+            }
+
+            if (mEndIcon != null) {
+                contentView.setViewVisibility(R.id.notification_progress_end_icon, View.VISIBLE);
+                contentView.setImageViewIcon(R.id.notification_progress_end_icon, mEndIcon);
+            } else {
+                contentView.setViewVisibility(R.id.notification_progress_end_icon, View.GONE);
+            }
+
+            contentView.setViewVisibility(R.id.progress, View.VISIBLE);
+
+            final int backgroundColor = mBuilder.getColors(p).getBackgroundColor();
+            final int defaultProgressColor = mBuilder.getPrimaryAccentColor(p);
+            final NotificationProgressModel model = createProgressModel(
+                    defaultProgressColor, backgroundColor);
+            contentView.setBundle(R.id.progress,
+                    "setProgressModel", model.toBundle());
+
+            contentView.setIcon(R.id.progress,
+                    "setProgressTrackerIcon",
+                    mTrackerIcon);
+
+            return contentView;
+        }
+
+        /**
+         * @hide
+         */
+        public static @NonNull ArrayList<Bundle> getProgressSegmentsAsBundleList(
+                @Nullable List<Segment> progressSegments) {
+            final ArrayList<Bundle> segments = new ArrayList<>();
+            if (progressSegments != null && !progressSegments.isEmpty()) {
+                for (int i = 0; i < progressSegments.size(); i++) {
+                    final Segment segment = progressSegments.get(i);
+                    if (segment.getLength() <= 0) {
+                        continue;
+                    }
+
+                    final Bundle bundle = new Bundle();
+                    bundle.putInt(KEY_SEGMENT_LENGTH, segment.getLength());
+                    bundle.putInt(KEY_ELEMENT_ID, segment.getId());
+                    bundle.putInt(KEY_ELEMENT_COLOR, segment.getColor());
+
+                    segments.add(bundle);
+                }
+            }
+
+            return segments;
+        }
+
+        /**
+         * @hide
+         */
+        public  static @NonNull List<Segment> getProgressSegmentsFromBundleList(
+                @Nullable List<Bundle> segmentBundleList) {
+            final ArrayList<Segment> segments = new ArrayList<>();
+            if (segmentBundleList != null && !segmentBundleList.isEmpty()) {
+                for (int i = 0; i < segmentBundleList.size(); i++) {
+                    final Bundle segmentBundle = segmentBundleList.get(i);
+                    final int length = segmentBundle.getInt(KEY_SEGMENT_LENGTH);
+                    if (length <= 0) {
+                        continue;
+                    }
+
+                    final int id = segmentBundle.getInt(KEY_ELEMENT_ID);
+                    final int color = segmentBundle.getInt(KEY_ELEMENT_COLOR,
+                            Notification.COLOR_DEFAULT);
+                    final Segment segment = new Segment(length)
+                            .setId(id).setColor(color);
+
+                    segments.add(segment);
+                }
+            }
+
+            return segments;
+        }
+        /**
+         * @hide
+         */
+        public static @NonNull ArrayList<Bundle> getProgressPointsAsBundleList(
+                @Nullable List<Point> progressPoints) {
+            final ArrayList<Bundle> points = new ArrayList<>();
+            if (progressPoints != null && !progressPoints.isEmpty()) {
+                for (int i = 0; i < progressPoints.size(); i++) {
+                    final Point point = progressPoints.get(i);
+                    if (point.getPosition() < 0) {
+                        continue;
+                    }
+
+                    final Bundle bundle = new Bundle();
+                    bundle.putInt(KEY_POINT_POSITION, point.getPosition());
+                    bundle.putInt(KEY_ELEMENT_ID, point.getId());
+                    bundle.putInt(KEY_ELEMENT_COLOR, point.getColor());
+
+                    points.add(bundle);
+                }
+            }
+
+            return points;
+        }
+
+        /**
+         * @hide
+         */
+        public static @NonNull List<Point> getProgressPointsFromBundleList(
+                @Nullable List<Bundle> pointBundleList) {
+            final ArrayList<Point> points = new ArrayList<>();
+
+            if (pointBundleList != null && !pointBundleList.isEmpty()) {
+                for (int i = 0; i < pointBundleList.size(); i++) {
+                    final Bundle pointBundle = pointBundleList.get(i);
+                    final int position = pointBundle.getInt(KEY_POINT_POSITION);
+                    if (position < 0) {
+                        continue;
+                    }
+                    final int id = pointBundle.getInt(KEY_ELEMENT_ID);
+                    final int color = pointBundle.getInt(KEY_ELEMENT_COLOR,
+                            Notification.COLOR_DEFAULT);
+                    final Point point = new Point(position).setId(id).setColor(color);
+                    points.add(point);
+                }
+            }
+
+            return points;
+        }
+
+        /**
+         * @hide
+         */
+        public @NonNull NotificationProgressModel createProgressModel(int defaultProgressColor,
+                int backgroundColor) {
+            final NotificationProgressModel model;
+            if (mIndeterminate) {
+                final int indeterminateColor;
+                if (!mProgressSegments.isEmpty()) {
+                    indeterminateColor = mProgressSegments.get(0).mColor;
+                } else {
+                    indeterminateColor = defaultProgressColor;
+                }
+
+                model = new NotificationProgressModel(
+                        sanitizeProgressColor(indeterminateColor,
+                                backgroundColor, defaultProgressColor));
+            } else {
+                // Ensure segment color contrasts.
+                final List<Segment> segments = new ArrayList<>();
+                int totalLength = 0;
+                for (Segment segment : mProgressSegments) {
+                    final int length = segment.getLength();
+                    if (length <= 0) continue;
+
+                    try {
+                        totalLength = Math.addExact(totalLength, length);
+                        segments.add(sanitizeSegment(segment, backgroundColor,
+                                defaultProgressColor));
+                    } catch (ArithmeticException e) {
+                        totalLength = DEFAULT_PROGRESS_MAX;
+                        segments.clear();
+                        break;
+                    }
+                }
+
+                // Create default segment when no segments are provided.
+                if (segments.isEmpty()) {
+                    totalLength = DEFAULT_PROGRESS_MAX;
+                    segments.add(sanitizeSegment(new Segment(totalLength), backgroundColor,
+                            defaultProgressColor));
+                }
+
+                // Ensure point color contrasts.
+                final List<Point> points = new ArrayList<>();
+                for (Point point : mProgressPoints) {
+                    final int position = point.getPosition();
+                    if (position < 0 || position > totalLength) continue;
+                    points.add(sanitizePoint(point, backgroundColor, defaultProgressColor));
+                }
+
+                model = new NotificationProgressModel(segments, points,
+                        Math.clamp(mProgress, 0, totalLength), mIsStyledByProgress);
+            }
+            return model;
+        }
+
+        private Segment sanitizeSegment(@NonNull Segment segment,
+                @ColorInt int bg,
+                @ColorInt int defaultColor) {
+            return new Segment(segment.getLength())
+                    .setId(segment.getId())
+                    .setColor(sanitizeProgressColor(segment.getColor(), bg, defaultColor));
+        }
+
+        private Point sanitizePoint(@NonNull Point point,
+                @ColorInt int bg,
+                @ColorInt int defaultColor) {
+            return new Point(point.getPosition()).setId(point.getId())
+                    .setColor(sanitizeProgressColor(point.getColor(), bg, defaultColor));
+        }
+
+        /**
+         * Finds steps and points fill color with sufficient contrast over bg (1.3:1) that
+         * has the same hue as the original color, but is lightened or darkened depending on
+         * whether the background is dark or light.
+         *
+         */
+        private int sanitizeProgressColor(@ColorInt int color,
+                @ColorInt int bg,
+                @ColorInt int defaultColor) {
+            return Builder.ensureColorContrast(
+                    Color.alpha(color) == 0 ? defaultColor : color,
+                    bg,
+                    1.3);
+        }
+
+        /**
+         * A segment of the progress bar, which defines its length and color.
+         * Segments allow for creating progress bars with multiple colors or sections
+         * to represent different stages or categories of progress.
+         * For example, Traffic conditions along a navigation journey.
+         */
+        public static final class Segment {
+            private int mLength;
+            private int mId = 0;
+            @ColorInt
+            private int mColor = Notification.COLOR_DEFAULT;
+
+            /**
+             * Create a segment with a non-zero length.
+             * @param length
+             * See {@link #getLength}
+             */
+            public Segment(int length) {
+                mLength = length;
+            }
+
+            /**
+             * The length of this Segment within the progress bar.
+             * This value has no units, it is just relative to the length of other segments,
+             * and the value provided to {@link ProgressStyle#setProgress}.
+             */
+            public int getLength() {
+                return mLength;
+            }
+
+            /**
+             * Gets the id of this Segment.
+             *
+             * @see #setId
+             */
+            public int getId() {
+                return mId;
+            }
+
+            /**
+             * Optional ID used to uniquely identify the element across updates.
+             */
+            public @NonNull Segment setId(int id) {
+                mId = id;
+                return this;
+            }
+
+            /**
+             * Returns the color of this Segment.
+             *
+             * @see #setColor
+             */
+            @ColorInt
+            public int getColor() {
+                return mColor;
+            }
+
+            /**
+             * Optional color of this Segment
+             */
+            public @NonNull Segment setColor(@ColorInt int color) {
+                mColor = color;
+                return this;
+            }
+
+            /**
+             * Needed for {@link Notification.Style#areNotificationsVisiblyDifferent}
+             */
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                final Segment segment = (Segment) o;
+                return mLength == segment.mLength && mId == segment.mId
+                        && mColor == segment.mColor;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mLength, mId, mColor);
+            }
+        }
+
+        /**
+         * A point within the progress bar, defining its position and color.
+         * Points within a progress bar are used to visualize distinct stages or milestones.
+         * For example, you might use points to mark stops in a multi-stop
+         * navigation journey, where each point represents a destination.
+         */
+        public static final class Point {
+
+            private int mPosition;
+            private int mId;
+            @ColorInt
+            private int mColor = Notification.COLOR_DEFAULT;
+
+            /**
+             * Create a point element.
+             * The position of this point on the progress bar
+             * relative to {@link ProgressStyle#getProgressMax}
+             * @param position
+             * See {@link #getPosition}
+             */
+            public Point(int position) {
+                mPosition = position;
+            }
+
+            /**
+             * Gets the position of this Point.
+             * The position of this point on the progress bar
+             * relative to {@link ProgressStyle#getProgressMax}.
+             */
+            public int getPosition() {
+                return mPosition;
+            }
+
+
+            /**
+             * Optional ID used to uniquely identify the element across updates.
+             */
+            public int getId() {
+                return mId;
+            }
+
+            /**
+             * Optional ID used to uniquely identify the element across updates.
+             */
+            public @NonNull Point setId(int id) {
+                mId = id;
+                return this;
+            }
+
+            /**
+             * Returns the color of this Segment.
+             *
+             * @see #setColor
+             */
+            @ColorInt
+            public int getColor() {
+                return mColor;
+            }
+
+            /**
+             * Optional color of this Segment
+             */
+            public @NonNull Point setColor(@ColorInt int color) {
+                mColor = color;
+                return this;
+            }
+
+            /**
+             * Needed for {@link Notification.Style#areNotificationsVisiblyDifferent}
+             */
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                final Point point = (Point) o;
+                return mPosition == point.mPosition && mId == point.mId
+                        && mColor == point.mColor;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mPosition, mId, mColor);
             }
         }
     }
@@ -11257,8 +12081,8 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeBigContentView() {
-            return makeDecoratedBigContentView();
+        public RemoteViews makeExpandedContentView() {
+            return makeDecoratedExpandedContentView();
         }
 
         /**
@@ -11301,13 +12125,13 @@ public class Notification implements Parcelable
                     .decorationType(StandardTemplateParams.DECORATION_PARTIAL)
                     .fillTextsFrom(mBuilder);
             RemoteViews remoteViews = mBuilder.applyStandardTemplate(
-                    mBuilder.getBaseLayoutResource(), p, result);
+                    mBuilder.getCollapsedBaseLayoutResource(), p, result);
             buildCustomContentIntoTemplate(mBuilder.mContext, remoteViews, customContent,
                     p, result);
             return remoteViews;
         }
 
-        private RemoteViews makeDecoratedBigContentView() {
+        private RemoteViews makeDecoratedExpandedContentView() {
             RemoteViews bigContentView = mBuilder.mN.bigContentView == null
                     ? mBuilder.mN.contentView
                     : mBuilder.mN.bigContentView;
@@ -11316,11 +12140,11 @@ public class Notification implements Parcelable
             }
             TemplateBindResult result = new TemplateBindResult();
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .decorationType(StandardTemplateParams.DECORATION_PARTIAL)
                     .fillTextsFrom(mBuilder);
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
-                    mBuilder.getBigBaseLayoutResource(), p, result);
+                    mBuilder.getExpandedBaseLayoutResource(), p, result);
             buildCustomContentIntoTemplate(mBuilder.mContext, remoteViews, bigContentView,
                     p, result);
             return remoteViews;
@@ -11393,11 +12217,11 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             RemoteViews customContent = mBuilder.mN.bigContentView != null
                     ? mBuilder.mN.bigContentView
                     : mBuilder.mN.contentView;
-            return makeMediaBigContentView(customContent);
+            return makeMediaExpandedContentView(customContent);
         }
 
         /**
@@ -11408,7 +12232,7 @@ public class Notification implements Parcelable
             RemoteViews customContent = mBuilder.mN.headsUpContentView != null
                     ? mBuilder.mN.headsUpContentView
                     : mBuilder.mN.contentView;
-            return makeMediaBigContentView(customContent);
+            return makeMediaExpandedContentView(customContent);
         }
 
         /**
@@ -13734,7 +14558,7 @@ public class Notification implements Parcelable
 
         public static int VIEW_TYPE_UNSPECIFIED = 0;
         public static int VIEW_TYPE_NORMAL = 1;
-        public static int VIEW_TYPE_BIG = 2;
+        public static int VIEW_TYPE_EXPANDED = 2;
         public static int VIEW_TYPE_HEADS_UP = 3;
         public static int VIEW_TYPE_MINIMIZED = 4;    // header only for minimized state
         public static int VIEW_TYPE_PUBLIC = 5;       // header only for automatic public version
@@ -14022,12 +14846,23 @@ public class Notification implements Parcelable
                 } else {
                     mBackgroundColor = rawColor;
                 }
-                mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                        ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
-                        mBackgroundColor, 4.5);
-                mSecondaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                        ContrastColorUtil.resolveSecondaryColor(ctx, mBackgroundColor, nightMode),
-                        mBackgroundColor, 4.5);
+                if (Flags.uiRichOngoing()) {
+                    boolean isBgDark = Notification.Builder.isColorDark(mBackgroundColor);
+                    int onSurfaceColorExtreme = isBgDark ? Color.WHITE : Color.BLACK;
+                    mPrimaryTextColor = ContrastColorUtil.ensureContrast(
+                            ColorUtils.blendARGB(mBackgroundColor, onSurfaceColorExtreme, 0.9f),
+                            mBackgroundColor, isBgDark, 4.5);
+                    mSecondaryTextColor = ContrastColorUtil.ensureContrast(
+                            ColorUtils.blendARGB(mBackgroundColor, onSurfaceColorExtreme, 0.8f),
+                            mBackgroundColor, isBgDark, 4.5);
+                } else {
+                    mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
+                            ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
+                            mBackgroundColor, 4.5);
+                    mSecondaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
+                            ContrastColorUtil.resolveSecondaryColor(ctx,
+                                    mBackgroundColor, nightMode), mBackgroundColor, 4.5);
+                }
                 mContrastColor = mPrimaryTextColor;
                 mPrimaryAccentColor = mPrimaryTextColor;
                 mSecondaryAccentColor = mSecondaryTextColor;

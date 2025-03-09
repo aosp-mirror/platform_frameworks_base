@@ -30,6 +30,9 @@ java_library {
         "src/**/*.java",
         "src/**/*.kt",
     ],
+    exclude_srcs: [
+        "src/**/PluginProtectorStub.kt",
+    ],
 
     optimize: {
         proguard_flags_files: [
@@ -52,6 +55,8 @@ java_library {
         "SystemUICommon",
         "SystemUILogLib",
         "androidx.annotation_annotation",
+        "androidx.compose.ui_ui",
+        "androidx.compose.runtime_runtime",
     ],
 }
 

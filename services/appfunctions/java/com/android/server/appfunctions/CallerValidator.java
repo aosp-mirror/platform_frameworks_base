@@ -64,6 +64,9 @@ public interface CallerValidator {
      * {@link Manifest.permission#EXECUTE_APP_FUNCTIONS} granted. In some cases, app functions can
      * still opt-out of caller having {@link Manifest.permission#EXECUTE_APP_FUNCTIONS}.
      *
+     * @param callingUid The calling uid.
+     * @param callingPid The calling pid.
+     * @param targetUser The user which the caller is requesting to execute as.
      * @param callerPackageName The calling package (as previously validated).
      * @param targetPackageName The package that owns the app function to execute.
      * @param functionId The id of the app function to execute.
@@ -72,15 +75,18 @@ public interface CallerValidator {
     AndroidFuture<Boolean> verifyCallerCanExecuteAppFunction(
             int callingUid,
             int callingPid,
+            @NonNull UserHandle targetUser,
             @NonNull String callerPackageName,
             @NonNull String targetPackageName,
             @NonNull String functionId);
 
     /**
-     * Checks if the user is organization managed.
+     * Checks if the app function policy is allowed.
      *
+     * @param callingUser The current calling user.
      * @param targetUser The user which the caller is requesting to execute as.
-     * @return Whether the user is organization managed.
+     * @return Whether the app function policy is allowed.
      */
-    boolean isUserOrganizationManaged(@NonNull UserHandle targetUser);
+    boolean verifyEnterprisePolicyIsAllowed(
+            @NonNull UserHandle callingUser, @NonNull UserHandle targetUser);
 }

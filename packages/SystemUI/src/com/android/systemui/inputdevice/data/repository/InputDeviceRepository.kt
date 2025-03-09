@@ -38,7 +38,7 @@ class InputDeviceRepository
 constructor(
     @Background private val backgroundHandler: Handler,
     @Background private val backgroundScope: CoroutineScope,
-    private val inputManager: InputManager
+    private val inputManager: InputManager,
 ) {
 
     sealed interface DeviceChange
@@ -50,11 +50,11 @@ constructor(
     data object FreshStart : DeviceChange
 
     /**
-     * Emits collection of all currently connected keyboards and what was the last [DeviceChange].
-     * It emits collection so that every new subscriber to this SharedFlow can get latest state of
-     * all keyboards. Otherwise we might get into situation where subscriber timing on
-     * initialization matter and later subscriber will only get latest device and will miss all
-     * previous devices.
+     * Emits collection of all currently connected input devices and what was the last
+     * [DeviceChange]. It emits collection so that every new subscriber to this SharedFlow can get
+     * latest state of all input devices. Otherwise we might get into situation where subscriber
+     * timing on initialization matter and later subscriber will only get latest device and will
+     * miss all previous devices.
      */
     // TODO(b/351984587): Replace with StateFlow
     @SuppressLint("SharedFlowCreation")
@@ -79,11 +79,7 @@ constructor(
                 inputManager.registerInputDeviceListener(listener, backgroundHandler)
                 awaitClose { inputManager.unregisterInputDeviceListener(listener) }
             }
-            .shareIn(
-                scope = backgroundScope,
-                started = SharingStarted.Lazily,
-                replay = 1,
-            )
+            .shareIn(scope = backgroundScope, started = SharingStarted.Lazily, replay = 1)
 
     private fun <T> SendChannel<T>.sendWithLogging(element: T) {
         trySendWithFailureLogging(element, TAG)

@@ -20,6 +20,7 @@ import android.annotation.AnyThread;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Region;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
 import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.net.Uri;
@@ -154,6 +155,25 @@ public final class InputMethodPrivilegedOperations {
         }
         try {
             ops.setHandwritingSurfaceNotTouchable(notTouchable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#setHandwritingTouchableRegion(Region)}.
+     *
+     * @param region {@link Region} to set handwritable.
+     */
+    @AnyThread
+    public void setHandwritingTouchableRegion(Region region) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.setHandwritingTouchableRegion(region);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

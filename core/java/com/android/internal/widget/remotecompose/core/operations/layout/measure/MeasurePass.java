@@ -15,22 +15,24 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.measure;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 
 import java.util.HashMap;
 
 /**
- * Represents the result of a measure pass on the entire hierarchy
- * TODO: optimize to use a flat array vs the current hashmap
+ * Represents the result of a measure pass on the entire hierarchy TODO: optimize to use a flat
+ * array vs the current hashmap
  */
 public class MeasurePass {
-    HashMap<Integer, ComponentMeasure> mList = new HashMap<>();
+    @NonNull HashMap<Integer, ComponentMeasure> mList = new HashMap<>();
 
     public void clear() {
         mList.clear();
     }
 
-    public void add(ComponentMeasure measure) throws Exception {
+    public void add(@NonNull ComponentMeasure measure) throws Exception {
         if (measure.mId == -1) {
             throw new Exception("Component has no id!");
         }
@@ -41,20 +43,21 @@ public class MeasurePass {
         return mList.containsKey(id);
     }
 
-    public ComponentMeasure get(Component c) {
+    public @NonNull ComponentMeasure get(@NonNull Component c) {
         if (!mList.containsKey(c.getComponentId())) {
-            ComponentMeasure measure = new ComponentMeasure(c.getComponentId(),
-                    c.getX(), c.getY(), c.getWidth(), c.getHeight());
+            ComponentMeasure measure =
+                    new ComponentMeasure(
+                            c.getComponentId(), c.getX(), c.getY(), c.getWidth(), c.getHeight());
             mList.put(c.getComponentId(), measure);
             return measure;
         }
         return mList.get(c.getComponentId());
     }
 
-    public ComponentMeasure get(int id) {
+    public @NonNull ComponentMeasure get(int id) {
         if (!mList.containsKey(id)) {
-            ComponentMeasure measure = new ComponentMeasure(id,
-                    0f, 0f, 0f, 0f, Component.Visibility.GONE);
+            ComponentMeasure measure =
+                    new ComponentMeasure(id, 0f, 0f, 0f, 0f, Component.Visibility.GONE);
             mList.put(id, measure);
             return measure;
         }

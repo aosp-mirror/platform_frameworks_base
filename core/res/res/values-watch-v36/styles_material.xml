@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <!--  Button Styles  -->
+    <!-- Material Button - Filled (primary colored) -->
+    <style name="Widget.DeviceDefault.Button.Filled" parent="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="android:background">@drawable/btn_background_material_filled</item>
+        <item name="textAppearance">@style/TextAppearance.Widget.Button.Material.Filled</item>
+    </style>
+
+    <!-- Material Button - Filled Tonal (Override system default button styles) -->
+    <style name="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="background">@drawable/btn_background_material_filled_tonal</item>
+        <item name="textAppearance">@style/TextAppearance.Widget.Button.Material</item>
+        <item name="minHeight">@dimen/btn_material_height</item>
+        <item name="maxWidth">@dimen/btn_material_width</item>
+        <item name="android:paddingStart">@dimen/btn_horizontal_edge_padding</item>
+        <item name="android:paddingEnd">@dimen/btn_horizontal_edge_padding</item>
+        <item name="android:drawablePadding">@dimen/btn_drawable_padding</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:breakStrategy">simple</item>
+        <item name="stateListAnimator">@anim/button_state_list_anim_material</item>
+        <item name="focusable">true</item>
+        <item name="clickable">true</item>
+        <item name="gravity">center_vertical</item>
+    </style>
+
+    <!-- Material Button - Outlined -->
+    <style name="Widget.DeviceDefault.Button.Outlined" parent="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="android:background">@drawable/btn_background_material_outlined</item>
+    </style>
+
+    <!-- Material Button - Text -->
+    <style name="Widget.DeviceDefault.Button.Text" parent="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="android:background">@drawable/btn_background_material_text</item>
+    </style>
+
+    <!--  Text Styles  -->
+    <!-- TextAppearance for Material Button - Filled  -->
+    <style name="TextAppearance.Widget.Button.Material.Filled">
+        <item name="textColor">@color/btn_material_filled_content_color</item>
+    </style>
+
+    <!-- TextAppearance for Material Button - Filled Tonal  -->
+    <style name="TextAppearance.Widget.Button.Material" parent="TextAppearance.DeviceDefault">
+        <item name="android:fontFamily">font-family-flex-device-default</item>
+        <item name="android:fontVariationSettings">"'wdth' 90, 'wght' 500, 'ROND' 100, 'opsz' 15, 'GRAD' 0"</item>
+        <item name="textSize">@dimen/btn_textSize</item>
+        <item name="textColor">@color/btn_material_filled_tonal_content_color</item>
+        <item name="lineHeight">@dimen/btn_lineHeight</item>
+    </style>
+
+    <!--  AlertDialog Styles  -->
+    <style name="AlertDialog.DeviceDefault.WearMaterial3">
+        <item name="layout">@layout/alert_dialog_wear_material3</item>
+    </style>
+
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3" parent="Widget.DeviceDefault.Button">
+        <item name="android:textSize">0sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:drawablePadding">0dp</item>
+    </style>
+
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3.Confirm">
+        <!-- Use a ImageView as background -->
+        <item name="background">@android:color/transparent</item>
+        <item name="minWidth">@dimen/dialog_btn_confirm_width</item>
+        <item name="minHeight">@dimen/dialog_btn_confirm_height</item>
+    </style>
+
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3.Negative">
+        <item name="background">@drawable/dialog_alert_button_negative</item>
+        <item name="minWidth">@dimen/dialog_btn_negative_width</item>
+        <item name="minHeight">@dimen/dialog_btn_negative_height</item>
+        <item name="maxWidth">@dimen/dialog_btn_negative_width</item>
+        <item name="maxHeight">@dimen/dialog_btn_negative_height</item>
+    </style>
+
+    <!-- Wear Material3 Progress Bar style: progressed ring.-->
+    <style name="Widget.DeviceDefault.ProgressBar.WearMaterial3">
+        <item name="indeterminateOnly">false</item>
+        <item name="progressDrawable">@drawable/progress_ring_wear_material3</item>
+        <item name="minHeight">@dimen/progress_bar_height</item>
+        <item name="maxHeight">@dimen/progress_bar_height</item>
+        <item name="mirrorForRtl">true</item>
+    </style>
+</resources>

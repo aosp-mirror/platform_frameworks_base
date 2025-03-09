@@ -20,9 +20,11 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
 import android.content.IntentFilter
 import android.content.pm.UserInfo
+import android.content.res.Resources
 import android.os.UserHandle
 import android.provider.Settings
 import com.android.systemui.Flags.communalHub
+import com.android.systemui.Flags.glanceableHubV2
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.model.CommunalEnabledState
 import com.android.systemui.communal.data.model.DisabledReason
@@ -33,6 +35,7 @@ import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_U
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.util.kotlin.emitOnStart
@@ -53,12 +56,29 @@ interface CommunalSettingsRepository {
     fun getEnabledState(user: UserInfo): Flow<CommunalEnabledState>
 
     /**
-     * Returns true if both the communal trunk-stable flag and resource flag are enabled.
+     * Returns true if any glanceable hub functionality should be enabled via configs and flags.
      *
-     * The trunk-stable flag is controlled by server rollout and is on all devices. The resource
-     * flag is enabled via resource overlay only on products we want the hub to be present on.
+     * This should be used for preventing basic glanceable hub functionality from running on devices
+     * that don't need it.
+     *
+     * If the glanceable_hub_v2 flag is enabled, checks the config_glanceableHubEnabled Android
+     * config boolean. Otherwise, checks the old config_communalServiceEnabled config and
+     * communal_hub flag.
      */
     fun getFlagEnabled(): Boolean
+
+    /**
+     * Returns true if the Android config config_glanceableHubEnabled and the glanceable_hub_v2 flag
+     * are enabled.
+     *
+     * This should be used to flag off new glanceable hub or dream behavior that should launch
+     * together with the new hub experience that brings the hub to mobile.
+     *
+     * The trunk-stable flag is controlled by server rollout and is on all devices. The Android
+     * config flag is enabled via resource overlay only on products we want the hub to be present
+     * on.
+     */
+    fun getV2FlagEnabled(): Boolean
 
     /** Keyguard widgets enabled state by Device Policy Manager for the specified user. */
     fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean>
@@ -72,6 +92,7 @@ class CommunalSettingsRepositoryImpl
 @Inject
 constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
+    @Main private val resources: Resources,
     private val featureFlagsClassic: FeatureFlagsClassic,
     private val secureSettings: SecureSettings,
     private val broadcastDispatcher: BroadcastDispatcher,
@@ -79,7 +100,18 @@ constructor(
 ) : CommunalSettingsRepository {
 
     override fun getFlagEnabled(): Boolean {
-        return featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()
+        return if (getV2FlagEnabled()) {
+            true
+        } else {
+            // This config (exposed as a classic feature flag) is targeted only to tablet.
+            // TODO(b/379181581): clean up usages of communal_hub flag
+            featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()
+        }
+    }
+
+    override fun getV2FlagEnabled(): Boolean {
+        return resources.getBoolean(com.android.internal.R.bool.config_glanceableHubEnabled) &&
+            glanceableHubV2()
     }
 
     override fun getEnabledState(user: UserInfo): Flow<CommunalEnabledState> {
@@ -128,7 +160,7 @@ constructor(
                     secureSettings.getIntForUser(
                         GLANCEABLE_HUB_BACKGROUND_SETTING,
                         CommunalBackgroundType.ANIMATED.value,
-                        user.id
+                        user.id,
                     )
                 CommunalBackgroundType.entries.find { type -> type.value == intType }
                     ?: CommunalBackgroundType.ANIMATED

@@ -30,21 +30,20 @@ import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
-import com.android.keyguard.LegacyLockIconViewController
-import com.android.keyguard.LockIconView
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.lightRevealMigration
 import com.android.systemui.biometrics.ui.binder.DeviceEntryUnlockTrackerViewBinder
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
+import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
@@ -54,18 +53,23 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
+import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.NotificationShadeWindowView
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
+import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationLockscreenScrimViewModel
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import com.android.systemui.wallpapers.ui.viewmodel.WallpaperViewModel
 import com.google.android.msdl.domain.MSDLPlayer
 import dagger.Lazy
 import java.util.Optional
@@ -90,10 +94,9 @@ constructor(
     private val chipbarCoordinator: ChipbarCoordinator,
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
-    private val configuration: ConfigurationState,
-    private val context: Context,
+    @ShadeDisplayAware private val configuration: ConfigurationState,
+    @ShadeDisplayAware private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
-    private val lockIconViewController: Lazy<LegacyLockIconViewController>,
     private val shadeInteractor: ShadeInteractor,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
@@ -102,11 +105,15 @@ constructor(
     private val keyguardClockViewModel: KeyguardClockViewModel,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val lockscreenContentViewModelFactory: LockscreenContentViewModel.Factory,
+    private val notificationScrimViewModelFactory: NotificationLockscreenScrimViewModel.Factory,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
     private val deviceEntryUnlockTrackerViewBinder: Optional<DeviceEntryUnlockTrackerViewBinder>,
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
+    private val lightRevealScrimViewModel: LightRevealScrimViewModel,
+    private val lightRevealScrim: LightRevealScrim,
+    private val wallpaperViewModel: WallpaperViewModel,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val msdlPlayer: MSDLPlayer,
 ) : CoreStartable {
@@ -134,6 +141,14 @@ constructor(
     override fun start() {
         bindKeyguardRootView()
         initializeViews()
+
+        if (lightRevealMigration()) {
+            LightRevealScrimViewBinder.bind(
+                lightRevealScrim,
+                lightRevealScrimViewModel,
+                wallpaperViewModel,
+            )
+        }
 
         if (!SceneContainerFlag.isEnabled) {
             KeyguardBlueprintViewBinder.bind(
@@ -169,10 +184,6 @@ constructor(
     private fun initializeViews() {
         val indicationArea = KeyguardIndicationArea(context, null)
         keyguardIndicationController.setIndicationArea(indicationArea)
-
-        if (!DeviceEntryUdfpsRefactor.isEnabled) {
-            lockIconViewController.get().setLockIconView(LockIconView(context, null))
-        }
     }
 
     private fun bindKeyguardRootView() {
@@ -207,6 +218,7 @@ constructor(
     private fun createLockscreen(
         context: Context,
         viewModelFactory: LockscreenContentViewModel.Factory,
+        notificationScrimViewModelFactory: NotificationLockscreenScrimViewModel.Factory,
         blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
     ): View {
         val sceneBlueprints =
@@ -222,6 +234,8 @@ constructor(
                         with(
                             LockscreenContent(
                                 viewModelFactory = viewModelFactory,
+                                notificationScrimViewModelFactory =
+                                    notificationScrimViewModelFactory,
                                 blueprints = sceneBlueprints,
                                 clockInteractor = clockInteractor,
                             )

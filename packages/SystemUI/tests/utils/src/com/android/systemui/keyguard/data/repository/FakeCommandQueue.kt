@@ -18,6 +18,8 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.content.Context
+import androidx.collection.ArrayMap
+import com.android.internal.statusbar.StatusBarIcon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.CommandQueue
@@ -30,6 +32,11 @@ import org.mockito.Mockito.mock
 class FakeCommandQueue @Inject constructor() :
     CommandQueue(mock(Context::class.java), mock(DisplayTracker::class.java)) {
     private val callbacks = mutableListOf<Callbacks>()
+
+    val icons = ArrayMap<String, StatusBarIcon>()
+
+    private val perDisplayDisableFlags1 = mutableMapOf<Int, Int>()
+    private val perDisplayDisableFlags2 = mutableMapOf<Int, Int>()
 
     override fun addCallback(callback: Callbacks) {
         callbacks.add(callback)
@@ -44,6 +51,23 @@ class FakeCommandQueue @Inject constructor() :
     }
 
     fun callbackCount(): Int = callbacks.size
+
+    override fun setIcon(slot: String, icon: StatusBarIcon) {
+        icons[slot] = icon
+    }
+
+    override fun disable(displayId: Int, state1: Int, state2: Int, animate: Boolean) {
+        perDisplayDisableFlags1[displayId] = state1
+        perDisplayDisableFlags2[displayId] = state2
+    }
+
+    override fun disable(displayId: Int, state1: Int, state2: Int) {
+        disable(displayId, state1, state2, /* animate= */ false)
+    }
+
+    fun disableFlags1ForDisplay(displayId: Int) = perDisplayDisableFlags1[displayId]
+
+    fun disableFlags2ForDisplay(displayId: Int) = perDisplayDisableFlags2[displayId]
 }
 
 @Module

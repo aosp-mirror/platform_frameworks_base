@@ -68,8 +68,8 @@ private constructor(
         ): QSTileIntentUserInputHandlerSubject =
             Truth.assertAbout {
                     failureMetadata: FailureMetadata,
-                    subject: FakeQSTileIntentUserInputHandler ->
-                    QSTileIntentUserInputHandlerSubject(failureMetadata, subject)
+                    subject: FakeQSTileIntentUserInputHandler? ->
+                    QSTileIntentUserInputHandlerSubject(failureMetadata, subject!!)
                 }
                 .that(handler)
     }

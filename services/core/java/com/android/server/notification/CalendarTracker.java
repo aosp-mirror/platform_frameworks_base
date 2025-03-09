@@ -32,6 +32,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Objects;
@@ -296,4 +298,8 @@ public class CalendarTracker {
         void onChanged();
     }
 
+    @VisibleForTesting // (otherwise = NONE)
+    public int getUserId() {
+        return mUserContext.getUserId();
+    }
 }

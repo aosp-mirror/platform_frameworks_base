@@ -20,12 +20,14 @@ import static com.android.wm.shell.shared.animation.Interpolators.FAST_OUT_SLOW_
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.view.Gravity;
@@ -33,6 +35,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
@@ -83,6 +86,7 @@ public class DropZoneView extends FrameLayout {
     private int mTargetBackgroundColor;
     private ObjectAnimator mMarginAnimator;
     private float mMarginPercent;
+    private TextView mDebugIndex;
 
     // Renders a highlight or neutral transparent color
     private ColorDrawable mColorDrawable;
@@ -125,6 +129,22 @@ public class DropZoneView extends FrameLayout {
         mMarginView = new MarginView(context);
         addView(mMarginView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
+
+        if (DEBUG_LAYOUT) {
+            mDebugIndex = new TextView(context);
+            mDebugIndex.setVisibility(GONE);
+            mDebugIndex.setTextColor(Color.YELLOW);
+            addView(mDebugIndex, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.START | Gravity.TOP));
+
+            View borderView = new View(context);
+            addView(borderView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            GradientDrawable border = new GradientDrawable();
+            border.setShape(GradientDrawable.RECTANGLE);
+            border.setStroke(5, Color.RED);
+            borderView.setBackground(border);
+        }
     }
 
     public void onThemeChange() {
@@ -234,6 +254,16 @@ public class DropZoneView extends FrameLayout {
             animateBackground(mColorDrawable.getColor(), Color.TRANSPARENT);
             animateSplashScreenIcon();
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    public void setDebugIndex(int index) {
+        if (!DEBUG_LAYOUT) {
+            return;
+        }
+
+        mDebugIndex.setText("Index:\n" + index);
+        mDebugIndex.setVisibility(VISIBLE);
     }
 
     private void animateBackground(int startColor, int endColor) {

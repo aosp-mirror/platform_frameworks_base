@@ -22,7 +22,7 @@
     android:autoMirrored="true">
     <item android:id="@+id/volume_seekbar_progress_solid">
         <shape>
-            <size android:height="@dimen/volume_dialog_slider_width" />
+            <size android:height="@dimen/volume_dialog_slider_width_legacy" />
             <solid android:color="?android:attr/colorAccent" />
             <corners android:radius="@dimen/volume_dialog_slider_corner_radius"/>
         </shape>

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2020 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,46 +13,127 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="8dp"
-        android:paddingBottom="8dp"/>
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:paddingTop="8dp">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearanceBody"/>
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:paddingBottom="8dp" />
 
-    <TextView
-        android:id="@+id/value1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:gravity="right"
-        android:maxLines="1"
-        android:textAppearance="@style/TextAppearanceBody"/>
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearanceBody" />
 
-    <TextView
-        android:id="@+id/value2"
-        android:layout_width="76dp"
+        <TextView
+            android:id="@+id/value1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearanceBody" />
+
+        <TextView
+            android:id="@+id/value2"
+            android:layout_width="76dp"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearanceBody" />
+    </LinearLayout>
+
+    <TableLayout
+        android:id="@+id/table"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="right"
-        android:maxLines="1"
-        android:textAppearance="@style/TextAppearanceBody"/>
+        android:layout_marginEnd="?android:attr/listPreferredItemPaddingEnd"
+        android:layout_marginStart="50dp"
+        android:stretchColumns="1,2,3,4">
+
+        <TableRow android:background="#EEFFEE">
+            <LinearLayout
+                style="@style/TableCell.Start"
+                android:layout_width="65dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="3dip"
+                    android:text="State"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <RelativeLayout style="@style/TableCell.Inner">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/screen_on_24"
+                    android:tint="@color/battery_consumer_slice_icon" />
+            </RelativeLayout>
+
+            <RelativeLayout style="@style/TableCell.Inner">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/screen_off_24"
+                    android:tint="@color/battery_consumer_slice_icon" />
+            </RelativeLayout>
+
+            <RelativeLayout style="@style/TableCell.Inner">
+                <ImageView
+                    android:id="@+id/screen_on_24_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/screen_on_24"
+                    android:tint="@color/battery_consumer_slice_icon" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/screen_on_24_icon"
+                    android:src="@drawable/power_other_24"
+                    android:tint="@color/battery_consumer_slice_icon" />
+            </RelativeLayout>
+
+            <RelativeLayout style="@style/TableCell.End">
+                <ImageView
+                    android:id="@+id/screen_off_24_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/screen_off_24"
+                    android:tint="@color/battery_consumer_slice_icon" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/screen_off_24_icon"
+                    android:src="@drawable/power_other_24"
+                    android:tint="@color/battery_consumer_slice_icon" />
+            </RelativeLayout>
+        </TableRow>
+
+        <View
+            android:layout_height="1dip"
+            android:background="#000000" />
+    </TableLayout>
 </LinearLayout>

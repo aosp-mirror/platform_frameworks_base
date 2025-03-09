@@ -68,6 +68,10 @@ class UserDataPreparer {
     void prepareUserData(UserInfo userInfo, int flags) {
         try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            if (storage == null) {
+                Log.e(TAG, "prepareUserData failed due to unable get StorageManager");
+                return;
+            }
             /*
              * Internal storage must be prepared before adoptable storage, since the user's volume
              * keys are stored in their internal storage.
@@ -159,14 +163,16 @@ class UserDataPreparer {
     void destroyUserData(int userId, int flags) {
         try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
-            /*
-             * Volume destruction order isn't really important, but to avoid any weird issues we
-             * process internal storage last, the opposite of prepareUserData.
-             */
-            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
-                final String volumeUuid = vol.getFsUuid();
-                if (volumeUuid != null) {
-                    destroyUserDataLI(volumeUuid, userId, flags);
+            if (storage != null) {
+                /*
+                 * Volume destruction order isn't really important, but to avoid any weird issues we
+                 * process internal storage last, the opposite of prepareUserData.
+                 */
+                for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                    final String volumeUuid = vol.getFsUuid();
+                    if (volumeUuid != null) {
+                        destroyUserDataLI(volumeUuid, userId, flags);
+                    }
                 }
             }
             destroyUserDataLI(null /* internal storage */, userId, flags);
@@ -194,9 +200,10 @@ class UserDataPreparer {
                 }
             }
 
-            // All the user's data directories should be empty now, so finish the job.
-            storage.destroyUserStorage(volumeUuid, userId, flags);
-
+            if (storage != null) {
+                // All the user's data directories should be empty now, so finish the job.
+                storage.destroyUserStorage(volumeUuid, userId, flags);
+            }
         } catch (Exception e) {
             logCriticalInfo(Log.WARN,
                     "Failed to destroy user " + userId + " on volume " + volumeUuid + ": " + e);

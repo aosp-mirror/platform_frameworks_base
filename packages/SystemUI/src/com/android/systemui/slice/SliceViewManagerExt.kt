@@ -22,7 +22,7 @@ import androidx.slice.SliceViewManager
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Returns updating [Slice] for a [sliceUri]. It's null when there is no slice available for the

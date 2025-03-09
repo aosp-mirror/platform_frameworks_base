@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.UserHandle
 import com.android.systemui.CoreStartable
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -52,13 +53,13 @@ constructor(
             receiver =
                 object : BroadcastReceiver() {
                     override fun onReceive(context: Context, intent: Intent) {
-                        applicationContext.startActivityAsUser(
-                            Intent(
-                                applicationContext,
-                                KeyboardTouchpadTutorialActivity::class.java
-                            ),
-                            UserHandle.SYSTEM
-                        )
+                        val activityIntent =
+                            Intent(applicationContext, KeyboardTouchpadTutorialActivity::class.java)
+                        if (Build.IS_DEBUGGABLE) {
+                            // helpful for testing different cases but pointless for public builds
+                            intent.extras?.let { activityIntent.putExtras(it) }
+                        }
+                        applicationContext.startActivityAsUser(activityIntent, UserHandle.SYSTEM)
                     }
                 },
             filter = IntentFilter("com.android.systemui.action.KEYBOARD_TOUCHPAD_TUTORIAL"),
