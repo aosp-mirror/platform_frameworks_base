@@ -30,11 +30,11 @@ import android.provider.DeviceConfig;
 import android.util.Slog;
 import android.view.Display;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Detects when user manually undims the screen (x times) and acquires a wakelock to keep the screen
@@ -48,7 +48,6 @@ public class ScreenUndimDetector {
 
     /** DeviceConfig flag: is keep screen on feature enabled. */
     static final String KEY_KEEP_SCREEN_ON_ENABLED = "keep_screen_on_enabled";
-    private static final boolean DEFAULT_KEEP_SCREEN_ON_ENABLED = true;
     private static final int OUTCOME_POWER_BUTTON =
             FrameworkStatsLog.TIMEOUT_AUTO_EXTENDED_REPORTED__OUTCOME__POWER_BUTTON;
     private static final int OUTCOME_TIMEOUT =
@@ -58,15 +57,11 @@ public class ScreenUndimDetector {
     /** DeviceConfig flag: how long should we keep the screen on. */
     @VisibleForTesting
     static final String KEY_KEEP_SCREEN_ON_FOR_MILLIS = "keep_screen_on_for_millis";
-    @VisibleForTesting
-    static final long DEFAULT_KEEP_SCREEN_ON_FOR_MILLIS = TimeUnit.MINUTES.toMillis(10);
     private long mKeepScreenOnForMillis;
 
     /** DeviceConfig flag: how many user undims required to trigger keeping the screen on. */
     @VisibleForTesting
     static final String KEY_UNDIMS_REQUIRED = "undims_required";
-    @VisibleForTesting
-    static final int DEFAULT_UNDIMS_REQUIRED = 2;
     private int mUndimsRequired;
 
     /**
@@ -76,8 +71,6 @@ public class ScreenUndimDetector {
     @VisibleForTesting
     static final String KEY_MAX_DURATION_BETWEEN_UNDIMS_MILLIS =
             "max_duration_between_undims_millis";
-    @VisibleForTesting
-    static final long DEFAULT_MAX_DURATION_BETWEEN_UNDIMS_MILLIS = TimeUnit.MINUTES.toMillis(5);
     private long mMaxDurationBetweenUndimsMillis;
 
     @VisibleForTesting
@@ -92,6 +85,7 @@ public class ScreenUndimDetector {
     private long mUndimOccurredTime = -1;
     private long mInteractionAfterUndimTime = -1;
     private InternalClock mClock;
+    private Context mContext;
 
     public ScreenUndimDetector() {
         mClock = new InternalClock();
@@ -109,12 +103,13 @@ public class ScreenUndimDetector {
 
     /** Should be called in parent's systemReady() */
     public void systemReady(Context context) {
+        mContext = context;
         readValuesFromDeviceConfig();
         DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_ATTENTION_MANAGER_SERVICE,
-                context.getMainExecutor(),
+                mContext.getMainExecutor(),
                 (properties) -> onDeviceConfigChange(properties.getKeyset()));
 
-        final PowerManager powerManager = context.getSystemService(PowerManager.class);
+        final PowerManager powerManager = mContext.getSystemService(PowerManager.class);
         mWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
                         | PowerManager.ON_AFTER_RELEASE,
                 UNDIM_DETECTOR_WAKE_LOCK);
@@ -203,36 +198,44 @@ public class ScreenUndimDetector {
         }
     }
 
-    private boolean readKeepScreenOnNotificationEnabled() {
+    private boolean readKeepScreenOnEnabled() {
+        boolean defaultKeepScreenOnEnabled = mContext.getResources().getBoolean(
+                R.bool.config_defaultPreventScreenTimeoutEnabled);
         return DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_KEEP_SCREEN_ON_ENABLED,
-                DEFAULT_KEEP_SCREEN_ON_ENABLED);
+                defaultKeepScreenOnEnabled);
     }
 
     private long readKeepScreenOnForMillis() {
+        long defaultKeepScreenOnDuration = mContext.getResources().getInteger(
+                R.integer.config_defaultPreventScreenTimeoutForMillis);
         return DeviceConfig.getLong(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_KEEP_SCREEN_ON_FOR_MILLIS,
-                DEFAULT_KEEP_SCREEN_ON_FOR_MILLIS);
+                defaultKeepScreenOnDuration);
     }
 
     private int readUndimsRequired() {
+        int defaultUndimsRequired = mContext.getResources().getInteger(
+                R.integer.config_defaultUndimsRequired);
         int undimsRequired = DeviceConfig.getInt(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_UNDIMS_REQUIRED,
-                DEFAULT_UNDIMS_REQUIRED);
+                defaultUndimsRequired);
 
         if (undimsRequired < 1 || undimsRequired > 5) {
             Slog.e(TAG, "Provided undimsRequired=" + undimsRequired
-                    + " is not allowed [1, 5]; using the default=" + DEFAULT_UNDIMS_REQUIRED);
-            return DEFAULT_UNDIMS_REQUIRED;
+                    + " is not allowed [1, 5]; using the default=" + defaultUndimsRequired);
+            return defaultUndimsRequired;
         }
 
         return undimsRequired;
     }
 
     private long readMaxDurationBetweenUndimsMillis() {
+        long defaultMaxDurationBetweenUndimsMillis = mContext.getResources().getInteger(
+                R.integer.config_defaultMaxDurationBetweenUndimsMillis);
         return DeviceConfig.getLong(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_MAX_DURATION_BETWEEN_UNDIMS_MILLIS,
-                DEFAULT_MAX_DURATION_BETWEEN_UNDIMS_MILLIS);
+                defaultMaxDurationBetweenUndimsMillis);
     }
 
     private void onDeviceConfigChange(@NonNull Set<String> keys) {
@@ -253,15 +256,16 @@ public class ScreenUndimDetector {
 
     @VisibleForTesting
     void readValuesFromDeviceConfig() {
-        mKeepScreenOnEnabled = readKeepScreenOnNotificationEnabled();
+        mKeepScreenOnEnabled = readKeepScreenOnEnabled();
         mKeepScreenOnForMillis = readKeepScreenOnForMillis();
         mUndimsRequired = readUndimsRequired();
         mMaxDurationBetweenUndimsMillis = readMaxDurationBetweenUndimsMillis();
 
         Slog.i(TAG, "readValuesFromDeviceConfig():"
                 + "\nmKeepScreenOnForMillis=" + mKeepScreenOnForMillis
-                + "\nmKeepScreenOnNotificationEnabled=" + mKeepScreenOnEnabled
-                + "\nmUndimsRequired=" + mUndimsRequired);
+                + "\nmKeepScreenOnEnabled=" + mKeepScreenOnEnabled
+                + "\nmUndimsRequired=" + mUndimsRequired
+                + "\nmMaxDurationBetweenUndimsMillis=" + mMaxDurationBetweenUndimsMillis);
 
     }
 

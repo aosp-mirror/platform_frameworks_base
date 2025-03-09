@@ -901,6 +901,9 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     mSendHoverEnterAndMoveDelayed.cancel();
                     mSendHoverExitDelayed.cancel();
                 }
+                if (pointerIndex < 0) {
+                    return;
+                }
                 // If the user is touch exploring the second pointer may be
                 // performing a double tap to activate an item without need
                 // for the user to lift their exploring finger.

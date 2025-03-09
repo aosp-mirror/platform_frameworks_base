@@ -222,15 +222,14 @@ public class AdbService extends IAdbManager.Stub {
         }
     }
 
-    private static final String TAG = "AdbService";
-    private static final boolean DEBUG = false;
+    private static final String TAG = AdbService.class.getSimpleName();
 
     /**
      * The persistent property which stores whether adb is enabled or not.
      * May also contain vendor-specific default functions for testing purposes.
      */
     private static final String USB_PERSISTENT_CONFIG_PROPERTY = "persist.sys.usb.config";
-    private static final String WIFI_PERSISTENT_CONFIG_PROPERTY = "persist.adb.tls_server.enable";
+    static final String WIFI_PERSISTENT_CONFIG_PROPERTY = "persist.adb.tls_server.enable";
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -256,7 +255,7 @@ public class AdbService extends IAdbManager.Stub {
      * SystemServer}.
      */
     public void systemReady() {
-        if (DEBUG) Slog.d(TAG, "systemReady");
+        Slog.d(TAG, "systemReady");
 
         /*
          * Use the normal bootmode persistent prop to maintain state of adb across
@@ -287,7 +286,7 @@ public class AdbService extends IAdbManager.Stub {
      * Called in response to {@code SystemService.PHASE_BOOT_COMPLETED} from {@code SystemServer}.
      */
     public void bootCompleted() {
-        if (DEBUG) Slog.d(TAG, "boot completed");
+        Slog.d(TAG, "boot completed");
         if (mDebuggingManager != null) {
             mDebuggingManager.setAdbEnabled(mIsAdbUsbEnabled, AdbTransportType.USB);
             mDebuggingManager.setAdbEnabled(mIsAdbWifiEnabled, AdbTransportType.WIFI);
@@ -429,17 +428,13 @@ public class AdbService extends IAdbManager.Stub {
 
     @Override
     public void registerCallback(IAdbCallback callback) throws RemoteException {
-        if (DEBUG) {
-            Slog.d(TAG, "Registering callback " + callback);
-        }
+        Slog.d(TAG, "Registering callback " + callback);
         mCallbacks.register(callback);
     }
 
     @Override
     public void unregisterCallback(IAdbCallback callback) throws RemoteException {
-        if (DEBUG) {
-            Slog.d(TAG, "Unregistering callback " + callback);
-        }
+        Slog.d(TAG, "Unregistering callback " + callback);
         mCallbacks.unregister(callback);
     }
     /**
@@ -500,11 +495,8 @@ public class AdbService extends IAdbManager.Stub {
     }
 
     private void setAdbEnabled(boolean enable, byte transportType) {
-        if (DEBUG) {
-            Slog.d(TAG, "setAdbEnabled(" + enable + "), mIsAdbUsbEnabled=" + mIsAdbUsbEnabled
-                    + ", mIsAdbWifiEnabled=" + mIsAdbWifiEnabled + ", transportType="
-                        + transportType);
-        }
+        Slog.d(TAG, "setAdbEnabled(" + enable + "), mIsAdbUsbEnabled=" + mIsAdbUsbEnabled
+                 + ", mIsAdbWifiEnabled=" + mIsAdbWifiEnabled + ", transportType=" + transportType);
 
         if (transportType == AdbTransportType.USB && enable != mIsAdbUsbEnabled) {
             mIsAdbUsbEnabled = enable;
@@ -549,20 +541,14 @@ public class AdbService extends IAdbManager.Stub {
             mDebuggingManager.setAdbEnabled(enable, transportType);
         }
 
-        if (DEBUG) {
-            Slog.d(TAG, "Broadcasting enable = " + enable + ", type = " + transportType);
-        }
+        Slog.d(TAG, "Broadcasting enable = " + enable + ", type = " + transportType);
         mCallbacks.broadcast((callback) -> {
-            if (DEBUG) {
-                Slog.d(TAG, "Sending enable = " + enable + ", type = " + transportType
-                        + " to " + callback);
-            }
+            Slog.d(TAG, "Sending enable = " + enable + ", type = " + transportType + " to "
+                    + callback);
             try {
                 callback.onDebuggingChanged(enable, transportType);
             } catch (RemoteException ex) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Unable to send onDebuggingChanged:", ex);
-                }
+                Slog.w(TAG, "Unable to send onDebuggingChanged:", ex);
             }
         });
     }
