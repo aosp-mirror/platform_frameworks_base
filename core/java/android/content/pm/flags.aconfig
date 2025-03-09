@@ -319,3 +319,11 @@ flag {
     bug: "377474232"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "cloud_compilation_verification"
+    namespace: "art_mainline"
+    description: "Feature flag to enable the Cloud Compilation install-time verification in the package manager."
+    bug: "377474232"
+    is_fixed_read_only: true
+}

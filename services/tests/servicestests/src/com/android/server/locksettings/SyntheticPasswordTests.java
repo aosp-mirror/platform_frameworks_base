@@ -16,6 +16,7 @@
 
 package com.android.server.locksettings;
 
+import static android.content.pm.UserInfo.FLAG_FOR_TESTING;
 import static android.content.pm.UserInfo.FLAG_FULL;
 import static android.content.pm.UserInfo.FLAG_MAIN;
 import static android.content.pm.UserInfo.FLAG_PRIMARY;
@@ -44,6 +45,8 @@ import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.PasswordMetrics;
+import android.content.ComponentName;
+import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
@@ -354,6 +357,45 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 pattern, PRIMARY_USER_ID, 0 /* flags */).getResponseCode());
         assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
+    }
+
+    @Test
+    public void testEscrowDataRetainedWhenManagedUserVerifiesCredential() throws RemoteException {
+        when(mDeviceStateCache.isUserOrganizationManaged(anyInt())).thenReturn(true);
+
+        LockscreenCredential password = newPassword("password");
+        initSpAndSetCredential(PRIMARY_USER_ID, password);
+
+        mService.verifyCredential(password, PRIMARY_USER_ID, 0 /* flags */);
+
+        assertTrue("Escrow data was destroyed", mSpManager.hasEscrowData(PRIMARY_USER_ID));
+    }
+
+    @Test
+    public void testEscrowDataRetainedWhenUnmanagedTestUserVerifiesCredential()
+            throws RemoteException {
+        when(mDeviceStateCache.isUserOrganizationManaged(anyInt())).thenReturn(false);
+        UserInfo userInfo = mUserManagerInternal.getUserInfo(PRIMARY_USER_ID);
+        userInfo.flags |= FLAG_FOR_TESTING;
+
+        LockscreenCredential password = newPassword("password");
+        initSpAndSetCredential(PRIMARY_USER_ID, password);
+
+        mService.verifyCredential(password, PRIMARY_USER_ID, 0 /* flags */);
+
+        assertTrue("Escrow data was destroyed", mSpManager.hasEscrowData(PRIMARY_USER_ID));
+    }
+
+    @Test
+    public void testEscrowDataDeletedWhenUnmanagedUserVerifiesCredential() throws RemoteException {
+        when(mDeviceStateCache.isUserOrganizationManaged(anyInt())).thenReturn(false);
+
+        LockscreenCredential password = newPassword("password");
+        initSpAndSetCredential(PRIMARY_USER_ID, password);
+
+        mService.verifyCredential(password, PRIMARY_USER_ID, 0 /* flags */);
+
+        assertFalse("Escrow data wasn't destroyed", mSpManager.hasAnyEscrowData(PRIMARY_USER_ID));
     }
 
     @Test

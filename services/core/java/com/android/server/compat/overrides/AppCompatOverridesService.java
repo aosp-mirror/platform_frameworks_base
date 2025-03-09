@@ -103,12 +103,6 @@ public final class AppCompatOverridesService {
         }
     }
 
-    @Override
-    public void finalize() {
-        unregisterDeviceConfigListeners();
-        unregisterPackageReceiver();
-    }
-
     @VisibleForTesting
     void registerDeviceConfigListeners() {
         for (DeviceConfigListener listener : mDeviceConfigListeners) {
@@ -116,19 +110,9 @@ public final class AppCompatOverridesService {
         }
     }
 
-    private void unregisterDeviceConfigListeners() {
-        for (DeviceConfigListener listener : mDeviceConfigListeners) {
-            listener.unregister();
-        }
-    }
-
     @VisibleForTesting
     void registerPackageReceiver() {
         mPackageReceiver.register();
-    }
-
-    private void unregisterPackageReceiver() {
-        mPackageReceiver.unregister();
     }
 
     /**
@@ -374,10 +358,6 @@ public final class AppCompatOverridesService {
                     this);
         }
 
-        private void unregister() {
-            DeviceConfig.removeOnPropertiesChangedListener(this);
-        }
-
         @Override
         public void onPropertiesChanged(Properties properties) {
             boolean removeOverridesFlagChanged = properties.getKeyset().contains(
@@ -424,10 +404,6 @@ public final class AppCompatOverridesService {
         private void register() {
             mContext.registerReceiverForAllUsers(this, mIntentFilter, /* broadcastPermission= */
                     null, /* scheduler= */ null);
-        }
-
-        private void unregister() {
-            mContext.unregisterReceiver(this);
         }
 
         @Override

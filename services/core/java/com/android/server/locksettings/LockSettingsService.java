@@ -3618,6 +3618,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             return;
         }
 
+        UserInfo userInfo = mInjector.getUserManagerInternal().getUserInfo(userId);
+        if (userInfo != null && userInfo.isForTesting()) {
+            Slog.i(TAG, "Keeping escrow data for test-only user");
+            return;
+        }
+
         // Disable escrow token permanently on all other device/user types.
         Slogf.i(TAG, "Permanently disabling support for escrow tokens on user %d", userId);
         mSpManager.destroyEscrowData(userId);

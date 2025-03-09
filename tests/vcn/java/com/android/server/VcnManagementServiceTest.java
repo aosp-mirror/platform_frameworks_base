@@ -41,6 +41,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -1088,6 +1089,10 @@ public class VcnManagementServiceTest {
 
     @Test
     public void testGetRestrictedTransportsFromCarrierConfig() {
+        assumeTrue(
+                "Configuring restricted transport types is only allowed on a debuggable build",
+                Build.isDebuggable());
+
         final Set<Integer> restrictedTransports = new ArraySet<>();
         restrictedTransports.add(TRANSPORT_CELLULAR);
         restrictedTransports.add(TRANSPORT_WIFI);
@@ -1109,6 +1114,10 @@ public class VcnManagementServiceTest {
 
     @Test
     public void testGetRestrictedTransportsFromCarrierConfig_noRestrictPolicyConfigured() {
+        assumeTrue(
+                "Configuring restricted transport types is only allowed on a debuggable build",
+                Build.isDebuggable());
+
         final Set<Integer> restrictedTransports = Collections.singleton(TRANSPORT_WIFI);
 
         final PersistableBundleWrapper carrierConfig =
@@ -1123,6 +1132,10 @@ public class VcnManagementServiceTest {
 
     @Test
     public void testGetRestrictedTransportsFromCarrierConfig_noCarrierConfig() {
+        assumeTrue(
+                "Configuring restricted transport types is only allowed on a debuggable build",
+                Build.isDebuggable());
+
         final Set<Integer> restrictedTransports = Collections.singleton(TRANSPORT_WIFI);
 
         final TelephonySubscriptionSnapshot lastSnapshot =
@@ -1134,6 +1147,10 @@ public class VcnManagementServiceTest {
 
     @Test
     public void testGetRestrictedTransportsFromCarrierConfigAndVcnConfig() {
+        assumeTrue(
+                "Configuring restricted transport types is only allowed on a debuggable build",
+                Build.isDebuggable());
+
         // Configure restricted transport in CarrierConfig
         final Set<Integer> restrictedTransportInCarrierConfig =
                 Collections.singleton(TRANSPORT_WIFI);

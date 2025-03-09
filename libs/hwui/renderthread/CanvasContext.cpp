@@ -418,6 +418,11 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
                                 RenderNode* target) {
     mRenderThread.removeFrameCallback(this);
 
+    // Make sure we have a valid device info
+    if (!DeviceInfo::get()->hasMaxTextureSize()) {
+        (void)mRenderThread.requireGrContext();
+    }
+
     // If the previous frame was dropped we don't need to hold onto it, so
     // just keep using the previous frame's structure instead
     const auto reason = wasSkipped(mCurrentFrameInfo);
