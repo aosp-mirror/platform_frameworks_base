@@ -33,6 +33,7 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.view.Display;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -174,7 +175,8 @@ public class AppEnumerationInternalTests {
                         ServiceManager.getService(MEDIA_PROJECTION_SERVICE));
 
         assertThat(mediaProjectionManager.createProjection(0 /* uid */, TARGET_SHARED_USER,
-                MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */))
+                MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */,
+                Display.DEFAULT_DISPLAY /* displayId */))
                 .isNotNull();
     }
 
@@ -187,7 +189,8 @@ public class AppEnumerationInternalTests {
 
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> mediaProjectionManager.createProjection(0 /* uid */, TARGET_SHARED_USER,
-                        MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */));
+                        MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */,
+                        Display.DEFAULT_DISPLAY /* displayId */));
     }
 
     private static void installPackage(String apkPath, boolean forceQueryable) {

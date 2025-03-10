@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.animation;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
@@ -24,12 +26,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ParticleAnimation {
-    HashMap<Integer, ArrayList<Particle>> mAllParticles = new HashMap<>();
+    @NonNull HashMap<Integer, ArrayList<Particle>> mAllParticles = new HashMap<>();
 
-    PaintBundle mPaint = new PaintBundle();
-    public void animate(PaintContext context, Component component,
-                        ComponentMeasure start, ComponentMeasure end,
-                        float progress) {
+    @NonNull PaintBundle mPaint = new PaintBundle();
+
+    public void animate(
+            @NonNull PaintContext context,
+            @NonNull Component component,
+            @NonNull ComponentMeasure start,
+            @NonNull ComponentMeasure end,
+            float progress) {
         ArrayList<Particle> particles = mAllParticles.get(component.getComponentId());
         if (particles == null) {
             particles = new ArrayList<Particle>();
@@ -37,9 +43,9 @@ public class ParticleAnimation {
                 float x = (float) Math.random();
                 float y = (float) Math.random();
                 float radius = (float) Math.random();
-                float r = 250f;
-                float g = 250f;
-                float b = 250f;
+                float r = 220f;
+                float g = 220f;
+                float b = 220f;
                 particles.add(new Particle(x, y, radius, r, g, b));
             }
             mAllParticles.put(component.getComponentId(), particles);
@@ -49,12 +55,17 @@ public class ParticleAnimation {
         for (int i = 0; i < particles.size(); i++) {
             Particle particle = particles.get(i);
             mPaint.reset();
-            mPaint.setColor(particle.r, particle.g, particle.b,
-                    200 * (1 - progress));
+            mPaint.setColor(
+                    particle.r / 255f,
+                    particle.g / 255f,
+                    particle.b / 255f,
+                    (200 * (1 - progress)) / 255f);
             context.applyPaint(mPaint);
             float dx = start.getX() + component.getWidth() * particle.x;
-            float dy = start.getY() + component.getHeight() * particle.y
-                    + progress * 0.01f * component.getHeight();
+            float dy =
+                    start.getY()
+                            + component.getHeight() * particle.y
+                            + progress * 0.01f * component.getHeight();
             float dr = (component.getHeight() + 60) * 0.15f * particle.radius + (30 * progress);
             context.drawCircle(dx, dy, dr);
         }

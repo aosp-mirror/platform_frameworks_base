@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.os.FileUtils;
 import android.os.PersistableBundle;
@@ -124,17 +125,18 @@ class DevicePolicyData {
     final ArrayList<ActiveAdmin> mAdminList = new ArrayList<>();
     final ArrayList<ComponentName> mRemovingAdmins = new ArrayList<>();
 
-    // Some DevicePolicyManager APIs can be called by (1) a DPC or (2) an app with permissions that
-    // isn't a DPC. For the latter, the caller won't have to provide a ComponentName and won't be
-    // mapped to an ActiveAdmin. This permission-based admin should be used to persist policies
-    // set by the permission-based caller. This admin should not be added to mAdminMap or mAdminList
-    // since a lot of methods in DPMS assume the ActiveAdmins here have a valid ComponentName.
-    // Instead, use variants of DPMS active admin getters to include the permission-based admin.
+    /**
+     * @deprecated Do not use. Policies set by permission holders must go into DevicePolicyEngine.
+     */
+    @Deprecated
     ActiveAdmin mPermissionBasedAdmin;
 
     // Create or get the permission-based admin. The permission-based admin will not have a
     // DeviceAdminInfo or ComponentName.
     ActiveAdmin createOrGetPermissionBasedAdmin(int userId) {
+        if (Flags.activeAdminCleanup()) {
+            throw new UnsupportedOperationException("permission based admin no longer supported");
+        }
         if (mPermissionBasedAdmin == null) {
             mPermissionBasedAdmin = new ActiveAdmin(userId, /* permissionBased= */ true);
         }
@@ -147,7 +149,7 @@ class DevicePolicyData {
     // This is the list of component allowed to start lock task mode.
     List<String> mLockTaskPackages = new ArrayList<>();
 
-    /** @deprecated moved to {@link ActiveAdmin#protectedPackages}. */
+    /** @deprecated moved to DevicePolicyEngine. */
     @Deprecated
     @Nullable
     List<String> mUserControlDisabledPackages;
@@ -280,7 +282,7 @@ class DevicePolicyData {
                 }
             }
 
-            if (policyData.mPermissionBasedAdmin != null) {
+            if (!Flags.activeAdminCleanup() && policyData.mPermissionBasedAdmin != null) {
                 out.startTag(null, "permission-based-admin");
                 policyData.mPermissionBasedAdmin.writeToXml(out);
                 out.endTag(null, "permission-based-admin");
@@ -521,7 +523,8 @@ class DevicePolicyData {
                     } catch (RuntimeException e) {
                         Slogf.w(TAG, e, "Failed loading admin %s", name);
                     }
-                } else if ("permission-based-admin".equals(tag)) {
+                } else if (!Flags.activeAdminCleanup() && "permission-based-admin".equals(tag)) {
+
                     ActiveAdmin ap = new ActiveAdmin(policy.mUserId, /* permissionBased= */ true);
                     ap.readFromXml(parser, /* overwritePolicies= */ false);
                     policy.mPermissionBasedAdmin = ap;

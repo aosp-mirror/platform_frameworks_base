@@ -76,8 +76,6 @@ import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 
-import kotlinx.coroutines.DisposableHandle;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -115,10 +113,6 @@ public class NotificationContentView extends FrameLayout implements Notification
     private View mHeadsUpChild;
     @VisibleForTesting
     protected HybridNotificationView mSingleLineView;
-
-    @Nullable public DisposableHandle mContractedBinderHandle;
-    @Nullable public DisposableHandle mExpandedBinderHandle;
-    @Nullable public DisposableHandle mHeadsUpBinderHandle;
 
     private RemoteInputView mExpandedRemoteInput;
     private RemoteInputView mHeadsUpRemoteInput;
@@ -579,8 +573,29 @@ public class NotificationContentView extends FrameLayout implements Notification
             return;
         }
 
-        mUiEventLogger.log(
-                NotificationCompactHeadsUpEvent.NOTIFICATION_COMPACT_HUN_SHOWN);
+        final StatusBarNotification containingRowSbn = getContainingRowSbn();
+        if (containingRowSbn == null) {
+            return;
+        }
+
+        mUiEventLogger.logWithInstanceId(
+                NotificationCompactHeadsUpEvent.NOTIFICATION_COMPACT_HUN_SHOWN,
+                containingRowSbn.getUid(),
+                containingRowSbn.getPackageName(),
+                containingRowSbn.getInstanceId());
+    }
+
+    @Nullable
+    private StatusBarNotification getContainingRowSbn() {
+        if (mContainingNotification == null) {
+            return null;
+        }
+        final NotificationEntry entry = mContainingNotification.getEntry();
+        if (entry == null) {
+            return null;
+        }
+
+        return entry.getSbn();
     }
 
     /**

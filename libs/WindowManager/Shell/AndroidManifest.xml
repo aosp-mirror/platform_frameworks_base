@@ -24,13 +24,14 @@
     <uses-permission android:name="android.permission.WAKEUP_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
     <uses-permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
+    <uses-permission android:name="android.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION" />
+    <uses-permission android:name="android.permission.MANAGE_KEY_GESTURES" />
 
     <application>
         <activity
             android:name=".desktopmode.DesktopWallpaperActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
-            android:showForAllUsers="true"
             android:theme="@style/DesktopWallpaperTheme" />
 
         <activity

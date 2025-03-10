@@ -112,11 +112,12 @@ class DesktopPersistentRepositoryTest : ShellTestCase() {
             datastoreRepository.addOrUpdateDesktop(
                 visibleTasks = visibleTasks,
                 minimizedTasks = minimizedTasks,
-                freeformTasksInZOrder = freeformTasksInZOrder)
+                freeformTasksInZOrder = freeformTasksInZOrder,
+                userId = DEFAULT_USER_ID)
 
             val actualDesktop = datastoreRepository.readDesktop(DEFAULT_USER_ID, DEFAULT_DESKTOP_ID)
-            assertThat(actualDesktop.tasksByTaskIdMap).hasSize(2)
-            assertThat(actualDesktop.getZOrderedTasks(0)).isEqualTo(2)
+            assertThat(actualDesktop?.tasksByTaskIdMap).hasSize(2)
+            assertThat(actualDesktop?.getZOrderedTasks(0)).isEqualTo(2)
         }
     }
 
@@ -135,10 +136,11 @@ class DesktopPersistentRepositoryTest : ShellTestCase() {
             datastoreRepository.addOrUpdateDesktop(
                 visibleTasks = visibleTasks,
                 minimizedTasks = minimizedTasks,
-                freeformTasksInZOrder = freeformTasksInZOrder)
+                freeformTasksInZOrder = freeformTasksInZOrder,
+                userId = DEFAULT_USER_ID)
 
             val actualDesktop = datastoreRepository.readDesktop(DEFAULT_USER_ID, DEFAULT_DESKTOP_ID)
-            assertThat(actualDesktop.tasksByTaskIdMap[task.taskId]?.desktopTaskState)
+            assertThat(actualDesktop?.tasksByTaskIdMap?.get(task.taskId)?.desktopTaskState)
                 .isEqualTo(DesktopTaskState.MINIMIZED)
         }
     }
@@ -158,11 +160,12 @@ class DesktopPersistentRepositoryTest : ShellTestCase() {
             datastoreRepository.addOrUpdateDesktop(
                 visibleTasks = visibleTasks,
                 minimizedTasks = minimizedTasks,
-                freeformTasksInZOrder = freeformTasksInZOrder)
+                freeformTasksInZOrder = freeformTasksInZOrder,
+                userId = DEFAULT_USER_ID)
 
             val actualDesktop = datastoreRepository.readDesktop(DEFAULT_USER_ID, DEFAULT_DESKTOP_ID)
-            assertThat(actualDesktop.tasksByTaskIdMap).isEmpty()
-            assertThat(actualDesktop.zOrderedTasksList).isEmpty()
+            assertThat(actualDesktop?.tasksByTaskIdMap).isEmpty()
+            assertThat(actualDesktop?.zOrderedTasksList).isEmpty()
         }
     }
 

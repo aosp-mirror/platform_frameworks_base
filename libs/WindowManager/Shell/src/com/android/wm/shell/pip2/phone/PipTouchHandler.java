@@ -222,7 +222,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 pipBoundsState, mTouchState, mPipScheduler, mPipTransitionState, pipUiEventLogger,
                 menuController, mainExecutor,
                 mPipPerfHintController);
-        mPipBoundsState.addOnAspectRatioChangedCallback(this::updateMinMaxSize);
+        mPipBoundsState.addOnAspectRatioChangedCallback(aspectRatio -> {
+            updateMinMaxSize(aspectRatio);
+            onAspectRatioChanged();
+        });
 
         mMoveOnShelVisibilityChanged = () -> {
             if (mIsImeShowing && mImeHeight > mShelfHeight) {
@@ -231,17 +234,15 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 // KCA triggered movement to wait for other transitions (e.g. due to IME changes).
                 return;
             }
-            mPipTransitionState.setOnIdlePipTransitionStateRunnable(() -> {
-                boolean hasUserInteracted = (mPipBoundsState.hasUserMovedPip()
-                        || mPipBoundsState.hasUserResizedPip());
-                int delta = mPipBoundsAlgorithm.getEntryDestinationBounds().top
-                        - mPipBoundsState.getBounds().top;
+            boolean hasUserInteracted = (mPipBoundsState.hasUserMovedPip()
+                    || mPipBoundsState.hasUserResizedPip());
+            int delta = mPipBoundsAlgorithm.getEntryDestinationBounds().top
+                    - mPipBoundsState.getBounds().top;
 
-                if (!mIsImeShowing && !hasUserInteracted && delta != 0) {
-                    // If the user hasn't interacted with PiP, we respect the keep clear areas
-                    mMotionHelper.animateToOffset(mPipBoundsState.getBounds(), delta);
-                }
-            });
+            if (!mIsImeShowing && !hasUserInteracted && delta != 0) {
+                // If the user hasn't interacted with PiP, we respect the keep clear areas
+                mMotionHelper.animateToOffset(mPipBoundsState.getBounds(), delta);
+            }
         };
 
         if (PipUtils.isPip2ExperimentEnabled()) {
@@ -365,12 +366,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mMotionHelper.synchronizePinnedStackBounds();
         reloadResources();
 
-        /*
-        if (mPipTaskOrganizer.isInPip()) {
+        if (mPipTransitionState.isInPip()) {
             // Recreate the dismiss target for the new orientation.
             mPipDismissTargetHandler.createOrUpdateDismissTarget();
         }
-         */
     }
 
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
@@ -406,12 +405,9 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         // We need to remove the callback even if the shelf is visible, in case it the delayed
         // callback hasn't been executed yet to avoid the wrong final state.
         mMainExecutor.removeCallbacks(mMoveOnShelVisibilityChanged);
-        if (shelfVisible) {
-            mMoveOnShelVisibilityChanged.run();
-        } else {
-            // Postpone moving in response to hide of Launcher in case there's another change
-            mMainExecutor.executeDelayed(mMoveOnShelVisibilityChanged, PIP_KEEP_CLEAR_AREAS_DELAY);
-        }
+
+        // Postpone moving in response to hide of Launcher in case there's another change
+        mMainExecutor.executeDelayed(mMoveOnShelVisibilityChanged, PIP_KEEP_CLEAR_AREAS_DELAY);
     }
 
     /**
@@ -582,7 +578,6 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             return true;
         }
 
-        /*
         if ((ev.getAction() == MotionEvent.ACTION_DOWN || mTouchState.isUserInteracting())
                 && mPipDismissTargetHandler.maybeConsumeMotionEvent(ev)) {
             // If the first touch event occurs within the magnetic field, pass the ACTION_DOWN event
@@ -599,6 +594,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             return true;
         }
 
+        /*
         // Ignore the motion event When the entry animation is waiting to be started
         if (!mTouchState.isUserInteracting() && mPipTaskOrganizer.isEntryScheduled()) {
             ProtoLog.wtf(WM_SHELL_PICTURE_IN_PICTURE,
@@ -775,16 +771,17 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
     private void animateToNormalSize(Runnable callback) {
         // Save the current bounds as the user-resize bounds.
         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
-
-        final Size minMenuSize = mMenuController.getEstimatedMinMenuSize();
-        final Size defaultSize = mSizeSpecSource.getDefaultSize(mPipBoundsState.getAspectRatio());
-        final Rect normalBounds = new Rect(0, 0, defaultSize.getWidth(), defaultSize.getHeight());
-        final Rect adjustedNormalBounds = mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(
-                normalBounds, minMenuSize);
-
+        final Rect adjustedNormalBounds = getAdjustedNormalBounds();
         mSavedSnapFraction = mMotionHelper.animateToExpandedState(adjustedNormalBounds,
                 getMovementBounds(mPipBoundsState.getBounds()),
                 getMovementBounds(adjustedNormalBounds), callback /* callback */);
+    }
+
+    private Rect getAdjustedNormalBounds() {
+        final Size minMenuSize = mMenuController.getEstimatedMinMenuSize();
+        final Size defaultSize = mSizeSpecSource.getDefaultSize(mPipBoundsState.getAspectRatio());
+        final Rect normalBounds = new Rect(0, 0, defaultSize.getWidth(), defaultSize.getHeight());
+        return mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
     }
 
     private void animateToUnexpandedState(Rect restoreBounds) {
@@ -880,7 +877,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             mMovementWithinDismiss = touchState.getDownTouchPosition().y
                     >= mPipBoundsState.getMovementBounds().bottom;
             mMotionHelper.setSpringingToTouch(false);
-            mPipDismissTargetHandler.setTaskLeash(mPipTransitionState.mPinnedTaskLeash);
+            mPipDismissTargetHandler.setTaskLeash(mPipTransitionState.getPinnedTaskLeash());
 
             // If the menu is still visible then just poke the menu
             // so that it will timeout after the user stops touching it
@@ -1016,21 +1013,6 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             return true;
         }
 
-        private void stashEndAction() {
-            if (mPipBoundsState.getBounds().left < 0
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT) {
-                mPipUiEventLogger.log(
-                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_LEFT);
-                mPipBoundsState.setStashed(STASH_TYPE_LEFT);
-            } else if (mPipBoundsState.getBounds().left >= 0
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT) {
-                mPipUiEventLogger.log(
-                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_RIGHT);
-                mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
-            }
-            mMenuController.hideMenu();
-        }
-
         private void flingEndAction() {
             if (mShouldHideMenuAfterFling) {
                 // If the menu is not visible, then we can still be showing the activity for the
@@ -1087,6 +1069,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mPipBoundsAlgorithm.getMovementBounds(mPipBoundsState.getBounds(),
                 insetBounds, mPipBoundsState.getMovementBounds(), mIsImeShowing ? mImeHeight : 0);
         mMotionHelper.onMovementBoundsChanged();
+
+        if (mPipResizeGestureHandler.getUserResizeBounds().isEmpty()) {
+            mPipResizeGestureHandler.setUserResizeBounds(getAdjustedNormalBounds());
+        }
     }
 
     private Rect getMovementBounds(Rect curBounds) {

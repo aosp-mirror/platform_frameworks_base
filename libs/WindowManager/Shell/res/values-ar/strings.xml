@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"هل هناك مشاكل في الكاميرا؟\nانقر لإعادة الضبط."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ألم يتم حل المشكلة؟\nانقر للعودة"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"أليس هناك مشاكل في الكاميرا؟ انقر للإغلاق."</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"يمكن العثور على قائمة التطبيقات هنا"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"يمكنك الدخول إلى وضع العرض المخصّص للكمبيوتر المكتبي لفتح عدة تطبيقات معًا"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"يمكنك الرجوع إلى وضع ملء الشاشة في أي وقت من قائمة التطبيقات"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"استخدام تطبيقات متعدّدة في وقت واحد"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"اسحب تطبيقًا آخر لاستخدام وضع تقسيم الشاشة."</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"انقر مرّتين خارج تطبيق لتغيير موضعه."</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"اختيار"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"لقطة شاشة"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"فتح في المتصفِّح"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"فتح في التطبيق"</string>
     <string name="new_window_text" msgid="6318648868380652280">"نافذة جديدة"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"إدارة النوافذ"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"تغيير نسبة العرض إلى الارتفاع"</string>
     <string name="close_text" msgid="4986518933445178928">"إغلاق"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"إغلاق القائمة"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"فتح القائمة"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"تكبير الشاشة إلى أقصى حدّ"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"التقاط صورة للشاشة"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"لا يمكن تغيير حجم نافذة هذا التطبيق"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"تغيير الحجم"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"لا يمكن نقل التطبيق إلى هنا"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"مجسَّم"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"استعادة"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"تكبير"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"استعادة"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"المحاذاة إلى اليسار"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"المحاذاة إلى اليمين"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"إعدادات الفتح تلقائيًا"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"اختيار طريقة فتح روابط الويب لهذا التطبيق"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"في التطبيق"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"في المتصفِّح"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"حسنًا"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"فتح التطبيقات بسرعة في المتصفِّح هنا"</string>
 </resources>

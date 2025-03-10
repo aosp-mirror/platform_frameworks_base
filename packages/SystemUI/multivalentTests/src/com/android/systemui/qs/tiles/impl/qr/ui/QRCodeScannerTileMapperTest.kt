@@ -49,11 +49,11 @@ class QRCodeScannerTileMapperTest : SysuiTestCase() {
                     .apply {
                         addOverride(
                             com.android.systemui.res.R.drawable.ic_qr_code_scanner,
-                            TestStubDrawable()
+                            TestStubDrawable(),
                         )
                     }
                     .resources,
-                context.theme
+                context.theme,
             )
     }
 
@@ -64,11 +64,7 @@ class QRCodeScannerTileMapperTest : SysuiTestCase() {
 
         val outputState = mapper.map(config, inputModel)
 
-        val expectedState =
-            createQRCodeScannerTileState(
-                QSTileState.ActivationState.INACTIVE,
-                null,
-            )
+        val expectedState = createQRCodeScannerTileState(QSTileState.ActivationState.INACTIVE, null)
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
 
@@ -83,7 +79,7 @@ class QRCodeScannerTileMapperTest : SysuiTestCase() {
                 QSTileState.ActivationState.UNAVAILABLE,
                 context.getString(
                     com.android.systemui.res.R.string.qr_code_scanner_updating_secondary_label
-                )
+                ),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -94,12 +90,10 @@ class QRCodeScannerTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         val label = context.getString(com.android.systemui.res.R.string.qr_code_scanner_title)
         return QSTileState(
-            {
-                Icon.Loaded(
-                    context.getDrawable(com.android.systemui.res.R.drawable.ic_qr_code_scanner)!!,
-                    null
-                )
-            },
+            Icon.Loaded(
+                context.getDrawable(com.android.systemui.res.R.drawable.ic_qr_code_scanner)!!,
+                null,
+            ),
             com.android.systemui.res.R.drawable.ic_qr_code_scanner,
             label,
             activationState,
@@ -109,7 +103,7 @@ class QRCodeScannerTileMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.Chevron,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

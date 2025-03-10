@@ -18,6 +18,7 @@ package android.hardware;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.hardware.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -50,6 +51,8 @@ public final class OverlayProperties implements Parcelable {
     // Invoked on destruction
     private Runnable mCloser;
 
+    private LutProperties[] mLutProperties;
+
     private OverlayProperties(long nativeObject) {
         if (nativeObject != 0) {
             mCloser = sRegistry.registerNativeAllocation(this, nativeObject);
@@ -67,6 +70,22 @@ public final class OverlayProperties implements Parcelable {
             sDefaultOverlayProperties = new OverlayProperties(nCreateDefault());
         }
         return sDefaultOverlayProperties;
+    }
+
+    /**
+     * Returns the lut properties of the device.
+     */
+    @FlaggedApi(Flags.FLAG_LUTS_API)
+    @SuppressLint("ArrayReturn")
+    @NonNull
+    public LutProperties[] getLutProperties() {
+        if (mNativeObject == 0) {
+            return null;
+        }
+        if (mLutProperties == null) {
+            mLutProperties = nGetLutProperties(mNativeObject);
+        }
+        return mLutProperties;
     }
 
     /**
@@ -140,4 +159,5 @@ public final class OverlayProperties implements Parcelable {
             long nativeObject, int dataspace, int format);
     private static native void nWriteOverlayPropertiesToParcel(long nativeObject, Parcel dest);
     private static native long nReadOverlayPropertiesFromParcel(Parcel in);
+    private static native LutProperties[] nGetLutProperties(long nativeObject);
 }

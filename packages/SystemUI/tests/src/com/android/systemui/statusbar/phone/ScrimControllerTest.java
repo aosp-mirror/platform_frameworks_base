@@ -40,11 +40,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
-import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -90,7 +89,6 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.utils.os.FakeHandler;
-import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository;
 
 import com.google.common.truth.Expect;
 
@@ -139,7 +137,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     private boolean mAlwaysOnEnabled;
     private TestableLooper mLooper;
     private Context mContext;
-    @Mock private AlarmManager mAlarmManager;
     @Mock private DozeParameters mDozeParameters;
     @Mock private LightBarController mLightBarController;
     @Mock private DelayedWakeLock.Factory mDelayedWakeLockFactory;
@@ -157,7 +154,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     private final FakeKeyguardTransitionRepository mKeyguardTransitionRepository =
             mKosmos.getKeyguardTransitionRepository();
     @Mock private KeyguardInteractor mKeyguardInteractor;
-    private final FakeWallpaperRepository mWallpaperRepository = new FakeWallpaperRepository();
     @Mock private TypedArray mMockTypedArray;
 
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
@@ -282,7 +278,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController = new ScrimController(
                 mLightBarController,
                 mDozeParameters,
-                mAlarmManager,
                 mKeyguardStateController,
                 mDelayedWakeLockFactory,
                 new FakeHandler(mLooper.getLooper()),
@@ -298,10 +293,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mKeyguardInteractor,
-                mWallpaperRepository,
                 mKosmos.getTestDispatcher(),
                 mLinearLargeScreenShadeInterpolator);
-        mScrimController.start();
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -309,9 +302,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Attach behind scrim so flows that are collecting on it start running.
         ViewUtils.attachView(mScrimBehind);
 
-        mScrimController.setHasBackdrop(false);
-
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(false);
         mTestScope.getTestScheduler().runCurrent();
 
         if (SceneContainerFlag.isEnabled()) {
@@ -438,8 +428,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront, true,
                 mScrimBehind, true
         ));
-
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
     }
 
     @Test
@@ -451,72 +439,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront, TRANSPARENT,
                 mScrimBehind, TRANSPARENT,
                 mNotificationsScrim, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
-
-        assertScrimTinted(Map.of(
-                mScrimInFront, true,
-                mScrimBehind, true
-        ));
-    }
-
-    @Test
-    public void transitionToAod_withAodWallpaper() {
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
-        mTestScope.getTestScheduler().runCurrent();
-
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-        finishAnimationsImmediately();
-
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, TRANSPARENT));
-        assertEquals(0f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
-
-        // Pulsing notification should conserve AOD wallpaper.
-        mScrimController.legacyTransitionTo(ScrimState.PULSING);
-        finishAnimationsImmediately();
-
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, TRANSPARENT));
-        assertEquals(0f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
-    }
-
-    @Test
-    public void transitionToAod_withAodWallpaperAndLockScreenWallpaper() {
-        mScrimController.setHasBackdrop(true);
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
-        mTestScope.getTestScheduler().runCurrent();
-
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-        finishAnimationsImmediately();
-
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
-
-        assertScrimTinted(Map.of(
-                mScrimInFront, true,
-                mScrimBehind, true
-        ));
-    }
-
-    @Test
-    public void setHasBackdrop_withAodWallpaperAndAlbumArt() {
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
-        mTestScope.getTestScheduler().runCurrent();
-
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-        finishAnimationsImmediately();
-        mScrimController.setHasBackdrop(true);
-        finishAnimationsImmediately();
-
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
-
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
                 mScrimBehind, true
@@ -540,14 +462,12 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, SEMI_TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... and that if we set it while we're in AOD, it does take immediate effect.
         mScrimController.setAodFrontScrimAlpha(1f);
         assertScrimAlpha(Map.of(
                 mScrimInFront, OPAQUE,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... and make sure we recall the previous front scrim alpha even if we transition away
         // for a bit.
@@ -557,7 +477,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, OPAQUE,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... and alpha updates should be completely ignored if always_on is off.
         // Passing it forward would mess up the wake-up transition.
@@ -588,7 +507,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, OPAQUE,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... but will take effect after docked
         when(mDockManager.isDocked()).thenReturn(true);
@@ -600,7 +518,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, SEMI_TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // ... and that if we set it while we're in AOD, it does take immediate effect after docked.
         mScrimController.setAodFrontScrimAlpha(1f);
@@ -608,7 +525,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, OPAQUE,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // Reset value since enums are static.
         mScrimController.setAodFrontScrimAlpha(0f);
@@ -619,7 +535,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Pre-condition
         // Need to go to AoD first because PULSING doesn't change
         // the back scrim opacity - otherwise it would hide AoD wallpapers.
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(false);
         mTestScope.getTestScheduler().runCurrent();
 
         mScrimController.legacyTransitionTo(ScrimState.AOD);
@@ -627,7 +542,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         mScrimController.legacyTransitionTo(ScrimState.PULSING);
         finishAnimationsImmediately();
@@ -637,7 +551,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         assertScrimTinted(Map.of(
                 mScrimInFront, true,
@@ -651,15 +564,12 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimAlpha(Map.of(
                 mScrimInFront, SEMI_TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(1f, mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         mScrimController.setWakeLockScreenSensorActive(true);
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
                 mScrimInFront, SEMI_TRANSPARENT,
                 mScrimBehind, TRANSPARENT));
-        assertEquals(ScrimController.WAKE_SENSOR_SCRIM_ALPHA,
-                mScrimController.getState().getMaxLightRevealScrimAlpha(), 0f);
 
         // Reset value since enums are static.
         mScrimController.setAodFrontScrimAlpha(0f);
@@ -1229,7 +1139,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         reset(mScrimBehind);
         mScrimController.setExpansionAffectsAlpha(false);
         mScrimController.setRawPanelExpansionFraction(0.8f);
-        verifyZeroInteractions(mScrimBehind);
+        verifyNoMoreInteractions(mScrimBehind);
         assertEquals("Scrim opacity shouldn't change when setExpansionAffectsAlpha "
                 + "is false", scrimAlpha, mScrimBehind.getViewAlpha(), 0.01f);
 
@@ -1333,7 +1243,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController = new ScrimController(
                 mLightBarController,
                 mDozeParameters,
-                mAlarmManager,
                 mKeyguardStateController,
                 mDelayedWakeLockFactory,
                 new FakeHandler(mLooper.getLooper()),
@@ -1349,15 +1258,11 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mKeyguardInteractor,
-                mWallpaperRepository,
                 mKosmos.getTestDispatcher(),
                 mLinearLargeScreenShadeInterpolator);
-        mScrimController.start();
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
-        mScrimController.setHasBackdrop(false);
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(false);
         mTestScope.getTestScheduler().runCurrent();
         mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
         finishAnimationsImmediately();
@@ -1441,7 +1346,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testDoesNotHoldWakeLock_whenUnlocking() {
         mScrimController.legacyTransitionTo(ScrimState.UNLOCKED);
         finishAnimationsImmediately();
-        verifyZeroInteractions(mWakeLock);
+        verifyNoMoreInteractions(mWakeLock);
     }
 
     @Test
@@ -1451,57 +1356,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         ScrimController.Callback callback = mock(ScrimController.Callback.class);
         mScrimController.legacyTransitionTo(ScrimState.UNLOCKED, callback);
         verify(callback).onFinished();
-    }
-
-    @Test
-    public void testHoldsAodWallpaperAnimationLock() {
-        // Pre-conditions
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-        finishAnimationsImmediately();
-        reset(mWakeLock);
-
-        mScrimController.onHideWallpaperTimeout();
-        verify(mWakeLock).acquire(anyString());
-        verify(mWakeLock, never()).release(anyString());
-        finishAnimationsImmediately();
-        verify(mWakeLock).release(anyString());
-    }
-
-    @Test
-    public void testHoldsPulsingWallpaperAnimationLock() {
-        // Pre-conditions
-        mScrimController.legacyTransitionTo(ScrimState.PULSING);
-        finishAnimationsImmediately();
-        reset(mWakeLock);
-
-        mScrimController.onHideWallpaperTimeout();
-        verify(mWakeLock).acquire(anyString());
-        verify(mWakeLock, never()).release(anyString());
-        finishAnimationsImmediately();
-        verify(mWakeLock).release(anyString());
-    }
-
-    @Test
-    public void testWillHideAodWallpaper() {
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
-        mTestScope.getTestScheduler().runCurrent();
-
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-        verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
-        mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
-        verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
-    }
-
-    @Test
-    public void testWillHideDockedWallpaper() {
-        mAlwaysOnEnabled = false;
-        when(mDockManager.isDocked()).thenReturn(true);
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
-        mTestScope.getTestScheduler().runCurrent();
-
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-
-        verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
     }
 
     @Test
@@ -1539,43 +1393,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertFalse("Front scrim should not be focusable", mScrimInFront.isFocusable());
         assertFalse("Notifications scrim should not be focusable",
                 mNotificationsScrim.isFocusable());
-    }
-
-    @Test
-    public void testHidesShowWhenLockedActivity() {
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
-        mTestScope.getTestScheduler().runCurrent();
-
-        mScrimController.setKeyguardOccluded(true);
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-        finishAnimationsImmediately();
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, OPAQUE));
-
-        mScrimController.legacyTransitionTo(ScrimState.PULSING);
-        finishAnimationsImmediately();
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, OPAQUE));
-    }
-
-    @Test
-    public void testHidesShowWhenLockedActivity_whenAlreadyInAod() {
-        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
-        mTestScope.getTestScheduler().runCurrent();
-
-        mScrimController.legacyTransitionTo(ScrimState.AOD);
-        finishAnimationsImmediately();
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, TRANSPARENT));
-
-        mScrimController.setKeyguardOccluded(true);
-        finishAnimationsImmediately();
-        assertScrimAlpha(Map.of(
-                mScrimInFront, TRANSPARENT,
-                mScrimBehind, OPAQUE));
     }
 
     @Test
@@ -2158,6 +1975,17 @@ public class ScrimControllerTest extends SysuiTestCase {
                         TransitionState.FINISHED, "ScrimControllerTest"));
 
         verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
+    }
+
+    @Test
+    public void primaryBouncerToGoneOnFinishCallsLightBarController() {
+        reset(mLightBarController);
+        mScrimController.mBouncerToGoneTransition.accept(
+                new TransitionStep(KeyguardState.PRIMARY_BOUNCER, KeyguardState.GONE, 0f,
+                        TransitionState.FINISHED, "ScrimControllerTest"));
+
+        verify(mLightBarController).setScrimState(
+                any(ScrimState.class), anyFloat(), any(GradientColors.class));
     }
 
     @Test

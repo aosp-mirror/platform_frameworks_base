@@ -32,14 +32,15 @@ import androidx.annotation.VisibleForTesting
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
-import com.android.systemui.Dumpable
 import com.android.app.animation.Interpolators
+import com.android.systemui.Dumpable
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
+import com.android.systemui.shared.Flags.ambientAod
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -52,12 +53,16 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.sign
+import com.android.systemui.Flags.notificationShadeBlur
 
 /**
- * Controller responsible for statusbar window blur.
+ * Responsible for blurring the notification shade window, and applying a zoom effect to the
+ * wallpaper.
  */
 @SysUISingleton
-class NotificationShadeDepthController @Inject constructor(
+class NotificationShadeDepthController
+@Inject
+constructor(
     private val statusBarStateController: StatusBarStateController,
     private val blurUtils: BlurUtils,
     private val biometricUnlockController: BiometricUnlockController,
@@ -69,7 +74,7 @@ class NotificationShadeDepthController @Inject constructor(
     private val context: Context,
     private val splitShadeStateController: SplitShadeStateController,
     dumpManager: DumpManager,
-    configurationController: ConfigurationController
+    configurationController: ConfigurationController,
 ) : ShadeExpansionListener, Dumpable {
     companion object {
         private const val WAKE_UP_ANIMATION_ENABLED = true
@@ -85,8 +90,7 @@ class NotificationShadeDepthController @Inject constructor(
     private var keyguardAnimator: Animator? = null
     private var notificationAnimator: Animator? = null
     private var updateScheduled: Boolean = false
-    @VisibleForTesting
-    var shadeExpansion = 0f
+    @VisibleForTesting var shadeExpansion = 0f
     private var isClosed: Boolean = true
     private var isOpen: Boolean = false
     private var isBlurred: Boolean = false
@@ -106,13 +110,13 @@ class NotificationShadeDepthController @Inject constructor(
 
     var shadeAnimation = DepthAnimation()
 
-    @VisibleForTesting
-    var brightnessMirrorSpring = DepthAnimation()
+    @VisibleForTesting var brightnessMirrorSpring = DepthAnimation()
     var brightnessMirrorVisible: Boolean = false
         set(value) {
             field = value
-            brightnessMirrorSpring.animateTo(if (value) blurUtils.blurRadiusOfRatio(1f).toInt()
-                else 0)
+            brightnessMirrorSpring.animateTo(
+                if (value) blurUtils.blurRadiusOfRatio(1f).toInt() else 0
+            )
         }
 
     var qsPanelExpansion = 0f
@@ -126,9 +130,7 @@ class NotificationShadeDepthController @Inject constructor(
             scheduleUpdate()
         }
 
-    /**
-     * How much we're transitioning to the full shade
-     */
+    /** How much we're transitioning to the full shade */
     var transitionToFullShadeProgress = 0f
         set(value) {
             if (field == value) return
@@ -160,19 +162,15 @@ class NotificationShadeDepthController @Inject constructor(
             shadeAnimation.finishIfRunning()
         }
 
-    /**
-     * We're unlocking, and should not blur as the panel expansion changes.
-     */
+    /** We're unlocking, and should not blur as the panel expansion changes. */
     var blursDisabledForUnlock: Boolean = false
-    set(value) {
-        if (field == value) return
-        field = value
-        scheduleUpdate()
-    }
+        set(value) {
+            if (field == value) return
+            field = value
+            scheduleUpdate()
+        }
 
-    /**
-     * Force stop blur effect when necessary.
-     */
+    /** Force stop blur effect when necessary. */
     private var scrimsVisible: Boolean = false
         set(value) {
             if (field == value) return
@@ -180,9 +178,7 @@ class NotificationShadeDepthController @Inject constructor(
             scheduleUpdate()
         }
 
-    /**
-     * Blur radius of the wake-up animation on this frame.
-     */
+    /** Blur radius of the wake-up animation on this frame. */
     private var wakeAndUnlockBlurRadius = 0f
         set(value) {
             if (field == value) return
@@ -191,15 +187,23 @@ class NotificationShadeDepthController @Inject constructor(
         }
 
     private fun computeBlurAndZoomOut(): Pair<Int, Float> {
-        val animationRadius = MathUtils.constrain(shadeAnimation.radius,
-                blurUtils.minBlurRadius.toFloat(), blurUtils.maxBlurRadius.toFloat())
-        val expansionRadius = blurUtils.blurRadiusOfRatio(
+        val animationRadius =
+            MathUtils.constrain(
+                shadeAnimation.radius,
+                blurUtils.minBlurRadius.toFloat(),
+                blurUtils.maxBlurRadius.toFloat(),
+            )
+        val expansionRadius =
+            blurUtils.blurRadiusOfRatio(
                 ShadeInterpolation.getNotificationScrimAlpha(
-                        if (shouldApplyShadeBlur()) shadeExpansion else 0f))
-        var combinedBlur = (expansionRadius * INTERACTION_BLUR_FRACTION +
+                    if (shouldApplyShadeBlur()) shadeExpansion else 0f
+                )
+            )
+        var combinedBlur =
+            (expansionRadius * INTERACTION_BLUR_FRACTION +
                 animationRadius * ANIMATION_BLUR_FRACTION)
-        val qsExpandedRatio = ShadeInterpolation.getNotificationScrimAlpha(qsPanelExpansion) *
-                shadeExpansion
+        val qsExpandedRatio =
+            ShadeInterpolation.getNotificationScrimAlpha(qsPanelExpansion) * shadeExpansion
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsExpandedRatio))
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius)
@@ -217,7 +221,9 @@ class NotificationShadeDepthController @Inject constructor(
 
         // Make blur be 0 if it is necessary to stop blur effect.
         if (scrimsVisible) {
-            blur = 0
+            if (!notificationShadeBlur()) {
+                blur = 0
+            }
             zoomOut = 0f
         }
 
@@ -231,83 +237,97 @@ class NotificationShadeDepthController @Inject constructor(
         return Pair(blur, zoomOut)
     }
 
-    /**
-     * Callback that updates the window blur value and is called only once per frame.
-     */
+    /** Callback that updates the window blur value and is called only once per frame. */
     @VisibleForTesting
-    val updateBlurCallback = Choreographer.FrameCallback {
-        updateScheduled = false
-        val (blur, zoomOut) = computeBlurAndZoomOut()
-        val opaque = scrimsVisible && !blursDisabledForAppLaunch
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
-        blurUtils.applyBlur(root.viewRootImpl, blur, opaque)
-        lastAppliedBlur = blur
-        wallpaperController.setNotificationShadeZoom(zoomOut)
-        listeners.forEach {
-            it.onWallpaperZoomOutChanged(zoomOut)
-            it.onBlurRadiusChanged(blur)
-        }
-        notificationShadeWindowController.setBackgroundBlurRadius(blur)
-    }
-
-    /**
-     * Animate blurs when unlocking.
-     */
-    private val keyguardStateCallback = object : KeyguardStateController.Callback {
-        override fun onKeyguardFadingAwayChanged() {
-            if (!keyguardStateController.isKeyguardFadingAway ||
-                    biometricUnlockController.mode != MODE_WAKE_AND_UNLOCK) {
-                return
+    val updateBlurCallback =
+        Choreographer.FrameCallback {
+            updateScheduled = false
+            val (blur, zoomOut) = computeBlurAndZoomOut()
+            val opaque = if (notificationShadeBlur()) false else scrimsVisible && !blursDisabledForAppLaunch
+            Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
+            blurUtils.applyBlur(root.viewRootImpl, blur, opaque)
+            lastAppliedBlur = blur
+            wallpaperController.setNotificationShadeZoom(zoomOut)
+            listeners.forEach {
+                it.onWallpaperZoomOutChanged(zoomOut)
+                it.onBlurRadiusChanged(blur)
             }
+            notificationShadeWindowController.setBackgroundBlurRadius(blur)
+        }
 
-            keyguardAnimator?.cancel()
-            keyguardAnimator = ValueAnimator.ofFloat(1f, 0f).apply {
-                // keyguardStateController.keyguardFadingAwayDuration might be zero when unlock by
-                // fingerprint due to there is no window container, see AppTransition#goodToGo.
-                // We use DozeParameters.wallpaperFadeOutDuration as an alternative.
-                duration = dozeParameters.wallpaperFadeOutDuration
-                startDelay = keyguardStateController.keyguardFadingAwayDelay
-                interpolator = Interpolators.FAST_OUT_SLOW_IN
-                addUpdateListener { animation: ValueAnimator ->
-                    wakeAndUnlockBlurRadius =
-                            blurUtils.blurRadiusOfRatio(animation.animatedValue as Float)
+    /** Animate blurs when unlocking. */
+    private val keyguardStateCallback =
+        object : KeyguardStateController.Callback {
+            override fun onKeyguardFadingAwayChanged() {
+                if (
+                    !keyguardStateController.isKeyguardFadingAway ||
+                        biometricUnlockController.mode != MODE_WAKE_AND_UNLOCK
+                ) {
+                    return
                 }
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        keyguardAnimator = null
-                        wakeAndUnlockBlurRadius = 0f
-                    }
-                })
-                start()
-            }
-        }
 
-        override fun onKeyguardShowingChanged() {
-            if (keyguardStateController.isShowing) {
                 keyguardAnimator?.cancel()
-                notificationAnimator?.cancel()
+                keyguardAnimator =
+                    ValueAnimator.ofFloat(1f, 0f).apply {
+                        // keyguardStateController.keyguardFadingAwayDuration might be zero when
+                        // unlock by fingerprint due to there is no window container, see
+                        // AppTransition#goodToGo. We use DozeParameters.wallpaperFadeOutDuration as
+                        // an alternative.
+                        duration = dozeParameters.wallpaperFadeOutDuration
+                        startDelay = keyguardStateController.keyguardFadingAwayDelay
+                        interpolator = Interpolators.FAST_OUT_SLOW_IN
+                        addUpdateListener { animation: ValueAnimator ->
+                            wakeAndUnlockBlurRadius =
+                                blurUtils.blurRadiusOfRatio(animation.animatedValue as Float)
+                        }
+                        addListener(
+                            object : AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: Animator) {
+                                    keyguardAnimator = null
+                                    wakeAndUnlockBlurRadius = 0f
+                                }
+                            }
+                        )
+                        start()
+                    }
+            }
+
+            override fun onKeyguardShowingChanged() {
+                if (keyguardStateController.isShowing) {
+                    keyguardAnimator?.cancel()
+                    notificationAnimator?.cancel()
+                }
             }
         }
-    }
 
-    private val statusBarStateCallback = object : StatusBarStateController.StateListener {
-        override fun onStateChanged(newState: Int) {
-            updateShadeAnimationBlur(
-                    shadeExpansion, prevTracking, prevShadeVelocity, prevShadeDirection)
-            scheduleUpdate()
-        }
+    private val statusBarStateCallback =
+        object : StatusBarStateController.StateListener {
+            override fun onStateChanged(newState: Int) {
+                updateShadeAnimationBlur(
+                    shadeExpansion,
+                    prevTracking,
+                    prevShadeVelocity,
+                    prevShadeDirection,
+                )
+                scheduleUpdate()
+            }
 
-        override fun onDozingChanged(isDozing: Boolean) {
-            if (isDozing) {
-                shadeAnimation.finishIfRunning()
-                brightnessMirrorSpring.finishIfRunning()
+            override fun onDozingChanged(isDozing: Boolean) {
+                if (isDozing) {
+                    shadeAnimation.finishIfRunning()
+                    brightnessMirrorSpring.finishIfRunning()
+                }
+            }
+
+            override fun onDozeAmountChanged(linear: Float, eased: Float) {
+                wakeAndUnlockBlurRadius =
+                    if (ambientAod()) {
+                        0f
+                    } else {
+                        blurUtils.blurRadiusOfRatio(eased)
+                    }
             }
         }
-
-        override fun onDozeAmountChanged(linear: Float, eased: Float) {
-            wakeAndUnlockBlurRadius = blurUtils.blurRadiusOfRatio(eased)
-        }
-    }
 
     init {
         dumpManager.registerCriticalDumpable(javaClass.name, this)
@@ -317,16 +337,19 @@ class NotificationShadeDepthController @Inject constructor(
         statusBarStateController.addCallback(statusBarStateCallback)
         notificationShadeWindowController.setScrimsVisibilityListener {
             // Stop blur effect when scrims is opaque to avoid unnecessary GPU composition.
-            visibility -> scrimsVisible = visibility == ScrimController.OPAQUE
+            visibility ->
+            scrimsVisible = visibility == ScrimController.OPAQUE
         }
         shadeAnimation.setStiffness(SpringForce.STIFFNESS_LOW)
         shadeAnimation.setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
         updateResources()
-        configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
-            override fun onConfigChanged(newConfig: Configuration?) {
-                updateResources()
+        configurationController.addCallback(
+            object : ConfigurationController.ConfigurationListener {
+                override fun onConfigChanged(newConfig: Configuration?) {
+                    updateResources()
+                }
             }
-        })
+        )
     }
 
     private fun updateResources() {
@@ -341,15 +364,15 @@ class NotificationShadeDepthController @Inject constructor(
         listeners.remove(listener)
     }
 
-    /**
-     * Update blurs when pulling down the shade
-     */
+    /** Update blurs when pulling down the shade */
     override fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) {
         val rawFraction = event.fraction
         val tracking = event.tracking
         val timestamp = SystemClock.elapsedRealtimeNanos()
-        val expansion = MathUtils.saturate(
-                (rawFraction - panelPullDownMinFraction) / (1f - panelPullDownMinFraction))
+        val expansion =
+            MathUtils.saturate(
+                (rawFraction - panelPullDownMinFraction) / (1f - panelPullDownMinFraction)
+            )
 
         if (shadeExpansion == expansion && prevTracking == tracking) {
             prevTimestamp = timestamp
@@ -360,14 +383,14 @@ class NotificationShadeDepthController @Inject constructor(
         if (prevTimestamp < 0) {
             prevTimestamp = timestamp
         } else {
-            deltaTime = MathUtils.constrain(
-                    ((timestamp - prevTimestamp) / 1E9).toFloat(), 0.00001f, 1f)
+            deltaTime =
+                MathUtils.constrain(((timestamp - prevTimestamp) / 1E9).toFloat(), 0.00001f, 1f)
         }
 
         val diff = expansion - shadeExpansion
         val shadeDirection = sign(diff).toInt()
-        val shadeVelocity = MathUtils.constrain(
-            VELOCITY_SCALE * diff / deltaTime, MIN_VELOCITY, MAX_VELOCITY)
+        val shadeVelocity =
+            MathUtils.constrain(VELOCITY_SCALE * diff / deltaTime, MIN_VELOCITY, MAX_VELOCITY)
         updateShadeAnimationBlur(expansion, tracking, shadeVelocity, shadeDirection)
 
         prevShadeDirection = shadeDirection
@@ -383,7 +406,7 @@ class NotificationShadeDepthController @Inject constructor(
         expansion: Float,
         tracking: Boolean,
         velocity: Float,
-        direction: Int
+        direction: Int,
     ) {
         if (shouldApplyShadeBlur()) {
             if (expansion > 0f) {
@@ -432,11 +455,12 @@ class NotificationShadeDepthController @Inject constructor(
     private fun animateBlur(blur: Boolean, velocity: Float) {
         isBlurred = blur
 
-        val targetBlurNormalized = if (blur && shouldApplyShadeBlur()) {
-            1f
-        } else {
-            0f
-        }
+        val targetBlurNormalized =
+            if (blur && shouldApplyShadeBlur()) {
+                1f
+            } else {
+                0f
+            }
 
         shadeAnimation.setStartVelocity(velocity)
         shadeAnimation.animateTo(blurUtils.blurRadiusOfRatio(targetBlurNormalized).toInt())
@@ -453,13 +477,13 @@ class NotificationShadeDepthController @Inject constructor(
     }
 
     /**
-     * Should blur be applied to the shade currently. This is mainly used to make sure that
-     * on the lockscreen, the wallpaper isn't blurred.
+     * Should blur be applied to the shade currently. This is mainly used to make sure that on the
+     * lockscreen, the wallpaper isn't blurred.
      */
     private fun shouldApplyShadeBlur(): Boolean {
         val state = statusBarStateController.state
         return (state == StatusBarState.SHADE || state == StatusBarState.SHADE_LOCKED) &&
-                !keyguardStateController.isKeyguardFadingAway
+            !keyguardStateController.isKeyguardFadingAway
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
@@ -483,33 +507,30 @@ class NotificationShadeDepthController @Inject constructor(
      * invalidation.
      */
     inner class DepthAnimation() {
-        /**
-         * Blur radius visible on the UI, in pixels.
-         */
+        /** Blur radius visible on the UI, in pixels. */
         var radius = 0f
 
-        /**
-         * Depth ratio of the current blur radius.
-         */
+        /** Depth ratio of the current blur radius. */
         val ratio
             get() = blurUtils.ratioOfBlurRadius(radius)
 
-        /**
-         * Radius that we're animating to.
-         */
+        /** Radius that we're animating to. */
         private var pendingRadius = -1
 
-        private var springAnimation = SpringAnimation(this, object :
-                FloatPropertyCompat<DepthAnimation>("blurRadius") {
-            override fun setValue(rect: DepthAnimation?, value: Float) {
-                radius = value
-                scheduleUpdate()
-            }
+        private var springAnimation =
+            SpringAnimation(
+                this,
+                object : FloatPropertyCompat<DepthAnimation>("blurRadius") {
+                    override fun setValue(rect: DepthAnimation?, value: Float) {
+                        radius = value
+                        scheduleUpdate()
+                    }
 
-            override fun getValue(rect: DepthAnimation?): Float {
-                return radius
-            }
-        })
+                    override fun getValue(rect: DepthAnimation?): Float {
+                        return radius
+                    }
+                },
+            )
 
         init {
             springAnimation.spring = SpringForce(0.0f)
@@ -545,13 +566,9 @@ class NotificationShadeDepthController @Inject constructor(
         }
     }
 
-    /**
-     * Invoked when changes are needed in z-space
-     */
+    /** Invoked when changes are needed in z-space */
     interface DepthListener {
-        /**
-         * Current wallpaper zoom out, where 0 is the closest, and 1 the farthest
-         */
+        /** Current wallpaper zoom out, where 0 is the closest, and 1 the farthest */
         fun onWallpaperZoomOutChanged(zoomOut: Float)
 
         fun onBlurRadiusChanged(blurRadius: Int) {}

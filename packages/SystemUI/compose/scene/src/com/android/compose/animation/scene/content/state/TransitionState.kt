@@ -18,9 +18,11 @@ package com.android.compose.animation.scene.content.state
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import com.android.compose.animation.scene.ContentKey
@@ -33,8 +35,8 @@ import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransformationSpec
 import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
-import com.android.compose.animation.scene.transition.link.LinkedTransition
-import com.android.compose.animation.scene.transition.link.StateLink
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 /** The state associated to a [SceneTransitionLayout] at some specific point in time. */
@@ -88,6 +90,10 @@ sealed interface TransitionState {
                     // The set of overlays does not change in a [ChangeCurrentScene] transition.
                     return currentOverlaysWhenTransitionStarted
                 }
+
+            override fun toString(): String {
+                return "ChangeScene(fromScene=$fromScene, toScene=$toScene)"
+            }
         }
 
         /**
@@ -128,7 +134,7 @@ sealed interface TransitionState {
              * starting a swipe transition to show [overlay] and will be `true` only once the swipe
              * transition is committed.
              */
-            protected abstract val isEffectivelyShown: Boolean
+            abstract val isEffectivelyShown: Boolean
 
             init {
                 check(
@@ -143,6 +149,12 @@ sealed interface TransitionState {
                 } else {
                     currentOverlaysWhenTransitionStarted - overlay
                 }
+            }
+
+            override fun toString(): String {
+                val isShowing = overlay == toContent
+                return "ShowOrHideOverlay(overlay=$overlay, fromOrToScene=$fromOrToScene, " +
+                    "isShowing=$isShowing)"
             }
         }
 
@@ -163,7 +175,7 @@ sealed interface TransitionState {
              * [fromOverlay] by [toOverlay] and will [toOverlay] once the swipe transition is
              * committed.
              */
-            protected abstract val effectivelyShownOverlay: OverlayKey
+            abstract val effectivelyShownOverlay: OverlayKey
 
             init {
                 check(fromOverlay != toOverlay)
@@ -191,6 +203,10 @@ sealed interface TransitionState {
                     remove(exclude)
                     add(include)
                 }
+            }
+
+            override fun toString(): String {
+                return "ReplaceOverlay(fromOverlay=$fromOverlay, toOverlay=$toOverlay)"
             }
         }
 
@@ -249,18 +265,29 @@ sealed interface TransitionState {
         private var fromOverscrollSpec: OverscrollSpecImpl? = null
         private var toOverscrollSpec: OverscrollSpecImpl? = null
 
-        /** The current [OverscrollSpecImpl], if this transition is currently overscrolling. */
-        internal val currentOverscrollSpec: OverscrollSpecImpl?
-            get() {
-                if (this !is HasOverscrollProperties) return null
-                val progress = progress
-                val bouncingContent = bouncingContent
-                return when {
-                    progress < 0f || bouncingContent == fromContent -> fromOverscrollSpec
-                    progress > 1f || bouncingContent == toContent -> toOverscrollSpec
-                    else -> null
+        /**
+         * The current [OverscrollSpecImpl], if this transition is currently overscrolling.
+         *
+         * Note: This is backed by a State<OverscrollSpecImpl?> because the overscroll spec is
+         * derived from progress, and we don't want readers of currentOverscrollSpec to recompose
+         * every time progress is changed.
+         */
+        private val _currentOverscrollSpec: State<OverscrollSpecImpl?>? =
+            if (this !is HasOverscrollProperties) {
+                null
+            } else {
+                derivedStateOf {
+                    val progress = progress
+                    val bouncingContent = bouncingContent
+                    when {
+                        progress < 0f || bouncingContent == fromContent -> fromOverscrollSpec
+                        progress > 1f || bouncingContent == toContent -> toOverscrollSpec
+                        else -> null
+                    }
                 }
             }
+        internal val currentOverscrollSpec: OverscrollSpecImpl?
+            get() = _currentOverscrollSpec?.value
 
         /**
          * An animatable that animates from 1f to 0f. This will be used to nicely animate the sudden
@@ -268,8 +295,24 @@ sealed interface TransitionState {
          */
         private var interruptionDecay: Animatable<Float, AnimationVector1D>? = null
 
-        /** The map of active links that connects this transition to other transitions. */
-        internal val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
+        /**
+         * The coroutine scope associated to this transition.
+         *
+         * This coroutine scope can be used to launch animations associated to this transition,
+         * which will not finish until at least one animation/job is still running in the scope.
+         *
+         * Important: Make sure to never launch long-running jobs in this scope, otherwise the
+         * transition will never be considered as finished.
+         */
+        internal val coroutineScope: CoroutineScope
+            get() =
+                _coroutineScope
+                    ?: error(
+                        "Transition.coroutineScope can only be accessed once the transition was " +
+                            "started "
+                    )
+
+        private var _coroutineScope: CoroutineScope? = null
 
         init {
             check(fromContent != toContent)
@@ -299,8 +342,39 @@ sealed interface TransitionState {
             return fromContent == content || toContent == content
         }
 
+        /**
+         * Return [progress] if [content] is equal to [toContent], `1f - progress` if [content] is
+         * equal to [fromContent], and throw otherwise.
+         */
+        fun progressTo(content: ContentKey): Float {
+            return when (content) {
+                toContent -> progress
+                fromContent -> 1f - progress
+                else ->
+                    throw IllegalArgumentException(
+                        "content ($content) should be either toContent ($toContent) or " +
+                            "fromContent ($fromContent)"
+                    )
+            }
+        }
+
+        /** Whether [fromContent] is effectively the current content of the transition. */
+        internal fun isFromCurrentContent() = isCurrentContent(expectedFrom = true)
+
+        /** Whether [toContent] is effectively the current content of the transition. */
+        internal fun isToCurrentContent() = isCurrentContent(expectedFrom = false)
+
+        private fun isCurrentContent(expectedFrom: Boolean): Boolean {
+            val expectedContent = if (expectedFrom) fromContent else toContent
+            return when (this) {
+                is ChangeScene -> currentScene == expectedContent
+                is ReplaceOverlay -> effectivelyShownOverlay == expectedContent
+                is ShowOrHideOverlay -> isEffectivelyShown == (expectedContent == overlay)
+            }
+        }
+
         /** Run this transition and return once it is finished. */
-        abstract suspend fun run()
+        protected abstract suspend fun run()
 
         /**
          * Freeze this transition state so that neither [currentScene] nor [currentOverlays] will
@@ -312,6 +386,14 @@ sealed interface TransitionState {
          * This is called when this transition is interrupted (replaced) by another transition.
          */
         abstract fun freezeAndAnimateToCurrentState()
+
+        internal suspend fun runInternal() {
+            check(_coroutineScope == null) { "A Transition can be started only once." }
+            coroutineScope {
+                _coroutineScope = this
+                run()
+            }
+        }
 
         internal fun updateOverscrollSpecs(
             fromSpec: OverscrollSpecImpl?,
@@ -333,14 +415,10 @@ sealed interface TransitionState {
                     else -> null
                 } ?: return true
 
-            return specForCurrentScene.transformationSpec.transformations.isNotEmpty()
+            return specForCurrentScene.transformationSpec.transformationMatchers.isNotEmpty()
         }
 
         internal open fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {
-            if (!layoutImpl.state.enableInterruptions) {
-                return 0f
-            }
-
             if (replacedTransition != null) {
                 return replacedTransition.interruptionProgress(layoutImpl)
             }
@@ -352,7 +430,7 @@ sealed interface TransitionState {
                     val progressSpec =
                         spring(
                             stiffness = swipeSpec.stiffness,
-                            dampingRatio = swipeSpec.dampingRatio,
+                            dampingRatio = Spring.DampingRatioNoBouncy,
                             visibilityThreshold = ProgressVisibilityThreshold,
                         )
                     animatable.animateTo(0f, progressSpec)

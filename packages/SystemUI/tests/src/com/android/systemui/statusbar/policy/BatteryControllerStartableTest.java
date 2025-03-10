@@ -21,7 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -108,6 +108,6 @@ public class BatteryControllerStartableTest extends SysuiTestCase {
         mBatteryControllerStartable.start();
         mExecutor.runAllReady();
 
-        verifyZeroInteractions(mBroadcastDispatcher);
+        verifyNoMoreInteractions(mBroadcastDispatcher);
     }
 }

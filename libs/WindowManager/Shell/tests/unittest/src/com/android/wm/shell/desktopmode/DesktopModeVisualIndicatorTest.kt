@@ -17,8 +17,8 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
+import android.graphics.PointF
 import android.graphics.Rect
-import android.graphics.Region
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
 import androidx.test.filters.SmallTest
@@ -33,6 +33,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.kotlin.whenever
 
@@ -58,13 +59,15 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
         whenever(displayLayout.width()).thenReturn(DISPLAY_BOUNDS.width())
         whenever(displayLayout.height()).thenReturn(DISPLAY_BOUNDS.height())
         whenever(displayLayout.stableInsets()).thenReturn(STABLE_INSETS)
+        whenever(displayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
     }
 
     @Test
     fun testFullscreenRegionCalculation() {
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FULLSCREEN)
         var testRegion = visualIndicator.calculateFullscreenRegion(displayLayout, CAPTION_HEIGHT)
-        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, 2 * STABLE_INSETS.top))
+        assertThat(testRegion.bounds).isEqualTo(Rect(0, Short.MIN_VALUE.toInt(), 2400,
+            2 * STABLE_INSETS.top))
 
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FREEFORM)
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout, CAPTION_HEIGHT)
@@ -75,17 +78,19 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
         val toFullscreenWidth = displayLayout.width() * toFullscreenScale
         assertThat(testRegion.bounds).isEqualTo(Rect(
             (DISPLAY_BOUNDS.width() / 2f - toFullscreenWidth / 2f).toInt(),
-            -50,
+            Short.MIN_VALUE.toInt(),
             (DISPLAY_BOUNDS.width() / 2f + toFullscreenWidth / 2f).toInt(),
             transitionHeight))
 
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_SPLIT)
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout, CAPTION_HEIGHT)
-        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, 2 * STABLE_INSETS.top))
+        assertThat(testRegion.bounds).isEqualTo(Rect(0, Short.MIN_VALUE.toInt(), 2400,
+            2 * STABLE_INSETS.top))
 
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.DRAGGED_INTENT)
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout, CAPTION_HEIGHT)
-        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, transitionHeight))
+        assertThat(testRegion.bounds).isEqualTo(Rect(0, Short.MIN_VALUE.toInt(), 2400,
+            transitionHeight))
     }
 
     @Test
@@ -133,22 +138,19 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
     }
 
     @Test
-    fun testToDesktopRegionCalculation() {
+    fun testDefaultIndicators() {
         createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FULLSCREEN)
-        val fullscreenRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
-            CAPTION_HEIGHT)
-        val splitLeftRegion = visualIndicator.calculateSplitLeftRegion(displayLayout,
-            TRANSITION_AREA_WIDTH, CAPTION_HEIGHT)
-        val splitRightRegion = visualIndicator.calculateSplitRightRegion(displayLayout,
-            TRANSITION_AREA_WIDTH, CAPTION_HEIGHT)
-        val desktopRegion = visualIndicator.calculateToDesktopRegion(displayLayout,
-            splitLeftRegion, splitRightRegion, fullscreenRegion)
-        var testRegion = Region()
-        testRegion.union(DISPLAY_BOUNDS)
-        testRegion.op(splitLeftRegion, Region.Op.DIFFERENCE)
-        testRegion.op(splitRightRegion, Region.Op.DIFFERENCE)
-        testRegion.op(fullscreenRegion, Region.Op.DIFFERENCE)
-        assertThat(desktopRegion).isEqualTo(testRegion)
+        var result = visualIndicator.updateIndicatorType(PointF(-10000f, 500f))
+        assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR)
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_SPLIT)
+        result = visualIndicator.updateIndicatorType(PointF(10000f, 500f))
+        assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR)
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.DRAGGED_INTENT)
+        result = visualIndicator.updateIndicatorType(PointF(500f, 10000f))
+        assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
+        createVisualIndicator(DesktopModeVisualIndicator.DragStartState.FROM_FREEFORM)
+        result = visualIndicator.updateIndicatorType(PointF(500f, 10000f))
+        assertThat(result).isEqualTo(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
     }
 
     private fun createVisualIndicator(dragStartState: DesktopModeVisualIndicator.DragStartState) {

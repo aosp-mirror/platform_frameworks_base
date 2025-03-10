@@ -23,5 +23,6 @@ import com.android.systemui.statusbar.StatusBarIconView
 fun inCallModel(
     startTimeMs: Long,
     notificationIcon: StatusBarIconView? = null,
-    intent: PendingIntent? = null
-) = OngoingCallModel.InCall(startTimeMs, notificationIcon, intent)
+    intent: PendingIntent? = null,
+    notificationKey: String = "test",
+) = OngoingCallModel.InCall(startTimeMs, notificationIcon, intent, notificationKey)

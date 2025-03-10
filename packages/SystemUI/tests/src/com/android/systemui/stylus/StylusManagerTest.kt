@@ -47,7 +47,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 import org.mockito.quality.Strictness
 
@@ -176,7 +175,7 @@ class StylusManagerTest : SysuiTestCase() {
     fun startListener_hasStarted_doesNothing() {
         stylusManager.startListener()
 
-        verifyZeroInteractions(inputManager)
+        verifyNoMoreInteractions(inputManager)
     }
 
     @Test
@@ -194,7 +193,7 @@ class StylusManagerTest : SysuiTestCase() {
 
         stylusManager.onInputDeviceAdded(STYLUS_DEVICE_ID)
 
-        verifyZeroInteractions(stylusCallback)
+        verifyNoMoreInteractions(stylusCallback)
     }
 
     @Test
@@ -283,7 +282,7 @@ class StylusManagerTest : SysuiTestCase() {
 
         stylusManager.onInputDeviceChanged(STYLUS_DEVICE_ID)
 
-        verifyZeroInteractions(stylusCallback)
+        verifyNoMoreInteractions(stylusCallback)
     }
 
     @Test
@@ -357,7 +356,7 @@ class StylusManagerTest : SysuiTestCase() {
 
         stylusManager.onInputDeviceRemoved(STYLUS_DEVICE_ID)
 
-        verifyZeroInteractions(stylusCallback)
+        verifyNoMoreInteractions(stylusCallback)
     }
 
     @Test
@@ -566,7 +565,7 @@ class StylusManagerTest : SysuiTestCase() {
 
         stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
 
-        verifyZeroInteractions(uiEventLogger)
+        verifyNoMoreInteractions(uiEventLogger)
     }
 
     @Test
@@ -575,7 +574,7 @@ class StylusManagerTest : SysuiTestCase() {
 
         stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
 
-        verifyZeroInteractions(uiEventLogger)
+        verifyNoMoreInteractions(uiEventLogger)
     }
 
     @Test
@@ -631,7 +630,7 @@ class StylusManagerTest : SysuiTestCase() {
     fun onBatteryStateChanged_hasNotStarted_doesNothing() {
         stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
 
-        verifyZeroInteractions(inputManager)
+        verifyNoMoreInteractions(inputManager)
     }
 
     @Test

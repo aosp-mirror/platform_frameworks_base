@@ -70,16 +70,17 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
-import com.android.server.PinnerService;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.ReasonMapping;
 import com.android.server.art.model.ArtFlags;
 import com.android.server.art.model.DexoptParams;
 import com.android.server.art.model.DexoptResult;
+import com.android.server.pinner.PinnerService;
 import com.android.server.pm.PackageDexOptimizer.DexOptResult;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
+import com.android.server.pm.local.PackageManagerLocalImpl;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -95,6 +96,9 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -104,6 +108,11 @@ import java.util.function.Predicate;
 public final class DexOptHelper {
     private static final long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
 
+    @NonNull
+    private static final ThreadPoolExecutor sDexoptExecutor =
+            new ThreadPoolExecutor(1 /* corePoolSize */, 1 /* maximumPoolSize */,
+                    60 /* keepAliveTime */, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+
     private static boolean sArtManagerLocalIsInitialized = false;
 
     private final PackageManagerService mPm;
@@ -111,6 +120,11 @@ public final class DexOptHelper {
     // Start time for the boot dexopt in performPackageDexOptUpgradeIfNeeded when ART Service is
     // used, to make it available to the onDexoptDone callback.
     private volatile long mBootDexoptStartTime;
+
+    static {
+        // Recycle the thread if it's not used for `keepAliveTime`.
+        sDexoptExecutor.allowsCoreThreadTimeOut();
+    }
 
     DexOptHelper(PackageManagerService pm) {
         mPm = pm;
@@ -768,6 +782,40 @@ public final class DexOptHelper {
         }
     }
 
+    /** Same as above, but runs asynchronously. */
+    static CompletableFuture<Void> performDexoptIfNeededAsync(
+            InstallRequest installRequest, DexManager dexManager) {
+        if (!shouldCallArtService(installRequest)) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        return CompletableFuture.runAsync(
+                        () -> {
+                            try {
+                                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+                                DexoptOptions dexoptOptions =
+                                        getDexoptOptionsByInstallRequest(
+                                                installRequest, dexManager);
+                                // Don't fail application installs if the dexopt step fails.
+                                // TODO(b/393076925): Make this async in ART Service.
+                                DexoptResult dexOptResult =
+                                        DexOptHelper.dexoptPackageUsingArtService(
+                                                installRequest, dexoptOptions);
+                                installRequest.onDexoptFinished(dexOptResult);
+                            } finally {
+                                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                            }
+                        },
+                        sDexoptExecutor)
+                .exceptionally(
+                        (t) -> {
+                            // This should never happen. A normal dexopt failure should result
+                            // in a DexoptResult.DEXOPT_FAILED, not an exception.
+                            Slog.wtf(TAG, "Dexopt encountered a fatal error", t);
+                            return null;
+                        });
+    }
+
     /**
      * Use ArtService to perform dexopt by the given InstallRequest.
      */
@@ -776,10 +824,16 @@ public final class DexOptHelper {
         final PackageSetting ps = installRequest.getScannedPackageSetting();
         final String packageName = ps.getPackageName();
 
+        PackageSetting uncommittedPs = null;
+        if (Flags.improveInstallFreeze()) {
+            uncommittedPs = ps;
+        }
+
         PackageManagerLocal packageManagerLocal =
                 LocalManagerRegistry.getManager(PackageManagerLocal.class);
         try (PackageManagerLocal.FilteredSnapshot snapshot =
-                     packageManagerLocal.withFilteredSnapshot()) {
+                     PackageManagerLocalImpl.withFilteredSnapshot(packageManagerLocal,
+                uncommittedPs)) {
             boolean ignoreDexoptProfile =
                     (installRequest.getInstallFlags()
                             & PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE)

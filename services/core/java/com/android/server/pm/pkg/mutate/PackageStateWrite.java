@@ -46,6 +46,10 @@ public interface PackageStateWrite {
     @NonNull
     PackageStateWrite setCategoryOverride(@ApplicationInfo.Category int category);
 
+    /** set 16Kb App compat mode. @see ApplicationInfo.PageSizeAppCompatFlags */
+    @NonNull
+    PackageStateWrite setPageSizeAppCompatFlags(@ApplicationInfo.PageSizeAppCompatFlags int mode);
+
     @NonNull
     PackageStateWrite setUpdateAvailable(boolean updateAvailable);
 

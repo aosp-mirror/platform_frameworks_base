@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.transformation.Transformation
 import kotlin.math.tanh
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
@@ -75,7 +76,7 @@ interface SceneTransitionsBuilder {
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
-    ): TransitionSpec
+    )
 
     /**
      * Define the animation to be played when transitioning [from] the specified content. For the
@@ -101,7 +102,7 @@ interface SceneTransitionsBuilder {
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
-    ): TransitionSpec
+    )
 
     /**
      * Define the animation to be played when the [content] is overscrolled in the given
@@ -114,13 +115,13 @@ interface SceneTransitionsBuilder {
         content: ContentKey,
         orientation: Orientation,
         builder: OverscrollBuilder.() -> Unit,
-    ): OverscrollSpec
+    )
 
     /**
      * Prevents overscroll the [content] in the given [orientation], allowing ancestors to
      * eventually consume the remaining gesture.
      */
-    fun overscrollDisabled(content: ContentKey, orientation: Orientation): OverscrollSpec
+    fun overscrollDisabled(content: ContentKey, orientation: Orientation)
 }
 
 interface BaseTransitionBuilder : PropertyTransformationBuilder {
@@ -156,6 +157,9 @@ interface BaseTransitionBuilder : PropertyTransformationBuilder {
 
 @TransitionDsl
 interface TransitionBuilder : BaseTransitionBuilder {
+    /** The [TransitionState.Transition] for which we currently compute the transformations. */
+    val transition: TransitionState.Transition
+
     /**
      * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
      * the transition is triggered (i.e. it is not gesture-based).
@@ -201,8 +205,17 @@ interface TransitionBuilder : BaseTransitionBuilder {
      *
      * @param enabled whether the matched element(s) should actually be shared in this transition.
      *   Defaults to true.
+     * @param elevateInContent the content in which we should elevate the element when it is shared,
+     *   drawing above all other composables of that content. If `null` (the default), we will
+     *   simply draw this element in its original location. If not `null`, it has to be either the
+     *   [fromContent][TransitionState.Transition.fromContent] or
+     *   [toContent][TransitionState.Transition.toContent] of the transition.
      */
-    fun sharedElement(matcher: ElementMatcher, enabled: Boolean = true)
+    fun sharedElement(
+        matcher: ElementMatcher,
+        enabled: Boolean = true,
+        elevateInContent: ContentKey? = null,
+    )
 
     /**
      * Adds the transformations in [builder] but in reversed order. This allows you to partially
@@ -515,6 +528,9 @@ interface PropertyTransformationBuilder {
         anchorWidth: Boolean = true,
         anchorHeight: Boolean = true,
     )
+
+    /** Apply a [transformation] to the element(s) matching [matcher]. */
+    fun transformation(matcher: ElementMatcher, transformation: Transformation.Factory)
 }
 
 /** This converter lets you change a linear progress into a function of your choice. */

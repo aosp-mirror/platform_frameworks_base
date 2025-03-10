@@ -34,10 +34,14 @@ oneway interface INotificationListener
     void onListenerConnected(in NotificationRankingUpdate update);
     void onNotificationPosted(in IStatusBarNotificationHolder notificationHolder,
             in NotificationRankingUpdate update);
+    void onNotificationPostedFull(in StatusBarNotification sbn,
+            in NotificationRankingUpdate update);
     void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons);
     // stats only for assistant
     void onNotificationRemoved(in IStatusBarNotificationHolder notificationHolder,
             in NotificationRankingUpdate update, in NotificationStats stats, int reason);
+    void onNotificationRemovedFull(in StatusBarNotification sbn,
+                in NotificationRankingUpdate update, in NotificationStats stats, int reason);
     void onNotificationRankingUpdate(in NotificationRankingUpdate update);
     void onListenerHintsChanged(int hints);
     void onInterruptionFilterChanged(int interruptionFilter);
@@ -48,7 +52,9 @@ oneway interface INotificationListener
 
     // assistants only
     void onNotificationEnqueuedWithChannel(in IStatusBarNotificationHolder notificationHolder, in NotificationChannel channel, in NotificationRankingUpdate update);
+    void onNotificationEnqueuedWithChannelFull(in StatusBarNotification sbn, in NotificationChannel channel, in NotificationRankingUpdate update);
     void onNotificationSnoozedUntilContext(in IStatusBarNotificationHolder notificationHolder, String snoozeCriterionId);
+    void onNotificationSnoozedUntilContextFull(in StatusBarNotification sbn, String snoozeCriterionId);
     void onNotificationsSeen(in List<String> keys);
     void onPanelRevealed(int items);
     void onPanelHidden();
@@ -58,7 +64,6 @@ oneway interface INotificationListener
     void onSuggestedReplySent(String key, in CharSequence reply, int source);
     void onActionClicked(String key, in Notification.Action action, int source);
     void onNotificationClicked(String key);
-    // @deprecated changing allowed adjustments is no longer supported.
     void onAllowedAdjustmentsChanged();
     void onNotificationFeedbackReceived(String key, in NotificationRankingUpdate update, in Bundle feedback);
 }

@@ -15,9 +15,7 @@
  */
 package com.android.systemui.shade.data.repository
 
-import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -182,8 +180,7 @@ interface ShadeRepository {
 
 /** Business logic for shade interactions */
 @SysUISingleton
-class ShadeRepositoryImpl @Inject constructor(@Application applicationContext: Context) :
-    ShadeRepository {
+class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     private val _qsExpansion = MutableStateFlow(0f)
     @Deprecated("Use ShadeInteractor.qsExpansion instead")
     override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()

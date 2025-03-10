@@ -31,6 +31,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 
@@ -142,10 +144,13 @@ public final class RadioManagerTest {
             new ProgramSelector.Identifier[]{}, /* vendorIds= */ null);
 
     private static final RadioMetadata METADATA = createMetadata();
+    private static final RadioAlert HD_ALERT = createRadioAlert();
     private static final RadioManager.ProgramInfo DAB_PROGRAM_INFO =
             createDabProgramInfo(DAB_SELECTOR);
     private static final RadioManager.ProgramInfo HD_PROGRAM_INFO = createHdProgramInfo(
-            HD_SELECTOR);
+            HD_SELECTOR, /* alert= */ null);
+    private static final RadioManager.ProgramInfo HD_PROGRAM_INFO_WITH_ALERT = createHdProgramInfo(
+            HD_SELECTOR, HD_ALERT);
 
     private static final int EVENT_ANNOUNCEMENT_TYPE = Announcement.TYPE_EVENT;
     private static final List<Announcement> TEST_ANNOUNCEMENT_LIST = Arrays.asList(
@@ -1163,6 +1168,20 @@ public final class RadioManagerTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void getAlert() {
+        mExpect.withMessage("Alert in HD program info")
+                .that(HD_PROGRAM_INFO_WITH_ALERT.getAlert()).isEqualTo(HD_ALERT);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void getAlert_withNullAlert() {
+        mExpect.withMessage("Null alert in HD program info")
+                .that(HD_PROGRAM_INFO.getAlert()).isNull();
+    }
+
+    @Test
     public void describeContents_forProgramInfo() {
         mExpect.withMessage("Program info contents")
                 .that(DAB_PROGRAM_INFO.describeContents()).isEqualTo(0);
@@ -1190,6 +1209,69 @@ public final class RadioManagerTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void equals_forProgramInfoWithAlertAndFlagDisabled() {
+        mExpect.withMessage("Program info with alert and flag disabled")
+                .that(HD_PROGRAM_INFO_WITH_ALERT).isEqualTo(HD_PROGRAM_INFO);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void equals_forProgramInfoWithAlertAndFlagEnabled() {
+        RadioManager.ProgramInfo sameProgramInfoWithAlert = createHdProgramInfo(HD_SELECTOR,
+                HD_ALERT);
+
+        mExpect.withMessage("Program info with alert and flag enabled")
+                .that(HD_PROGRAM_INFO_WITH_ALERT).isEqualTo(sameProgramInfoWithAlert);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void hashcode_forProgramInfoWithAlertAndFlagDisabled() {
+        mExpect.withMessage("Hash code of program info with alert and flag disabled")
+                .that(HD_PROGRAM_INFO_WITH_ALERT.hashCode()).isEqualTo(HD_PROGRAM_INFO.hashCode());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void hashcode_forProgramInfoWithAlertAndFlagEnabled() {
+        RadioManager.ProgramInfo sameProgramInfoWithAlert = createHdProgramInfo(HD_SELECTOR,
+                HD_ALERT);
+
+        mExpect.withMessage("Hash code of program info with alert and flag enabled")
+                .that(HD_PROGRAM_INFO_WITH_ALERT.hashCode())
+                .isEqualTo(sameProgramInfoWithAlert.hashCode());
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void writeToParcel_forProgramInfoWithAlertAndFlagDisabled() {
+        Parcel parcel = Parcel.obtain();
+
+        HD_PROGRAM_INFO_WITH_ALERT.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.ProgramInfo programInfoFromParcel =
+                RadioManager.ProgramInfo.CREATOR.createFromParcel(parcel);
+        mExpect.withMessage("Program info created from parcel with alert and flag disabled")
+                .that(programInfoFromParcel).isEqualTo(HD_PROGRAM_INFO);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void writeToParcel_forProgramInfoWithAlertAndFlagEnabled() {
+        Parcel parcel = Parcel.obtain();
+
+        HD_PROGRAM_INFO_WITH_ALERT.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.ProgramInfo programInfoFromParcel =
+                RadioManager.ProgramInfo.CREATOR.createFromParcel(parcel);
+        mExpect.withMessage("Program info created from parcel with alert and flag enabled")
+                .that(programInfoFromParcel).isEqualTo(HD_PROGRAM_INFO_WITH_ALERT);
+    }
+
+    @Test
     public void equals_withSameProgramInfo_returnsTrue() {
         RadioManager.ProgramInfo dabProgramInfoCompared = createDabProgramInfo(DAB_SELECTOR);
 
@@ -1207,6 +1289,13 @@ public final class RadioManagerTest {
 
         mExpect.withMessage("Program info with different secondary id selectors")
                 .that(DAB_PROGRAM_INFO).isNotEqualTo(dabProgramInfoCompared);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void equals_withDifferentAlert_returnsFalse() {
+        mExpect.withMessage("Program info with different alerts")
+                .that(HD_PROGRAM_INFO).isNotEqualTo(HD_PROGRAM_INFO_WITH_ALERT);
     }
 
     @Test
@@ -1399,19 +1488,31 @@ public final class RadioManagerTest {
         return metadataBuilder.putString(RadioMetadata.METADATA_KEY_ARTIST, "artistTest").build();
     }
 
+    private static RadioAlert createRadioAlert() {
+        RadioAlert.AlertArea alertArea = new RadioAlert.AlertArea(new ArrayList<>(),
+                List.of(new RadioAlert.Geocode("SAME", "006109")));
+        RadioAlert.AlertInfo alertInfo = new RadioAlert.AlertInfo(
+                new int[]{RadioAlert.CATEGORY_FIRE}, RadioAlert.URGENCY_EXPECTED,
+                RadioAlert.SEVERITY_MODERATE, RadioAlert.CERTAINTY_OBSERVED,
+                "alert description", List.of(alertArea), "en-US");
+        return new RadioAlert(RadioAlert.STATUS_ACTUAL, RadioAlert.MESSAGE_TYPE_ALERT,
+                List.of(alertInfo));
+    }
+
     private static RadioManager.ProgramInfo createDabProgramInfo(ProgramSelector selector) {
         return new RadioManager.ProgramInfo(selector, selector.getPrimaryId(),
                 DAB_FREQUENCY_IDENTIFIER, Arrays.asList(DAB_SID_EXT_IDENTIFIER_RELATED),
                 INFO_FLAGS_DAB, SIGNAL_QUALITY, METADATA, /* vendorInfo= */ null);
     }
 
-    private static RadioManager.ProgramInfo createHdProgramInfo(ProgramSelector selector) {
+    private static RadioManager.ProgramInfo createHdProgramInfo(ProgramSelector selector,
+            RadioAlert alert) {
         long frequency = (selector.getPrimaryId().getValue() >> 32);
         ProgramSelector.Identifier physicallyTunedToId = new ProgramSelector.Identifier(
                 ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, frequency);
         return new RadioManager.ProgramInfo(selector, selector.getPrimaryId(), physicallyTunedToId,
                 Collections.emptyList(), INFO_FLAGS_HD, SIGNAL_QUALITY, METADATA,
-                /* vendorInfo= */ null);
+                /* vendorInfo= */ null, alert);
     }
 
     private void createRadioManager() throws RemoteException {

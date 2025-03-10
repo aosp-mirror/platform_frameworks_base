@@ -18,7 +18,7 @@ package com.android.systemui.util.kotlin
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Runs the given [blocks] in parallel, returning the result of the first one to complete, and

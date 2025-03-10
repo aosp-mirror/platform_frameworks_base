@@ -85,8 +85,8 @@ class QSTileViewModelImplTest : SysuiTestCase() {
                     object : QSTileDataToStateMapper<Any> {
                         override fun map(config: QSTileConfig, data: Any): QSTileState =
                             QSTileState.build(
-                                { Icon.Resource(0, ContentDescription.Resource(0)) },
-                                data.toString()
+                                Icon.Resource(0, ContentDescription.Resource(0)),
+                                data.toString(),
                             ) {}
                     }
                 },
@@ -116,7 +116,7 @@ class QSTileViewModelImplTest : SysuiTestCase() {
                 .isEqualTo(
                     "test_spec:\n" +
                         "    QSTileState(" +
-                        "icon=() -> com.android.systemui.common.shared.model.Icon?, " +
+                        "icon=Resource(res=0, contentDescription=Resource(res=0)), " +
                         "iconRes=null, " +
                         "label=test_data, " +
                         "activationState=INACTIVE, " +

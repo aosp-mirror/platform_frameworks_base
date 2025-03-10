@@ -221,12 +221,63 @@ public final class XmlReader {
         if (parser.getAttributeIndex(NAMESPACE, attrName) < 0) {
             return defaultValue;
         }
+
+        return readAttributeFloatInRange(parser, attrName, lowerInclusive, upperInclusive);
+    }
+
+    /**
+     * Read attribute from current tag as a float within given inclusive range.
+     */
+    public static float readAttributeFloatInRange(
+            TypedXmlPullParser parser, String attrName, float lowerInclusive,
+            float upperInclusive) throws XmlParserException {
         String tagName = parser.getName();
         float value = readAttributeFloat(parser, attrName);
 
         XmlValidator.checkParserCondition(value >= lowerInclusive && value <= upperInclusive,
-                "Unexpected %s = %f in tag %s, expected %s in [%f, %f]",
-                attrName, value, tagName, attrName, lowerInclusive, upperInclusive);
+                "Unexpected %s = %f in tag %s, expected %s in [%f, %f]", attrName, value, tagName,
+                attrName, lowerInclusive, upperInclusive);
+        return value;
+    }
+
+    /**
+     * Read attribute from current tag as a positive float, returning default value if attribute
+     * is missing.
+     */
+    public static float readAttributePositiveFloat(TypedXmlPullParser parser, String attrName,
+            float defaultValue) throws XmlParserException {
+        if (parser.getAttributeIndex(NAMESPACE, attrName) < 0) {
+            return defaultValue;
+        }
+
+        return readAttributePositiveFloat(parser, attrName);
+    }
+
+    /**
+     * Read attribute from current tag as a positive float.
+     */
+    public static float readAttributePositiveFloat(TypedXmlPullParser parser, String attrName)
+            throws XmlParserException {
+        String tagName = parser.getName();
+        float value = readAttributeFloat(parser, attrName);
+
+        XmlValidator.checkParserCondition(value > 0,
+                "Unexpected %s = %d in tag %s, expected %s > 0", attrName, value, tagName,
+                attrName);
+        return value;
+    }
+
+    /**
+     * Read attribute from current tag as a positive long.
+     */
+    public static long readAttributePositiveLong(TypedXmlPullParser parser, String attrName)
+            throws XmlParserException {
+        String tagName = parser.getName();
+        long value = readAttributeLong(parser, attrName);
+
+        XmlValidator.checkParserCondition(value > 0,
+                "Unexpected %s = %d in tag %s, expected %s > 0", attrName, value, tagName,
+                attrName);
         return value;
     }
 
@@ -246,6 +297,17 @@ public final class XmlReader {
         String tagName = parser.getName();
         try {
             return parser.getAttributeFloat(NAMESPACE, attrName);
+        } catch (XmlPullParserException e) {
+            String rawValue = parser.getAttributeValue(NAMESPACE, attrName);
+            throw XmlParserException.createFromPullParserException(tagName, attrName, rawValue, e);
+        }
+    }
+
+    private static long readAttributeLong(TypedXmlPullParser parser, String attrName)
+            throws XmlParserException {
+        String tagName = parser.getName();
+        try {
+            return parser.getAttributeLong(NAMESPACE, attrName);
         } catch (XmlPullParserException e) {
             String rawValue = parser.getAttributeValue(NAMESPACE, attrName);
             throw XmlParserException.createFromPullParserException(tagName, attrName, rawValue, e);

@@ -225,6 +225,40 @@ class NestedScrollToSceneTest {
     }
 
     @Test
+    fun stlNotConsumeUnobservedGesture() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(SceneA, transitions = EmptyTestTransitions)
+            }
+
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(
+                state = state,
+                modifier = Modifier.size(layoutWidth, layoutHeight),
+            ) {
+                scene(SceneA) {
+                    Spacer(
+                        Modifier.verticalNestedScrollToScene()
+                            // This scrollable will not consume the gesture.
+                            .scrollable(rememberScrollableState { 0f }, Vertical)
+                            .fillMaxSize()
+                    )
+                }
+            }
+        }
+
+        rule.onRoot().performTouchInput {
+            down(Offset.Zero)
+            // There is no vertical scene.
+            moveBy(Offset(0f, layoutWidth.toPx()), delayMillis = 1_000)
+        }
+
+        rule.waitForIdle()
+        assertThat(state.transitionState).isIdle()
+    }
+
+    @Test
     fun customizeStlNestedScrollBehavior_multipleRequests() {
         var canScroll = true
         val state = setup2ScenesAndScrollTouchSlop {

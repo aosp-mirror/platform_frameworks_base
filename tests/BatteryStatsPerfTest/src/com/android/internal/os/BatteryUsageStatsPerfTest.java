@@ -159,7 +159,7 @@ public class BatteryUsageStatsPerfTest {
 
     private static BatteryUsageStats buildBatteryUsageStats() {
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, false, false, false, 0)
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, false, false, false, 0)
                         .setBatteryCapacity(4000)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
@@ -168,32 +168,27 @@ public class BatteryUsageStatsPerfTest {
 
         builder.getAggregateBatteryConsumerBuilder(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
-                .setConsumedPower(123)
-                .setConsumedPower(
-                        BatteryConsumer.POWER_COMPONENT_CPU, 10100)
-                .setConsumedPower(
-                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10200)
-                .setUsageDurationMillis(
-                        BatteryConsumer.POWER_COMPONENT_CPU, 10300)
-                .setUsageDurationMillis(
-                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10400);
+                .addConsumedPower(123)
+                .addConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 10100)
+                .addConsumedPower(BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10200)
+                .addUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CPU, 10300)
+                .addUsageDurationMillis(BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10400);
 
         for (int i = 0; i < 1000; i++) {
             final UidBatteryConsumer.Builder consumerBuilder =
                     builder.getOrCreateUidBatteryConsumerBuilder(i)
                             .setPackageWithHighestDrain("example.packagename" + i)
-                            .setTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND, i * 2000)
-                            .setTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND, i * 1000);
+                            .setTimeInProcessStateMs(UidBatteryConsumer.STATE_FOREGROUND, i * 2000)
+                            .setTimeInProcessStateMs(UidBatteryConsumer.STATE_BACKGROUND, i * 1000);
             for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
                     componentId++) {
-                consumerBuilder.setConsumedPower(componentId, componentId * 123.0,
-                        BatteryConsumer.POWER_MODEL_POWER_PROFILE);
-                consumerBuilder.setUsageDurationMillis(componentId, componentId * 1000);
+                consumerBuilder.addConsumedPower(componentId, componentId * 123.0);
+                consumerBuilder.addUsageDurationMillis(componentId, componentId * 1000);
             }
 
             consumerBuilder
-                    .setConsumedPower(BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 1234)
-                    .setUsageDurationMillis(BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 4321);
+                    .addConsumedPower(BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 1234)
+                    .addUsageDurationMillis(BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 4321);
         }
         return builder.build();
     }

@@ -16,7 +16,7 @@
 package com.android.systemui.util.kotlin
 
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.async
+import com.android.app.tracing.coroutines.asyncTraced as async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 

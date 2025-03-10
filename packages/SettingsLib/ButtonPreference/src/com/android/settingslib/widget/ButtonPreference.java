@@ -32,10 +32,43 @@ import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.widget.preference.button.R;
 
+import com.google.android.material.button.MaterialButton;
+
 /**
  * A preference handled a button
  */
-public class ButtonPreference extends Preference {
+public class ButtonPreference extends Preference implements GroupSectionDividerMixin {
+
+    enum ButtonStyle {
+        FILLED_NORMAL(0, 0, R.layout.settingslib_expressive_button_filled),
+        FILLED_LARGE(0, 1, R.layout.settingslib_expressive_button_filled_large),
+        FILLED_EXTRA(0, 2, R.layout.settingslib_expressive_button_filled_extra),
+        TONAL_NORMAL(1, 0, R.layout.settingslib_expressive_button_tonal),
+        TONAL_LARGE(1, 1, R.layout.settingslib_expressive_button_tonal_large),
+        TONAL_EXTRA(1, 2, R.layout.settingslib_expressive_button_tonal_extra),
+        OUTLINE_NORMAL(2, 0, R.layout.settingslib_expressive_button_outline),
+        OUTLINE_LARGE(2, 1, R.layout.settingslib_expressive_button_outline_large),
+        OUTLINE_EXTRA(2, 2, R.layout.settingslib_expressive_button_outline_extra);
+
+        private final int mType;
+        private final int mSize;
+        private final int mLayoutId;
+
+        ButtonStyle(int type, int size, int layoutId) {
+            this.mType = type;
+            this.mSize = size;
+            this.mLayoutId = layoutId;
+        }
+
+        static int getLayoutId(int type, int size) {
+            for (ButtonStyle style : values()) {
+                if (style.mType == type && style.mSize == size) {
+                    return style.mLayoutId;
+                }
+            }
+            throw new IllegalArgumentException();
+        }
+    }
 
     private static final int ICON_SIZE = 24;
 
@@ -86,7 +119,7 @@ public class ButtonPreference extends Preference {
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
-        setLayoutResource(R.layout.settingslib_button_layout);
+        int resId = R.layout.settingslib_button_layout;
 
         if (attrs != null) {
             TypedArray a = context.obtainStyledAttributes(attrs,
@@ -102,8 +135,16 @@ public class ButtonPreference extends Preference {
                     R.styleable.ButtonPreference, defStyleAttr,
                     0 /*defStyleRes*/);
             mGravity = a.getInt(R.styleable.ButtonPreference_android_gravity, Gravity.START);
+
+            if (SettingsThemeHelper.isExpressiveTheme(context)) {
+                int type = a.getInt(R.styleable.ButtonPreference_buttonPreferenceType, 0);
+                int size = a.getInt(R.styleable.ButtonPreference_buttonPreferenceSize, 0);
+                resId = ButtonStyle.getLayoutId(type, size);
+            }
             a.recycle();
         }
+
+        setLayoutResource(resId);
     }
 
     @Override
@@ -144,14 +185,20 @@ public class ButtonPreference extends Preference {
         if (mButton == null || icon == null) {
             return;
         }
-        //get pixel from dp
-        int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ICON_SIZE,
-                getContext().getResources().getDisplayMetrics());
-        icon.setBounds(0, 0, size, size);
 
-        //set drawableStart
-        mButton.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null/* top */, null/* end */,
-                null/* bottom */);
+        if (mButton instanceof MaterialButton) {
+            ((MaterialButton) mButton).setIcon(icon);
+        } else {
+            //get pixel from dp
+            int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ICON_SIZE,
+                    getContext().getResources().getDisplayMetrics());
+            icon.setBounds(0, 0, size, size);
+
+            //set drawableStart
+            mButton.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null/* top */,
+                    null/* end */,
+                    null/* bottom */);
+        }
     }
 
     @Override

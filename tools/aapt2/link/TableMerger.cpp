@@ -207,14 +207,13 @@ static ResourceTable::CollisionResult MergeConfigValue(
   Value* dst_value = dst_config_value->value.get();
   Value* src_value = src_config_value->value.get();
 
-  CollisionResult collision_result;
-  if (overlay) {
-    collision_result =
-        ResolveMergeCollision(override_styles_instead_of_overlaying, dst_value, src_value, pool);
-  } else {
-    collision_result =
-        ResourceTable::ResolveFlagCollision(dst_value->GetFlagStatus(), src_value->GetFlagStatus());
-    if (collision_result == CollisionResult::kConflict) {
+  CollisionResult collision_result =
+      ResourceTable::ResolveFlagCollision(dst_value->GetFlagStatus(), src_value->GetFlagStatus());
+  if (collision_result == CollisionResult::kConflict) {
+    if (overlay) {
+      collision_result =
+          ResolveMergeCollision(override_styles_instead_of_overlaying, dst_value, src_value, pool);
+    } else {
       collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value);
     }
   }
@@ -321,6 +320,30 @@ bool TableMerger::DoMerge(const android::Source& src, ResourceTablePackage* src_
           }
         }
       }
+
+      // disabled values
+      for (auto& src_config_value : src_entry->flag_disabled_values) {
+        auto dst_config_value = dst_entry->FindOrCreateFlagDisabledValue(
+            src_config_value->value->GetFlag().value(), src_config_value->config,
+            src_config_value->product);
+        if (!dst_config_value->value) {
+          // Resource does not exist, add it now.
+          // Must clone the value since it might be in the values vector as well
+          CloningValueTransformer cloner(&main_table_->string_pool);
+          dst_config_value->value = src_config_value->value->Transform(cloner);
+        } else {
+          error = true;
+          context_->GetDiagnostics()->Error(
+              android::DiagMessage(src_config_value->value->GetSource())
+              << "duplicate value for resource '" << src_entry->name << "' " << "with config '"
+              << src_config_value->config << "' and flag '"
+              << (src_config_value->value->GetFlag()->negated ? "!" : "")
+              << src_config_value->value->GetFlag()->name << "'");
+          context_->GetDiagnostics()->Note(
+              android::DiagMessage(dst_config_value->value->GetSource())
+              << "resource previously defined here");
+        }
+      }
     }
   }
   return !error;
@@ -353,6 +376,8 @@ bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFi
   file_ref->SetSource(file_desc.source);
   file_ref->type = file_desc.type;
   file_ref->file = file;
+  file_ref->SetFlagStatus(file_desc.flag_status);
+  file_ref->SetFlag(file_desc.flag);
 
   ResourceTablePackage* pkg = table.FindOrCreatePackage(file_desc.name.package);
   pkg->FindOrCreateType(file_desc.name.type)

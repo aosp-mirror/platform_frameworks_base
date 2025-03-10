@@ -23,6 +23,7 @@ import android.hardware.face.FaceManager
 import android.os.PowerManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.provider.Settings
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -32,6 +33,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.uiEventLoggerFake
 import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.keyguard.AuthInteractionProperties
+import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
@@ -42,6 +44,7 @@ import com.android.systemui.biometrics.data.repository.fingerprintPropertyReposi
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.classifier.FalsingCollector
@@ -52,12 +55,15 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.haptics.msdl.fakeMSDLPlayer
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyevent.data.repository.fakeKeyEventRepository
+import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
@@ -68,14 +74,16 @@ import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.dismissCallbackRegistry
+import com.android.systemui.keyguard.domain.interactor.dozeInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.scenetransition.lockscreenSceneTransitionInteractor
-import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
-import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runCurrent
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.data.repository.fakePowerRepository
@@ -96,6 +104,8 @@ import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
@@ -107,11 +117,13 @@ import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvision
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -128,6 +140,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -137,6 +150,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val deviceEntryHapticsInteractor by lazy { kosmos.deviceEntryHapticsInteractor }
+    private val dozeInteractor by lazy { kosmos.dozeInteractor }
+    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val sceneBackInteractor by lazy { kosmos.sceneBackInteractor }
     private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
@@ -159,7 +174,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
+        whenever(kosmos.keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean()))
+            .thenReturn(true)
         underTest = kosmos.sceneContainerStartable
     }
 
@@ -366,6 +382,64 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    fun hydrateVisibility_whileDreaming() =
+        testScope.runTest {
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
+
+            // GIVEN the device is dreaming
+            val transitionState =
+                prepareState(isDeviceUnlocked = false, initialSceneKey = Scenes.Dream)
+            underTest.start()
+            assertThat(isVisible).isFalse()
+        }
+
+    @Test
+    fun hydrateVisibility_onCommunalWhileOccluded() =
+        testScope.runTest {
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
+
+            kosmos.keyguardOcclusionInteractor.setWmNotifiedShowWhenLockedActivityOnTop(
+                true,
+                mock(),
+            )
+            prepareState(isDeviceUnlocked = false, initialSceneKey = Scenes.Communal)
+            underTest.start()
+            runCurrent()
+            assertThat(isVisible).isTrue()
+        }
+
+    @Test
+    fun hydrateVisibility_inCommunalTransition() =
+        testScope.runTest {
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
+
+            // GIVEN the device is dreaming
+            val transitionState =
+                prepareState(
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Dream,
+                )
+            underTest.start()
+            assertThat(isVisible).isFalse()
+
+            // WHEN a transition starts to the communal hub
+            sceneInteractor.changeScene(Scenes.Dream, "switching to dream for test")
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Dream,
+                    toScene = Scenes.Communal,
+                    currentScene = flowOf(Scenes.Dream),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+            // THEN scenes are visible
+            assertThat(isVisible).isTrue()
+        }
+
+    @Test
     fun startsInLockscreenScene() =
         testScope.runTest {
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
@@ -405,10 +479,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(Scenes.Bouncer)
             underTest.start()
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
-
+            updateFingerprintAuthStatus(isSuccess = true)
             assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
@@ -430,10 +501,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
             underTest.start()
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
-
+            updateFingerprintAuthStatus(isSuccess = true)
             assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
             assertThat(alternateBouncerVisible).isFalse()
         }
@@ -464,9 +532,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
             assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
+            updateFingerprintAuthStatus(isSuccess = true)
             runCurrent()
 
             assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
@@ -501,10 +567,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(Scenes.Bouncer)
             assertThat(backStack?.asIterable()?.last()).isEqualTo(Scenes.Lockscreen)
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
-
+            updateFingerprintAuthStatus(isSuccess = true)
             assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
             assertThat(backStack?.asIterable()?.last()).isEqualTo(Scenes.Gone)
         }
@@ -535,10 +598,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
             assertThat(currentSceneKey).isEqualTo(Scenes.Bouncer)
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
-
+            updateFingerprintAuthStatus(isSuccess = true)
             assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
@@ -554,10 +614,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
             underTest.start()
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
-
+            updateFingerprintAuthStatus(isSuccess = true)
             assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
@@ -592,9 +649,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             transitionStateFlowValue.value = ObservableTransitionState.Idle(Scenes.Shade)
             assertThat(currentSceneKey).isEqualTo(Scenes.Shade)
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
+            updateFingerprintAuthStatus(isSuccess = true)
             runCurrent()
 
             assertThat(currentSceneKey).isEqualTo(Scenes.Shade)
@@ -651,10 +706,11 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_TRANSITION_RACE_CONDITION)
     fun switchToAOD_whenAvailable_whenDeviceSleepsLocked() =
         testScope.runTest {
             kosmos.lockscreenSceneTransitionInteractor.start()
-            val asleepState by collectLastValue(kosmos.keyguardInteractor.asleepKeyguardState)
+            val asleepState by collectLastValue(keyguardInteractor.asleepKeyguardState)
             val currentTransitionInfo by
                 collectLastValue(kosmos.keyguardTransitionRepository.currentTransitionInfoInternal)
             val transitionState =
@@ -680,10 +736,11 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_TRANSITION_RACE_CONDITION)
     fun switchToDozing_whenAodUnavailable_whenDeviceSleepsLocked() =
         testScope.runTest {
             kosmos.lockscreenSceneTransitionInteractor.start()
-            val asleepState by collectLastValue(kosmos.keyguardInteractor.asleepKeyguardState)
+            val asleepState by collectLastValue(keyguardInteractor.asleepKeyguardState)
             val currentTransitionInfo by
                 collectLastValue(kosmos.keyguardTransitionRepository.currentTransitionInfoInternal)
             val transitionState =
@@ -698,6 +755,56 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(currentTransitionInfo?.to).isEqualTo(KeyguardState.DOZING)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_TRANSITION_RACE_CONDITION)
+    fun switchToAOD_whenAvailable_whenDeviceSleepsLocked_transitionFlagEnabled() =
+        testScope.runTest {
+            kosmos.lockscreenSceneTransitionInteractor.start()
+            val asleepState by collectLastValue(kosmos.keyguardInteractor.asleepKeyguardState)
+            val transitionState =
+                prepareState(isDeviceUnlocked = false, initialSceneKey = Scenes.Shade)
+            kosmos.keyguardRepository.setAodAvailable(true)
+            runCurrent()
+            assertThat(asleepState).isEqualTo(KeyguardState.AOD)
+            underTest.start()
+            powerInteractor.setAsleepForTest()
+            runCurrent()
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Shade,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Lockscreen),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+
+            assertThat(kosmos.keyguardTransitionRepository.currentTransitionInfo.to)
+                .isEqualTo(KeyguardState.AOD)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_TRANSITION_RACE_CONDITION)
+    fun switchToDozing_whenAodUnavailable_whenDeviceSleepsLocked_transitionFlagEnabled() =
+        testScope.runTest {
+            kosmos.lockscreenSceneTransitionInteractor.start()
+            val asleepState by collectLastValue(kosmos.keyguardInteractor.asleepKeyguardState)
+            val transitionState =
+                prepareState(isDeviceUnlocked = false, initialSceneKey = Scenes.Shade)
+            kosmos.keyguardRepository.setAodAvailable(false)
+            runCurrent()
+            assertThat(asleepState).isEqualTo(KeyguardState.DOZING)
+            underTest.start()
+            powerInteractor.setAsleepForTest()
+            runCurrent()
+            transitionState.value = Transition(from = Scenes.Shade, to = Scenes.Lockscreen)
+            runCurrent()
+
+            assertThat(kosmos.keyguardTransitionRepository.currentTransitionInfo.to)
+                .isEqualTo(KeyguardState.DOZING)
         }
 
     @Test
@@ -719,7 +826,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.POWER_BUTTON,
                 powerButtonLaunchGestureTriggered = false,
             )
-            transitionStateFlow.value = Transition(from = Scenes.Shade, to = Scenes.Lockscreen)
+            transitionStateFlow.value = Transition(from = Scenes.Gone, to = Scenes.Lockscreen)
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
 
             kosmos.fakePowerRepository.updateWakefulness(
@@ -734,6 +841,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun playSuccessHaptics_onSuccessfulLockscreenAuth_udfps() =
         testScope.runTest {
+            whenever(kosmos.keyguardUpdateMonitor.isDeviceInteractive).thenReturn(true)
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             val playSuccessHaptic by
                 collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
@@ -743,24 +851,19 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
 
             underTest.start()
-            unlockWithFingerprintAuth()
+            // unlock with fingerprint
+            updateFingerprintAuthStatus(isSuccess = true)
 
             assertThat(playSuccessHaptic).isNotNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
-            verify(vibratorHelper)
-                .vibrateAuthSuccess(
-                    "SceneContainerStartable, $currentSceneKey device-entry::success"
-                )
+            verify(vibratorHelper).vibrateAuthSuccess(anyString())
             verify(vibratorHelper, never()).vibrateAuthError(anyString())
-
-            updateFingerprintAuthStatus(isSuccess = true)
-            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
     @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun playSuccessMSDLHaptics_onSuccessfulLockscreenAuth_udfps() =
         testScope.runTest {
+            whenever(kosmos.keyguardUpdateMonitor.isDeviceInteractive).thenReturn(true)
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             val playSuccessHaptic by
                 collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
@@ -770,21 +873,19 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isFalse()
 
             underTest.start()
-            unlockWithFingerprintAuth()
+            // unlock with fingerprint
+            updateFingerprintAuthStatus(isSuccess = true)
 
             assertThat(playSuccessHaptic).isNotNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
             assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.UNLOCK)
             assertThat(msdlPlayer.latestPropertiesPlayed).isEqualTo(authInteractionProperties)
-
-            updateFingerprintAuthStatus(isSuccess = true)
-            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
     @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun playSuccessHaptics_onSuccessfulLockscreenAuth_sfps() =
         testScope.runTest {
+            whenever(kosmos.keyguardUpdateMonitor.isDeviceInteractive).thenReturn(true)
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             val playSuccessHaptic by
                 collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
@@ -795,24 +896,19 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             underTest.start()
             allowHapticsOnSfps()
-            unlockWithFingerprintAuth()
+            // unlock with fingerprint
+            updateFingerprintAuthStatus(isSuccess = true)
 
             assertThat(playSuccessHaptic).isNotNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
-            verify(vibratorHelper)
-                .vibrateAuthSuccess(
-                    "SceneContainerStartable, $currentSceneKey device-entry::success"
-                )
+            verify(vibratorHelper).vibrateAuthSuccess(anyString())
             verify(vibratorHelper, never()).vibrateAuthError(anyString())
-
-            updateFingerprintAuthStatus(isSuccess = true)
-            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
     @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun playSuccessMSDLHaptics_onSuccessfulLockscreenAuth_sfps() =
         testScope.runTest {
+            whenever(kosmos.keyguardUpdateMonitor.isDeviceInteractive).thenReturn(true)
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             val playSuccessHaptic by
                 collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
@@ -823,15 +919,12 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             underTest.start()
             allowHapticsOnSfps()
-            unlockWithFingerprintAuth()
+            // unlock with fingerprint
+            updateFingerprintAuthStatus(isSuccess = true)
 
             assertThat(playSuccessHaptic).isNotNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
             assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.UNLOCK)
             assertThat(msdlPlayer.latestPropertiesPlayed).isEqualTo(authInteractionProperties)
-
-            updateFingerprintAuthStatus(isSuccess = true)
-            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -850,8 +943,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             assertThat(playErrorHaptic).isNotNull()
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
-            verify(vibratorHelper)
-                .vibrateAuthError("SceneContainerStartable, $currentSceneKey device-entry::error")
+            verify(vibratorHelper).vibrateAuthError(anyString())
             verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
         }
 
@@ -891,8 +983,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             assertThat(playErrorHaptic).isNotNull()
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
-            verify(vibratorHelper)
-                .vibrateAuthError("SceneContainerStartable, $currentSceneKey device-entry::error")
+            verify(vibratorHelper).vibrateAuthError(anyString())
             verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
         }
 
@@ -920,6 +1011,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun skipsSuccessHaptics_whenPowerButtonDown_sfps() =
         testScope.runTest {
+            whenever(kosmos.keyguardUpdateMonitor.isDeviceInteractive).thenReturn(true)
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             val playSuccessHaptic by
                 collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
@@ -930,24 +1022,19 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             underTest.start()
             allowHapticsOnSfps(isPowerButtonDown = true)
-            unlockWithFingerprintAuth()
+            // unlock with fingerprint
+            updateFingerprintAuthStatus(isSuccess = true)
 
             assertThat(playSuccessHaptic).isNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
-            verify(vibratorHelper, never())
-                .vibrateAuthSuccess(
-                    "SceneContainerStartable, $currentSceneKey device-entry::success"
-                )
+            verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
             verify(vibratorHelper, never()).vibrateAuthError(anyString())
-
-            updateFingerprintAuthStatus(isSuccess = true)
-            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
     @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun skipsMSDLSuccessHaptics_whenPowerButtonDown_sfps() =
         testScope.runTest {
+            whenever(kosmos.keyguardUpdateMonitor.isDeviceInteractive).thenReturn(true)
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             val playSuccessHaptic by
                 collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
@@ -958,21 +1045,19 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             underTest.start()
             allowHapticsOnSfps(isPowerButtonDown = true)
-            unlockWithFingerprintAuth()
+            // unlock with fingerprint
+            updateFingerprintAuthStatus(isSuccess = true)
 
             assertThat(playSuccessHaptic).isNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
             assertThat(msdlPlayer.latestTokenPlayed).isNull()
             assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
-
-            updateFingerprintAuthStatus(isSuccess = true)
-            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
     @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun skipsSuccessHaptics_whenPowerButtonRecentlyPressed_sfps() =
         testScope.runTest {
+            whenever(kosmos.keyguardUpdateMonitor.isDeviceInteractive).thenReturn(true)
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             val playSuccessHaptic by
                 collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
@@ -983,24 +1068,19 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             underTest.start()
             allowHapticsOnSfps(lastPowerPress = 50)
-            unlockWithFingerprintAuth()
+            // unlock with fingerprint
+            updateFingerprintAuthStatus(isSuccess = true)
 
             assertThat(playSuccessHaptic).isNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
-            verify(vibratorHelper, never())
-                .vibrateAuthSuccess(
-                    "SceneContainerStartable, $currentSceneKey device-entry::success"
-                )
+            verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
             verify(vibratorHelper, never()).vibrateAuthError(anyString())
-
-            updateFingerprintAuthStatus(isSuccess = true)
-            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
     @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun skipsMSDLSuccessHaptics_whenPowerButtonRecentlyPressed_sfps() =
         testScope.runTest {
+            whenever(kosmos.keyguardUpdateMonitor.isDeviceInteractive).thenReturn(true)
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
             val playSuccessHaptic by
                 collectLastValue(deviceEntryHapticsInteractor.playSuccessHaptic)
@@ -1011,15 +1091,12 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             underTest.start()
             allowHapticsOnSfps(lastPowerPress = 50)
-            unlockWithFingerprintAuth()
+            // unlock with fingerprint
+            updateFingerprintAuthStatus(isSuccess = true)
 
             assertThat(playSuccessHaptic).isNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
             assertThat(msdlPlayer.latestTokenPlayed).isNull()
             assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
-
-            updateFingerprintAuthStatus(isSuccess = true)
-            assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -1038,9 +1115,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             updateFingerprintAuthStatus(isSuccess = false)
 
             assertThat(playErrorHaptic).isNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
-            verify(vibratorHelper, never())
-                .vibrateAuthError("SceneContainerStartable, $currentSceneKey device-entry::error")
+            verify(vibratorHelper, never()).vibrateAuthError(anyString())
             verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
         }
 
@@ -1060,7 +1135,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
             updateFingerprintAuthStatus(isSuccess = false)
 
             assertThat(playErrorHaptic).isNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
             assertThat(msdlPlayer.latestTokenPlayed).isNull()
             assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
         }
@@ -1080,9 +1154,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             updateFaceAuthStatus(isSuccess = false)
 
             assertThat(playErrorHaptic).isNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
-            verify(vibratorHelper, never())
-                .vibrateAuthError("SceneContainerStartable, $currentSceneKey device-entry::error")
+            verify(vibratorHelper, never()).vibrateAuthError(anyString())
             verify(vibratorHelper, never()).vibrateAuthSuccess(anyString())
         }
 
@@ -1101,7 +1173,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
             updateFaceAuthStatus(isSuccess = false)
 
             assertThat(playErrorHaptic).isNull()
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
             assertThat(msdlPlayer.latestTokenPlayed).isNull()
             assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
         }
@@ -1124,9 +1195,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 )
                 .forEachIndexed { index, sceneKey ->
                     if (sceneKey == Scenes.Gone) {
-                        kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                            SuccessFingerprintAuthenticationStatus(0, true)
-                        )
+                        updateFingerprintAuthStatus(isSuccess = true)
                         runCurrent()
                     }
                     fakeSceneDataSource.pause()
@@ -1282,9 +1351,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
             underTest.start()
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
+            updateFingerprintAuthStatus(isSuccess = true)
             runCurrent()
             powerInteractor.setAwakeForTest()
             runCurrent()
@@ -1345,7 +1412,14 @@ class SceneContainerStartableTest : SysuiTestCase() {
             // Putting the device to sleep to lock it again, which shouldn't report another
             // successful unlock.
             kosmos.powerInteractor.setAsleepForTest()
-            runCurrent()
+            advanceTimeBy(
+                kosmos.userAwareSecureSettingsRepository
+                    .getInt(
+                        Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                        KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT,
+                    )
+                    .toLong()
+            )
             // Verify that the startable changed the scene to Lockscreen because the device locked
             // following the sleep.
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
@@ -1534,9 +1608,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
             verify(falsingCollector).onBouncerShown()
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
+            updateFingerprintAuthStatus(isSuccess = true)
             runCurrent()
             sceneInteractor.changeScene(Scenes.Gone, "reason")
             runCurrent()
@@ -2127,40 +2199,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun switchToGone_whenSurfaceBehindLockscreenVisibleMidTransition() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            val transitionStateFlow =
-                prepareState(authenticationMethod = AuthenticationMethodModel.None)
-            underTest.start()
-            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
-            // Swipe to Gone, more than halfway
-            transitionStateFlow.value =
-                ObservableTransitionState.Transition(
-                    fromScene = Scenes.Lockscreen,
-                    toScene = Scenes.Gone,
-                    currentScene = flowOf(Scenes.Gone),
-                    progress = flowOf(0.51f),
-                    isInitiatedByUserInput = true,
-                    isUserInputOngoing = flowOf(true),
-                )
-            runCurrent()
-            // Lift finger
-            transitionStateFlow.value =
-                ObservableTransitionState.Transition(
-                    fromScene = Scenes.Lockscreen,
-                    toScene = Scenes.Gone,
-                    currentScene = flowOf(Scenes.Gone),
-                    progress = flowOf(0.51f),
-                    isInitiatedByUserInput = true,
-                    isUserInputOngoing = flowOf(false),
-                )
-            runCurrent()
-
-            assertThat(currentScene).isEqualTo(Scenes.Gone)
-        }
-
-    @Test
     fun switchToGone_extendUnlock() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
@@ -2298,9 +2336,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             val dismissCallback: IKeyguardDismissCallback = mock()
             kosmos.dismissCallbackRegistry.addCallback(dismissCallback)
 
-            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
+            updateFingerprintAuthStatus(isSuccess = true)
             runCurrent()
             kosmos.fakeExecutor.runAllReady()
 
@@ -2388,6 +2424,277 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 )
             runCurrent()
             assertThat(isLockscreenEnabled).isTrue()
+        }
+
+    @Test
+    fun stayOnLockscreen_whenDozingStarted() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            prepareState()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            underTest.start()
+
+            // Stay on Lockscreen when dozing and dreaming
+            dozeInteractor.setIsDozing(true)
+            keyguardInteractor.setDreaming(true)
+            kosmos.fakeKeyguardRepository.setDreamingWithOverlay(false)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun switchFromLockscreenToDream_whenDreamStarted() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            prepareState()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            underTest.start()
+
+            powerInteractor.setAwakeForTest()
+            keyguardInteractor.setDreaming(true)
+            // Move past initial delay with [KeyguardInteractor#isAbleToDream]
+            advanceTimeBy(600L)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.Dream)
+        }
+
+    @Test
+    fun switchFromDreamToLockscreen_whenLockedAndDreamStopped() =
+        testScope.runTest {
+            keyguardInteractor.setDreaming(true)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            prepareState(initialSceneKey = Scenes.Dream)
+            assertThat(currentScene).isEqualTo(Scenes.Dream)
+            underTest.start()
+
+            keyguardInteractor.setDreaming(false)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun switchFromDreamToGone_whenUnlockedAndDreamStopped() =
+        testScope.runTest {
+            keyguardInteractor.setDreaming(true)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            prepareState(initialSceneKey = Scenes.Dream, isDeviceUnlocked = true)
+            assertThat(currentScene).isEqualTo(Scenes.Dream)
+            underTest.start()
+
+            keyguardInteractor.setDreaming(false)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun replacesLockscreenSceneOnBackStack_whenUnlockdViaAlternateBouncer_fromShade() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            underTest.start()
+
+            val isUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val backStack by collectLastValue(sceneBackInteractor.backStack)
+            val isAlternateBouncerVisible by
+                collectLastValue(kosmos.alternateBouncerInteractor.isVisible)
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Change to shade.
+            sceneInteractor.changeScene(Scenes.Shade, "")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Shade)
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Show the alternate bouncer.
+            kosmos.alternateBouncerInteractor.forceShow()
+            kosmos.sysuiStatusBarStateController.leaveOpen = true // leave shade open
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isTrue()
+
+            // Trigger a fingerprint unlock.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Gone)
+            assertThat(isAlternateBouncerVisible).isFalse()
+        }
+
+    @Test
+    fun handleDeviceUnlockStatus_deviceLockedWhileOnDream_stayOnDream() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            underTest.start()
+
+            val isUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            // Unlock device.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+
+            // Change to Dream.
+            sceneInteractor.changeScene(Scenes.Dream, "test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Dream)
+            runCurrent()
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Dream)
+
+            // Lock device, and verify stay on dream.
+            kosmos.fakeDeviceEntryRepository.deviceUnlockStatus.value =
+                DeviceUnlockStatus(isUnlocked = false, deviceUnlockSource = null)
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Dream)
+        }
+
+    @Test
+    fun handleDeviceUnlockStatus_deviceLockedWhileOnCommunal_stayOnCommunal() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            underTest.start()
+
+            val isUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            // Unlock device.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+
+            // Change to Communal.
+            sceneInteractor.changeScene(Scenes.Communal, "test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Communal)
+            runCurrent()
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+
+            // Lock device, and verify stay on Communal.
+            kosmos.fakeDeviceEntryRepository.deviceUnlockStatus.value =
+                DeviceUnlockStatus(isUnlocked = false, deviceUnlockSource = null)
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+        }
+
+    @Test
+    fun replacesLockscreenSceneOnBackStack_whenFaceUnlocked_fromShade_noAlternateBouncer() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            underTest.start()
+
+            val isUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val backStack by collectLastValue(sceneBackInteractor.backStack)
+            val isAlternateBouncerVisible by
+                collectLastValue(kosmos.alternateBouncerInteractor.isVisible)
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Change to shade.
+            sceneInteractor.changeScene(Scenes.Shade, "")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Shade)
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Show the alternate bouncer.
+            kosmos.alternateBouncerInteractor.forceShow()
+            kosmos.sysuiStatusBarStateController.leaveOpen = true // leave shade open
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isTrue()
+
+            // Simulate race condition by hiding the alternate bouncer *before* the face unlock:
+            kosmos.alternateBouncerInteractor.hide()
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Trigger a face unlock.
+            updateFaceAuthStatus(isSuccess = true)
+            runCurrent()
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Gone)
+            assertThat(isAlternateBouncerVisible).isFalse()
+        }
+
+    @Test
+    fun handleDisableFlags() =
+        kosmos.runTest {
+            underTest.start()
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            sceneInteractor.changeScene(Scenes.Shade, "reason")
+            sceneInteractor.showOverlay(Overlays.NotificationsShade, "reason")
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(currentOverlays).contains(Overlays.NotificationsShade)
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(disable2 = StatusBarManager.DISABLE2_NOTIFICATION_SHADE)
+            runCurrent()
+
+            assertThat(currentScene).isNotEqualTo(Scenes.Shade)
+            assertThat(currentOverlays).isEmpty()
         }
 
     private fun TestScope.emulateSceneTransition(
@@ -2554,9 +2861,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         )
 
     private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean) =
-        FakeHeadsUpRowRepository(key = key, elementKey = Any()).apply {
-            this.isPinned.value = isPinned
-        }
+        FakeHeadsUpRowRepository(key = key, elementKey = Any(), isPinned = isPinned)
 
     private fun setFingerprintSensorType(fingerprintSensorType: FingerprintSensorType) {
         kosmos.fingerprintPropertyRepository.setProperties(
@@ -2587,13 +2892,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
         advanceTimeBy(lastPowerPress)
         runCurrent()
-    }
-
-    private fun unlockWithFingerprintAuth() {
-        kosmos.fakeKeyguardRepository.setBiometricUnlockSource(
-            BiometricUnlockSource.FINGERPRINT_SENSOR
-        )
-        kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.UNLOCK_COLLAPSING)
     }
 
     private fun TestScope.setupBiometricAuth(
@@ -2633,15 +2931,16 @@ class SceneContainerStartableTest : SysuiTestCase() {
     }
 
     private fun updateFaceAuthStatus(isSuccess: Boolean) {
-        if (isSuccess) {
-            kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
-                SuccessFaceAuthenticationStatus(
-                    successResult = Mockito.mock(FaceManager.AuthenticationResult::class.java)
-                )
-            )
-        } else {
-            kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
-                FailedFaceAuthenticationStatus()
+        with(kosmos.fakeDeviceEntryFaceAuthRepository) {
+            isAuthenticated.value = isSuccess
+            setAuthenticationStatus(
+                if (isSuccess) {
+                    SuccessFaceAuthenticationStatus(
+                        successResult = Mockito.mock(FaceManager.AuthenticationResult::class.java)
+                    )
+                } else {
+                    FailedFaceAuthenticationStatus()
+                }
             )
         }
     }

@@ -22,9 +22,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.Componen
 
 import java.io.InputStream;
 
-/**
- * Public API to create a new RemoteComposeDocument coming from an input stream
- */
+/** Public API to create a new RemoteComposeDocument coming from an input stream */
 public class RemoteComposeDocument {
 
     CoreDocument mDocument = new CoreDocument();
@@ -33,6 +31,10 @@ public class RemoteComposeDocument {
         RemoteComposeBuffer buffer =
                 RemoteComposeBuffer.fromInputStream(inputStream, mDocument.getRemoteComposeState());
         mDocument.initFromBuffer(buffer);
+    }
+
+    public RemoteComposeDocument(CoreDocument document) {
+        mDocument = document;
     }
 
     public CoreDocument getDocument() {
@@ -44,23 +46,19 @@ public class RemoteComposeDocument {
     }
 
     /**
-     * Called when an initialization is needed, allowing the document to eg load
-     * resources / cache them.
+     * Called when an initialization is needed, allowing the document to eg load resources / cache
+     * them.
      */
     public void initializeContext(RemoteContext context) {
         mDocument.initializeContext(context);
     }
 
-    /**
-     * Returns the width of the document in pixels
-     */
+    /** Returns the width of the document in pixels */
     public int getWidth() {
         return mDocument.getWidth();
     }
 
-    /**
-     * Returns the height of the document in pixels
-     */
+    /** Returns the height of the document in pixels */
     public int getHeight() {
         return mDocument.getHeight();
     }
@@ -73,7 +71,7 @@ public class RemoteComposeDocument {
      * Paint the document
      *
      * @param context the provided PaintContext
-     * @param theme   the theme we want to use for this document.
+     * @param theme the theme we want to use for this document.
      */
     public void paint(RemoteContext context, int theme) {
         mDocument.paint(context, theme);
@@ -101,8 +99,7 @@ public class RemoteComposeDocument {
 
     @Override
     public String toString() {
-        return "Document{\n"
-                + mDocument + '}';
+        return "Document{\n" + mDocument + '}';
     }
 
     /**
@@ -115,12 +112,38 @@ public class RemoteComposeDocument {
     }
 
     /**
+     * Gets a array of Names of the named variables of a specific type defined in the doc.
+     *
+     * @param type the type of variable NamedVariable.COLOR_TYPE, STRING_TYPE, etc
+     * @return array of name or null
+     */
+    public String[] getNamedVariables(int type) {
+        return mDocument.getNamedVariables(type);
+    }
+
+    /**
      * Return a component associated with id
+     *
      * @param id the component id
      * @return the corresponding component or null if not found
      */
     public Component getComponent(int id) {
         return mDocument.getComponent(id);
     }
-}
 
+    public void invalidate() {
+        mDocument.invalidateMeasure();
+    }
+
+    public String[] getStats() {
+        if (mDocument == null) {
+            return new String[0];
+        }
+        return mDocument.getStats();
+    }
+
+    public int hasSensorListeners(int[] ids) {
+
+        return 0;
+    }
+}

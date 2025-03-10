@@ -33,7 +33,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.android.compose.rememberSystemUiController
-import com.android.compose.theme.LocalAndroidColorScheme
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
@@ -57,7 +56,7 @@ fun ModalBottomSheet(
         )
         androidx.compose.material3.ModalBottomSheet(
                 onDismissRequest = onDismiss,
-                containerColor = LocalAndroidColorScheme.current.surfaceBright,
+                containerColor = MaterialTheme.colorScheme.surfaceBright,
                 sheetState = state,
                 content = {
                     Box(
@@ -91,7 +90,7 @@ fun ModalBottomSheet(
             setBottomSheetSystemBarsColor(sysUiController)
         }
         ModalBottomSheetLayout(
-                sheetBackgroundColor = LocalAndroidColorScheme.current.surfaceBright,
+                sheetBackgroundColor = MaterialTheme.colorScheme.surfaceBright,
                 modifier = Modifier.background(Color.Transparent),
                 sheetState = state,
                 sheetContent = { sheetContent() },

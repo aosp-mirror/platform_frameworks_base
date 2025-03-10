@@ -24,6 +24,7 @@ import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -53,6 +54,8 @@ import com.android.app.viewcapture.ViewCaptureFactory;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 import com.android.systemui.scene.ui.view.WindowRootView;
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
+import com.android.systemui.statusbar.phone.ConfigurationForwarder;
 
 /**
  * Combined keyguard and notification panel view. Also holding backdrop and scrims. This view can
@@ -68,6 +71,7 @@ public class NotificationShadeWindowView extends WindowRootView {
     private ActionMode mFloatingActionMode;
     private FloatingToolbar mFloatingToolbar;
     private ViewTreeObserver.OnPreDrawListener mFloatingToolbarPreDrawListener;
+    @Nullable private ConfigurationForwarder mConfigurationForwarder;
 
     private InteractionEventHandler mInteractionEventHandler;
 
@@ -159,6 +163,29 @@ public class NotificationShadeWindowView extends WindowRootView {
         }
 
         return handled;
+    }
+
+    @Override
+    public void onMovedToDisplay(int displayId, Configuration config) {
+        super.onMovedToDisplay(displayId, config);
+        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode();
+        // When the window is moved we're only receiving a call to this method instead of the
+        // onConfigurationChange itself. Let's just trigegr a normal config change.
+        onConfigurationChanged(config);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mConfigurationForwarder != null) {
+            ShadeWindowGoesAround.isUnexpectedlyInLegacyMode();
+            mConfigurationForwarder.onConfigurationChanged(newConfig);
+        }
+    }
+
+    public void setConfigurationForwarder(ConfigurationForwarder configurationForwarder) {
+        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode();
+        mConfigurationForwarder = configurationForwarder;
     }
 
     @Override

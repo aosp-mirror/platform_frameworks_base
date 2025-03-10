@@ -402,4 +402,73 @@ public class TouchpadDebugViewTest {
         // Verify that no updateViewLayout is called (as expected for a two-finger drag gesture).
         verify(mWindowManager, times(0)).updateViewLayout(any(), any());
     }
+
+    @Test
+    public void testPinchDrag() {
+        float offsetY = ViewConfiguration.get(mTestableContext).getScaledTouchSlop() + 10;
+
+        MotionEvent actionDown = new MotionEventBuilder(MotionEvent.ACTION_DOWN, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionDown);
+
+        MotionEvent pointerDown = new MotionEventBuilder(MotionEvent.ACTION_POINTER_DOWN,
+                SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f)
+                )
+                .pointer(new PointerBuilder(1, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(45f)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(pointerDown);
+
+        // Simulate ACTION_MOVE event (both fingers moving apart).
+        MotionEvent actionMove = new MotionEventBuilder(MotionEvent.ACTION_MOVE, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f - offsetY)
+                )
+                .rawXCursorPosition(mWindowLayoutParams.x + 10f)
+                .rawYCursorPosition(mWindowLayoutParams.y + 10f)
+                .pointer(new PointerBuilder(1, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(45f + offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionMove);
+
+        MotionEvent pointerUp = new MotionEventBuilder(MotionEvent.ACTION_POINTER_UP, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f - offsetY)
+                )
+                .pointer(new PointerBuilder(1, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(45f + offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(pointerUp);
+
+        MotionEvent actionUp = new MotionEventBuilder(MotionEvent.ACTION_UP, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f - offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionUp);
+
+        // Verify that no updateViewLayout is called (as expected for a two-finger drag gesture).
+        verify(mWindowManager, times(0)).updateViewLayout(any(), any());
+    }
 }

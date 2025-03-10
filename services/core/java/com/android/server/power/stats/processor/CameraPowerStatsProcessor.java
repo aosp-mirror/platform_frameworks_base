@@ -20,12 +20,10 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 
 import com.android.internal.os.PowerProfile;
-import com.android.server.power.stats.PowerStatsUidResolver;
 
 class CameraPowerStatsProcessor extends BinaryStatePowerStatsProcessor {
-    CameraPowerStatsProcessor(PowerProfile powerProfile,
-            PowerStatsUidResolver uidResolver) {
-        super(BatteryConsumer.POWER_COMPONENT_CAMERA, uidResolver,
+    CameraPowerStatsProcessor(PowerProfile powerProfile) {
+        super(BatteryConsumer.POWER_COMPONENT_CAMERA,
                 powerProfile.getAveragePower(PowerProfile.POWER_CAMERA));
     }
 

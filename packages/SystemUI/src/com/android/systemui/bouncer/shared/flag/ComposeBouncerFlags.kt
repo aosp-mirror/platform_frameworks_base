@@ -43,8 +43,16 @@ object ComposeBouncerFlags {
     fun isUnexpectedlyInLegacyMode() =
         RefactorFlagUtils.isUnexpectedlyInLegacyMode(
             isEnabled,
-            "SceneContainerFlag || ComposeBouncerFlag"
+            "SceneContainerFlag || ComposeBouncerFlag",
         )
+
+    /**
+     * Called to ensure code is only run when the flag is disabled. This will throw an exception if
+     * the flag is enabled to ensure that the refactor author catches issues in testing.
+     */
+    @JvmStatic
+    fun assertInLegacyMode() =
+        RefactorFlagUtils.assertInLegacyMode(isEnabled, "SceneContainerFlag || ComposeBouncerFlag")
 
     /**
      * Returns `true` if only compose bouncer is enabled and scene container framework is not
@@ -53,7 +61,7 @@ object ComposeBouncerFlags {
     @Deprecated(
         "Avoid using this, this is meant to be used only by the glue code " +
             "that includes compose bouncer in legacy keyguard.",
-        replaceWith = ReplaceWith("isComposeBouncerOrSceneContainerEnabled()")
+        replaceWith = ReplaceWith("isComposeBouncerOrSceneContainerEnabled()"),
     )
     fun isOnlyComposeBouncerEnabled(): Boolean {
         return !SceneContainerFlag.isEnabled && Flags.composeBouncer()

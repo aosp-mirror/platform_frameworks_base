@@ -316,7 +316,7 @@ public class AudioPolicy {
         @NonNull
         public Builder setMediaProjection(@NonNull MediaProjection projection) {
             if (projection == null) {
-                throw new IllegalArgumentException("Invalid null volume callback");
+                throw new IllegalArgumentException("Invalid null media projection");
             }
             mProjection = projection;
             return this;

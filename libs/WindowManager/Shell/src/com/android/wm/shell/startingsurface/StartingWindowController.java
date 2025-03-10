@@ -23,8 +23,6 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_WINDOWLESS;
 
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_STARTING_WINDOW;
-
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -119,7 +117,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
 
     private void onInit() {
         mShellTaskOrganizer.initStartingWindow(this);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_STARTING_WINDOW,
+        mShellController.addExternalInterface(IStartingWindow.DESCRIPTOR,
                 this::createExternalInterface, this);
     }
 

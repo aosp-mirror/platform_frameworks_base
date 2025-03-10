@@ -84,6 +84,8 @@ interface INotificationManager
     boolean isImportanceLocked(String pkg, int uid);
 
     List<String> getAllowedAssistantAdjustments(String pkg);
+    void allowAssistantAdjustment(String adjustmentType);
+    void disallowAssistantAdjustment(String adjustmentType);
 
     boolean shouldHideSilentStatusIcons(String callingPkg);
     void setHideSilentStatusIcons(boolean hide);
@@ -122,7 +124,7 @@ interface INotificationManager
     boolean onlyHasDefaultChannel(String pkg, int uid);
     boolean areChannelsBypassingDnd();
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);
-    List<String> getPackagesBypassingDnd(int userId, boolean includeConversationChannels);
+    ParceledListSlice getPackagesBypassingDnd(int userId);
     boolean isPackagePaused(String pkg);
     void deleteNotificationHistoryItem(String pkg, int uid, long postedTime);
     boolean isPermissionFixed(String pkg, int userId);
@@ -160,8 +162,8 @@ interface INotificationManager
     void requestBindProvider(in ComponentName component);
     void requestUnbindProvider(in IConditionProvider token);
 
-    void setNotificationsShownFromListener(in INotificationListener token, in String[] keys);
 
+    void setNotificationsShownFromListener(in INotificationListener token, in String[] keys);
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
     ParceledListSlice getSnoozedNotificationsFromListener(in INotificationListener token, int trim);
     void clearRequestedListenerHints(in INotificationListener token);
@@ -173,6 +175,7 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter, boolean fromUser);
 
+    NotificationChannel createConversationNotificationChannelForPackageFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user, String parentChannelId, String conversationId);
     void updateNotificationChannelGroupFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user, in NotificationChannelGroup group);
     void updateNotificationChannelFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user, in NotificationChannel channel);
     ParceledListSlice getNotificationChannelsFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user);
@@ -258,6 +261,15 @@ interface INotificationManager
     @EnforcePermission(allOf={"INTERACT_ACROSS_USERS", "ACCESS_NOTIFICATIONS"})
     void unregisterCallNotificationEventListener(String packageName, in UserHandle userHandle, in ICallNotificationEventCallback listener);
 
-    void setCanBePromoted(String pkg, int uid, boolean promote);
-    boolean canBePromoted(String pkg, int uid);
+    void setCanBePromoted(String pkg, int uid, boolean promote, boolean fromUser);
+    boolean appCanBePromoted(String pkg, int uid);
+    boolean canBePromoted(String pkg);
+
+    void setAdjustmentTypeSupportedState(in INotificationListener token, String key, boolean supported);
+    List<String> getUnsupportedAdjustmentTypes();
+
+    int[] getAllowedAdjustmentKeyTypes();
+    void setAssistantAdjustmentKeyTypeState(int type, boolean enabled);
+    String[] getTypeAdjustmentDeniedPackages();
+    void setTypeAdjustmentForPackageState(String pkg, boolean enabled);
 }

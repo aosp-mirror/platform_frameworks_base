@@ -109,6 +109,7 @@ public class Annotation {
             //TelephonyManager.NETWORK_TYPE_LTE_CA,
 
             TelephonyManager.NETWORK_TYPE_NR,
+            TelephonyManager.NETWORK_TYPE_NB_IOT_NTN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NetworkType {

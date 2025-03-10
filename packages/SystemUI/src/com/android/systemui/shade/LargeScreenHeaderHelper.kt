@@ -22,7 +22,7 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.math.max
 
-class LargeScreenHeaderHelper @Inject constructor(private val context: Context) {
+class LargeScreenHeaderHelper @Inject constructor(@ShadeDisplayAware private val context: Context) {
 
     fun getLargeScreenHeaderHeight(): Int = getLargeScreenHeaderHeight(context)
 

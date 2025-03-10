@@ -6,6 +6,7 @@ flag {
   namespace: "system_performance"
   description: "Control the API portion of Detailed Application Jank Metrics"
   bug: "366264614"
+  is_exported: true
 }
 
 flag {

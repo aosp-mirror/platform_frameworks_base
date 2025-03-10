@@ -16,14 +16,18 @@
 
 package android.webkit;
 
+import android.annotation.FlaggedApi;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.RemoteException;
 
 /**
+ * @deprecated Use the {@link WebViewUpdateManager} class instead.
  * @hide
  */
+@FlaggedApi(Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
+@Deprecated
 @SystemApi
 public final class WebViewUpdateService {
 

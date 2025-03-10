@@ -20,9 +20,13 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import android.annotation.Nullable;
 import android.app.AlertDialog;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -58,6 +62,7 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.flags.Flags;
 
 import com.android.internal.R;
 
@@ -65,6 +70,12 @@ import java.lang.ref.WeakReference;
 
 public class AlertController {
     public static final int MICRO = 1;
+
+    private static boolean sUseWearMaterial3Style;
+
+    @ChangeId
+    @EnabledSince(targetSdkVersion = 36)
+    private static final long WEAR_MATERIAL3_ALERTDIALOG = 379365266L;
 
     private final Context mContext;
     private final DialogInterface mDialogInterface;
@@ -210,7 +221,8 @@ public class AlertController {
         mHandler = new ButtonHandler(di);
 
         final TypedArray a = context.obtainStyledAttributes(null,
-                R.styleable.AlertDialog, R.attr.alertDialogStyle, 0);
+                R.styleable.AlertDialog, getAlertDialogDefStyleAttr(context),
+                getAlertDialogDefStyleRes());
 
         mAlertDialogLayout = a.getResourceId(
                 R.styleable.AlertDialog_layout, R.layout.alert_dialog);
@@ -234,6 +246,30 @@ public class AlertController {
 
         /* We use a custom title so never request a window title */
         window.requestFeature(Window.FEATURE_NO_TITLE);
+    }
+
+    private int getAlertDialogDefStyleAttr(Context context) {
+        sUseWearMaterial3Style = useWearMaterial3Style(context);
+        if (sUseWearMaterial3Style) {
+            return 0;
+        }
+        return R.attr.alertDialogStyle;
+    }
+
+    private int getAlertDialogDefStyleRes() {
+        if (sUseWearMaterial3Style) {
+            return com.android.internal.R.style.AlertDialog_DeviceDefault_WearMaterial3;
+        }
+        return 0;
+    }
+
+    private static boolean useWearMaterial3Style(Context context) {
+        return Flags.useWearMaterial3Ui()
+                && CompatChanges.isChangeEnabled(WEAR_MATERIAL3_ALERTDIALOG)
+                && context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                && (context.getThemeResId() == com.android.internal.R.style.Theme_DeviceDefault
+                    || context.getThemeResId()
+                        == com.android.internal.R.style.Theme_DeviceDefault_Dialog_Alert);
     }
 
     static boolean canTextInput(View v) {

@@ -19,7 +19,6 @@ package com.android.systemui.communal.view.viewmodel
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.UserInfo
 import android.provider.Settings
@@ -27,7 +26,6 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.accessibilityManager
 import android.widget.RemoteViews
-import androidx.activity.result.ActivityResultLauncher
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
@@ -58,6 +56,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInterac
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.media.controls.ui.controller.mediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
@@ -88,7 +87,6 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var uiEventLogger: UiEventLogger
     @Mock private lateinit var packageManager: PackageManager
-    @Mock private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     @Mock private lateinit var metricsLogger: CommunalMetricsLogger
 
     private val kosmos = testKosmos()
@@ -117,10 +115,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         communalSceneInteractor = kosmos.communalSceneInteractor
         communalInteractor = spy(kosmos.communalInteractor)
         kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO))
-        kosmos.fakeUserTracker.set(
-            userInfos = listOf(MAIN_USER_INFO),
-            selectedUserIndex = 0,
-        )
+        kosmos.fakeUserTracker.set(userInfos = listOf(MAIN_USER_INFO), selectedUserIndex = 0)
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
         accessibilityManager = kosmos.accessibilityManager
 
@@ -139,6 +134,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                 accessibilityManager,
                 packageManager,
                 WIDGET_PICKER_PACKAGE_NAME,
+                kosmos.mediaCarouselController,
             )
     }
 
@@ -257,10 +253,13 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Test
     fun onOpenWidgetPicker_launchesWidgetPickerActivity() {
         testScope.runTest {
+            var activityStarted = false
             val success =
-                underTest.onOpenWidgetPicker(testableResources.resources, activityResultLauncher)
+                underTest.onOpenWidgetPicker(testableResources.resources) { _ ->
+                    run { activityStarted = true }
+                }
 
-            verify(activityResultLauncher).launch(any())
+            assertTrue(activityStarted)
             assertTrue(success)
         }
     }
@@ -268,14 +267,10 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Test
     fun onOpenWidgetPicker_activityLaunchThrowsException_failure() {
         testScope.runTest {
-            whenever(activityResultLauncher.launch(any()))
-                .thenThrow(ActivityNotFoundException::class.java)
-
             val success =
-                underTest.onOpenWidgetPicker(
-                    testableResources.resources,
-                    activityResultLauncher,
-                )
+                underTest.onOpenWidgetPicker(testableResources.resources) { _ ->
+                    run { throw ActivityNotFoundException() }
+                }
 
             assertFalse(success)
         }
@@ -359,6 +354,32 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         assertThat(event.eventType).isEqualTo(AccessibilityEvent.TYPE_ANNOUNCEMENT)
         assertThat(event.contentDescription).isEqualTo("Test Clock widget added to lock screen")
     }
+
+    @Test
+    fun onResizeWidget_logsMetrics() =
+        testScope.runTest {
+            val appWidgetId = 123
+            val spanY = 2
+            val widgetIdToRankMap = mapOf(appWidgetId to 1)
+            val componentName = ComponentName("test.package", "TestWidget")
+            val rank = 1
+
+            underTest.onResizeWidget(
+                appWidgetId = appWidgetId,
+                spanY = spanY,
+                widgetIdToRankMap = widgetIdToRankMap,
+                componentName = componentName,
+                rank = rank,
+            )
+
+            verify(communalInteractor).resizeWidget(appWidgetId, spanY, widgetIdToRankMap)
+            verify(metricsLogger)
+                .logResizeWidget(
+                    componentName = componentName.flattenToString(),
+                    rank = rank,
+                    spanY = spanY,
+                )
+        }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)

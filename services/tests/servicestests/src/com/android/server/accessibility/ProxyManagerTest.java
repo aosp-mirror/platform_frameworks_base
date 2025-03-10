@@ -51,9 +51,6 @@ import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.test.FakePermissionEnforcer;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArraySet;
 import android.view.KeyEvent;
@@ -96,9 +93,6 @@ public class ProxyManagerTest {
     private static final int DISPLAY_2_ID = 1001;
     private static final int DEVICE_ID = 10;
     private static final int STREAMED_CALLING_UID = 9876;
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Rule
     public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -243,7 +237,6 @@ public class ProxyManagerTest {
      * app changes to the proxy device.
      */
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_PROXY_USE_APPS_ON_VIRTUAL_DEVICE_LISTENER)
     public void testUpdateProxyOfRunningAppsChange_changedUidIsStreamedApp_propagatesChange() {
         final VirtualDeviceManagerInternal localVdm =
                 Mockito.mock(VirtualDeviceManagerInternal.class);

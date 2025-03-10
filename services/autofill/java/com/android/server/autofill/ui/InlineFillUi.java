@@ -409,5 +409,10 @@ public final class InlineFillUi {
          * Callback to notify inline ui is hidden.
          */
         void notifyInlineUiHidden(@NonNull AutofillId autofillId);
+
+        /**
+         * Callback to notify input method started.
+         */
+        void onInputMethodStartInputView();
     }
 }

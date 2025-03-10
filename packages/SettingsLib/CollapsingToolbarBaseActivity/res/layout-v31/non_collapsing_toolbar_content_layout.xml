@@ -26,12 +26,12 @@
         android:outlineAmbientShadowColor="@android:color/transparent"
         android:outlineSpotShadowColor="@android:color/transparent"
         android:background="@android:color/transparent"
-        android:theme="@style/Theme.CollapsingToolbar.Settings">
+        android:theme="@style/ThemeOverlay.MaterialComponents.PlatformBridge.CollapsingToolbar">
 
         <Toolbar
             android:id="@+id/action_bar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
             android:theme="?android:attr/actionBarTheme"
             android:transitionName="shared_element_view"
             app:layout_collapseMode="pin"/>

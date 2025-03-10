@@ -16,6 +16,10 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
+
+import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -29,11 +33,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Dialog;
+import android.media.projection.StopReason;
 import android.os.Handler;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -47,6 +52,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -64,10 +70,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidJUnit4.class)
+import java.util.List;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ScreenRecordTileTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+    }
 
     @Mock
     private RecordingController mController;
@@ -102,6 +118,11 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
+
+    public ScreenRecordTileTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -160,9 +181,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         ArgumentCaptor<Runnable> onStartRecordingClicked = ArgumentCaptor.forClass(Runnable.class);
-        verify(mController).createScreenRecordDialog(any(), eq(mFeatureFlags),
-                eq(mDialogTransitionAnimator), eq(mActivityStarter),
-                onStartRecordingClicked.capture());
+        verify(mController).createScreenRecordDialog(onStartRecordingClicked.capture());
 
         // When starting the recording, we collapse the shade and disable the dialog animation.
         assertNotNull(onStartRecordingClicked.getValue());
@@ -217,7 +236,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleClick(null /* view */);
 
-        verify(mController, times(1)).stopRecording();
+        verify(mController, times(1)).stopRecording(eq(StopReason.STOP_QS_TILE));
     }
 
     @Test
@@ -269,7 +288,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_on));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_screen_record_icon_on));
     }
 
     @Test
@@ -280,7 +299,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_on));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_screen_record_icon_on));
     }
 
     @Test
@@ -291,21 +310,20 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_off));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_screen_record_icon_off));
     }
 
     @Test
     public void showingDialogPrompt_logsMediaProjectionPermissionRequested() {
         when(mController.isStarting()).thenReturn(false);
         when(mController.isRecording()).thenReturn(false);
-        when(mController.createScreenRecordDialog(any(), any(), any(), any(), any()))
+        when(mController.createScreenRecordDialog(any()))
                 .thenReturn(mPermissionDialogPrompt);
 
         mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
-        verify(mController).createScreenRecordDialog(any(), eq(mFeatureFlags),
-                eq(mDialogTransitionAnimator), eq(mActivityStarter), any());
+        verify(mController).createScreenRecordDialog(any());
         var onDismissAction = ArgumentCaptor.forClass(ActivityStarter.OnDismissAction.class);
         verify(mKeyguardDismissUtil).executeWhenUnlocked(
                 onDismissAction.capture(), anyBoolean(), anyBoolean());
@@ -316,6 +334,14 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         verify(mPermissionDialogPrompt).show();
         verify(mMediaProjectionMetricsLogger)
                 .notifyPermissionRequestDisplayed(mContext.getUserId());
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 
 }

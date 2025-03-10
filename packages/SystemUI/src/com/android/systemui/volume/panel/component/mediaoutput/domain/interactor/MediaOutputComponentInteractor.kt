@@ -16,7 +16,10 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
 
+import com.android.settingslib.media.PhoneMediaDevice.inputRoutingEnabledAndIsDesktop
+import android.content.Context
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.volume.domain.interactor.AudioOutputInteractor
 import com.android.systemui.volume.domain.interactor.AudioSharingInteractor
 import com.android.systemui.volume.domain.model.AudioOutputDevice
@@ -46,6 +49,7 @@ import kotlinx.coroutines.flow.stateIn
 class MediaOutputComponentInteractor
 @Inject
 constructor(
+    @Application private val context: Context,
     @VolumePanelScope private val coroutineScope: CoroutineScope,
     private val mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
     audioOutputInteractor: AudioOutputInteractor,
@@ -91,7 +95,8 @@ constructor(
                         MediaOutputComponentModel.Calling(
                             device = currentAudioDevice,
                             isInAudioSharing = isInAudioSharing,
-                            canOpenAudioSwitcher = false,
+                            /* allow open switcher when input routing is enabled in desktop */
+                            canOpenAudioSwitcher = inputRoutingEnabledAndIsDesktop(context),
                         )
                     )
                 } else {

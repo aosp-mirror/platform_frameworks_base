@@ -84,7 +84,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -213,7 +213,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
             )
         val keyguardTouchHandlingInteractor =
             KeyguardTouchHandlingInteractor(
-                appContext = mContext,
+                context = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
                 repository = repository,
@@ -735,7 +735,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
             if (testConfig.intent != null) {
                 assertThat(Mockito.mockingDetails(activityStarter).invocations).hasSize(1)
             } else {
-                verifyZeroInteractions(activityStarter)
+                verifyNoMoreInteractions(activityStarter)
             }
         } else {
             assertThat(viewModel.isVisible).isFalse()

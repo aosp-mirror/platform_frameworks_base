@@ -27,6 +27,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.tiles.base.interactor.DisabledByPolicyInteractor.PolicyResult
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -70,7 +71,7 @@ interface DisabledByPolicyInteractor {
 class DisabledByPolicyInteractorImpl
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val activityStarter: ActivityStarter,
     private val restrictedLockProxy: RestrictedLockProxy,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
@@ -105,7 +106,7 @@ constructor(
 
 /** Mockable proxy for [RestrictedLockUtilsInternal] static methods. */
 @VisibleForTesting
-class RestrictedLockProxy @Inject constructor(private val context: Context) {
+class RestrictedLockProxy @Inject constructor(@ShadeDisplayAware private val context: Context) {
 
     @WorkerThread
     fun hasBaseUserRestriction(userId: Int, userRestriction: String?): Boolean =

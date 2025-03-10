@@ -73,6 +73,7 @@ import com.android.internal.infra.AndroidFuture;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -1163,7 +1164,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     public boolean startRecognition(@RecognitionFlags int recognitionFlags) {
         if (DBG) Slog.d(TAG, "startRecognition(" + recognitionFlags + ")");
         synchronized (mLock) {
-            return startRecognitionLocked(recognitionFlags, null /* data */) == STATUS_OK;
+            return startRecognitionLocked(recognitionFlags, /* data= */new byte[0]) == STATUS_OK;
         }
     }
 
@@ -1495,8 +1496,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     }
 
     @GuardedBy("mLock")
-    private int startRecognitionLocked(int recognitionFlags,
-            @Nullable byte[] data) {
+    @SuppressWarnings("FlaggedApi") // RecognitionConfig.Builder is available internally.
+    private int startRecognitionLocked(int recognitionFlags, @NonNull byte[] data) {
         if (DBG) {
             Slog.d(TAG, "startRecognition("
                     + recognitionFlags
@@ -1513,10 +1514,11 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     "Recognition for the given keyphrase is not supported");
         }
 
-        KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
+        List<KeyphraseRecognitionExtra> recognitionExtra =
+            new ArrayList<KeyphraseRecognitionExtra>(1);
         // TODO: Do we need to do something about the confidence level here?
-        recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.getId(),
-                mKeyphraseMetadata.getRecognitionModeFlags(), 0, new ConfidenceLevel[0]);
+        recognitionExtra.add(new KeyphraseRecognitionExtra(mKeyphraseMetadata.getId(),
+            mKeyphraseMetadata.getRecognitionModeFlags(), 0, new ConfidenceLevel[0]));
         boolean captureTriggerAudio =
                 (recognitionFlags&RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
         boolean allowMultipleTriggers =
@@ -1534,10 +1536,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         int code;
         try {
             code = mSoundTriggerSession.startRecognition(
-                    mKeyphraseMetadata.getId(), mLocale.toLanguageTag(), mInternalCallback,
-                    new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
-                            recognitionExtra, data, audioCapabilities),
-                    runInBatterySaver);
+                mKeyphraseMetadata.getId(),
+                mLocale.toLanguageTag(),
+                mInternalCallback,
+                new RecognitionConfig.Builder()
+                    .setCaptureRequested(captureTriggerAudio)
+                    .setMultipleTriggersAllowed(allowMultipleTriggers)
+                    .setKeyphrases(recognitionExtra)
+                    .setData(data)
+                    .setAudioCapabilities(audioCapabilities)
+                    .build(),
+                runInBatterySaver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

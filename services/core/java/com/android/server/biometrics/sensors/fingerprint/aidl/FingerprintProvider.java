@@ -659,7 +659,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     sensorId, createLogger(BiometricsProtoEnums.ACTION_REMOVE,
                     BiometricsProtoEnums.CLIENT_UNKNOWN,
                     mAuthenticationStatsCollector), mBiometricContext,
-                    mFingerprintSensors.get(sensorId).getAuthenticatorIds());
+                    mFingerprintSensors.get(sensorId).getAuthenticatorIds(),
+                    BiometricsProtoEnums.UNENROLL_REASON_USER_REQUEST);
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
     }

@@ -219,6 +219,15 @@
          compatibility control. [CHAR LIMIT=NONE] -->
     <string name="camera_compat_dismiss_button_description">No camera issues? Tap to dismiss.</string>
 
+    <!-- App handle education tooltip text for tooltip pointing to app handle -->
+    <string name="windowing_app_handle_education_tooltip">The app menu can be found here</string>
+
+    <!-- App handle education tooltip text for tooltip pointing to windowing image button -->
+    <string name="windowing_desktop_mode_image_button_education_tooltip">Enter desktop view to open multiple apps together</string>
+
+    <!-- App handle education tooltip text for tooltip pointing to app chip -->
+    <string name="windowing_desktop_mode_exit_education_tooltip">Return to full screen anytime from the app menu</string>
+
     <!-- The title of the letterbox education dialog. [CHAR LIMIT=NONE] -->
     <string name="letterbox_education_dialog_title">See and do more</string>
 
@@ -292,10 +301,14 @@
     <string name="screenshot_text">Screenshot</string>
     <!-- Accessibility text for the handle menu open in browser button [CHAR LIMIT=NONE] -->
     <string name="open_in_browser_text">Open in browser</string>
+    <!-- Accessibility text for the handle menu open in app button [CHAR LIMIT=NONE] -->
+    <string name="open_in_app_text">Open in App</string>
     <!-- Accessibility text for the handle menu new window button [CHAR LIMIT=NONE] -->
     <string name="new_window_text">New Window</string>
     <!-- Accessibility text for the handle menu new window button [CHAR LIMIT=NONE] -->
     <string name="manage_windows_text">Manage Windows</string>
+    <!-- Accessibility text for the handle menu change aspect ratio button [CHAR LIMIT=NONE] -->
+    <string name="change_aspect_ratio_text">Change aspect ratio</string>
     <!-- Accessibility text for the handle menu close button [CHAR LIMIT=NONE] -->
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->
@@ -305,14 +318,32 @@
     <!-- Maximize menu maximize button string. -->
     <string name="desktop_mode_maximize_menu_maximize_text">Maximize Screen</string>
     <!-- Maximize menu snap buttons string. -->
-    <string name="desktop_mode_maximize_menu_snap_text">Snap Screen</string>
+    <string name="desktop_mode_maximize_menu_snap_text">Resize</string>
     <!-- Snap resizing non-resizable string. -->
-    <string name="desktop_mode_non_resizable_snap_text">This app can\'t be resized</string>
-    <!-- Accessibility text for the Maximize Menu's maximize button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_non_resizable_snap_text">App can\'t be moved here</string>
+    <!-- Accessibility text for the Maximize Menu's immersive button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_immersive_button_text">Immersive</string>
+    <!-- Accessibility text for the Maximize Menu's immersive restore button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text">Restore</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text">Maximize</string>
+    <!-- Accessibility text for the Maximize Menu's restore button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_restore_button_text">Restore</string>
     <!-- Accessibility text for the Maximize Menu's snap left button [CHAR LIMIT=NONE] -->
     <string name="desktop_mode_maximize_menu_snap_left_button_text">Snap left</string>
     <!-- Accessibility text for the Maximize Menu's snap right button [CHAR LIMIT=NONE] -->
     <string name="desktop_mode_maximize_menu_snap_right_button_text">Snap right</string>
 
+    <!-- Accessibility text for open by default settings button [CHAR LIMIT=NONE] -->
+    <string name="open_by_default_settings_text">Open by default settings</string>
+    <!-- Subheader for open by default menu string. -->
+    <string name="open_by_default_dialog_subheader_text">Choose how to open web links for this app</string>
+    <!-- Text for open by default settings dialog option. -->
+    <string name="open_by_default_dialog_in_app_text">In the app</string>
+    <!-- Text for open by default settings dialog option. -->
+    <string name="open_by_default_dialog_in_browser_text">In your browser</string>
+    <!-- Text for open by default settings dialog dismiss button. -->
+    <string name="open_by_default_dialog_dismiss_button_text">OK</string>
+
+    <!-- Text for the App-to-Web education promo. -->
+    <string name="desktop_windowing_app_to_web_education_text">Quickly open apps in your browser here</string>
 </resources>

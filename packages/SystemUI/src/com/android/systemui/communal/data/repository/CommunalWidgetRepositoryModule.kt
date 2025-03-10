@@ -17,11 +17,24 @@
 
 package com.android.systemui.communal.data.repository
 
-import dagger.Binds
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
+import dagger.Lazy
 import dagger.Module
+import dagger.Provides
 
 @Module
 interface CommunalWidgetRepositoryModule {
-    @Binds
-    fun communalWidgetRepository(impl: CommunalWidgetRepositoryImpl): CommunalWidgetRepository
+    companion object {
+        @Provides
+        fun provideCommunalWidgetRepository(
+            localImpl: Lazy<CommunalWidgetRepositoryLocalImpl>,
+            remoteImpl: Lazy<CommunalWidgetRepositoryRemoteImpl>,
+            helper: GlanceableHubMultiUserHelper,
+        ): CommunalWidgetRepository {
+            // Provide an implementation based on the current user.
+            return if (helper.glanceableHubHsumFlagEnabled && helper.isInHeadlessSystemUser())
+                remoteImpl.get()
+            else localImpl.get()
+        }
+    }
 }

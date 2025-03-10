@@ -21,10 +21,14 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyString;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
+import static org.mockito.Mockito.verify;
+
 import android.content.ContentResolver;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 
@@ -34,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
@@ -108,6 +113,20 @@ public class SettingsToPropertiesMapperTest {
     @After
     public void tearDown() throws Exception {
         mSession.finishMocking();
+    }
+
+    @Test
+    public void testClearAconfigStorageOverride() {
+        SettingsToPropertiesMapper spyMapper = Mockito.spy(new SettingsToPropertiesMapper(
+                mMockContentResolver, TEST_MAPPING, new String[] {}, new String[] {}));
+        HashMap flags = new HashMap();
+        flags.put("test_package.test_flag", null);
+        DeviceConfig.Properties props = new DeviceConfig.Properties("test_namespace", flags);
+
+        spyMapper.setLocalOverridesInNewStorage(props);
+
+        verify(spyMapper).writeFlagOverrideRemovalRequest(new ProtoOutputStream(),
+                "test_package", "test_flag", true);
     }
 
     @Test

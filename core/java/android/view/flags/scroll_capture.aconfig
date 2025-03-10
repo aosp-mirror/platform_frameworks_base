@@ -1,0 +1,22 @@
+package: "android.view.flags"
+container: "system"
+
+flag {
+    name: "scroll_capture_target_z_order_fix"
+    namespace: "systemui"
+    description: "Always prefer targets with higher z-order"
+    bug: "365969802"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "scroll_capture_relax_scroll_view_criteria"
+    namespace: "systemui"
+    description: "Treat all custom ViewGroups which support scrollTo as ScrollView"
+    bug: "189827634"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

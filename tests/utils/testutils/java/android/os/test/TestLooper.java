@@ -93,8 +93,8 @@ public class TestLooper {
         try {
             mLooper = LOOPER_CONSTRUCTOR.newInstance(false);
 
-            ThreadLocal<Looper> threadLocalLooper = (ThreadLocal<Looper>) THREAD_LOCAL_LOOPER_FIELD
-                    .get(null);
+            ThreadLocal<Looper> threadLocalLooper =
+                    (ThreadLocal<Looper>) THREAD_LOCAL_LOOPER_FIELD.get(null);
             threadLocalLooper.set(mLooper);
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
             throw new RuntimeException("Reflection error constructing or accessing looper", e);

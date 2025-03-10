@@ -27,6 +27,7 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -59,8 +60,14 @@ final class AdditionalSubtypeUtils {
     private static final String NODE_SUBTYPE = "subtype";
     private static final String NODE_IMI = "imi";
     private static final String ATTR_ID = "id";
+    /** The resource ID of the subtype name. */
     private static final String ATTR_LABEL = "label";
+    /** The untranslatable name of the subtype. */
     private static final String ATTR_NAME_OVERRIDE = "nameOverride";
+    /** The layout label string resource identifier. */
+    private static final String ATTR_LAYOUT_LABEL = "layoutLabel";
+    /** The non-localized layout label. */
+    private static final String ATTR_LAYOUT_LABEL_NON_LOCALIZED = "layoutLabelNonLocalized";
     private static final String ATTR_NAME_PK_LANGUAGE_TAG = "pkLanguageTag";
     private static final String ATTR_NAME_PK_LAYOUT_TYPE = "pkLayoutType";
     private static final String ATTR_ICON = "icon";
@@ -173,6 +180,11 @@ final class AdditionalSubtypeUtils {
                     out.attributeInt(null, ATTR_ICON, subtype.getIconResId());
                     out.attributeInt(null, ATTR_LABEL, subtype.getNameResId());
                     out.attribute(null, ATTR_NAME_OVERRIDE, subtype.getNameOverride().toString());
+                    if (Flags.imeSwitcherRevampApi()) {
+                        out.attributeInt(null, ATTR_LAYOUT_LABEL, subtype.getLayoutLabelResource());
+                        out.attribute(null, ATTR_LAYOUT_LABEL_NON_LOCALIZED,
+                                subtype.getLayoutLabelNonLocalized().toString());
+                    }
                     ULocale pkLanguageTag = subtype.getPhysicalKeyboardHintLanguageTag();
                     if (pkLanguageTag != null) {
                         out.attribute(null, ATTR_NAME_PK_LANGUAGE_TAG,
@@ -264,6 +276,16 @@ final class AdditionalSubtypeUtils {
                     final int label = parser.getAttributeInt(null, ATTR_LABEL);
                     final String untranslatableName = parser.getAttributeValue(null,
                             ATTR_NAME_OVERRIDE);
+                    final int layoutLabelResource;
+                    final String layoutLabelNonLocalized;
+                    if (Flags.imeSwitcherRevampApi()) {
+                        layoutLabelResource = parser.getAttributeInt(null, ATTR_LAYOUT_LABEL);
+                        layoutLabelNonLocalized = parser.getAttributeValue(null,
+                                ATTR_LAYOUT_LABEL_NON_LOCALIZED);
+                    } else {
+                        layoutLabelResource = 0;
+                        layoutLabelNonLocalized = null;
+                    }
                     final String pkLanguageTag = parser.getAttributeValue(null,
                             ATTR_NAME_PK_LANGUAGE_TAG);
                     final String pkLayoutType = parser.getAttributeValue(null,
@@ -283,6 +305,7 @@ final class AdditionalSubtypeUtils {
                     final InputMethodSubtype.InputMethodSubtypeBuilder
                             builder = new InputMethodSubtype.InputMethodSubtypeBuilder()
                             .setSubtypeNameResId(label)
+                            .setLayoutLabelResource(layoutLabelResource)
                             .setPhysicalKeyboardHint(
                                     pkLanguageTag == null ? null : new ULocale(pkLanguageTag),
                                     pkLayoutType == null ? "" : pkLayoutType)
@@ -300,6 +323,9 @@ final class AdditionalSubtypeUtils {
                     }
                     if (untranslatableName != null) {
                         builder.setSubtypeNameOverride(untranslatableName);
+                    }
+                    if (layoutLabelNonLocalized != null) {
+                        builder.setLayoutLabelNonLocalized(layoutLabelNonLocalized);
                     }
                     tempSubtypesArray.add(builder.build());
                 }

@@ -16,9 +16,6 @@
 
 package android.hardware.biometrics;
 
-import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
-
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -26,7 +23,6 @@ import android.os.Parcelable;
 /**
  * A list item with plain text shown on {@link PromptVerticalListContentView}.
  */
-@FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptContentItemPlainText implements PromptContentItemParcelable {
     private final String mText;
 

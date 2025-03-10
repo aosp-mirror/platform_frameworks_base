@@ -291,6 +291,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
 
+        makeWindowVisible(statusBar);
+
         // IME cannot be the IME target.
         ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
 

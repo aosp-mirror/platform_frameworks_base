@@ -337,11 +337,11 @@ public class AppStandbyController
      */
     long[] mAppStandbyElapsedThresholds = DEFAULT_ELAPSED_TIME_THRESHOLDS;
     /** Minimum time a strong usage event should keep the bucket elevated. */
-    long mStrongUsageTimeoutMillis = ConstantsObserver.DEFAULT_STRONG_USAGE_TIMEOUT;
+    long mStrongUsageTimeoutMillis = ConstantsObserver.DEFAULT_LEGACY_STRONG_USAGE_TIMEOUT;
     /** Minimum time a notification seen event should keep the bucket elevated. */
     long mNotificationSeenTimeoutMillis = ConstantsObserver.DEFAULT_NOTIFICATION_TIMEOUT;
     /** Minimum time a slice pinned event should keep the bucket elevated. */
-    long mSlicePinnedTimeoutMillis = ConstantsObserver.DEFAULT_SLICE_PINNED_TIMEOUT;
+    long mSlicePinnedTimeoutMillis = ConstantsObserver.DEFAULT_LEGACY_SLICE_PINNED_TIMEOUT;
     /** The standby bucket that an app will be promoted on a notification-seen event */
     int mNotificationSeenPromotedBucket =
             ConstantsObserver.DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET;
@@ -362,7 +362,9 @@ public class AppStandbyController
     /** Maximum time to wait for a prediction before using simple timeouts to downgrade buckets. */
     long mPredictionTimeoutMillis = DEFAULT_PREDICTION_TIMEOUT;
     /** Maximum time a sync adapter associated with a CP should keep the buckets elevated. */
-    long mSyncAdapterTimeoutMillis = ConstantsObserver.DEFAULT_SYNC_ADAPTER_TIMEOUT;
+    long mSyncAdapterTimeoutMillis = ConstantsObserver.DEFAULT_LEGACY_SYNC_ADAPTER_TIMEOUT;
+    /** The bucket that an app will be promoted on a sync adapter associated with a CP */
+    int mSyncAdapaterPromotedBucket = STANDBY_BUCKET_ACTIVE;
     /**
      * Maximum time an exempted sync should keep the buckets elevated, when sync is scheduled in
      * non-doze
@@ -751,7 +753,7 @@ public class AppStandbyController
                         userId);
                 synchronized (mAppIdleLock) {
                     reportNoninteractiveUsageCrossUserLocked(packageName, userId,
-                            STANDBY_BUCKET_ACTIVE, REASON_SUB_USAGE_SYNC_ADAPTER,
+                            mSyncAdapaterPromotedBucket, REASON_SUB_USAGE_SYNC_ADAPTER,
                             elapsedRealtime, mSyncAdapterTimeoutMillis, linkedProfiles);
                 }
             }
@@ -2446,6 +2448,8 @@ public class AppStandbyController
         pw.println("Flags: ");
         pw.println("    " + Flags.FLAG_AVOID_IDLE_CHECK
                 + ": " + Flags.avoidIdleCheck());
+        pw.println("    " + Flags.FLAG_ADJUST_DEFAULT_BUCKET_ELEVATION_PARAMS
+                + ": " + Flags.adjustDefaultBucketElevationParams());
         pw.println();
 
         synchronized (mCarrierPrivilegedLock) {
@@ -2480,6 +2484,9 @@ public class AppStandbyController
         pw.println();
         pw.print("  mSyncAdapterTimeoutMillis=");
         TimeUtils.formatDuration(mSyncAdapterTimeoutMillis, pw);
+        pw.println();
+        pw.print("  mSyncAdapaterPromotedBucket=");
+        pw.print(standbyBucketToString(mSyncAdapaterPromotedBucket));
         pw.println();
         pw.print("  mSystemInteractionTimeoutMillis=");
         TimeUtils.formatDuration(mSystemInteractionTimeoutMillis, pw);
@@ -3059,12 +3066,18 @@ public class AppStandbyController
 
         public static final long DEFAULT_CHECK_IDLE_INTERVAL_MS =
                 COMPRESS_TIME ? ONE_MINUTE : 4 * ONE_HOUR;
-        public static final long DEFAULT_STRONG_USAGE_TIMEOUT =
+        public static final long DEFAULT_LEGACY_STRONG_USAGE_TIMEOUT =
                 COMPRESS_TIME ? ONE_MINUTE : 1 * ONE_HOUR;
+
+        public static final long DEFAULT_CURRENT_STRONG_USAGE_TIMEOUT =
+                COMPRESS_TIME ? ONE_MINUTE : 5 * ONE_MINUTE;
         public static final long DEFAULT_NOTIFICATION_TIMEOUT =
                 COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
-        public static final long DEFAULT_SLICE_PINNED_TIMEOUT =
+        public static final long DEFAULT_LEGACY_SLICE_PINNED_TIMEOUT =
                 COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
+
+        public static final long DEFAULT_CURRENT_SLICE_PINNED_TIMEOUT =
+                COMPRESS_TIME ? 12 * ONE_MINUTE : 2 * ONE_HOUR;
         public static final int DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET =
                 STANDBY_BUCKET_WORKING_SET;
         public static final boolean DEFAULT_RETAIN_NOTIFICATION_SEEN_IMPACT_FOR_PRE_T_APPS = false;
@@ -3073,8 +3086,11 @@ public class AppStandbyController
                 COMPRESS_TIME ? 2 * ONE_MINUTE : 2 * ONE_HOUR;
         public static final long DEFAULT_SYSTEM_INTERACTION_TIMEOUT =
                 COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE;
-        public static final long DEFAULT_SYNC_ADAPTER_TIMEOUT =
+        public static final long DEFAULT_LEGACY_SYNC_ADAPTER_TIMEOUT =
                 COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE;
+
+        public static final long DEFAULT_CURRENT_SYNC_ADAPTER_TIMEOUT =
+                COMPRESS_TIME ? ONE_MINUTE : 2 * ONE_HOUR;
         public static final long DEFAULT_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_TIMEOUT =
                 COMPRESS_TIME ? (ONE_MINUTE / 2) : 10 * ONE_MINUTE;
         public static final long DEFAULT_EXEMPTED_SYNC_SCHEDULED_DOZE_TIMEOUT =
@@ -3117,6 +3133,9 @@ public class AppStandbyController
             cr.registerContentObserver(Global.getUriFor(Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED),
                     false, this);
             mInjector.registerDeviceConfigPropertiesChangedListener(this);
+
+            processDefaultConstants();
+
             // Load all the constants.
             // postOneTimeCheckIdleStates() doesn't need to be called on boot.
             processProperties(mInjector.getDeviceConfigProperties());
@@ -3133,6 +3152,17 @@ public class AppStandbyController
         public void onPropertiesChanged(DeviceConfig.Properties properties) {
             processProperties(properties);
             postOneTimeCheckIdleStates();
+        }
+
+        private void processDefaultConstants() {
+            if (!Flags.adjustDefaultBucketElevationParams()) {
+                return;
+            }
+
+            mSlicePinnedTimeoutMillis = DEFAULT_CURRENT_SLICE_PINNED_TIMEOUT;
+            mSyncAdapterTimeoutMillis = DEFAULT_CURRENT_SYNC_ADAPTER_TIMEOUT;
+            mSyncAdapaterPromotedBucket = STANDBY_BUCKET_WORKING_SET;
+            mStrongUsageTimeoutMillis = DEFAULT_CURRENT_STRONG_USAGE_TIMEOUT;
         }
 
         private void processProperties(DeviceConfig.Properties properties) {
@@ -3182,11 +3212,16 @@ public class AppStandbyController
                         case KEY_SLICE_PINNED_HOLD_DURATION:
                             mSlicePinnedTimeoutMillis = properties.getLong(
                                     KEY_SLICE_PINNED_HOLD_DURATION,
-                                    DEFAULT_SLICE_PINNED_TIMEOUT);
+                                    Flags.adjustDefaultBucketElevationParams()
+                                            ? DEFAULT_CURRENT_SLICE_PINNED_TIMEOUT
+                                            : DEFAULT_LEGACY_SLICE_PINNED_TIMEOUT);
                             break;
                         case KEY_STRONG_USAGE_HOLD_DURATION:
                             mStrongUsageTimeoutMillis = properties.getLong(
-                                    KEY_STRONG_USAGE_HOLD_DURATION, DEFAULT_STRONG_USAGE_TIMEOUT);
+                                    KEY_STRONG_USAGE_HOLD_DURATION,
+                                    Flags.adjustDefaultBucketElevationParams()
+                                            ? DEFAULT_CURRENT_STRONG_USAGE_TIMEOUT
+                                            : DEFAULT_LEGACY_STRONG_USAGE_TIMEOUT);
                             break;
                         case KEY_PREDICTION_TIMEOUT:
                             mPredictionTimeoutMillis = properties.getLong(
@@ -3203,7 +3238,10 @@ public class AppStandbyController
                             break;
                         case KEY_SYNC_ADAPTER_HOLD_DURATION:
                             mSyncAdapterTimeoutMillis = properties.getLong(
-                                    KEY_SYNC_ADAPTER_HOLD_DURATION, DEFAULT_SYNC_ADAPTER_TIMEOUT);
+                                    KEY_SYNC_ADAPTER_HOLD_DURATION,
+                                    Flags.adjustDefaultBucketElevationParams()
+                                            ? DEFAULT_CURRENT_SYNC_ADAPTER_TIMEOUT
+                                            : DEFAULT_LEGACY_SYNC_ADAPTER_TIMEOUT);
                             break;
                         case KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION:
                             mExemptedSyncScheduledDozeTimeoutMillis = properties.getLong(

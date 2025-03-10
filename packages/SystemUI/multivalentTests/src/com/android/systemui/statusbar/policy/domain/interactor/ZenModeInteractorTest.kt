@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.policy.domain.interactor
 
 import android.app.AutomaticZenRule
 import android.app.Flags
+import android.app.NotificationManager.INTERRUPTION_FILTER_NONE
+import android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY
 import android.app.NotificationManager.Policy
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
@@ -25,6 +27,8 @@ import android.provider.Settings.Secure.ZEN_DURATION
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import android.service.notification.SystemZenRules
+import android.service.notification.ZenPolicy
+import android.service.notification.ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
@@ -34,6 +38,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.settings.data.repository.secureSettingsRepository
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
 import com.android.systemui.testKosmos
@@ -246,6 +251,22 @@ class ZenModeInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun deactivateAllModes_updatesCorrectModes() =
+        testScope.runTest {
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder.MANUAL_DND_ACTIVE,
+                    TestModeBuilder().setName("Inactive").setActive(false).build(),
+                    TestModeBuilder().setName("Active").setActive(true).build(),
+                )
+            )
+
+            underTest.deactivateAllModes()
+
+            assertThat(zenModeRepository.getModes().filter { it.isActive }).isEmpty()
+        }
+
+    @Test
     fun activeModes_computesMainActiveMode() =
         testScope.runTest {
             val activeModes by collectLastValue(underTest.activeModes)
@@ -373,10 +394,165 @@ class ZenModeInteractorTest : SysuiTestCase() {
 
             assertThat(dndMode!!.isActive).isFalse()
 
-            zenModeRepository.removeMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            zenModeRepository.activateMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
             runCurrent()
 
             assertThat(dndMode!!.isActive).isTrue()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    fun activeModesBlockingEverything_hasModesWithFilterNone() =
+        testScope.runTest {
+            val blockingEverything by collectLastValue(underTest.activeModesBlockingEverything)
+
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("Filter=None, Not active")
+                        .setInterruptionFilter(INTERRUPTION_FILTER_NONE)
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Filter=Priority, Active")
+                        .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Filter=None, Active")
+                        .setInterruptionFilter(INTERRUPTION_FILTER_NONE)
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Filter=None, Active Too")
+                        .setInterruptionFilter(INTERRUPTION_FILTER_NONE)
+                        .setActive(true)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(blockingEverything!!.mainMode!!.name).isEqualTo("Filter=None, Active")
+            assertThat(blockingEverything!!.modeNames)
+                .containsExactly("Filter=None, Active", "Filter=None, Active Too")
+                .inOrder()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    fun activeModesBlockingMedia_hasModesWithPolicyBlockingMedia() =
+        testScope.runTest {
+            val blockingMedia by collectLastValue(underTest.activeModesBlockingMedia)
+
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("Blocks media, Not active")
+                        .setZenPolicy(ZenPolicy.Builder().allowMedia(false).build())
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Allows media, Active")
+                        .setZenPolicy(ZenPolicy.Builder().allowMedia(true).build())
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Blocks media, Active")
+                        .setZenPolicy(ZenPolicy.Builder().allowMedia(false).build())
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Blocks media, Active Too")
+                        .setZenPolicy(ZenPolicy.Builder().allowMedia(false).build())
+                        .setActive(true)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(blockingMedia!!.mainMode!!.name).isEqualTo("Blocks media, Active")
+            assertThat(blockingMedia!!.modeNames)
+                .containsExactly("Blocks media, Active", "Blocks media, Active Too")
+                .inOrder()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    fun activeModesBlockingAlarms_hasModesWithPolicyBlockingAlarms() =
+        testScope.runTest {
+            val blockingAlarms by collectLastValue(underTest.activeModesBlockingAlarms)
+
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("Blocks alarms, Not active")
+                        .setZenPolicy(ZenPolicy.Builder().allowAlarms(false).build())
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Allows alarms, Active")
+                        .setZenPolicy(ZenPolicy.Builder().allowAlarms(true).build())
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Blocks alarms, Active")
+                        .setZenPolicy(ZenPolicy.Builder().allowAlarms(false).build())
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Blocks alarms, Active Too")
+                        .setZenPolicy(ZenPolicy.Builder().allowAlarms(false).build())
+                        .setActive(true)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(blockingAlarms!!.mainMode!!.name).isEqualTo("Blocks alarms, Active")
+            assertThat(blockingAlarms!!.modeNames)
+                .containsExactly("Blocks alarms, Active", "Blocks alarms, Active Too")
+                .inOrder()
+        }
+
+    @Test
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME, Flags.FLAG_MODES_UI, Flags.FLAG_MODES_API)
+    fun modesHidingNotifications_onlyIncludesModesWithNotifListSuppression() =
+        testScope.runTest {
+            val modesHidingNotifications by collectLastValue(underTest.modesHidingNotifications)
+
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("Not active, no list suppression")
+                        .setActive(false)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Not active, has list suppression")
+                        .setActive(false)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("No list suppression")
+                        .setActive(true)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Has list suppression 1")
+                        .setActive(true)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Has list suppression 2")
+                        .setActive(true)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(modesHidingNotifications?.map { it.name })
+                .containsExactly("Has list suppression 1", "Has list suppression 2")
+                .inOrder()
         }
 }

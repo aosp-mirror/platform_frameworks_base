@@ -29,8 +29,10 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.Decision
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.FullScreenIntentDecision
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionSuppressor.EventLogData
@@ -40,7 +42,6 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings
@@ -72,9 +73,9 @@ constructor(
     private val systemSettings: SystemSettings,
     private val packageManager: PackageManager,
     private val bubbles: Optional<Bubbles>,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val notificationManager: NotificationManager,
-    private val settingsInteractor: NotificationSettingsInteractor
+    private val settingsInteractor: NotificationSettingsInteractor,
 ) : VisualInterruptionDecisionProvider {
 
     init {
@@ -88,7 +89,7 @@ constructor(
 
     private class DecisionImpl(
         override val shouldInterrupt: Boolean,
-        override val logReason: String
+        override val logReason: String,
     ) : Decision
 
     private data class LoggableDecision
@@ -106,7 +107,7 @@ constructor(
                 LoggableDecision(
                     DecisionImpl(
                         shouldInterrupt = false,
-                        logReason = "${legacySuppressor.name}.$methodName"
+                        logReason = "${legacySuppressor.name}.$methodName",
                     )
                 )
 
@@ -122,7 +123,7 @@ constructor(
 
     private class FullScreenIntentDecisionImpl(
         val entry: NotificationEntry,
-        private val fsiDecision: FullScreenIntentDecisionProvider.Decision
+        private val fsiDecision: FullScreenIntentDecisionProvider.Decision,
     ) : FullScreenIntentDecision, Loggable {
         var hasBeenLogged = false
 
@@ -153,7 +154,7 @@ constructor(
             deviceProvisionedController,
             keyguardStateController,
             powerManager,
-            statusBarStateController
+            statusBarStateController,
         )
 
     private val legacySuppressors = mutableSetOf<NotificationInterruptSuppressor>()
@@ -196,7 +197,7 @@ constructor(
                     context,
                     notificationManager,
                     logger,
-                    systemSettings
+                    systemSettings,
                 )
             )
             avalancheProvider.register()
@@ -289,7 +290,7 @@ constructor(
     private fun logDecision(
         type: VisualInterruptionType,
         entry: NotificationEntry,
-        loggableDecision: LoggableDecision
+        loggableDecision: LoggableDecision,
     ) {
         if (!loggableDecision.isSpammy || logger.spew) {
             logger.logDecision(type.name, entry, loggableDecision.decision)

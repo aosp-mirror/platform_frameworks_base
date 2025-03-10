@@ -49,7 +49,7 @@ public class DragUtils {
      * Returns whether we can handle this particular drag.
      */
     public static boolean canHandleDrag(DragEvent event) {
-        if (event.getClipData().getItemCount() <= 0) {
+        if (event.getClipData() == null || event.getClipData().getItemCount() <= 0) {
             // No clip data, ignore this drag
             return false;
         }
@@ -107,8 +107,11 @@ public class DragUtils {
     /**
      * Returns a list of the mime types provided in the clip description.
      */
-    public static String getMimeTypesConcatenated(ClipDescription description) {
+    public static String getMimeTypesConcatenated(@Nullable ClipDescription description) {
         String mimeTypes = "";
+        if (description == null) {
+            return mimeTypes;
+        }
         for (int i = 0; i < description.getMimeTypeCount(); i++) {
             if (i > 0) {
                 mimeTypes += ", ";
@@ -125,25 +128,35 @@ public class DragUtils {
         StringJoiner str = new StringJoiner("|");
         if ((dragFlags & DRAG_FLAG_GLOBAL) != 0) {
             str.add("GLOBAL");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_URI_READ) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_URI_READ) != 0) {
             str.add("GLOBAL_URI_READ");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_URI_WRITE) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_URI_WRITE) != 0) {
             str.add("GLOBAL_URI_WRITE");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION) != 0) {
             str.add("GLOBAL_PERSISTABLE_URI_PERMISSION");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION) != 0) {
             str.add("GLOBAL_PREFIX_URI_PERMISSION");
-        } else if ((dragFlags & DRAG_FLAG_OPAQUE) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_OPAQUE) != 0) {
             str.add("OPAQUE");
-        } else if ((dragFlags & DRAG_FLAG_ACCESSIBILITY_ACTION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_ACCESSIBILITY_ACTION) != 0) {
             str.add("ACCESSIBILITY_ACTION");
-        } else if ((dragFlags & DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION) != 0) {
             str.add("REQUEST_SURFACE_FOR_RETURN_ANIMATION");
-        } else if ((dragFlags & DRAG_FLAG_GLOBAL_SAME_APPLICATION) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_GLOBAL_SAME_APPLICATION) != 0) {
             str.add("GLOBAL_SAME_APPLICATION");
-        } else if ((dragFlags & DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG) != 0) {
             str.add("START_INTENT_SENDER_ON_UNHANDLED_DRAG");
-        } else if ((dragFlags & DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START) != 0) {
+        }
+        if ((dragFlags & DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START) != 0) {
             str.add("HIDE_CALLING_TASK_ON_DRAG_START");
         }
         return str.toString();

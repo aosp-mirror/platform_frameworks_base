@@ -15,63 +15,76 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 
-/**
- * Specify an abstract paint context used by RemoteCompose commands to draw
- */
+/** Specify an abstract paint context used by RemoteCompose commands to draw */
 public abstract class PaintContext {
-    protected RemoteContext mContext;
+    public static final int TEXT_MEASURE_MONOSPACE_WIDTH = 0x01;
+    public static final int TEXT_MEASURE_FONT_HEIGHT = 0x02;
 
+    protected @NonNull RemoteContext mContext;
+    private boolean mNeedsRepaint = false;
+
+    @NonNull
     public RemoteContext getContext() {
         return mContext;
     }
 
-    public PaintContext(RemoteContext context) {
+    public boolean doesNeedsRepaint() {
+        return mNeedsRepaint;
+    }
+
+    public void clearNeedsRepaint() {
+        mNeedsRepaint = false;
+    }
+
+    public PaintContext(@NonNull RemoteContext context) {
         this.mContext = context;
     }
 
-    public void setContext(RemoteContext context) {
+    public void setContext(@NonNull RemoteContext context) {
         this.mContext = context;
     }
 
-    /**
-     * convenience function to call matrixSave()
-     */
+    /** convenience function to call matrixSave() */
     public void save() {
         matrixSave();
     }
 
-    /**
-     * convenience function to call matrixRestore()
-     */
+    /** convenience function to call matrixRestore() */
     public void restore() {
         matrixRestore();
     }
 
-    /**
-     * convenience function to call matrixSave()
-     */
+    /** convenience function to call matrixSave() */
     public void saveLayer(float x, float y, float width, float height) {
         // TODO
         matrixSave();
     }
 
-    public abstract void drawBitmap(int imageId,
-                                    int srcLeft, int srcTop, int srcRight, int srcBottom,
-                                    int dstLeft, int dstTop, int dstRight, int dstBottom,
-                                    int cdId);
+    public abstract void drawBitmap(
+            int imageId,
+            int srcLeft,
+            int srcTop,
+            int srcRight,
+            int srcBottom,
+            int dstLeft,
+            int dstTop,
+            int dstRight,
+            int dstBottom,
+            int cdId);
 
     public abstract void scale(float scaleX, float scaleY);
 
     public abstract void translate(float translateX, float translateY);
 
-    public abstract void drawArc(float left,
-                                 float top,
-                                 float right,
-                                 float bottom,
-                                 float startAngle,
-                                 float sweepAngle);
+    public abstract void drawArc(
+            float left, float top, float right, float bottom, float startAngle, float sweepAngle);
+
+    public abstract void drawSector(
+            float left, float top, float right, float bottom, float startAngle, float sweepAngle);
 
     public abstract void drawBitmap(int id, float left, float top, float right, float bottom);
 
@@ -85,40 +98,30 @@ public abstract class PaintContext {
 
     public abstract void drawRect(float left, float top, float right, float bottom);
 
-    /**
-     * this caches the paint to a paint stack
-     */
-    public abstract void  savePaint();
+    /** this caches the paint to a paint stack */
+    public abstract void savePaint();
 
-    /**
-     * This restores the paint form the paint stack
-     */
-    public abstract void  restorePaint();
+    /** This restores the paint form the paint stack */
+    public abstract void restorePaint();
 
-    public abstract void drawRoundRect(float left,
-                                       float top,
-                                       float right,
-                                       float bottom,
-                                       float radiusX,
-                                       float radiusY);
+    public abstract void drawRoundRect(
+            float left, float top, float right, float bottom, float radiusX, float radiusY);
 
     public abstract void drawTextOnPath(int textId, int pathId, float hOffset, float vOffset);
 
     /**
-     * Return the dimensions (left, top, right, bottom).
-     * Relative to a drawTextRun x=0, y=0;
+     * Return the dimensions (left, top, right, bottom). Relative to a drawTextRun x=0, y=0;
      *
      * @param textId
      * @param start
-     * @param end    if end is -1 it means the whole string
-     * @param monospace measure with better support for monospace
+     * @param end if end is -1 it means the whole string
+     * @param flags how to measure: TEXT_MEASURE_MONOSPACE_WIDTH - measure as a monospace font
+     *     TEXT_MEASURE_FULL_HEIGHT - measure bounds of the given string using the max ascend and
+     *     descent of the font (not just of the measured text)
      * @param bounds the bounds (left, top, right, bottom)
      */
-    public abstract void getTextBounds(int textId,
-                                       int start,
-                                       int end,
-                                       boolean monospace,
-                                       float[]bounds);
+    public abstract void getTextBounds(
+            int textId, int start, int end, int flags, @NonNull float[] bounds);
 
     /**
      * Draw a text starting ast x,y
@@ -132,38 +135,40 @@ public abstract class PaintContext {
      * @param y
      * @param rtl
      */
-    public abstract void drawTextRun(int textId,
-                                     int start,
-                                     int end,
-                                     int contextStart,
-                                     int contextEnd,
-                                     float x,
-                                     float y,
-                                     boolean rtl);
+    public abstract void drawTextRun(
+            int textId,
+            int start,
+            int end,
+            int contextStart,
+            int contextEnd,
+            float x,
+            float y,
+            boolean rtl);
 
     /**
      * Draw an interpolation between two paths
+     *
      * @param path1Id
      * @param path2Id
-     * @param tween  0.0 = is path1 1.0 is path2
+     * @param tween 0.0 = is path1 1.0 is path2
      * @param start
      * @param stop
      */
-    public abstract void drawTweenPath(int path1Id,
-                                       int path2Id,
-                                       float tween,
-                                       float start,
-                                       float stop);
+    public abstract void drawTweenPath(
+            int path1Id, int path2Id, float tween, float start, float stop);
+
+    public abstract void tweenPath(int out, int path1, int path2, float tween);
 
     /**
      * This applies changes to the current paint
+     *
      * @param mPaintData the list of changes
      */
-    public abstract void applyPaint(PaintBundle mPaintData);
+    public abstract void applyPaint(@NonNull PaintBundle mPaintData);
 
     /**
-     * Scale the rendering by scaleX and saleY (1.0 = no scale).
-     * Scaling is done about centerX,centerY.
+     * Scale the rendering by scaleX and saleY (1.0 = no scale). Scaling is done about
+     * centerX,centerY.
      *
      * @param scaleX
      * @param scaleY
@@ -174,6 +179,7 @@ public abstract class PaintContext {
 
     /**
      * Translate the rendering
+     *
      * @param translateX
      * @param translateY
      */
@@ -181,33 +187,30 @@ public abstract class PaintContext {
 
     /**
      * Skew the rendering
+     *
      * @param skewX
      * @param skewY
      */
     public abstract void matrixSkew(float skewX, float skewY);
 
     /**
-     * Rotate the rendering.
-     * Note rotates are cumulative.
+     * Rotate the rendering. Note rotates are cumulative.
+     *
      * @param rotate angle to rotate
      * @param pivotX x-coordinate about which to rotate
      * @param pivotY y-coordinate about which to rotate
      */
     public abstract void matrixRotate(float rotate, float pivotX, float pivotY);
 
-    /**
-     * Save the current state of the transform
-     */
+    /** Save the current state of the transform */
     public abstract void matrixSave();
 
-    /**
-     * Restore the previously saved state of the transform
-     */
+    /** Restore the previously saved state of the transform */
     public abstract void matrixRestore();
 
     /**
-     * Set the clip to a rectangle.
-     * Drawing outside the current clip region will have no effect
+     * Set the clip to a rectangle. Drawing outside the current clip region will have no effect
+     *
      * @param left
      * @param top
      * @param right
@@ -217,13 +220,15 @@ public abstract class PaintContext {
 
     /**
      * Clip based on a path.
+     *
      * @param pathId
      * @param regionOp
      */
     public abstract void clipPath(int pathId, int regionOp);
 
     /**
-     * Clip based ona  round rect
+     * Clip based ona round rect
+     *
      * @param width
      * @param height
      * @param topStart
@@ -231,13 +236,15 @@ public abstract class PaintContext {
      * @param bottomStart
      * @param bottomEnd
      */
-    public abstract void roundedClipRect(float width, float height,
-                                         float topStart, float topEnd,
-                                         float bottomStart, float bottomEnd);
+    public abstract void roundedClipRect(
+            float width,
+            float height,
+            float topStart,
+            float topEnd,
+            float bottomStart,
+            float bottomEnd);
 
-    /**
-     * Reset the paint
-     */
+    /** Reset the paint */
     public abstract void reset();
 
     /**
@@ -263,9 +270,31 @@ public abstract class PaintContext {
      *
      * @param content the content to log
      */
-    public void log(String content) {
+    public void log(@NonNull String content) {
         System.out.println("[LOG] " + content);
     }
 
-}
+    public void needsRepaint() {
+        mNeedsRepaint = true;
+    }
 
+    public abstract void startGraphicsLayer(int w, int h);
+
+    public abstract void setGraphicsLayer(
+            float scaleX,
+            float scaleY,
+            float rotationX,
+            float rotationY,
+            float rotationZ,
+            float shadowElevation,
+            float transformOriginX,
+            float transformOriginY,
+            float alpha,
+            int renderEffectId);
+
+    public abstract void endGraphicsLayer();
+
+    public boolean isVisualDebug() {
+        return mContext.isVisualDebug();
+    }
+}

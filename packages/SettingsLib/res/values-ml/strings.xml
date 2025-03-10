@@ -586,13 +586,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ഈ ഫോൺ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ഈ ടാബ്‌ലെറ്റ്"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ഈ കമ്പ്യൂട്ടർ (ഇന്റേണൽ)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"മൈക്രോഫോൺ (ഇന്റേണൽ)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ഈ ടിവി"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ഡോക്ക് സ്‌പീക്കർ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ബാഹ്യ ഉപകരണം"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"കണക്‌റ്റ് ചെയ്‌ത ഉപകരണം"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ഈ ഫോൺ"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"അനലോഗ്"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ഈ ഉപകരണത്തിൽ പ്ലേ ചെയ്യാൻ കഴിയില്ല"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"അക്കൗണ്ട് മാറാൻ അപ്‌ഗ്രേഡ് ചെയ്യുക"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ഡൗൺലോഡുകൾ പ്ലേ ചെയ്യാനാകില്ല"</string>
@@ -605,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC വഴി കണക്റ്റ് ചെയ്തിരിക്കുന്നു"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC വഴി കണക്റ്റ് ചെയ്തിരിക്കുന്നു"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ടിവി ഡിഫോൾട്ട്"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ഔട്ട്പുട്ട്"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ആന്തരിക സ്‌പീക്കറുകൾ"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"ബിൽട്ട്-ഇൻ സ്പീക്കർ"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"ടിവി ഓഡിയോ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"കണക്‌റ്റ് ചെയ്യുന്നതിൽ പ്രശ്‌നമുണ്ടായി. ഉപകരണം ഓഫാക്കി വീണ്ടും ഓണാക്കുക"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"വയർ മുഖേന ബന്ധിപ്പിച്ച ഓഡിയോ ഉപകരണം"</string>
     <string name="help_label" msgid="3528360748637781274">"സഹായവും ഫീഡ്‌ബാക്കും"</string>
@@ -690,10 +690,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ഈ മാറ്റം ബാധകമാകുന്നതിന് നിങ്ങളുടെ ഉപകരണം റീബൂട്ട് ചെയ്യേണ്ടതുണ്ട്. ഇപ്പോൾ റീബൂട്ട് ചെയ്യുകയോ റദ്ദാക്കുകയോ ചെയ്യുക."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"വയേർഡ് ഹെഡ്ഫോൺ"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"ഹെഡ്ഫോൺ"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB സ്‌പീക്കർ"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"മൈക്ക് ജാക്ക്"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB മൈക്ക്"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"വയേർഡ് ഓഡിയോ"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ഓഡിയോ"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"വയേർഡ് മൈക്രോഫോൺ"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB മൈക്രോഫോൺ"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT മൈക്രോഫോൺ"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ഓണാണ്"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ഓഫാണ്"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"കാരിയർ നെറ്റ്‌വർക്ക് മാറ്റൽ"</string>

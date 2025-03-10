@@ -41,8 +41,13 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 
 import android.app.StatusBarManager;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.os.Binder;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
@@ -52,6 +57,7 @@ import android.view.WindowInsets;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -95,6 +101,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
     public void testControlsForDispatch_freeformTaskVisible() {
         addStatusBar();
         addNavigationBar();
@@ -104,6 +111,37 @@ public class InsetsPolicyTest extends WindowTestsBase {
         final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
 
         // The app must not control any system bars.
+        assertNull(controls);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void testControlsForDispatch_fullscreenFreeformTaskVisible() {
+        addStatusBar();
+        addNavigationBar();
+
+        final WindowState win = createWindow(null, WINDOWING_MODE_FREEFORM,
+                ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app");
+        win.setBounds(new Rect());
+        final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
+
+        // The freeform (w/fullscreen bounds) app window can control both system bars.
+        assertNotNull(controls);
+        assertEquals(2, controls.length);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void testControlsForDispatch_nonFullscreenFreeformTaskVisible() {
+        addStatusBar();
+        addNavigationBar();
+
+        final WindowState win = createWindow(null, WINDOWING_MODE_FREEFORM,
+                ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app");
+        win.getTask().setBounds(new Rect(1, 1, 10, 10));
+        final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
+
+        // The freeform (but not fullscreen bounds) app window must not control any system bars.
         assertNull(controls);
     }
 
@@ -488,6 +526,59 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertTrue(win2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
         assertTrue(win1.getWindowFrames().hasInsetsChanged());
     }
+
+    /**
+     * This test verifies that after setting {@link WindowContainer#mExcludeInsetsTypes}, the IME
+     * insets have a height of zero (applied in {@link InsetsPolicy#adjustVisibilityForIme}).
+     */
+    @RequiresFlagsEnabled(android.view.inputmethod.Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testExcludeImeInsets() {
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        final InsetsSource imeSource = new InsetsSource(ID_IME, ime());
+        imeSource.setVisible(true);
+        mImeWindow.mHasSurface = true;
+
+        final WindowState win = addWindow(TYPE_APPLICATION, "win1");
+        win.setRequestedVisibleTypes(0, ime());
+
+        win.mAboveInsetsState.addSource(imeSource);
+        win.mHasSurface = true;
+
+        DisplayContentTests.performLayout(mDisplayContent);
+        // IME should cover half of the app's window
+        final var winFrame = win.getFrame();
+        imeSource.setFrame(winFrame.left, winFrame.bottom / 2, winFrame.right, winFrame.bottom);
+        imeSource.setVisibleFrame(imeSource.getFrame());
+        DisplayContentTests.performLayout(mDisplayContent);
+
+        assertTrue(mImeWindow.isVisible());
+        assertTrue(win.isVisible());
+
+        displayPolicy.beginPostLayoutPolicyLw();
+        displayPolicy.applyPostLayoutPolicyLw(win, win.mAttrs, null, null);
+        displayPolicy.finishPostLayoutPolicyLw();
+
+        final var imeInsetsShown = win.getInsetsState().calculateInsets(win.getFrame(), ime(),
+                true);
+        assertEquals(new Rect(0, 0, 0, winFrame.bottom / 2), imeInsetsShown.toRect());
+
+
+        // Now we're setting the excludedInsetsTypes for the IME. The IME is still showing, but
+        // in this case, InsetsPolicy#adjustVisibilityForIme will override and dispatch IME
+        // insets with zero height.
+        win.setExcludeInsetsTypes(ime());
+
+        displayPolicy.beginPostLayoutPolicyLw();
+        displayPolicy.applyPostLayoutPolicyLw(win, win.mAttrs, null, null);
+        displayPolicy.finishPostLayoutPolicyLw();
+
+        final var imeInsetsHidden = win.getInsetsState().calculateInsets(win.getFrame(), ime(),
+                true);
+        assertEquals(Insets.NONE, imeInsetsHidden);
+    }
+
 
     private WindowState addNavigationBar() {
         final Binder owner = new Binder();

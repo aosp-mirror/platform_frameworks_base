@@ -181,6 +181,9 @@ public class PowerStatsLayout {
      * Extracts the usage duration from the corresponding <code>stats</code> element.
      */
     public long getUsageDuration(long[] stats) {
+        if (mDeviceDurationPosition == UNSUPPORTED) {
+            return 0;
+        }
         return stats[mDeviceDurationPosition];
     }
 
@@ -234,6 +237,9 @@ public class PowerStatsLayout {
      * Extracts the power estimate from a device stats array and converts it to mAh.
      */
     public double getDevicePowerEstimate(long[] stats) {
+        if (mDevicePowerEstimatePosition == UNSUPPORTED) {
+            return 0;
+        }
         return stats[mDevicePowerEstimatePosition] / MILLI_TO_NANO_MULTIPLIER;
     }
 
@@ -255,7 +261,7 @@ public class PowerStatsLayout {
      * Returns true if power for this component is attributed to UIDs (apps).
      */
     public boolean isUidPowerAttributionSupported() {
-        return mUidPowerEstimatePosition != UNSUPPORTED;
+        return mUidPowerEstimatePosition != UNSUPPORTED || mUidDurationPosition != UNSUPPORTED;
     }
 
     /**
@@ -269,6 +275,9 @@ public class PowerStatsLayout {
      * Extracts the usage duration from a UID stats array.
      */
     public long getUidUsageDuration(long[] stats) {
+        if (mUidDurationPosition == UNSUPPORTED) {
+            return 0;
+        }
         return stats[mUidDurationPosition];
     }
 
@@ -314,6 +323,9 @@ public class PowerStatsLayout {
      * Extracts the power estimate from a UID stats array and converts it to mAh.
      */
     public double getUidPowerEstimate(long[] stats) {
+        if (mUidPowerEstimatePosition == UNSUPPORTED) {
+            return 0;
+        }
         return stats[mUidPowerEstimatePosition] / MILLI_TO_NANO_MULTIPLIER;
     }
 

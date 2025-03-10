@@ -4,6 +4,15 @@ container: "system"
 # Important: Flags must be accessed through DisplayManagerFlags.
 
 flag {
+    name: "is_always_on_available_api"
+    namespace: "display_manager"
+    description: "Allows querying of AOD availability"
+    bug: "324046664"
+    is_fixed_read_only: true
+    is_exported: true
+}
+
+flag {
     name: "enable_port_in_display_layout"
     namespace: "display_manager"
     description: "Allows refering to displays by port in display layout"
@@ -259,6 +268,7 @@ flag {
     description: "Feature flag for an API to get the highest defined HDR/SDR ratio for a display."
     bug: "335181559"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -348,10 +358,29 @@ flag {
 }
 
 flag {
+    name: "virtual_display_limit"
+    namespace: "display_manager"
+    description: "Limit the number of virtual displays that can be created."
+    bug: "261791612"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "idle_screen_config_in_subscribing_light_sensor"
     namespace: "display_manager"
     description: "Account for Idle screen refresh rate configs while subscribing to light sensor"
     bug: "358019330"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_waiting_confirmation_before_mirroring"
+    namespace: "display_manager"
+    description: "Allow ContentRecorder checking whether user confirmed mirroring after boot"
+    bug: "361698995"
     is_fixed_read_only: true
     metadata {
       purpose: PURPOSE_BUGFIX
@@ -364,4 +393,105 @@ flag {
     description: "Flag to enable battery stats for all displays."
     bug: "366112793"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_apply_display_changed_during_display_added"
+    namespace: "display_manager"
+    description: "Apply display changes after display added"
+    bug: "368131655"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "block_autobrightness_changes_on_stylus_usage"
+    namespace: "display_manager"
+    description: "Block the usage of ALS to control the display brightness when stylus is being used"
+    bug: "352411468"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_user_refresh_rate_for_external_display"
+    namespace: "display_manager"
+    description: "Apply refresh rate from user preferred display mode to external displays"
+    bug: "370657357"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_has_arr_support"
+    namespace: "core_graphics"
+    description: "Flag for an API to get whether display supports ARR or not"
+    bug: "361433651"
+    is_fixed_read_only: true
+    is_exported: true
+}
+
+flag {
+    name: "auto_brightness_mode_bedtime_wear"
+    namespace: "wear_frameworks"
+    description: "Feature flag for loading and applying auto-brightness curve while wear bedtime mode enabled."
+    bug: "350617205"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_get_suggested_frame_rate"
+    namespace: "core_graphics"
+    description: "Flag for an API to get suggested frame rates"
+    bug: "361433796"
+    is_fixed_read_only: true
+    is_exported: true
+}
+
+flag {
+    name: "display_listener_performance_improvements"
+    namespace: "display_manager"
+    description: "Feature flag for an API to let the apps subscribe to a specific property change of the Display."
+    bug: "372700957"
+    is_fixed_read_only: true
+    is_exported: true
+}
+
+flag {
+    name: "enable_get_supported_refresh_rates"
+    namespace: "core_graphics"
+    description: "Flag to use the surfaceflinger rates for getSupportedRefreshRates"
+    bug: "365163968"
+    is_fixed_read_only: true
+    is_exported: true
+}
+
+flag {
+    name: "enable_plugin_manager"
+    namespace: "display_manager"
+    description: "Flag to enable DisplayManager plugins"
+    bug: "354059797"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_display_content_mode_management"
+    namespace: "lse_desktop_experience"
+    description: "Enable switching the content mode of connected displays between mirroring and extened. Also change the default content mode to extended mode."
+    bug: "378385869"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "subscribe_granular_display_events"
+    namespace: "display_manager"
+    description: "Enable subscription to granular display change events."
+    bug: "379250634"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

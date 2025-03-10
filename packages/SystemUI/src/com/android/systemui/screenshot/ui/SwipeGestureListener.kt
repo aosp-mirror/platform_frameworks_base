@@ -25,7 +25,7 @@ import kotlin.math.abs
 class SwipeGestureListener(
     private val view: View,
     private val onDismiss: (Float?) -> Unit,
-    private val onCancel: () -> Unit
+    private val onCancel: () -> Unit,
 ) {
     private val velocityTracker = VelocityTracker.obtain()
     private val displayMetrics = view.resources.displayMetrics
@@ -54,9 +54,9 @@ class SwipeGestureListener(
                     onDismiss.invoke(xVelocity)
                     return true
                 } else {
-                    velocityTracker.clear()
                     onCancel.invoke()
                 }
+                velocityTracker.clear()
             }
             MotionEvent.ACTION_MOVE -> {
                 velocityTracker.addMovement(ev)

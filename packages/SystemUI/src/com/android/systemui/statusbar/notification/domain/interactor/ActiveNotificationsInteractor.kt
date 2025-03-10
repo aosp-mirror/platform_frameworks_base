@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.notification.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
@@ -26,6 +27,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -73,6 +75,19 @@ constructor(
      */
     val allNotificationsCountValue: Int
         get() = repository.activeNotifications.value.individuals.size
+
+    /** The notifications that are promoted and ongoing. Sorted by priority order. */
+    val promotedOngoingNotifications: Flow<List<ActiveNotificationModel>> =
+        if (StatusBarNotifChips.isEnabled) {
+            // TODO(b/364653005): [ongoingCallNotification] should be incorporated into this flow
+            // instead of being separate.
+            topLevelRepresentativeNotifications
+                .map { notifs -> notifs.filter { it.promotedContent != null } }
+                .distinctUntilChanged()
+                .flowOn(backgroundDispatcher)
+        } else {
+            flowOf(emptyList())
+        }
 
     /**
      * The priority ongoing call notification, or null if there is no ongoing call.

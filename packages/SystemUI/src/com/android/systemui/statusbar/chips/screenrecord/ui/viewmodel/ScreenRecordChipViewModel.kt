@@ -30,6 +30,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel.Starting.Companion.toCountdownSeconds
+import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
@@ -84,7 +85,7 @@ constructor(
                                     Icon.Resource(
                                         ICON,
                                         ContentDescription.Resource(
-                                            R.string.screenrecord_ongoing_screen_only,
+                                            R.string.screenrecord_ongoing_screen_only
                                         ),
                                     )
                                 ),
@@ -153,6 +154,6 @@ constructor(
 
     companion object {
         @DrawableRes val ICON = R.drawable.ic_screenrecord
-        private const val TAG = "ScreenRecordVM"
+        private val TAG = "ScreenRecordVM".pad()
     }
 }

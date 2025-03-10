@@ -722,21 +722,31 @@ android_media_MediaRecorder_setInputDevice(JNIEnv *env, jobject thiz, jint devic
     return true;
 }
 
-static jint
-android_media_MediaRecorder_getRoutedDeviceId(JNIEnv *env, jobject thiz)
+static jintArray
+android_media_MediaRecorder_getRoutedDeviceIds(JNIEnv *env, jobject thiz)
 {
-    ALOGV("android_media_MediaRecorder_getRoutedDeviceId");
+    ALOGV("android_media_MediaRecorder_getRoutedDeviceIds");
 
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     if (mr == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return AUDIO_PORT_HANDLE_NONE;
+        return NULL;
     }
 
-    audio_port_handle_t deviceId;
-    process_media_recorder_call(env, mr->getRoutedDeviceId(&deviceId),
-            "java/lang/RuntimeException", "getRoutedDeviceId failed.");
-    return (jint) deviceId;
+    DeviceIdVector deviceIds;
+    process_media_recorder_call(env, mr->getRoutedDeviceIds(deviceIds),
+            "java/lang/RuntimeException", "getRoutedDeviceIds failed.");
+    jintArray result;
+    result = env->NewIntArray(deviceIds.size());
+    if (result == NULL) {
+        return NULL;
+    }
+    jint* values = env->GetIntArrayElements(result, 0);
+    for (unsigned int i = 0; i < deviceIds.size(); i++) {
+        values[i++] = static_cast<jint>(deviceIds[i]);
+    }
+    env->ReleaseIntArrayElements(result, values, 0);
+    return result;
 }
 
 static void
@@ -880,7 +890,8 @@ static const JNINativeMethod gMethods[] = {
     {"native_getMetrics",    "()Landroid/os/PersistableBundle;", (void *)android_media_MediaRecorder_native_getMetrics},
 
     {"native_setInputDevice", "(I)Z",                           (void *)android_media_MediaRecorder_setInputDevice},
-    {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaRecorder_getRoutedDeviceId},
+    {"native_getRoutedDeviceIds", "()[I",
+         (void *)android_media_MediaRecorder_getRoutedDeviceIds},
     {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaRecorder_enableDeviceCallback},
 
     {"native_getActiveMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_MediaRecord_getActiveMicrophones},

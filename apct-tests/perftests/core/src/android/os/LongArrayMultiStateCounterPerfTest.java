@@ -159,9 +159,7 @@ public class LongArrayMultiStateCounterPerfTest {
         LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         long time = 1000;
-        LongArrayMultiStateCounter.LongArrayContainer timeInFreq =
-                new LongArrayMultiStateCounter.LongArrayContainer(4);
-        timeInFreq.setValues(new long[]{100, 200, 300, 400});
+        long[] timeInFreq = {100, 200, 300, 400};
         while (state.keepRunning()) {
             counter.setState(1, time);
             counter.setState(0, time + 1000);

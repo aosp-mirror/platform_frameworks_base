@@ -3,11 +3,12 @@ package com.android.server.security
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_CERTS
+import android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS
+import android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_PATCH_LEVEL_DIFF
 import android.security.attestationverification.AttestationVerificationManager.PARAM_CHALLENGE
 import android.security.attestationverification.AttestationVerificationManager.PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS
 import android.security.attestationverification.AttestationVerificationManager.PARAM_PUBLIC_KEY
-import android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE
-import android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS
 import android.security.attestationverification.AttestationVerificationManager.TYPE_CHALLENGE
 import android.security.attestationverification.AttestationVerificationManager.TYPE_PUBLIC_KEY
 import android.util.IndentingPrintWriter
@@ -72,7 +73,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TYPE_CHALLENGE, challengeRequirements,
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_SUCCESS)
+        assertThat(result).isEqualTo(0)
     }
 
     @Test
@@ -88,7 +89,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TYPE_CHALLENGE, challengeRequirements,
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_SUCCESS)
+        assertThat(result).isEqualTo(0)
     }
 
     @Test
@@ -108,7 +109,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TYPE_PUBLIC_KEY, pkRequirements,
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_SUCCESS)
+        assertThat(result).isEqualTo(0)
     }
 
     @Test
@@ -126,7 +127,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TEST_OWNED_BY_SYSTEM_FILENAME.fromPEMFileToByteArray()
         )
 
-        assertThat(result).isEqualTo(RESULT_SUCCESS)
+        assertThat(result).isEqualTo(0)
     }
 
     @Test
@@ -143,7 +144,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TYPE_CHALLENGE, challengeRequirements,
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_FAILURE)
+        assertThat(result).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     @Test
@@ -159,7 +160,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TYPE_CHALLENGE, challengeRequirements,
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_FAILURE)
+        assertThat(result).isEqualTo(FLAG_FAILURE_PATCH_LEVEL_DIFF)
     }
 
     @Test
@@ -176,7 +177,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TYPE_CHALLENGE, challengeRequirements,
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_SUCCESS)
+        assertThat(result).isEqualTo(0)
     }
 
     @Test
@@ -191,10 +192,28 @@ class AttestationVerificationPeerDeviceVerifierTest {
 
         val result = verifier.verifyAttestation(
             TYPE_CHALLENGE, challengeRequirements,
-            // The patch date of this file is early 2022
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_FAILURE)
+        assertThat(result).isEqualTo(FLAG_FAILURE_PATCH_LEVEL_DIFF)
+    }
+
+    @Test
+    fun verifyAttestation_returnsFailureOwnedBySystemAndPatchDataNotWithinMaxPatchDiff() {
+        val verifier = AttestationVerificationPeerDeviceVerifier(
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2024, 10, 1),
+            LocalDate.of(2024, 9, 1)
+        )
+        val challengeRequirements = Bundle()
+        challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
+        challengeRequirements.putBoolean("android.key_owned_by_system", true)
+        challengeRequirements.putInt(PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS, 24)
+
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
+        // Both "owned by system" and "patch level diff" checks should fail.
+        assertThat(result).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS or FLAG_FAILURE_PATCH_LEVEL_DIFF)
     }
 
     @Test
@@ -210,7 +229,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TYPE_CHALLENGE, challengeRequirements,
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_FAILURE)
+        assertThat(result).isEqualTo(FLAG_FAILURE_CERTS)
     }
 
     @Test
@@ -232,7 +251,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TYPE_CHALLENGE, challengeRequirements,
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_FAILURE)
+        assertThat(result).isEqualTo(FLAG_FAILURE_CERTS)
     }
 
     fun verifyAttestation_returnsFailureChallenge() {
@@ -247,7 +266,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
             TYPE_CHALLENGE, challengeRequirements,
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
-        assertThat(result).isEqualTo(RESULT_FAILURE)
+        assertThat(result).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     private fun String.fromPEMFileToCerts(): Collection<Certificate> {
@@ -281,6 +300,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
     companion object {
         private const val TAG = "AVFTest"
         private const val TEST_ROOT_CERT_FILENAME = "test_root_certs.pem"
+        // Local patch date is 20220105
         private const val TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME =
             "test_attestation_with_root_certs.pem"
         private const val TEST_ATTESTATION_CERT_FILENAME = "test_attestation_wrong_root_certs.pem"

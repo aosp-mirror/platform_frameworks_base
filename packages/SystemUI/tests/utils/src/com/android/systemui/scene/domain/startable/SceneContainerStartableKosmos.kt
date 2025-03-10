@@ -32,12 +32,12 @@ import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.windowManagerLockscreenVisibilityInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.domain.interactor.disabledContentInteractor
 import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -78,12 +78,12 @@ val Kosmos.sceneContainerStartable by Fixture {
         uiEventLogger = uiEventLogger,
         sceneBackInteractor = sceneBackInteractor,
         shadeSessionStorage = shadeSessionStorage,
-        windowMgrLockscreenVisInteractor = windowManagerLockscreenVisibilityInteractor,
         keyguardEnabledInteractor = keyguardEnabledInteractor,
         dismissCallbackRegistry = dismissCallbackRegistry,
         statusBarStateController = sysuiStatusBarStateController,
         alternateBouncerInteractor = alternateBouncerInteractor,
         vibratorHelper = vibratorHelper,
         msdlPlayer = msdlPlayer,
+        disabledContentInteractor = disabledContentInteractor,
     )
 }

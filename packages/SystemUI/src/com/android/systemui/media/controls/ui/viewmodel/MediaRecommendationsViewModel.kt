@@ -31,6 +31,8 @@ import com.android.systemui.media.controls.domain.pipeline.interactor.MediaRecom
 import com.android.systemui.media.controls.shared.model.MediaRecModel
 import com.android.systemui.media.controls.shared.model.MediaRecommendationsModel
 import com.android.systemui.media.controls.shared.model.NUM_REQUIRED_RECOMMENDATIONS
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaLocation
 import com.android.systemui.media.controls.ui.controller.MediaViewController.Companion.GUTS_ANIMATION_DURATION
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_CLICK_EVENT
@@ -39,10 +41,8 @@ import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -57,16 +57,13 @@ constructor(
     private val logger: MediaUiEventLogger,
 ) {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val mediaRecsCard: Flow<MediaRecsCardViewModel?> =
-        interactor.onAnyMediaConfigurationChange
-            .flatMapLatest {
-                interactor.recommendations.map { recsCard -> toRecsViewModel(recsCard) }
-            }
+        interactor.recommendations
+            .map { recsCard -> toRecsViewModel(recsCard) }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 
-    private var location = -1
+    @MediaLocation private var location = MediaHierarchyManager.LOCATION_UNKNOWN
 
     /**
      * Called whenever the recommendation has been expired or removed by the user. This method

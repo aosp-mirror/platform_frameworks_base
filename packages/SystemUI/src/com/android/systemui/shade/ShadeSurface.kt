@@ -19,8 +19,8 @@ import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.GestureRecorder
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.statusbar.policy.HeadsUpManager
 
 /**
  * Allows CentralSurfacesImpl to interact with the shade. Only CentralSurfacesImpl should reference
@@ -37,7 +37,7 @@ interface ShadeSurface :
         centralSurfaces: CentralSurfaces,
         recorder: GestureRecorder,
         hideExpandedRunnable: Runnable,
-        headsUpManager: HeadsUpManager
+        headsUpManager: HeadsUpManager,
     )
 
     /** Cancels any pending collapses. */

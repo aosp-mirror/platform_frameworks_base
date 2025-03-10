@@ -18,6 +18,7 @@ package com.android.settingslib.datastore
 
 import android.content.ContentResolver
 import android.content.Context
+import android.net.Uri
 import android.provider.Settings.SettingNotFoundException
 import android.provider.Settings.System
 
@@ -29,11 +30,15 @@ import android.provider.Settings.System
 class SettingsSystemStore private constructor(contentResolver: ContentResolver) :
     SettingsStore(contentResolver) {
 
+    override val uri: Uri
+        get() = System.getUriFor("")
+
     override val tag: String
         get() = "SettingsSystemStore"
 
     override fun contains(key: String): Boolean = System.getString(contentResolver, key) != null
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : Any> getValue(key: String, valueType: Class<T>): T? =
         try {
             when (valueType) {

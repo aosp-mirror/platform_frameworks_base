@@ -16,34 +16,56 @@
 
 package com.android.systemui.brightness.ui.viewmodel
 
+import android.content.Context
+import androidx.annotation.StringRes
+import androidx.compose.runtime.getValue
 import com.android.systemui.brightness.domain.interactor.BrightnessPolicyEnforcementInteractor
 import com.android.systemui.brightness.domain.interactor.ScreenBrightnessInteractor
 import com.android.systemui.brightness.shared.model.GammaBrightness
+import com.android.systemui.classifier.Classifier
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.res.R
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor
+import com.android.systemui.settings.brightness.ui.BrightnessWarningToast
 import com.android.systemui.utils.PolicyRestriction
-import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-@SysUISingleton
+/**
+ * View Model for a brightness slider.
+ *
+ * If this brightness slider supports mirroring (show on top of current activity while dragging),
+ * then:
+ * * [showMirror] will be true while dragging
+ * * [BrightnessMirrorShowingInteractor.isShowing] will track if the mirror should show (for (other
+ *   parts of SystemUI to act accordingly).
+ */
 class BrightnessSliderViewModel
-@Inject
+@AssistedInject
 constructor(
     private val screenBrightnessInteractor: ScreenBrightnessInteractor,
     private val brightnessPolicyEnforcementInteractor: BrightnessPolicyEnforcementInteractor,
-    @Application private val applicationScope: CoroutineScope,
-) {
-    val currentBrightness =
-        screenBrightnessInteractor.gammaBrightness.stateIn(
-            applicationScope,
-            SharingStarted.WhileSubscribed(),
-            GammaBrightness(0)
+    val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
+    private val brightnessMirrorShowingInteractor: BrightnessMirrorShowingInteractor,
+    private val falsingInteractor: FalsingInteractor,
+    @Assisted private val supportsMirroring: Boolean,
+    private val brightnessWarningToast: BrightnessWarningToast,
+) : ExclusiveActivatable() {
+
+    private val hydrator = Hydrator("BrightnessSliderViewModel.hydrator")
+
+    val currentBrightness by
+        hydrator.hydratedStateOf(
+            "currentBrightness",
+            GammaBrightness(0),
+            screenBrightnessInteractor.gammaBrightness,
         )
 
     val maxBrightness = screenBrightnessInteractor.maxGammaBrightness
@@ -57,6 +79,19 @@ constructor(
 
     fun showPolicyRestrictionDialog(restriction: PolicyRestriction.Restricted) {
         brightnessPolicyEnforcementInteractor.startAdminSupportDetailsDialog(restriction)
+    }
+
+    val brightnessOverriddenByWindow = screenBrightnessInteractor.brightnessOverriddenByWindow
+
+    fun showToast(viewContext: Context, @StringRes resId: Int) {
+        if (brightnessWarningToast.isToastActive()) {
+            return
+        }
+        brightnessWarningToast.show(viewContext, resId)
+    }
+
+    fun emitBrightnessTouchForFalsing() {
+        falsingInteractor.isFalseTouch(Classifier.BRIGHTNESS_SLIDER)
     }
 
     /**
@@ -80,11 +115,31 @@ constructor(
         // This is not finalized UI so using fixed string
         return "$percentage%"
     }
+
+    fun setIsDragging(dragging: Boolean) {
+        brightnessMirrorShowingInteractor.setMirrorShowing(dragging && supportsMirroring)
+    }
+
+    val showMirror by
+        hydrator.hydratedStateOf("showMirror", brightnessMirrorShowingInteractor.isShowing)
+
+    override suspend fun onActivated(): Nothing {
+        hydrator.activate()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(supportsMirroring: Boolean): BrightnessSliderViewModel
+    }
 }
+
+fun BrightnessSliderViewModel.Factory.create() = create(supportsMirroring = true)
 
 /** Represents a drag event in a brightness slider. */
 sealed interface Drag {
     val brightness: GammaBrightness
+
     @JvmInline value class Dragging(override val brightness: GammaBrightness) : Drag
+
     @JvmInline value class Stopped(override val brightness: GammaBrightness) : Drag
 }

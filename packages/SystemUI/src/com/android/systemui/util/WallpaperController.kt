@@ -32,19 +32,24 @@ private const val TAG = "WallpaperController"
  * Note: New logic should be added to [WallpaperRepository], not this class.
  */
 @SysUISingleton
-class WallpaperController @Inject constructor(
+class WallpaperController
+@Inject
+constructor(
     private val wallpaperManager: WallpaperManager,
     private val wallpaperRepository: WallpaperRepository,
 ) {
 
     var rootView: View? = null
+        set(value) {
+            field = value
+            wallpaperRepository.rootView = value
+        }
 
     private var notificationShadeZoomOut: Float = 0f
     private var unfoldTransitionZoomOut: Float = 0f
 
     private val shouldUseDefaultUnfoldTransition: Boolean
-        get() = wallpaperRepository.wallpaperInfo.value?.shouldUseDefaultUnfoldTransition()
-            ?: true
+        get() = wallpaperRepository.wallpaperInfo.value?.shouldUseDefaultUnfoldTransition() ?: true
 
     fun setNotificationShadeZoom(zoomOut: Float) {
         notificationShadeZoomOut = zoomOut

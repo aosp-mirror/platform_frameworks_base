@@ -22,22 +22,12 @@ import kotlinx.coroutines.flow.Flow
 /** Domain logic pertaining to notifications on the keyguard. */
 class NotificationsKeyguardInteractor
 @Inject
-constructor(
-    private val repository: NotificationsKeyguardViewStateRepository,
-) {
-    /** Is a pulse expansion occurring? */
-    val isPulseExpanding: Flow<Boolean> = repository.isPulseExpanding
-
+constructor(private val repository: NotificationsKeyguardViewStateRepository) {
     /** Are notifications fully hidden from view? */
     val areNotificationsFullyHidden: Flow<Boolean> = repository.areNotificationsFullyHidden
 
     /** Updates whether notifications are fully hidden from view. */
     fun setNotificationsFullyHidden(fullyHidden: Boolean) {
         repository.areNotificationsFullyHidden.value = fullyHidden
-    }
-
-    /** Updates whether a pulse expansion is occurring. */
-    fun setPulseExpanding(pulseExpanding: Boolean) {
-        repository.isPulseExpanding.value = pulseExpanding
     }
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.model
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.service.quicksettings.Tile
@@ -36,6 +37,7 @@ sealed interface InternetTileModel {
     val stateDescription: ContentDescription?
     val contentDescription: ContentDescription?
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     fun applyTo(state: QSTile.BooleanState, context: Context) {
         if (secondaryLabel != null) {
             state.secondaryLabel = secondaryLabel.loadText(context)
@@ -50,7 +52,7 @@ sealed interface InternetTileModel {
         if (icon != null) {
             state.icon = icon
         } else if (iconId != null) {
-            state.icon = QSTileImpl.ResourceIcon.get(iconId!!)
+            state.icon = QSTileImpl.maybeLoadResourceIcon(iconId!!, context)
         }
 
         state.state =

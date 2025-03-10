@@ -103,12 +103,12 @@ filegroup {
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
         ":android.hardware.keymaster-V4-java-source",
-        ":android.hardware.radio-V3-java-source",
-        ":android.hardware.radio.data-V3-java-source",
-        ":android.hardware.radio.network-V3-java-source",
-        ":android.hardware.radio.voice-V3-java-source",
+        ":android.hardware.radio-V4-java-source",
+        ":android.hardware.radio.data-V4-java-source",
+        ":android.hardware.radio.network-V4-java-source",
+        ":android.hardware.radio.voice-V4-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
-        ":android.hardware.thermal-V2-java-source",
+        ":android.hardware.thermal-V3-java-source",
         ":android.hardware.tv.tuner-V3-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",
@@ -142,12 +142,10 @@ filegroup {
         // For the generated R.java and Manifest.java
         ":framework-res{.aapt.srcjar}",
 
-        // Java/AIDL sources to be moved out to CrashRecovery module
-        ":framework-crashrecovery-sources",
-
         // etc.
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
+        ":statslog-hwui-java-gen", // HwuiStatsLog.java
         ":audio_policy_configuration_V7_0",
     ] + select(release_flag("RELEASE_ATTEST_MODULES"), {
         true: [
@@ -229,18 +227,18 @@ java_library {
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.contexthub-V1.1-java",
         "android.hardware.contexthub-V1.2-java",
-        "android.hardware.contexthub-V3-java",
+        "android.hardware.contexthub-V4-java",
         "android.hardware.gnss-V1.0-java",
         "android.hardware.gnss-V2.1-java",
         "android.hardware.health-V1.0-java-constants",
         "android.hardware.radio-V1.6-java",
-        "android.hardware.radio.data-V3-java",
-        "android.hardware.radio.ims-V2-java",
-        "android.hardware.radio.messaging-V3-java",
-        "android.hardware.radio.modem-V3-java",
-        "android.hardware.radio.network-V3-java",
-        "android.hardware.radio.sim-V3-java",
-        "android.hardware.radio.voice-V3-java",
+        "android.hardware.radio.data-V4-java",
+        "android.hardware.radio.ims-V3-java",
+        "android.hardware.radio.messaging-V4-java",
+        "android.hardware.radio.modem-V4-java",
+        "android.hardware.radio.network-V4-java",
+        "android.hardware.radio.sim-V4-java",
+        "android.hardware.radio.voice-V4-java",
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.thermal-V1.0-java",
         "android.hardware.thermal-V1.1-java",
@@ -369,6 +367,7 @@ java_defaults {
     jarjar_rules: ":framework-jarjar-rules",
     javac_shard_size: 150,
     plugins: [
+        "cached-property-annotation-processor",
         "view-inspector-annotation-processor",
         "staledataclass-annotation-processor",
         "error_prone_android_framework",
@@ -409,7 +408,9 @@ java_defaults {
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
         "com.android.sysprop.view",
+        "configinfra_framework_flags_java_lib",
         "framework-internal-utils",
+        "dynamic_instrumentation_manager_aidl-java",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
@@ -440,7 +441,15 @@ java_library {
     name: "framework-non-updatable-unbundled-impl-libs",
     static_libs: [
         "framework-location.impl",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [],
+        default: [
+            "framework-platformcrashrecovery.impl",
+        ],
+    }) + select(release_flag("RELEASE_ONDEVICE_INTELLIGENCE_MODULE"), {
+        true: [],
+        default: ["framework-ondeviceintelligence-platform.impl"],
+    }),
     sdk_version: "core_platform",
     installable: false,
 }
@@ -483,6 +492,7 @@ java_library {
     apex_available: ["//apex_available:platform"],
     visibility: [
         "//frameworks/base:__subpackages__",
+        "//packages/modules/NeuralNetworks:__subpackages__",
     ],
     compile_dex: false,
     headers_only: true,
@@ -574,7 +584,15 @@ java_library {
         "documents-ui-compat-config",
         "calendar-provider-compat-config",
         "contacts-provider-platform-compat-config",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [],
+        default: [
+            "framework-platformcrashrecovery-compat-config",
+        ],
+    }) + select(release_flag("RELEASE_ONDEVICE_INTELLIGENCE_MODULE"), {
+        true: [],
+        default: ["framework-ondeviceintelligence-platform-compat-config"],
+    }),
 }
 
 platform_compat_config {

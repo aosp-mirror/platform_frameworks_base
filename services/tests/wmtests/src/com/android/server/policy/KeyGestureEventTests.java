@@ -22,16 +22,21 @@ import static com.android.server.policy.PhoneWindowManager.DOUBLE_TAP_HOME_RECEN
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_ALL_APPS;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_ASSIST;
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_HOME_NOTIFICATION_PANEL;
+import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS;
+import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAVIOR_MUTE;
 import static com.android.server.policy.PhoneWindowManager.SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL;
 
+import android.hardware.input.InputSettings;
 import android.hardware.input.KeyGestureEvent;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.KeyEvent;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.hardware.input.Flags;
 import com.android.internal.annotations.Keep;
 
 import junit.framework.Assert;
@@ -56,7 +61,73 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     private static final int CTRL_ON = MODIFIER.get(KeyEvent.KEYCODE_CTRL_LEFT);
 
     @Keep
-    private static Object[][] shortcutTestArguments() {
+    private static Object[][] shortcutTestArgumentsNotMigratedToKeyGestureController() {
+        // testName, testKeys, expectedKeyGestureType, expectedKey, expectedModifierState
+        return new Object[][]{
+                {"HOME key -> Open Home", new int[]{KeyEvent.KEYCODE_HOME},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_HOME,
+                        KeyEvent.KEYCODE_HOME, 0},
+                {"BACK key -> Go back", new int[]{KeyEvent.KEYCODE_BACK},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_BACK,
+                        KeyEvent.KEYCODE_BACK, 0},
+                {"VOLUME_UP key -> Increase Volume", new int[]{KeyEvent.KEYCODE_VOLUME_UP},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_UP,
+                        KeyEvent.KEYCODE_VOLUME_UP, 0},
+                {"VOLUME_DOWN key -> Decrease Volume", new int[]{KeyEvent.KEYCODE_VOLUME_DOWN},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_DOWN,
+                        KeyEvent.KEYCODE_VOLUME_DOWN, 0},
+                {"VOLUME_MUTE key -> Mute Volume", new int[]{KeyEvent.KEYCODE_VOLUME_MUTE},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_MUTE,
+                        KeyEvent.KEYCODE_VOLUME_MUTE, 0},
+                {"MUTE key -> Mute System Microphone", new int[]{KeyEvent.KEYCODE_MUTE},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_MUTE, KeyEvent.KEYCODE_MUTE,
+                        0},
+                {"POWER key -> Toggle Power", new int[]{KeyEvent.KEYCODE_POWER},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_POWER, KeyEvent.KEYCODE_POWER,
+                        0},
+                {"TV_POWER key -> Toggle Power", new int[]{KeyEvent.KEYCODE_TV_POWER},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_POWER,
+                        KeyEvent.KEYCODE_TV_POWER, 0},
+                {"SYSTEM_NAVIGATION_DOWN key -> System Navigation",
+                        new int[]{KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_NAVIGATION,
+                        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN,
+                        0},
+                {"SYSTEM_NAVIGATION_UP key -> System Navigation",
+                        new int[]{KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_NAVIGATION,
+                        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP,
+                        0},
+                {"SYSTEM_NAVIGATION_LEFT key -> System Navigation",
+                        new int[]{KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_NAVIGATION,
+                        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT,
+                        0},
+                {"SYSTEM_NAVIGATION_RIGHT key -> System Navigation",
+                        new int[]{KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_NAVIGATION,
+                        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT, 0},
+                {"SLEEP key -> System Sleep", new int[]{KeyEvent.KEYCODE_SLEEP},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SLEEP, KeyEvent.KEYCODE_SLEEP, 0},
+                {"SOFT_SLEEP key -> System Sleep", new int[]{KeyEvent.KEYCODE_SOFT_SLEEP},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SLEEP, KeyEvent.KEYCODE_SOFT_SLEEP,
+                        0},
+                {"WAKEUP key -> System Wakeup", new int[]{KeyEvent.KEYCODE_WAKEUP},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_WAKEUP, KeyEvent.KEYCODE_WAKEUP, 0},
+                {"MEDIA_PLAY key -> Media Control", new int[]{KeyEvent.KEYCODE_MEDIA_PLAY},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_MEDIA_KEY,
+                        KeyEvent.KEYCODE_MEDIA_PLAY, 0},
+                {"MEDIA_PAUSE key -> Media Control", new int[]{KeyEvent.KEYCODE_MEDIA_PAUSE},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_MEDIA_KEY,
+                        KeyEvent.KEYCODE_MEDIA_PAUSE, 0},
+                {"MEDIA_PLAY_PAUSE key -> Media Control",
+                        new int[]{KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_MEDIA_KEY,
+                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 0}};
+    }
+
+    @Keep
+    private static Object[][] shortcutTestArgumentsMigratedToKeyGestureController() {
         // testName, testKeys, expectedKeyGestureType, expectedKey, expectedModifierState
         return new Object[][]{
                 {"Meta + H -> Open Home", new int[]{META_KEY, KeyEvent.KEYCODE_H},
@@ -64,9 +135,6 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"Meta + Enter -> Open Home", new int[]{META_KEY, KeyEvent.KEYCODE_ENTER},
                         KeyGestureEvent.KEY_GESTURE_TYPE_HOME, KeyEvent.KEYCODE_ENTER,
                         META_ON},
-                {"HOME key -> Open Home", new int[]{KeyEvent.KEYCODE_HOME},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_HOME,
-                        KeyEvent.KEYCODE_HOME, 0},
                 {"RECENT_APPS key -> Open Overview", new int[]{KeyEvent.KEYCODE_RECENT_APPS},
                         KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS,
                         KeyEvent.KEYCODE_RECENT_APPS, 0},
@@ -76,9 +144,6 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"Alt + Tab -> Open Overview", new int[]{ALT_KEY, KeyEvent.KEYCODE_TAB},
                         KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS, KeyEvent.KEYCODE_TAB,
                         ALT_ON},
-                {"BACK key -> Go back", new int[]{KeyEvent.KEYCODE_BACK},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_BACK,
-                        KeyEvent.KEYCODE_BACK, 0},
                 {"Meta + Escape -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_ESCAPE},
                         KeyGestureEvent.KEY_GESTURE_TYPE_BACK, KeyEvent.KEYCODE_ESCAPE,
                         META_ON},
@@ -138,15 +203,6 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                         new int[]{KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE},
                         KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE,
                         KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE, 0},
-                {"VOLUME_UP key -> Increase Volume", new int[]{KeyEvent.KEYCODE_VOLUME_UP},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_UP,
-                        KeyEvent.KEYCODE_VOLUME_UP, 0},
-                {"VOLUME_DOWN key -> Decrease Volume", new int[]{KeyEvent.KEYCODE_VOLUME_DOWN},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_DOWN,
-                        KeyEvent.KEYCODE_VOLUME_DOWN, 0},
-                {"VOLUME_MUTE key -> Mute Volume", new int[]{KeyEvent.KEYCODE_VOLUME_MUTE},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_VOLUME_MUTE,
-                        KeyEvent.KEYCODE_VOLUME_MUTE, 0},
                 {"ALL_APPS key -> Open App Drawer",
                         new int[]{KeyEvent.KEYCODE_ALL_APPS},
                         KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
@@ -170,9 +226,6 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"CAPS_LOCK key -> Toggle CapsLock", new int[]{KeyEvent.KEYCODE_CAPS_LOCK},
                         KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK,
                         KeyEvent.KEYCODE_CAPS_LOCK, 0},
-                {"MUTE key -> Mute System Microphone", new int[]{KeyEvent.KEYCODE_MUTE},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_MUTE, KeyEvent.KEYCODE_MUTE,
-                        0},
                 {"Meta + Ctrl + DPAD_UP -> Split screen navigation",
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_UP},
                         KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION,
@@ -194,57 +247,20 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"Meta + Ctrl + N -> Open Notes", new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_N},
                         KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES, KeyEvent.KEYCODE_N,
                         META_ON | CTRL_ON},
-                {"POWER key -> Toggle Power", new int[]{KeyEvent.KEYCODE_POWER},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_POWER, KeyEvent.KEYCODE_POWER,
-                        0},
-                {"TV_POWER key -> Toggle Power", new int[]{KeyEvent.KEYCODE_TV_POWER},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_POWER,
-                        KeyEvent.KEYCODE_TV_POWER, 0},
-                {"SYSTEM_NAVIGATION_DOWN key -> System Navigation",
-                        new int[]{KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_NAVIGATION,
-                        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN,
-                        0},
-                {"SYSTEM_NAVIGATION_UP key -> System Navigation",
-                        new int[]{KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_NAVIGATION,
-                        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP,
-                        0},
-                {"SYSTEM_NAVIGATION_LEFT key -> System Navigation",
-                        new int[]{KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_NAVIGATION,
-                        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT,
-                        0},
-                {"SYSTEM_NAVIGATION_RIGHT key -> System Navigation",
-                        new int[]{KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_NAVIGATION,
-                        KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT, 0},
-                {"SLEEP key -> System Sleep", new int[]{KeyEvent.KEYCODE_SLEEP},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SLEEP, KeyEvent.KEYCODE_SLEEP, 0},
-                {"SOFT_SLEEP key -> System Sleep", new int[]{KeyEvent.KEYCODE_SOFT_SLEEP},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SLEEP, KeyEvent.KEYCODE_SOFT_SLEEP,
-                        0},
-                {"WAKEUP key -> System Wakeup", new int[]{KeyEvent.KEYCODE_WAKEUP},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_WAKEUP, KeyEvent.KEYCODE_WAKEUP, 0},
-                {"MEDIA_PLAY key -> Media Control", new int[]{KeyEvent.KEYCODE_MEDIA_PLAY},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_MEDIA_KEY,
-                        KeyEvent.KEYCODE_MEDIA_PLAY, 0},
-                {"MEDIA_PAUSE key -> Media Control", new int[]{KeyEvent.KEYCODE_MEDIA_PAUSE},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_MEDIA_KEY,
-                        KeyEvent.KEYCODE_MEDIA_PAUSE, 0},
-                {"MEDIA_PLAY_PAUSE key -> Media Control",
-                        new int[]{KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_MEDIA_KEY,
-                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, 0},
+                {"Meta + Ctrl + DPAD_DOWN -> Enter desktop mode",
+                        new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_DOWN},
+                        KeyGestureEvent.KEY_GESTURE_TYPE_DESKTOP_MODE,
+                        KeyEvent.KEYCODE_DPAD_DOWN,
+                        META_ON | CTRL_ON},
                 {"Meta + B -> Launch Default Browser", new int[]{META_KEY, KeyEvent.KEYCODE_B},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER,
                         KeyEvent.KEYCODE_B, META_ON},
                 {"EXPLORER key -> Launch Default Browser", new int[]{KeyEvent.KEYCODE_EXPLORER},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER,
                         KeyEvent.KEYCODE_EXPLORER, 0},
-                {"Meta + C -> Launch Default Contacts", new int[]{META_KEY, KeyEvent.KEYCODE_C},
+                {"Meta + P -> Launch Default Contacts", new int[]{META_KEY, KeyEvent.KEYCODE_P},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS,
-                        KeyEvent.KEYCODE_C, META_ON},
+                        KeyEvent.KEYCODE_P, META_ON},
                 {"CONTACTS key -> Launch Default Contacts", new int[]{KeyEvent.KEYCODE_CONTACTS},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS,
                         KeyEvent.KEYCODE_CONTACTS, 0},
@@ -254,15 +270,12 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"ENVELOPE key -> Launch Default Email", new int[]{KeyEvent.KEYCODE_ENVELOPE},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL,
                         KeyEvent.KEYCODE_ENVELOPE, 0},
-                {"Meta + K -> Launch Default Calendar", new int[]{META_KEY, KeyEvent.KEYCODE_K},
+                {"Meta + C -> Launch Default Calendar", new int[]{META_KEY, KeyEvent.KEYCODE_C},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR,
-                        KeyEvent.KEYCODE_K, META_ON},
+                        KeyEvent.KEYCODE_C, META_ON},
                 {"CALENDAR key -> Launch Default Calendar", new int[]{KeyEvent.KEYCODE_CALENDAR},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR,
                         KeyEvent.KEYCODE_CALENDAR, 0},
-                {"Meta + P -> Launch Default Music", new int[]{META_KEY, KeyEvent.KEYCODE_P},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC,
-                        KeyEvent.KEYCODE_P, META_ON},
                 {"MUSIC key -> Launch Default Music", new int[]{KeyEvent.KEYCODE_MUSIC},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC,
                         KeyEvent.KEYCODE_MUSIC, 0},
@@ -275,16 +288,7 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                         KeyEvent.KEYCODE_CALCULATOR, 0},
                 {"Meta + M -> Launch Default Maps", new int[]{META_KEY, KeyEvent.KEYCODE_M},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS,
-                        KeyEvent.KEYCODE_M, META_ON},
-                {"Meta + S -> Launch Default Messaging App",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_S},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING,
-                        KeyEvent.KEYCODE_S, META_ON},
-                {"Meta + Ctrl + DPAD_DOWN -> Enter desktop mode",
-                        new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_DOWN},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_DESKTOP_MODE,
-                        KeyEvent.KEYCODE_DPAD_DOWN,
-                        META_ON | CTRL_ON}};
+                        KeyEvent.KEYCODE_M, META_ON}};
     }
 
     @Keep
@@ -296,72 +300,14 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                         new int[]{KeyEvent.KEYCODE_HOME}, LONG_PRESS_HOME_NOTIFICATION_PANEL,
                         KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
                         KeyEvent.KEYCODE_HOME, 0},
-                {"Long press META + ENTER -> Toggle Notification panel",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_ENTER},
-                        LONG_PRESS_HOME_NOTIFICATION_PANEL,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
-                        KeyEvent.KEYCODE_ENTER,
-                        META_ON},
-                {"Long press META + H -> Toggle Notification panel",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_H}, LONG_PRESS_HOME_NOTIFICATION_PANEL,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
-                        KeyEvent.KEYCODE_H, META_ON},
                 {"Long press HOME key -> Launch assistant",
                         new int[]{KeyEvent.KEYCODE_HOME}, LONG_PRESS_HOME_ASSIST,
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT,
                         KeyEvent.KEYCODE_HOME, 0},
-                {"Long press META + ENTER -> Launch assistant",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_ENTER}, LONG_PRESS_HOME_ASSIST,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT,
-                        KeyEvent.KEYCODE_ENTER, META_ON},
-                {"Long press META + H -> Launch assistant",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_H}, LONG_PRESS_HOME_ASSIST,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT, KeyEvent.KEYCODE_H,
-                        META_ON},
                 {"Long press HOME key -> Open App Drawer",
                         new int[]{KeyEvent.KEYCODE_HOME}, LONG_PRESS_HOME_ALL_APPS,
                         KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
-                        KeyEvent.KEYCODE_HOME, 0},
-                {"Long press META + ENTER -> Open App Drawer",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_ENTER}, LONG_PRESS_HOME_ALL_APPS,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
-                        KeyEvent.KEYCODE_ENTER, META_ON},
-                {"Long press META + H -> Open App Drawer",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_H},
-                        LONG_PRESS_HOME_ALL_APPS,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
-                        KeyEvent.KEYCODE_H, META_ON}};
-    }
-
-    @Keep
-    private static Object[][] doubleTapOnHomeTestArguments() {
-        // testName, testKeys, doubleTapOnHomeBehavior, expectedKeyGestureType, expectedKey,
-        // expectedModifierState
-        return new Object[][]{
-                {"Double tap HOME -> Open App switcher",
-                        new int[]{KeyEvent.KEYCODE_HOME}, DOUBLE_TAP_HOME_RECENT_SYSTEM_UI,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH, KeyEvent.KEYCODE_HOME,
-                        0},
-                {"Double tap META + ENTER -> Open App switcher",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_ENTER},
-                        DOUBLE_TAP_HOME_RECENT_SYSTEM_UI,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH,
-                        KeyEvent.KEYCODE_ENTER, META_ON},
-                {"Double tap META + H -> Open App switcher",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_H}, DOUBLE_TAP_HOME_RECENT_SYSTEM_UI,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH, KeyEvent.KEYCODE_H,
-                        META_ON}};
-    }
-
-    @Keep
-    private static Object[][] settingsKeyTestArguments() {
-        // testName, testKeys, settingsKeyBehavior, expectedKeyGestureType, expectedKey,
-        // expectedModifierState
-        return new Object[][]{
-                {"SETTINGS key -> Toggle Notification panel", new int[]{KeyEvent.KEYCODE_SETTINGS},
-                        SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
-                        KeyEvent.KEYCODE_SETTINGS, 0}};
+                        KeyEvent.KEYCODE_HOME, 0}};
     }
 
     @Before
@@ -378,11 +324,22 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.setupAssistForLaunch();
         mPhoneWindowManager.overrideTogglePanel();
         mPhoneWindowManager.overrideInjectKeyEvent();
+        mPhoneWindowManager.overrideRoleManager();
     }
 
     @Test
-    @Parameters(method = "shortcutTestArguments")
-    public void testShortcut(String testName, int[] testKeys,
+    @Parameters(method = "shortcutTestArgumentsNotMigratedToKeyGestureController")
+    public void testShortcuts_notMigratedToKeyGestureController(String testName,
+            int[] testKeys, @KeyGestureEvent.KeyGestureType int expectedKeyGestureType,
+            int expectedKey, int expectedModifierState) {
+        testShortcutInternal(testName, testKeys, expectedKeyGestureType, expectedKey,
+                expectedModifierState);
+    }
+
+    @Test
+    @Parameters(method = "shortcutTestArgumentsMigratedToKeyGestureController")
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    public void testShortcuts_migratedToKeyGestureController(String testName, int[] testKeys,
             @KeyGestureEvent.KeyGestureType int expectedKeyGestureType, int expectedKey,
             int expectedModifierState) {
         testShortcutInternal(testName, testKeys, expectedKeyGestureType, expectedKey,
@@ -402,36 +359,75 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    @Parameters(method = "doubleTapOnHomeTestArguments")
-    public void testDoubleTapOnHomeBehavior(String testName, int[] testKeys,
-            int doubleTapOnHomeBehavior,
-            @KeyGestureEvent.KeyGestureType int expectedKeyGestureType, int expectedKey,
-            int expectedModifierState) {
-        mPhoneWindowManager.overriderDoubleTapOnHomeBehavior(doubleTapOnHomeBehavior);
-        sendKeyCombination(testKeys, 0 /* duration */);
-        sendKeyCombination(testKeys, 0 /* duration */);
+    public void testDoubleTapOnHomeBehavior_AppSwitchBehavior() {
+        mPhoneWindowManager.overriderDoubleTapOnHomeBehavior(DOUBLE_TAP_HOME_RECENT_SYSTEM_UI);
+        sendKeyCombination(new int[]{KeyEvent.KEYCODE_HOME}, 0 /* duration */);
+        sendKeyCombination(new int[]{KeyEvent.KEYCODE_HOME}, 0 /* duration */);
         mPhoneWindowManager.assertKeyGestureCompleted(
-                new int[]{expectedKey}, expectedModifierState, expectedKeyGestureType,
-                "Failed while executing " + testName);
+                new int[]{KeyEvent.KEYCODE_HOME}, /* modifierState = */0,
+                KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH,
+                "Failed while executing Double tap HOME -> Open App switcher");
     }
 
     @Test
-    @Parameters(method = "settingsKeyTestArguments")
-    public void testSettingsKey(String testName, int[] testKeys, int settingsKeyBehavior,
-            @KeyGestureEvent.KeyGestureType int expectedKeyGestureType, int expectedKey,
-            int expectedModifierState) {
-        mPhoneWindowManager.overrideSettingsKeyBehavior(settingsKeyBehavior);
-        testShortcutInternal(testName, testKeys, expectedKeyGestureType, expectedKey,
-                expectedModifierState);
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    public void testSettingsKey_ToggleNotificationBehavior() {
+        mPhoneWindowManager.overrideSettingsKeyBehavior(SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL);
+        testShortcutInternal("SETTINGS key -> Toggle Notification panel",
+                new int[]{KeyEvent.KEYCODE_SETTINGS},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
+                KeyEvent.KEYCODE_SETTINGS, 0);
     }
 
     @Test
     @EnableFlags(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     public void testBugreportShortcutPress() {
         testShortcutInternal("Meta + Ctrl + Del -> Trigger bug report",
                 new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DEL},
                 KeyGestureEvent.KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT, KeyEvent.KEYCODE_DEL,
                 META_ON | CTRL_ON);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    public void testToggleTalkbackPress() {
+        testShortcutInternal("Meta + Alt + T -> Toggle talkback",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_T},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK,
+                KeyEvent.KEYCODE_T,
+                META_ON | ALT_ON);
+    }
+
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS})
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    public void testKeyboardAccessibilityToggleShortcutPress() {
+        testShortcutInternal("Meta + Alt + 3 -> Toggle Bounce Keys",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_3},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS,
+                KeyEvent.KEYCODE_3,
+                META_ON | ALT_ON);
+        testShortcutInternal("Meta + Alt + 4 -> Toggle Mouse Keys",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_4},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS,
+                KeyEvent.KEYCODE_4,
+                META_ON | ALT_ON);
+        testShortcutInternal("Meta + Alt + 5 -> Toggle Sticky Keys",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_5},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS,
+                KeyEvent.KEYCODE_5,
+                META_ON | ALT_ON);
+        testShortcutInternal("Meta + Alt + 6 -> Toggle Slow Keys",
+                new int[]{META_KEY, ALT_KEY, KeyEvent.KEYCODE_6},
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS,
+                KeyEvent.KEYCODE_6,
+                META_ON | ALT_ON);
     }
 
     private void testShortcutInternal(String testName, int[] testKeys,
@@ -461,6 +457,14 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     public void testKeyGestureLaunchAssistant() {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT));
+        mPhoneWindowManager.assertSearchManagerLaunchAssist();
+    }
+
+    @Test
+    public void testKeyGestureLaunchVoiceAssistant() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT));
         mPhoneWindowManager.assertSearchManagerLaunchAssist();
     }
 
@@ -598,5 +602,210 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH));
         mPhoneWindowManager.assertLaunchSearch();
+    }
+
+    @Test
+    public void testKeyGestureScreenshotChord() {
+        Assert.assertTrue(
+                sendKeyGestureEventStart(KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD));
+        mPhoneWindowManager.moveTimeForward(500);
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD));
+        mPhoneWindowManager.assertTakeScreenshotCalled();
+    }
+
+    @Test
+    public void testKeyGestureScreenshotChordCancelled() {
+        Assert.assertTrue(
+                sendKeyGestureEventStart(KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD));
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD));
+        mPhoneWindowManager.assertTakeScreenshotNotCalled();
+    }
+
+    @Test
+    public void testKeyGestureAccessibilityShortcutChord() {
+        Assert.assertTrue(
+                sendKeyGestureEventStart(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD));
+        mPhoneWindowManager.moveTimeForward(5000);
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD));
+        mPhoneWindowManager.assertAccessibilityKeychordCalled();
+    }
+
+    @Test
+    public void testKeyGestureAccessibilityShortcutChordCancelled() {
+        Assert.assertTrue(
+                sendKeyGestureEventStart(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD));
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD));
+        mPhoneWindowManager.assertAccessibilityKeychordNotCalled();
+    }
+
+    @Test
+    public void testKeyGestureRingerToggleChord() {
+        mPhoneWindowManager.overridePowerVolumeUp(POWER_VOLUME_UP_BEHAVIOR_MUTE);
+        Assert.assertTrue(
+                sendKeyGestureEventStart(KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD));
+        mPhoneWindowManager.moveTimeForward(500);
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD));
+        mPhoneWindowManager.assertVolumeMute();
+    }
+
+    @Test
+    public void testKeyGestureRingerToggleChordCancelled() {
+        mPhoneWindowManager.overridePowerVolumeUp(POWER_VOLUME_UP_BEHAVIOR_MUTE);
+        Assert.assertTrue(
+                sendKeyGestureEventStart(KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD));
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD));
+        mPhoneWindowManager.assertVolumeNotMuted();
+    }
+
+    @Test
+    public void testKeyGestureGlobalAction() {
+        mPhoneWindowManager.overridePowerVolumeUp(POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS);
+        Assert.assertTrue(
+                sendKeyGestureEventStart(KeyGestureEvent.KEY_GESTURE_TYPE_GLOBAL_ACTIONS));
+        mPhoneWindowManager.moveTimeForward(500);
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(KeyGestureEvent.KEY_GESTURE_TYPE_GLOBAL_ACTIONS));
+        mPhoneWindowManager.assertShowGlobalActionsCalled();
+    }
+
+    @Test
+    public void testKeyGestureGlobalActionCancelled() {
+        mPhoneWindowManager.overridePowerVolumeUp(POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS);
+        Assert.assertTrue(
+                sendKeyGestureEventStart(KeyGestureEvent.KEY_GESTURE_TYPE_GLOBAL_ACTIONS));
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(KeyGestureEvent.KEY_GESTURE_TYPE_GLOBAL_ACTIONS));
+        mPhoneWindowManager.assertShowGlobalActionsNotCalled();
+    }
+
+    @Test
+    public void testKeyGestureAccessibilityTvShortcutChord() {
+        Assert.assertTrue(
+                sendKeyGestureEventStart(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD));
+        mPhoneWindowManager.moveTimeForward(5000);
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD));
+        mPhoneWindowManager.assertAccessibilityKeychordCalled();
+    }
+
+    @Test
+    public void testKeyGestureAccessibilityTvShortcutChordCancelled() {
+        Assert.assertTrue(
+                sendKeyGestureEventStart(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD));
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD));
+        mPhoneWindowManager.assertAccessibilityKeychordNotCalled();
+    }
+
+    @Test
+    public void testKeyGestureTvTriggerBugReport() {
+        Assert.assertTrue(
+                sendKeyGestureEventStart(KeyGestureEvent.KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT));
+        mPhoneWindowManager.moveTimeForward(1000);
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(KeyGestureEvent.KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT));
+        mPhoneWindowManager.assertBugReportTakenForTv();
+    }
+
+    @Test
+    public void testKeyGestureTvTriggerBugReportCancelled() {
+        Assert.assertTrue(
+                sendKeyGestureEventStart(KeyGestureEvent.KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT));
+        Assert.assertTrue(
+                sendKeyGestureEventCancel(KeyGestureEvent.KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT));
+        mPhoneWindowManager.assertBugReportNotTakenForTv();
+    }
+
+    @Test
+    public void testKeyGestureAccessibilityShortcut() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT));
+        mPhoneWindowManager.assertAccessibilityKeychordCalled();
+    }
+
+    @Test
+    public void testKeyGestureCloseAllDialogs() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS));
+        mPhoneWindowManager.assertCloseAllDialogs();
+    }
+
+    @Test
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
+    public void testKeyGestureToggleTalkback() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
+        mPhoneWindowManager.assertTalkBack(true);
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
+        mPhoneWindowManager.assertTalkBack(false);
+    }
+
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG})
+    public void testKeyGestureToggleStickyKeys() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS));
+        Assert.assertTrue(InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS));
+        Assert.assertFalse(InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+    }
+
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG})
+    public void testKeyGestureToggleSlowKeys() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS));
+        Assert.assertTrue(InputSettings.isAccessibilitySlowKeysEnabled(mContext));
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS));
+        Assert.assertFalse(InputSettings.isAccessibilitySlowKeysEnabled(mContext));
+    }
+
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS})
+    public void testKeyGestureToggleMouseKeys() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS));
+        Assert.assertTrue(InputSettings.isAccessibilityMouseKeysEnabled(mContext));
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS));
+        Assert.assertFalse(InputSettings.isAccessibilityMouseKeysEnabled(mContext));
+    }
+
+    @Test
+    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
+            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG})
+    public void testKeyGestureToggleBounceKeys() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS));
+        Assert.assertTrue(InputSettings.isAccessibilityBounceKeysEnabled(mContext));
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS));
+        Assert.assertFalse(InputSettings.isAccessibilityBounceKeysEnabled(mContext));
     }
 }

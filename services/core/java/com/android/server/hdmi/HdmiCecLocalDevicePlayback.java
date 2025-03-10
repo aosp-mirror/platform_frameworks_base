@@ -21,6 +21,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.display.DeviceProductInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -31,6 +32,7 @@ import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.sysprop.HdmiProperties;
 import android.util.Slog;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
@@ -82,6 +84,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     // lost.
     private Handler mDelayedPopupOnActiveSourceLostHandler;
 
+    private boolean mIsActiveSourceLostPopupLaunched;
+
     // Determines what action should be taken upon receiving Routing Control messages.
     @VisibleForTesting
     protected HdmiProperties.playback_device_action_on_routing_control_values
@@ -96,6 +100,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         mDelayedStandbyOnActiveSourceLostHandler = new Handler(service.getServiceLooper());
         mDelayedPopupOnActiveSourceLostHandler = new Handler(service.getServiceLooper());
         mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
+        mIsActiveSourceLostPopupLaunched = false;
     }
 
     @Override
@@ -273,13 +278,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private class DelayedStandbyOnActiveSourceLostRunnable implements Runnable {
         @Override
         public void run() {
-            if (mService.getPowerManagerInternal().wasDeviceIdleFor(
-                    STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS)) {
+            if (!isActiveSource()) {
                 mService.standby();
-            } else {
-                mService.setAndBroadcastActiveSource(mService.getPhysicalAddress(),
-                        getDeviceInfo().getDeviceType(), Constants.ADDR_TV,
-                        "DelayedActiveSourceLostStandbyRunnable");
+                mIsActiveSourceLostPopupLaunched = false;
             }
         }
     }
@@ -288,6 +289,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     void dismissUiOnActiveSourceStatusRecovered() {
         assertRunOnServiceThread();
         Intent intent = new Intent(HdmiControlManager.ACTION_ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI);
+        mIsActiveSourceLostPopupLaunched = false;
         mService.sendBroadcastAsUser(intent);
     }
 
@@ -444,14 +446,62 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                         new Runnable() {
                             @Override
                             public void run() {
-                                if (!isActiveSource()) {
+                                if (isActiveSource()) {
+                                    return;
+                                }
+
+                                if (getActiveSource().logicalAddress != Constants.ADDR_TV) {
                                     startHdmiCecActiveSourceLostActivity();
                                     mDelayedStandbyOnActiveSourceLostHandler
                                             .removeCallbacksAndMessages(null);
                                     mDelayedStandbyOnActiveSourceLostHandler.postDelayed(
                                             new DelayedStandbyOnActiveSourceLostRunnable(),
                                             STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+                                    return;
                                 }
+
+                                // We observed specific TV panels (old models) that send faulty CEC
+                                // source changing messages, especially during wake-up.
+                                // This request helps to check if the TV correctly asserted active
+                                // source or not. If the request times out, active source is
+                                // asserted by the local device.
+                                addAndStartAction(new RequestActiveSourceAction(mService.playback(),
+                                        new IHdmiControlCallback.Stub() {
+                                    @Override
+                                    public void onComplete(int result) {
+                                        // If a device answers to <Request Active Source>, the
+                                        // pop-up should be triggered.
+                                        // During this action, the TV can switch to an HDMI input
+                                        // with a non-CEC capable device that won't be able to
+                                        // answer this request.
+                                        // In this case, the known active source would be
+                                        // represented by a valid physical address, but invalid
+                                        // logical address. The pop-up will be shown and the local
+                                        // device will not assert active source.
+                                        if (result == HdmiControlManager.RESULT_SUCCESS
+                                                || getActiveSource().logicalAddress
+                                                != Constants.ADDR_TV) {
+                                                startHdmiCecActiveSourceLostActivity();
+                                                mDelayedStandbyOnActiveSourceLostHandler
+                                                        .removeCallbacksAndMessages(null);
+                                                mDelayedStandbyOnActiveSourceLostHandler
+                                                        .postDelayed(
+                                                                new DelayedStandbyOnActiveSourceLostRunnable(),
+                                                        STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+                                        } else {
+                                            // The request times out and the local device is not
+                                            // active source, but the TV previously asserted active
+                                            // source.
+                                            if (getActiveSource().logicalAddress
+                                                    == Constants.ADDR_TV) {
+                                                mService.setAndBroadcastActiveSource(
+                                                        mService.getPhysicalAddress(),
+                                                        getDeviceInfo().getDeviceType(),
+                                                        Constants.ADDR_BROADCAST,
+                                                        "RequestActiveSourceAction#RESULT_TIMEOUT");
+                                            }
+                                        }
+                                    }}));
                             }
                         }, POPUP_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
                 return;
@@ -473,6 +523,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                     )));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivityAsUser(intent, context.getUser());
+            mIsActiveSourceLostPopupLaunched = true;
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "Unable to start HdmiCecActiveSourceLostActivity");
         } finally {
@@ -690,6 +741,14 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         return Constants.ADDR_TV;
     }
 
+    boolean isActiveSourceLostPopupLaunched() {
+        return mIsActiveSourceLostPopupLaunched;
+    }
+
+    void setIsActiveSourceLostPopupLaunched(boolean isActiveSourceLostPopupLaunched) {
+        mIsActiveSourceLostPopupLaunched = isActiveSourceLostPopupLaunched;
+    }
+
     @Override
     @ServiceThreadOnly
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
@@ -698,6 +757,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         removeAction(HotplugDetectionAction.class);
         removeAction(NewDeviceAction.class);
         removeAction(PowerStatusMonitorActionFromPlayback.class);
+        removeAction(RequestActiveSourceAction.class);
         super.disableDevice(initiatedByCec, callback);
         clearDeviceInfoList();
         checkIfPendingActionsCleared();

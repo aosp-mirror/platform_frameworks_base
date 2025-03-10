@@ -22,7 +22,9 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.ModifiedUtf8;
 
+import java.io.UTFDataFormatException;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -33,8 +35,6 @@ import java.util.Queue;
  */
 public class PolicySizeVerifier {
 
-    // Binary XML serializer doesn't support longer strings
-    public static final int MAX_POLICY_STRING_LENGTH = 65535;
     // FrameworkParsingPackageUtils#MAX_FILE_NAME_SIZE, Android packages are used in dir names.
     public static final int MAX_PACKAGE_NAME_LENGTH = 223;
 
@@ -47,8 +47,11 @@ public class PolicySizeVerifier {
      * Throw if string argument is too long to be serialized.
      */
     public static void enforceMaxStringLength(String str, String argName) {
-        Preconditions.checkArgument(
-                str.length() <= MAX_POLICY_STRING_LENGTH, argName + " loo long");
+        try {
+            long len = ModifiedUtf8.countBytes(str, /* throw error if too long */ true);
+        } catch (UTFDataFormatException e) {
+            throw new IllegalArgumentException(argName + " too long");
+        }
     }
 
     /**

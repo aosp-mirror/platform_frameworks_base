@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 
 import android.app.ActivityManager.ProcessState;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import java.io.PrintWriter;
@@ -34,6 +35,8 @@ class MirrorActiveUids {
 
     /** Uid -> number of non-app visible windows belong to the uid. */
     private final SparseIntArray mNumNonAppVisibleWindowMap = new SparseIntArray();
+    /** Type -> Uid -> number of non-app visible windows for type/uid. */
+    private final SparseArray<SparseIntArray> mNumNonAppVisibleWindowMapByType = new SparseArray();
 
     synchronized void onUidActive(int uid, int procState) {
         mUidStates.put(uid, procState);
@@ -55,17 +58,31 @@ class MirrorActiveUids {
     }
 
     /** Called when the surface of non-application (exclude toast) window is shown or hidden. */
-    synchronized void onNonAppSurfaceVisibilityChanged(int uid, boolean visible) {
-        final int index = mNumNonAppVisibleWindowMap.indexOfKey(uid);
+    synchronized void onNonAppSurfaceVisibilityChanged(int uid, int type, boolean visible) {
+        updateCount(uid, visible, mNumNonAppVisibleWindowMap);
+        updateCount(uid, visible, getNumNonAppVisibleWindowMapByType(type));
+    }
+
+    private SparseIntArray getNumNonAppVisibleWindowMapByType(int type) {
+        SparseIntArray result = mNumNonAppVisibleWindowMapByType.get(type);
+        if (result == null) {
+            result = new SparseIntArray();
+            mNumNonAppVisibleWindowMapByType.append(type, result);
+        }
+        return result;
+    }
+
+    private void updateCount(int uid, boolean visible, SparseIntArray numNonAppVisibleWindowMap) {
+        final int index = numNonAppVisibleWindowMap.indexOfKey(uid);
         if (index >= 0) {
-            final int num = mNumNonAppVisibleWindowMap.valueAt(index) + (visible ? 1 : -1);
+            final int num = numNonAppVisibleWindowMap.valueAt(index) + (visible ? 1 : -1);
             if (num > 0) {
-                mNumNonAppVisibleWindowMap.setValueAt(index, num);
+                numNonAppVisibleWindowMap.setValueAt(index, num);
             } else {
-                mNumNonAppVisibleWindowMap.removeAt(index);
+                numNonAppVisibleWindowMap.removeAt(index);
             }
         } else if (visible) {
-            mNumNonAppVisibleWindowMap.append(uid, 1);
+            numNonAppVisibleWindowMap.append(uid, 1);
         }
     }
 
@@ -76,6 +93,24 @@ class MirrorActiveUids {
      */
     synchronized boolean hasNonAppVisibleWindow(int uid) {
         return mNumNonAppVisibleWindowMap.get(uid) > 0;
+    }
+
+    /**
+     * Returns details about the windows that contribute to the result of
+     * {@link #hasNonAppVisibleWindow(int)}.
+     *
+     * @return a map of window type to count
+     */
+    synchronized SparseIntArray getNonAppVisibleWindowDetails(int uid) {
+        SparseIntArray result = new SparseIntArray();
+        for (int i = 0; i < mNumNonAppVisibleWindowMapByType.size(); i++) {
+            SparseIntArray numNonAppVisibleWindowMap = mNumNonAppVisibleWindowMapByType.valueAt(i);
+            int count = numNonAppVisibleWindowMap.get(uid);
+            if (count > 0) {
+                result.append(mNumNonAppVisibleWindowMapByType.keyAt(i), count);
+            }
+        }
+        return result;
     }
 
     synchronized void dump(PrintWriter pw, String prefix) {

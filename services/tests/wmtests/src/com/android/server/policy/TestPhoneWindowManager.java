@@ -88,6 +88,7 @@ import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
 import android.view.Display;
 import android.view.InputEvent;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillManagerInternal;
@@ -197,7 +198,7 @@ class TestPhoneWindowManager {
         }
 
         @Override
-        boolean toggleTalkback(int currentUserId) {
+        boolean toggleTalkback(int currentUserId, ShortcutSource source) {
             mIsTalkBackEnabled = !mIsTalkBackEnabled;
             return mIsTalkBackEnabled;
         }
@@ -270,11 +271,15 @@ class TestPhoneWindowManager {
         // Return mocked services: LocalServices.getService
         mMockitoSession = mockitoSession()
                 .mockStatic(LocalServices.class, spyStubOnly)
+                .mockStatic(KeyCharacterMap.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
         mPhoneWindowManager = spy(new PhoneWindowManager());
 
+        KeyCharacterMap virtualKcm = mContext.getSystemService(InputManager.class)
+                .getInputDevice(KeyCharacterMap.VIRTUAL_KEYBOARD).getKeyCharacterMap();
+        doReturn(virtualKcm).when(() -> KeyCharacterMap.load(anyInt()));
         doReturn(mWindowManagerInternal).when(
                 () -> LocalServices.getService(eq(WindowManagerInternal.class)));
         doReturn(mActivityManagerInternal).when(
@@ -418,8 +423,8 @@ class TestPhoneWindowManager {
                 mKeyEventPolicyFlags);
     }
 
-    void dispatchUnhandledKey(KeyEvent event) {
-        mPhoneWindowManager.dispatchUnhandledKey(mInputToken, event, FLAG_INTERACTIVE);
+    void interceptUnhandledKey(KeyEvent event) {
+        mPhoneWindowManager.interceptUnhandledKey(event, mInputToken);
     }
 
     boolean sendKeyGestureEvent(KeyGestureEvent event) {
@@ -518,12 +523,12 @@ class TestPhoneWindowManager {
     }
 
     void prepareBrightnessDecrease(float currentBrightness) {
-        doReturn(0.0f).when(mPowerManager)
-                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
-        doReturn(1.0f).when(mPowerManager)
-                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+        doReturn(0.0f).when(mPowerManager).getBrightnessConstraint(
+                DEFAULT_DISPLAY, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+        doReturn(1.0f).when(mPowerManager).getBrightnessConstraint(
+                DEFAULT_DISPLAY, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
         doReturn(currentBrightness).when(mDisplayManager)
-                .getBrightness(0);
+                .getBrightness(DEFAULT_DISPLAY);
     }
 
     void verifyNewBrightness(float newBrightness) {
@@ -657,14 +662,34 @@ class TestPhoneWindowManager {
         verify(mPowerManager).userActivity(anyLong(), anyBoolean());
     }
 
+    void assertShowGlobalActionsNotCalled() {
+        mTestLooper.dispatchAll();
+        verify(mGlobalActions, never()).showDialog(anyBoolean(), anyBoolean());
+        verify(mPowerManager, never()).userActivity(anyLong(), anyBoolean());
+    }
+
     void assertVolumeMute() {
         mTestLooper.dispatchAll();
         verify(mAudioManagerInternal).silenceRingerModeInternal(eq("volume_hush"));
     }
 
+    void assertVolumeNotMuted() {
+        mTestLooper.dispatchAll();
+        verify(mAudioManagerInternal, never()).silenceRingerModeInternal(any());
+    }
+
     void assertAccessibilityKeychordCalled() {
         mTestLooper.dispatchAll();
         verify(mAccessibilityShortcutController).performAccessibilityShortcut();
+    }
+
+    void assertAccessibilityKeychordNotCalled() {
+        mTestLooper.dispatchAll();
+        verify(mAccessibilityShortcutController, never()).performAccessibilityShortcut();
+    }
+
+    void assertCloseAllDialogs() {
+        verify(mContext).closeSystemDialogs();
     }
 
     void assertDreamRequest() {
@@ -679,8 +704,8 @@ class TestPhoneWindowManager {
 
     void assertPowerWakeUp() {
         mTestLooper.dispatchAll();
-        verify(mWindowWakeUpPolicy)
-                .wakeUpFromKey(anyLong(), eq(KeyEvent.KEYCODE_POWER), anyBoolean());
+        verify(mWindowWakeUpPolicy).wakeUpFromKey(
+                eq(DEFAULT_DISPLAY), anyLong(), eq(KeyEvent.KEYCODE_POWER), anyBoolean());
     }
 
     void assertNoPowerSleep() {
@@ -802,11 +827,21 @@ class TestPhoneWindowManager {
     void assertTakeBugreport(boolean wasCalled) throws RemoteException {
         mTestLooper.dispatchAll();
         if (wasCalled) {
-            verify(mActivityManagerService).requestInteractiveBugReport();
+            verify(mActivityManagerService).launchBugReportHandlerApp();
         } else {
-            verify(mActivityManagerService, never()).requestInteractiveBugReport();
+            verify(mActivityManagerService, never()).launchBugReportHandlerApp();
         }
 
+    }
+
+    void assertBugReportTakenForTv() {
+        mTestLooper.dispatchAll();
+        verify(mPhoneWindowManager).requestBugreportForTv();
+    }
+
+    void assertBugReportNotTakenForTv() {
+        mTestLooper.dispatchAll();
+        verify(mPhoneWindowManager, never()).requestBugreportForTv();
     }
 
     void assertTogglePanel() throws RemoteException {
@@ -888,5 +923,10 @@ class TestPhoneWindowManager {
     void assertTalkBack(boolean expectEnabled) {
         mTestLooper.dispatchAll();
         Assert.assertEquals(expectEnabled, mIsTalkBackEnabled);
+    }
+
+    void assertKeyGestureEventSentToKeyGestureController(int gestureType) {
+        verify(mInputManagerInternal)
+                .handleKeyGestureInKeyGestureController(anyInt(), any(), anyInt(), eq(gestureType));
     }
 }

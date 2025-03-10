@@ -18,19 +18,31 @@ package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.graphics.Rect
+import com.android.wm.shell.desktopmode.CaptionState.AppHandle
+import com.android.wm.shell.desktopmode.CaptionState.AppHeader
+import com.android.wm.shell.desktopmode.CaptionState.NoCaption
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /** Repository to observe caption state. */
 class WindowDecorCaptionHandleRepository {
-  private val _captionStateFlow = MutableStateFlow<CaptionState>(CaptionState.NoCaption)
-  /** Observer for app handle state changes. */
-  val captionStateFlow: StateFlow<CaptionState> = _captionStateFlow
+    private val _captionStateFlow = MutableStateFlow<CaptionState>(CaptionState.NoCaption)
+    /** Observer for app handle state changes. */
+    val captionStateFlow: StateFlow<CaptionState> = _captionStateFlow
+    private val _appToWebUsageFlow = MutableSharedFlow<Unit>()
+    /** Observer for App-to-Web usage. */
+    val appToWebUsageFlow = _appToWebUsageFlow
 
-  /** Notifies [captionStateFlow] if there is a change to caption state. */
-  fun notifyCaptionChanged(captionState: CaptionState) {
-    _captionStateFlow.value = captionState
-  }
+    /** Notifies [captionStateFlow] if there is a change to caption state. */
+    fun notifyCaptionChanged(captionState: CaptionState) {
+        _captionStateFlow.value = captionState
+    }
+
+    /** Notifies [appToWebUsageFlow] if App-to-Web feature is used. */
+    fun onAppToWebUsage() {
+        _appToWebUsageFlow.tryEmit(Unit)
+    }
 }
 
 /**
@@ -42,17 +54,19 @@ class WindowDecorCaptionHandleRepository {
  * * [NoCaption]: Signifying that no caption handle is currently visible on the device.
  */
 sealed class CaptionState {
-  data class AppHandle(
-      val runningTaskInfo: RunningTaskInfo,
-      val isHandleMenuExpanded: Boolean,
-      val globalAppHandleBounds: Rect
-  ) : CaptionState()
+    data class AppHandle(
+        val runningTaskInfo: RunningTaskInfo,
+        val isHandleMenuExpanded: Boolean,
+        val globalAppHandleBounds: Rect,
+        val isCapturedLinkAvailable: Boolean,
+    ) : CaptionState()
 
-  data class AppHeader(
-      val runningTaskInfo: RunningTaskInfo,
-      val isHeaderMenuExpanded: Boolean,
-      val globalAppChipBounds: Rect
-  ) : CaptionState()
+    data class AppHeader(
+        val runningTaskInfo: RunningTaskInfo,
+        val isHeaderMenuExpanded: Boolean,
+        val globalAppChipBounds: Rect,
+        val isCapturedLinkAvailable: Boolean,
+    ) : CaptionState()
 
-  data object NoCaption : CaptionState()
+    data object NoCaption : CaptionState()
 }

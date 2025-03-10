@@ -34,10 +34,7 @@ sealed class TileSpec private constructor(open val spec: String) {
     data object Invalid : TileSpec("")
 
     /** Container for the spec of a tile provided by SystemUI. */
-    data class PlatformTileSpec
-    internal constructor(
-        override val spec: String,
-    ) : TileSpec(spec) {
+    data class PlatformTileSpec internal constructor(override val spec: String) : TileSpec(spec) {
         override fun toString(): String {
             return "P($spec)"
         }
@@ -49,10 +46,8 @@ sealed class TileSpec private constructor(open val spec: String) {
      * [componentName] indicates the associated `TileService`.
      */
     data class CustomTileSpec
-    internal constructor(
-        override val spec: String,
-        val componentName: ComponentName,
-    ) : TileSpec(spec) {
+    internal constructor(override val spec: String, val componentName: ComponentName) :
+        TileSpec(spec) {
         override fun toString(): String {
             return "C(${componentName.flattenToShortString()})"
         }
@@ -92,3 +87,11 @@ sealed class TileSpec private constructor(open val spec: String) {
                 }
     }
 }
+
+val TileSpec.metricSpec
+    get() =
+        when (this) {
+            is TileSpec.Invalid -> ""
+            is TileSpec.PlatformTileSpec -> spec
+            is TileSpec.CustomTileSpec -> componentName.packageName
+        }

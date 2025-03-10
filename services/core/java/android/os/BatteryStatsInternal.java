@@ -41,6 +41,7 @@ public abstract class BatteryStatsInternal {
     public static final int CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER = 3;
     public static final int CPU_WAKEUP_SUBSYSTEM_SENSOR = 4;
     public static final int CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA = 5;
+    public static final int CPU_WAKEUP_SUBSYSTEM_BLUETOOTH = 6;
 
     /** @hide */
     @IntDef(prefix = {"CPU_WAKEUP_SUBSYSTEM_"}, value = {
@@ -50,6 +51,7 @@ public abstract class BatteryStatsInternal {
             CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER,
             CPU_WAKEUP_SUBSYSTEM_SENSOR,
             CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA,
+            CPU_WAKEUP_SUBSYSTEM_BLUETOOTH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CpuWakeupSubsystem {
@@ -99,6 +101,14 @@ public abstract class BatteryStatsInternal {
     public abstract void noteCpuWakingNetworkPacket(Network network, long elapsedMillis, int uid);
 
     /**
+     * Informs battery stats of a sysproxy packet that woke up the CPU
+     *
+     * @param uid The uid that received the packet.
+     * @param elapsedMillis The time of the packet's arrival in elapsed timebase.
+     */
+    public abstract void noteCpuWakingBluetoothProxyPacket(int uid, long elapsedMillis);
+
+    /**
      * Informs battery stats of binder stats for the given work source UID.
      */
     public abstract void noteBinderCallStats(int workSourceUid, long incrementalBinderCallCount,
@@ -122,4 +132,7 @@ public abstract class BatteryStatsInternal {
      * @param uids the uids of all apps that have any alarm in this batch.
      */
     public abstract void noteWakingAlarmBatch(long elapsedMillis, int... uids);
+
+    /** See PowerStatsUidResolver.mapUid(). */
+    public abstract int getOwnerUid(int uid);
 }

@@ -586,13 +586,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ଏହି ଫୋନ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ଏହି ଟାବଲେଟ"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ଏହି କମ୍ପ୍ୟୁଟର (ଇଣ୍ଟର୍ନଲ)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"ମାଇକ୍ରୋଫୋନ (ଇଣ୍ଟର୍ନଲ)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ଏହି ଟିଭି"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ଡକ ସ୍ପିକର"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ଏକ୍ସଟର୍ନଲ ଡିଭାଇସ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"କନେକ୍ଟ କରାଯାଇଥିବା ଡିଭାଇସ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ଏହି ଫୋନ୍"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"ଆନାଲଗ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"ଅକ୍ସିଲାରି"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ଏହି ଡିଭାଇସରେ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ସ୍ୱିଚ କରିବା ପାଇଁ ଆକାଉଣ୍ଟକୁ ଅପଗ୍ରେଡ କରନ୍ତୁ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ଏଠାରେ ଡାଉନଲୋଡଗୁଡ଼ିକୁ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>
@@ -600,14 +601,13 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ଏଠାରେ ପ୍ଲେ କରିବା ପାଇଁ ଡିଭାଇସକୁ ସକ୍ରିୟ କରନ୍ତୁ"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ପ୍ଲେ କରିବା ପାଇଁ ଡିଭାଇସକୁ ଅନୁମୋଦନ କରାଯାଇନାହିଁ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ଏଠାରେ ମିଡିଆ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"କନେକ୍ଟ କରାଯାଇଛି"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"କନେକ୍ଟ ହୋଇଛି"</string>
     <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ମାଧ୍ୟମରେ କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ମାଧ୍ୟମରେ କନେକ୍ଟ କରାଯାଇଛି"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ଟିଭିର ଡିଫଲ୍ଟ ଅଡିଓ ଆଉଟପୁଟ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ଆଉଟପୁଟ"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ଇଣ୍ଟର୍ନଲ ସ୍ପିକର"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"ବିଲ୍ଟ-ଇନ ସ୍ପିକର"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"ଟିଭି ଅଡିଓ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ସଂଯୋଗ କରିବାରେ ସମସ୍ୟା ହେଉଛି। ଡିଭାଇସ୍ ବନ୍ଦ କରି ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ତାରଯୁକ୍ତ ଅଡିଓ ଡିଭାଇସ୍"</string>
     <string name="help_label" msgid="3528360748637781274">"ସାହାଯ୍ୟ ଓ ମତାମତ"</string>
@@ -690,10 +690,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ସକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ଏହି ପରିବର୍ତ୍ତନ ଲାଗୁ କରିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସକୁ ନିଶ୍ଚିତ ରୂପେ ରିବୁଟ୍ କରାଯିବା ଆବଶ୍ୟକ। ବର୍ତ୍ତମାନ ରିବୁଟ୍ କରନ୍ତୁ କିମ୍ବା ବାତିଲ କରନ୍ତୁ।"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"ତାରଯୁକ୍ତ ହେଡଫୋନ"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"ହେଡଫୋନ"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB ସ୍ପିକର"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"ମାଇକ ଜେକ"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB ମାଇକ"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"ୱାୟାର୍ଡ ଅଡିଓ"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ଅଡିଓ"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"ୱାୟାର୍ଡ ମାଇକ୍ରୋଫୋନ"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB ମାଇକ୍ରୋଫୋନ"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT ମାଇକ୍ରୋଫୋନ"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ଚାଲୁ ଅଛି"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ବନ୍ଦ ଅଛି"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"କେରିଅର୍‍ ନେଟ୍‌ୱର୍କ ବଦଳୁଛି"</string>

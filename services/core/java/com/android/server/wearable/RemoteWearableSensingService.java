@@ -19,7 +19,6 @@ package com.android.server.wearable;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 
-import android.app.wearable.Flags;
 import android.app.wearable.IWearableSensingCallback;
 import android.app.wearable.WearableSensingManager;
 import android.content.ComponentName;
@@ -42,7 +41,7 @@ import java.io.IOException;
 final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearableSensingService> {
     private static final String TAG =
             com.android.server.wearable.RemoteWearableSensingService.class.getSimpleName();
-    private final static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     private final Object mSecureConnectionLock = new Object();
 
@@ -55,11 +54,12 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
     @GuardedBy("mSecureConnectionLock")
     private boolean mSecureConnectionProvided = false;
 
-    RemoteWearableSensingService(Context context, ComponentName serviceName,
-            int userId) {
-        super(context, new Intent(
-                        WearableSensingService.SERVICE_INTERFACE).setComponent(serviceName),
-                BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES, userId,
+    RemoteWearableSensingService(Context context, ComponentName serviceName, int userId) {
+        super(
+                context,
+                new Intent(WearableSensingService.SERVICE_INTERFACE).setComponent(serviceName),
+                BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES,
+                userId,
                 IWearableSensingService.Stub::asInterface);
 
         // Bind right away
@@ -87,15 +87,6 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
         if (DEBUG) {
             Slog.i(TAG, "#provideSecureConnection");
         }
-        if (!Flags.enableRestartWssProcess()) {
-            Slog.d(
-                    TAG,
-                    "FLAG_ENABLE_RESTART_WSS_PROCESS is disabled. Do not attempt to restart the"
-                        + " WearableSensingService process");
-            provideSecureConnectionInternal(
-                    secureWearableConnection, wearableSensingCallback, statusCallback);
-            return;
-        }
         synchronized (mSecureConnectionLock) {
             if (mNextSecureConnectionContext != null) {
                 // A process restart is in progress, #binderDied is about to be called. Replace
@@ -103,13 +94,11 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
                 Slog.i(
                         TAG,
                         "A new wearable connection is provided before the process restart triggered"
-                            + " by the previous connection is complete. Discarding the previous"
-                            + " connection.");
-                if (Flags.enableProvideWearableConnectionApi()) {
-                    WearableSensingManagerPerUserService.notifyStatusCallback(
-                            mNextSecureConnectionContext.mStatusCallback,
-                            WearableSensingManager.STATUS_CHANNEL_ERROR);
-                }
+                                + " by the previous connection is complete. Discarding the previous"
+                                + " connection.");
+                WearableSensingManagerPerUserService.notifyStatusCallback(
+                        mNextSecureConnectionContext.mStatusCallback,
+                        WearableSensingManager.STATUS_CHANNEL_ERROR);
                 mNextSecureConnectionContext =
                         new SecureWearableConnectionContext(
                                 secureWearableConnection, wearableSensingCallback, statusCallback);
@@ -128,6 +117,32 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
             // Killing the process causes the binder to die. #binderDied will then be triggered
             killWearableSensingServiceProcess();
         }
+    }
+
+    public void provideConcurrentSecureConnection(
+            ParcelFileDescriptor secureWearableConnection,
+            PersistableBundle metadata,
+            IWearableSensingCallback wearableSensingCallback,
+            RemoteCallback statusCallback) {
+        if (DEBUG) {
+            Slog.i(TAG, "#provideConcurrentSecureConnection");
+        }
+        var unused =
+                post(
+                        service -> {
+                            service.provideConcurrentSecureConnection(
+                                    secureWearableConnection,
+                                    metadata,
+                                    wearableSensingCallback,
+                                    statusCallback);
+                            try {
+                                // close the local fd after it has been sent to the
+                                // WearableSensingService process
+                                secureWearableConnection.close();
+                            } catch (IOException ex) {
+                                Slog.w(TAG, "Unable to close the local parcelFileDescriptor.", ex);
+                            }
+                        });
     }
 
     private void provideSecureConnectionInternal(
@@ -174,6 +189,28 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
         var unused = post(service -> service.killProcess());
     }
 
+    /** Provides a read-only {@link ParcelFileDescriptor} to the WearableSensingService. */
+    public void provideReadOnlyParcelFileDescriptor(
+            ParcelFileDescriptor parcelFileDescriptor,
+            PersistableBundle metadata,
+            RemoteCallback callback) {
+        if (DEBUG) {
+            Slog.i(TAG, "Providing read-only ParcelFileDescriptor.");
+        }
+        var unused =
+                post(
+                        service -> {
+                            service.provideReadOnlyParcelFileDescriptor(
+                                    parcelFileDescriptor, metadata, callback);
+                            try {
+                                // close the local fd after it has been sent to the WSS process
+                                parcelFileDescriptor.close();
+                            } catch (IOException ex) {
+                                Slog.w(TAG, "Unable to close the local parcelFileDescriptor.", ex);
+                            }
+                        });
+    }
+
     /**
      * Provides the implementation a data stream to the wearable.
      *
@@ -210,9 +247,8 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
      * @param sharedMemory The unrestricted data blob to provide to the implementation.
      * @param callback The callback for service status
      */
-    public void provideData(PersistableBundle data,
-            SharedMemory sharedMemory,
-            RemoteCallback callback) {
+    public void provideData(
+            PersistableBundle data, SharedMemory sharedMemory, RemoteCallback callback) {
         if (DEBUG) {
             Slog.i(TAG, "Providing data.");
         }

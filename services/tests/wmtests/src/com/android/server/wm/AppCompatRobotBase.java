@@ -39,6 +39,8 @@ abstract class AppCompatRobotBase {
     private final AppCompatComponentPropRobot mOptPropRobot;
     @NonNull
     private final AppCompatResourcesRobot mResourcesRobot;
+    @NonNull
+    private final DesktopWindowingRobot mDesktopWindowingRobot;
 
     AppCompatRobotBase(@NonNull WindowManagerService wm,
             @NonNull ActivityTaskManagerService atm,
@@ -51,6 +53,7 @@ abstract class AppCompatRobotBase {
                 new AppCompatConfigurationRobot(wm.mAppCompatConfiguration);
         mOptPropRobot = new AppCompatComponentPropRobot(wm);
         mResourcesRobot = new AppCompatResourcesRobot(wm.mContext.getResources());
+        mDesktopWindowingRobot = new DesktopWindowingRobot();
     }
 
     AppCompatRobotBase(@NonNull WindowManagerService wm,
@@ -109,6 +112,11 @@ abstract class AppCompatRobotBase {
     @NonNull
     AppCompatResourcesRobot resources() {
         return mResourcesRobot;
+    }
+
+    @NonNull
+    DesktopWindowingRobot dw() {
+        return mDesktopWindowingRobot;
     }
 
     void applyOnResources(@NonNull Consumer<AppCompatResourcesRobot> consumer) {

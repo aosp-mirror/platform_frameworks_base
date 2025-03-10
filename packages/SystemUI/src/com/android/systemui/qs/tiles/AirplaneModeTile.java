@@ -160,7 +160,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
         final boolean airplaneMode = value != 0;
         state.value = airplaneMode;
         state.label = mContext.getString(R.string.airplane_mode);
-        state.icon = ResourceIcon.get(state.value
+        state.icon = maybeLoadResourceIcon(state.value
                 ? R.drawable.qs_airplane_icon_on : R.drawable.qs_airplane_icon_off);
         state.state = airplaneMode ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.contentDescription = state.label;

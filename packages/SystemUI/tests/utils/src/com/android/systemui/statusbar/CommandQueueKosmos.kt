@@ -19,4 +19,10 @@ package com.android.systemui.statusbar
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.commandQueue by Kosmos.Fixture { mock<CommandQueue>() }
+val Kosmos.mockCommandQueue by Kosmos.Fixture { mock<CommandQueue>() }
+
+var Kosmos.commandQueue by Kosmos.Fixture { mockCommandQueue }
+
+val Kosmos.mockCommandQueueCallbacks by Kosmos.Fixture { mock<CommandQueue.Callbacks>() }
+
+var Kosmos.commandQueueCallbacks by Kosmos.Fixture { mockCommandQueue }

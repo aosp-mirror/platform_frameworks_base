@@ -23,6 +23,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -33,20 +35,24 @@ import android.content.res.Resources;
 import android.location.ILocationListener;
 import android.location.LocationManagerInternal;
 import android.location.LocationRequest;
+import android.location.flags.Flags;
 import android.location.provider.ProviderRequest;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
+import com.android.server.location.fudger.LocationFudgerCache;
 import com.android.server.location.injector.FakeUserInfoHelper;
 import com.android.server.location.injector.TestInjector;
 import com.android.server.location.provider.AbstractLocationProvider;
 import com.android.server.location.provider.LocationProviderManager;
+import com.android.server.location.provider.proxy.ProxyPopulationDensityProvider;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
 import com.google.common.util.concurrent.MoreExecutors;
@@ -54,6 +60,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -75,8 +82,12 @@ public class LocationManagerServiceTest {
     private TestInjector mInjector;
     private LocationManagerService mLocationManagerService;
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     @Spy private FakeAbstractLocationProvider mProviderWithPermission;
     @Spy private FakeAbstractLocationProvider mProviderWithoutPermission;
+    @Mock private ProxyPopulationDensityProvider mPopulationDensityProvider;
     @Mock private ILocationListener mLocationListener;
     @Mock private IBinder mBinder;
     @Mock private Context mContext;
@@ -169,6 +180,32 @@ public class LocationManagerServiceTest {
     @Test
     public void testHasProvider() {
         assertThat(mLocationManagerService.hasProvider(PROVIDER_WITH_PERMISSION)).isTrue();
+    }
+
+    @Test
+    public void testSetLocationFudgerCache_withFeatureFlagDisabled_isNotCalled() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        LocationProviderManager manager = mock(LocationProviderManager.class);
+        ProxyPopulationDensityProvider provider = mock(ProxyPopulationDensityProvider.class);
+        mLocationManagerService.addLocationProviderManager(manager, /* provider = */ null);
+        LocationFudgerCache cache = new LocationFudgerCache(provider);
+
+        mLocationManagerService.setLocationFudgerCache(cache);
+
+        verify(manager, never()).setLocationFudgerCache(any());
+    }
+
+    @Test
+    public void testSetLocationFudgerCache_withFeatureFlagEnabled_isCalled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        LocationProviderManager manager = mock(LocationProviderManager.class);
+        ProxyPopulationDensityProvider provider = mock(ProxyPopulationDensityProvider.class);
+        mLocationManagerService.addLocationProviderManager(manager, /* provider = */ null);
+        LocationFudgerCache cache = new LocationFudgerCache(provider);
+
+        mLocationManagerService.setLocationFudgerCache(cache);
+
+        verify(manager).setLocationFudgerCache(cache);
     }
 
     @Test

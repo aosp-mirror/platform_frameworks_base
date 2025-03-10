@@ -16,31 +16,62 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import androidx.compose.runtime.getValue
+import com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.development.ui.viewmodel.BuildNumberViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.qs.panels.domain.interactor.PaginatedGridInteractor
-import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import com.android.systemui.qs.panels.ui.viewmodel.toolbar.EditModeButtonViewModel
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
-@SysUISingleton
 class PaginatedGridViewModel
-@Inject
+@AssistedInject
 constructor(
     iconTilesViewModel: IconTilesViewModel,
-    gridSizeViewModel: FixedColumnsSizeViewModel,
-    iconLabelVisibilityViewModel: IconLabelVisibilityViewModel,
+    columnsWithMediaViewModelFactory: QSColumnsViewModel.Factory,
     paginatedGridInteractor: PaginatedGridInteractor,
-    @Application applicationScope: CoroutineScope,
-) :
-    IconTilesViewModel by iconTilesViewModel,
-    FixedColumnsSizeViewModel by gridSizeViewModel,
-    IconLabelVisibilityViewModel by iconLabelVisibilityViewModel {
-    val rows =
-        paginatedGridInteractor.rows.stateIn(
-            applicationScope,
-            SharingStarted.WhileSubscribed(),
-            paginatedGridInteractor.defaultRows,
+    inFirstPageViewModel: InFirstPageViewModel,
+    val buildNumberViewModelFactory: BuildNumberViewModel.Factory,
+    val editModeButtonViewModelFactory: EditModeButtonViewModel.Factory,
+    private val falsingInteractor: FalsingInteractor,
+) : IconTilesViewModel by iconTilesViewModel, ExclusiveActivatable() {
+
+    private val hydrator = Hydrator("PaginatedGridViewModel")
+    private val columnsWithMediaViewModel = columnsWithMediaViewModelFactory.create(LOCATION_QS)
+
+    val rows by
+        hydrator.hydratedStateOf(
+            traceName = "rows",
+            initialValue = paginatedGridInteractor.defaultRows,
+            source = paginatedGridInteractor.rows,
         )
+
+    var inFirstPage by inFirstPageViewModel::inFirstPage
+
+    val columns: Int
+        get() = columnsWithMediaViewModel.columns
+
+    fun registerSideSwipeGesture() {
+        falsingInteractor.isFalseTouch(QS_SWIPE_SIDE)
+    }
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch { hydrator.activate() }
+            launch { columnsWithMediaViewModel.activate() }
+            awaitCancellation()
+        }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): PaginatedGridViewModel
+    }
 }

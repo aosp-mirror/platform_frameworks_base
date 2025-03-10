@@ -99,6 +99,7 @@ import android.view.KeyEvent.KEYCODE_PAGE_DOWN
 import android.view.KeyEvent.KEYCODE_PAGE_UP
 import android.view.KeyEvent.KEYCODE_PERIOD
 import android.view.KeyEvent.KEYCODE_RECENT_APPS
+import android.view.KeyEvent.KEYCODE_SCREENSHOT
 import android.view.KeyEvent.KEYCODE_SCROLL_LOCK
 import android.view.KeyEvent.KEYCODE_SHIFT_LEFT
 import android.view.KeyEvent.KEYCODE_SHIFT_RIGHT
@@ -116,18 +117,39 @@ import com.android.systemui.res.R
 
 object ShortcutHelperKeys {
 
+    val metaModifierIconResId = R.drawable.ic_ksh_key_meta
+
     val keyIcons =
         mapOf(
-            META_META_ON to R.drawable.ic_ksh_key_meta,
             KEYCODE_BACK to R.drawable.ic_arrow_back_2,
             KEYCODE_HOME to R.drawable.ic_radio_button_unchecked,
             KEYCODE_RECENT_APPS to R.drawable.ic_check_box_outline_blank,
+        )
+
+    val keyLabelResIds =
+        mapOf(
+            KEYCODE_BACK to R.string.group_system_go_back,
+            KEYCODE_HOME to R.string.group_system_access_home_screen,
+            KEYCODE_RECENT_APPS to R.string.group_system_overview_open_apps,
+            KEYCODE_SCREENSHOT to R.string.group_system_full_screenshot,
+        )
+
+    val modifierLabels =
+        mapOf<Int, (Context) -> String>(
+            // Modifiers
+            META_META_ON to { "Meta" },
+            META_CTRL_ON to { "Ctrl" },
+            META_ALT_ON to { "Alt" },
+            META_SHIFT_ON to { "Shift" },
+            META_SYM_ON to { "Sym" },
+            META_FUNCTION_ON to { "Fn" },
         )
 
     val specialKeyLabels =
         mapOf<Int, (Context) -> String>(
             KEYCODE_HOME to { context -> context.getString(R.string.keyboard_key_home) },
             KEYCODE_BACK to { context -> context.getString(R.string.keyboard_key_back) },
+            KEYCODE_RECENT_APPS to { context -> context.getString(R.string.accessibility_recent) },
             KEYCODE_DPAD_UP to { context -> context.getString(R.string.keyboard_key_dpad_up) },
             KEYCODE_DPAD_DOWN to { context -> context.getString(R.string.keyboard_key_dpad_down) },
             KEYCODE_DPAD_LEFT to { context -> context.getString(R.string.keyboard_key_dpad_left) },
@@ -317,7 +339,7 @@ object ShortcutHelperKeys {
                 { context ->
                     context.getString(
                         R.string.keyboard_key_numpad_template,
-                        context.getString(R.string.keyboard_key_enter)
+                        context.getString(R.string.keyboard_key_enter),
                     )
                 },
             KEYCODE_NUMPAD_EQUALS to
@@ -343,13 +365,5 @@ object ShortcutHelperKeys {
             KEYCODE_CTRL_RIGHT to { "Ctrl" },
             KEYCODE_SHIFT_LEFT to { "Shift" },
             KEYCODE_SHIFT_RIGHT to { "Shift" },
-
-            // Modifiers
-            META_META_ON to { "Meta" },
-            META_CTRL_ON to { "Ctrl" },
-            META_ALT_ON to { "Alt" },
-            META_SHIFT_ON to { "Shift" },
-            META_SYM_ON to { "Sym" },
-            META_FUNCTION_ON to { "Fn" },
         )
 }

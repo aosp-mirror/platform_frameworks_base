@@ -22,14 +22,23 @@ import static com.android.server.location.LocationUtils.createLocation;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
 import android.location.Location;
+import android.location.flags.Flags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -54,6 +63,9 @@ public class LocationFudgerTest {
     private Random mRandom;
 
     private LocationFudger mFudger;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
@@ -161,5 +173,65 @@ public class LocationFudgerTest {
                 input.getLatitude() + deltaXM / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR,
                 input.getLongitude() + deltaYM / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR,
                 0);
+    }
+
+    @Test
+    public void testDensityBasedCoarsening_ifFeatureIsDisabled_cacheIsNotUsed() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        LocationFudgerCache cache = mock(LocationFudgerCache.class);
+
+        mFudger.setLocationFudgerCache(cache);
+
+        mFudger.createCoarse(createLocation("test", mRandom));
+
+        verify(cache, never()).getCoarseningLevel(anyDouble(), anyDouble());
+    }
+
+    @Test
+    public void testDensityBasedCoarsening_ifFeatureIsEnabledButNoDefaultValue_cacheIsNotUsed() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        LocationFudgerCache cache = mock(LocationFudgerCache.class);
+        doReturn(false).when(cache).hasDefaultValue();
+
+        mFudger.setLocationFudgerCache(cache);
+
+        mFudger.createCoarse(createLocation("test", mRandom));
+
+        verify(cache, never()).getCoarseningLevel(anyDouble(), anyDouble());
+    }
+
+    @Test
+    public void testDensityBasedCoarsening_ifFeatureIsEnabledAndDefaultIsSet_cacheIsUsed() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        LocationFudgerCache cache = mock(LocationFudgerCache.class);
+        doReturn(true).when(cache).hasDefaultValue();
+
+        mFudger.setLocationFudgerCache(cache);
+
+        Location fine = createLocation("test", mRandom);
+        mFudger.createCoarse(fine);
+
+        // We can't verify that the coordinatese of "fine" are passed to the API due to the addition
+        // of the offset. We must use anyDouble().
+        verify(cache).getCoarseningLevel(anyDouble(), anyDouble());
+    }
+
+    @Test
+    public void testDensityBasedCoarsening_newAlgorithm_snapsToCenterOfS2Cell_testVector() {
+        // NB: a complete test vector is in
+        // frameworks/base/services/tests/mockingservicestests/src/com/android/server/...
+        // location/geometry/S2CellIdUtilsTest.java
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        // Arbitrary location in Times Square, NYC
+        double[] latLng = new double[] {40.758896, -73.985130};
+        int s2Level = 1;
+        // The level-2 S2 cell around this location is "8c", its center is:
+        double[] expected = { 21.037511025421814, -67.38013505195958 };
+
+        double[] center = mFudger.snapToCenterOfS2Cell(latLng[0], latLng[1], s2Level);
+
+        assertThat(center[0]).isEqualTo(expected[0]);
+        assertThat(center[1]).isEqualTo(expected[1]);
     }
 }

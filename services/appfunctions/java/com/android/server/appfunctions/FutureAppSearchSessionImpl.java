@@ -16,7 +16,7 @@
 
 package com.android.server.appfunctions;
 
-import static com.android.server.appfunctions.FutureAppSearchSession.failedResultToException;
+import static com.android.server.appfunctions.FutureSearchResults.failedResultToException;
 
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
@@ -190,33 +190,6 @@ public class FutureAppSearchSessionImpl implements FutureAppSearchSession {
                                 appSearchSession.close();
                             }
                         });
-    }
-
-    private static final class FutureSearchResultsImpl implements FutureSearchResults {
-        private final SearchResults mSearchResults;
-        private final Executor mExecutor;
-
-        private FutureSearchResultsImpl(
-                @NonNull SearchResults searchResults, @NonNull Executor executor) {
-            this.mSearchResults = searchResults;
-            this.mExecutor = executor;
-        }
-
-        @Override
-        public AndroidFuture<List<SearchResult>> getNextPage() {
-            AndroidFuture<AppSearchResult<List<SearchResult>>> nextPageFuture =
-                    new AndroidFuture<>();
-
-            mSearchResults.getNextPage(mExecutor, nextPageFuture::complete);
-            return nextPageFuture.thenApply(
-                    result -> {
-                        if (result.isSuccess()) {
-                            return result.getResultValue();
-                        } else {
-                            throw new RuntimeException(failedResultToException(result));
-                        }
-                    });
-        }
     }
 
     private static final class BatchResultCallbackAdapter<K, V>

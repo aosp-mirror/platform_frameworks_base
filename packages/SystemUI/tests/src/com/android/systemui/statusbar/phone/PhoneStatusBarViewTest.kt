@@ -38,6 +38,7 @@ import com.android.systemui.Gefingerpoken
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -57,10 +58,15 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         get() = view.requireViewById(R.id.system_icons)
 
     private val windowController = mock<StatusBarWindowController>()
+    private val windowControllerStore = mock<StatusBarWindowControllerStore>()
 
     @Before
     fun setUp() {
-        mDependency.injectTestDependency(StatusBarWindowController::class.java, windowController)
+        whenever(windowControllerStore.defaultDisplay).thenReturn(windowController)
+        mDependency.injectTestDependency(
+            StatusBarWindowControllerStore::class.java,
+            windowControllerStore,
+        )
         context.ensureTestableResources()
         view = spy(createStatusBarView())
         whenever(view.rootWindowInsets).thenReturn(emptyWindowInsets())

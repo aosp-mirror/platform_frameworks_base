@@ -13,10 +13,9 @@ per-file *Interactor* = justinweir@google.com, syeonlee@google.com, nijamkin@goo
 per-file *Repository* = set noparent
 per-file *Repository* = justinweir@google.com, syeonlee@google.com, nijamkin@google.com
 
-per-file NotificationShadeWindowViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com
-per-file NotificationShadeWindowView.java = pixel@google.com, cinek@google.com, juliacr@google.com
+per-file NotificationShadeWindow* = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com, syeonlee@google.com
 
 per-file NotificationPanelUnfoldAnimationController.kt = alexflo@google.com, jeffdq@google.com, juliacr@google.com
 
-per-file NotificationPanelView.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com
-per-file NotificationPanelViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com
+per-file NotificationPanelView.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com, syeonlee@google.com
+per-file NotificationPanelViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com, justinweir@google.com, syeonlee@google.com

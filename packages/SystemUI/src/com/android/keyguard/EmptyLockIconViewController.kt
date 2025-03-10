@@ -17,6 +17,7 @@
 package com.android.keyguard
 
 import android.view.MotionEvent
+import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.res.R
@@ -34,11 +35,10 @@ import javax.inject.Inject
 @SysUISingleton
 class EmptyLockIconViewController
 @Inject
-constructor(
-    private val keyguardRootView: Lazy<KeyguardRootView>,
-) : LockIconViewController {
+constructor(private val keyguardRootView: Lazy<KeyguardRootView>) : LockIconViewController {
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
-    override fun setLockIconView(lockIconView: LockIconView) {
+
+    override fun setLockIconView(lockIconView: View) {
         // no-op
     }
 

@@ -19,6 +19,7 @@ package com.android.server.notification;
 import android.content.ComponentName;
 import android.content.Context;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionProvider;
 import android.util.TimeUtils;
@@ -30,9 +31,10 @@ import java.util.Date;
 
 public abstract class SystemConditionProviderService extends ConditionProviderService {
 
-    abstract public void dump(PrintWriter pw, DumpFilter filter);
-    abstract public boolean isValidConditionId(Uri id);
-    abstract public void onBootComplete();
+    public abstract void dump(PrintWriter pw, DumpFilter filter);
+    public abstract boolean isValidConditionId(Uri id);
+    public abstract void onBootComplete();
+    public abstract void onUserSwitched(UserHandle user);
 
     final ComponentName getComponent() {
         return new ComponentName("android", this.getClass().getName());

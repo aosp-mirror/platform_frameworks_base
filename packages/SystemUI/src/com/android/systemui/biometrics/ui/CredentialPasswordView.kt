@@ -11,6 +11,7 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.systemui.biometrics.AuthPanelController
+import com.android.systemui.biometrics.plugins.AuthContextPlugins
 import com.android.systemui.biometrics.ui.binder.CredentialViewBinder
 import com.android.systemui.biometrics.ui.binder.Spaghetti
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
@@ -33,6 +34,7 @@ class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
         panelViewController: AuthPanelController,
         animatePanel: Boolean,
         legacyCallback: Spaghetti.Callback,
+        plugins: AuthContextPlugins?,
     ) {
         CredentialViewBinder.bind(
             this,
@@ -40,7 +42,8 @@ class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
             viewModel,
             panelViewController,
             animatePanel,
-            legacyCallback
+            legacyCallback,
+            plugins,
         )
     }
 
@@ -78,7 +81,7 @@ class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
             0,
             statusBarInsets.top,
             0,
-            if (keyboardInsets.bottom == 0) navigationInsets.bottom else keyboardInsets.bottom
+            if (keyboardInsets.bottom == 0) navigationInsets.bottom else keyboardInsets.bottom,
         )
         return WindowInsets.CONSUMED
     }

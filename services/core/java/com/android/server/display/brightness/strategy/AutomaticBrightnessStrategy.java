@@ -17,6 +17,7 @@ package com.android.server.display.brightness.strategy;
 
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 
@@ -132,10 +133,11 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
     public void setAutoBrightnessState(int targetDisplayState,
             boolean allowAutoBrightnessWhileDozingConfig, int brightnessReason, int policy,
             boolean useNormalBrightnessForDoze, float lastUserSetScreenBrightness,
-            boolean userSetBrightnessChanged) {
+            boolean userSetBrightnessChanged, boolean isBedtimeModeWearEnabled) {
         // We are still in the process of updating the power state, so there's no need to trigger
         // an update again
-        switchMode(targetDisplayState, useNormalBrightnessForDoze, policy, /* sendUpdate= */ false);
+        switchMode(targetDisplayState, useNormalBrightnessForDoze, policy, isBedtimeModeWearEnabled,
+                /* sendUpdate= */ false);
 
         // If the policy is POLICY_DOZE and the display state is not STATE_OFF, auto-brightness
         // should only be enabled if the config allows it
@@ -349,7 +351,8 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
                     strategySelectionNotifyRequest.getDisplayPowerRequest()
                             .useNormalBrightnessForDoze,
                     strategySelectionNotifyRequest.getLastUserSetScreenBrightness(),
-                    strategySelectionNotifyRequest.isUserSetBrightnessChanged());
+                    strategySelectionNotifyRequest.isUserSetBrightnessChanged(),
+                    strategySelectionNotifyRequest.isBedtimeModeWearEnabled());
         }
         mIsConfigured = false;
     }
@@ -505,18 +508,33 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
     }
 
     private void switchMode(int state, boolean useNormalBrightnessForDoze, int policy,
-            boolean sendUpdate) {
-        if (mDisplayManagerFlags.areAutoBrightnessModesEnabled()
-                && mAutomaticBrightnessController != null
-                && !mAutomaticBrightnessController.isInIdleMode()) {
-
-            boolean shouldUseDozeMode =
-                    mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()
-                            ? !useNormalBrightnessForDoze && policy == POLICY_DOZE
-                            : Display.isDozeState(state);
-            mAutomaticBrightnessController.switchMode(shouldUseDozeMode
-                    ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT, sendUpdate);
+            boolean isWearBedtimeModeEnabled, boolean sendUpdate) {
+        if (!mDisplayManagerFlags.areAutoBrightnessModesEnabled()
+                || mAutomaticBrightnessController == null
+                || mAutomaticBrightnessController.isInIdleMode()) {
+            return;
         }
+
+        final boolean shouldUseBedtimeMode =
+                mDisplayManagerFlags.isAutoBrightnessModeBedtimeWearEnabled()
+                        && isWearBedtimeModeEnabled;
+        if (shouldUseBedtimeMode) {
+            mAutomaticBrightnessController.switchMode(AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+                    sendUpdate);
+            return;
+        }
+
+        final boolean shouldUseDozeMode =
+                mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)
+                        ? (!useNormalBrightnessForDoze && policy == POLICY_DOZE)
+                                || Display.isDozeState(state)
+                        : Display.isDozeState(state);
+        if (shouldUseDozeMode) {
+            mAutomaticBrightnessController.switchMode(AUTO_BRIGHTNESS_MODE_DOZE, sendUpdate);
+            return;
+        }
+
+        mAutomaticBrightnessController.switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT, sendUpdate);
     }
 
     /**

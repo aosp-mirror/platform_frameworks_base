@@ -33,6 +33,7 @@ import android.media.RingtoneManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.BatteryStats;
+import android.os.BatteryStatsInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IWakeLockCallback;
@@ -48,11 +49,13 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.WorkSource;
+import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -65,10 +68,12 @@ import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.power.FrameworkStatsLogger.WakelockEventType;
 import com.android.server.power.feature.PowerManagerFlags;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -163,6 +168,7 @@ public class Notifier {
     }
 
     private final SparseArray<Interactivity> mInteractivityByGroupId = new SparseArray<>();
+    private SparseBooleanArray mDisplayInteractivities = new SparseBooleanArray();
 
     // The current global interactive state.  This is set as soon as an interactive state
     // transition begins so as to capture the reason that it happened.  At some point
@@ -192,6 +198,9 @@ public class Notifier {
     private final Injector mInjector;
 
     private final PowerManagerFlags mFlags;
+
+    private final BatteryStatsInternal mBatteryStatsInternal;
+    private final FrameworkStatsLogger mFrameworkStatsLogger;
 
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
             SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
@@ -239,6 +248,14 @@ public class Notifier {
         } catch (RemoteException ex) { }
         FrameworkStatsLog.write(FrameworkStatsLog.INTERACTIVE_STATE_CHANGED,
                 FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
+
+        if (mFlags.isMoveWscLoggingToNotifierEnabled()) {
+            mBatteryStatsInternal = mInjector.getBatteryStatsInternal();
+            mFrameworkStatsLogger = mInjector.getFrameworkStatsLogger();
+        } else {
+            mBatteryStatsInternal = null;
+            mFrameworkStatsLogger = null;
+        }
     }
 
     /**
@@ -275,6 +292,7 @@ public class Notifier {
                     + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
+        logWakelockStateChanged(flags, tag, ownerUid, workSource, WakelockEventType.ACQUIRE);
         notifyWakeLockListener(callback, tag, true, ownerUid, ownerPid, flags, workSource,
                 packageName, historyTag);
         if (!mFlags.improveWakelockLatency()) {
@@ -378,6 +396,10 @@ public class Notifier {
                         + ", workSource=" + newWorkSource);
             }
 
+            logWakelockStateChanged(flags, tag, ownerUid, workSource, WakelockEventType.RELEASE);
+            logWakelockStateChanged(
+                    newFlags, newTag, newOwnerUid, newWorkSource, WakelockEventType.ACQUIRE);
+
             final boolean unimportantForLogging = newOwnerUid == Process.SYSTEM_UID
                     && (newFlags & PowerManager.UNIMPORTANT_FOR_LOGGING) != 0;
             try {
@@ -423,6 +445,7 @@ public class Notifier {
                     + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
+        logWakelockStateChanged(flags, tag, ownerUid, workSource, WakelockEventType.RELEASE);
         notifyWakeLockListener(callback, tag, false, ownerUid, ownerPid, flags, workSource,
                 packageName, historyTag);
         if (!mFlags.improveWakelockLatency()) {
@@ -512,8 +535,17 @@ public class Notifier {
             }
 
             // Start input as soon as we start waking up or going to sleep.
-            mInputManagerInternal.setInteractive(interactive);
             mInputMethodManagerInternal.setInteractive(interactive);
+            if (!mFlags.isPerDisplayWakeByTouchEnabled()) {
+                // Since wakefulness is a global property in original logic, all displays should
+                // be set to the same interactive state, matching system's global wakefulness
+                SparseBooleanArray displayInteractivities = new SparseBooleanArray();
+                int[] displayIds = mDisplayManagerInternal.getDisplayIds().toArray();
+                for (int displayId : displayIds) {
+                    displayInteractivities.put(displayId, interactive);
+                }
+                mInputManagerInternal.setDisplayInteractivities(displayInteractivities);
+            }
 
             // Notify battery stats.
             try {
@@ -680,6 +712,42 @@ public class Notifier {
     }
 
     /**
+     * Update the interactivities of the displays in given DisplayGroup.
+     *
+     * @param groupId The group id of the DisplayGroup to update display interactivities for.
+     */
+    private void updateDisplayInteractivities(int groupId, boolean interactive) {
+        final int[] displayIds = mDisplayManagerInternal.getDisplayIdsForGroup(groupId);
+        for (int displayId : displayIds) {
+            mDisplayInteractivities.put(displayId, interactive);
+        }
+
+    }
+
+    private void resetDisplayInteractivities() {
+        final SparseArray<int[]> displaysByGroupId =
+                mDisplayManagerInternal.getDisplayIdsByGroupsIds();
+        SparseBooleanArray newDisplayInteractivities = new SparseBooleanArray();
+        for (int i = 0; i < displaysByGroupId.size(); i++) {
+            final int groupId = displaysByGroupId.keyAt(i);
+            for (int displayId : displaysByGroupId.get(groupId)) {
+                // If we already know display interactivity, use that
+                if (mDisplayInteractivities.indexOfKey(displayId) > 0) {
+                    newDisplayInteractivities.put(
+                            displayId, mDisplayInteractivities.get(displayId));
+                } else { // If display is new to Notifier, use the power group's interactive value
+                    final Interactivity groupInteractivity = mInteractivityByGroupId.get(groupId);
+                    // If group Interactivity hasn't been initialized, assume group is interactive
+                    final boolean groupInteractive =
+                            groupInteractivity == null || groupInteractivity.isInteractive;
+                    newDisplayInteractivities.put(displayId, groupInteractive);
+                }
+            }
+        }
+        mDisplayInteractivities = newDisplayInteractivities;
+    }
+
+    /**
      * Called when an individual PowerGroup changes wakefulness.
      */
     public void onGroupWakefulnessChangeStarted(int groupId, int wakefulness, int changeReason,
@@ -707,6 +775,12 @@ public class Notifier {
             handleEarlyInteractiveChange(groupId);
             mWakefulnessSessionObserver.onWakefulnessChangeStarted(groupId, wakefulness,
                     changeReason, eventTime);
+
+            // Update input on which displays are interactive
+            if (mFlags.isPerDisplayWakeByTouchEnabled()) {
+                updateDisplayInteractivities(groupId, isInteractive);
+                mInputManagerInternal.setDisplayInteractivities(mDisplayInteractivities);
+            }
         }
     }
 
@@ -718,6 +792,20 @@ public class Notifier {
     public void onGroupRemoved(int groupId) {
         mInteractivityByGroupId.remove(groupId);
         mWakefulnessSessionObserver.removePowerGroup(groupId);
+        if (mFlags.isPerDisplayWakeByTouchEnabled()) {
+            resetDisplayInteractivities();
+            mInputManagerInternal.setDisplayInteractivities(mDisplayInteractivities);
+        }
+    }
+
+    /**
+     * Called when a PowerGroup has been changed.
+     */
+    public void onGroupChanged() {
+        if (mFlags.isPerDisplayWakeByTouchEnabled()) {
+            resetDisplayInteractivities();
+            mInputManagerInternal.setDisplayInteractivities(mDisplayInteractivities);
+        }
     }
 
     /**
@@ -1191,6 +1279,44 @@ public class Notifier {
         }
     }
 
+    private void logWakelockStateChanged(
+            int flags,
+            String tag,
+            int ownerUid,
+            WorkSource workSource,
+            WakelockEventType eventType) {
+        if (mBatteryStatsInternal == null) {
+            return;
+        }
+        final int type = flags & PowerManager.WAKE_LOCK_LEVEL_MASK;
+        if (workSource == null || workSource.isEmpty()) {
+            final int mappedUid = mBatteryStatsInternal.getOwnerUid(ownerUid);
+            mFrameworkStatsLogger.wakelockStateChanged(mappedUid, tag, type, eventType);
+        } else {
+            for (int i = 0; i < workSource.size(); ++i) {
+                final int mappedUid = mBatteryStatsInternal.getOwnerUid(workSource.getUid(i));
+                mFrameworkStatsLogger.wakelockStateChanged(mappedUid, tag, type, eventType);
+            }
+
+            List<WorkChain> workChains = workSource.getWorkChains();
+            if (workChains != null) {
+                for (WorkChain workChain : workChains) {
+                    WorkChain mappedWorkChain = new WorkChain();
+                    // Cache getUids() and getTags() because they make an arraycopy.
+                    int[] uids = workChain.getUids();
+                    String[] tags = workChain.getTags();
+
+                    for (int i = 0; i < workChain.getSize(); ++i) {
+                        final int mappedUid = mBatteryStatsInternal.getOwnerUid(uids[i]);
+                        mappedWorkChain.addNode(mappedUid, tags[i]);
+                    }
+                    mFrameworkStatsLogger.wakelockStateChanged(
+                            tag, mappedWorkChain, type, eventType);
+                }
+            }
+        }
+    }
+
     public interface Injector {
         /**
          * Gets the current time in millis
@@ -1206,9 +1332,15 @@ public class Notifier {
          * Gets the AppOpsManager system service
          */
         AppOpsManager getAppOpsManager(Context context);
+
+        /** Gets the BatteryStatsInternal object */
+        BatteryStatsInternal getBatteryStatsInternal();
+
+        /** Get the FrameworkStatsLogger object */
+        FrameworkStatsLogger getFrameworkStatsLogger();
     }
 
-    static class RealInjector implements Injector {
+    class RealInjector implements Injector {
         @Override
         public long currentTimeMillis() {
             return System.currentTimeMillis();
@@ -1222,6 +1354,16 @@ public class Notifier {
         @Override
         public AppOpsManager getAppOpsManager(Context context) {
             return context.getSystemService(AppOpsManager.class);
+        }
+
+        @Override
+        public BatteryStatsInternal getBatteryStatsInternal() {
+            return LocalServices.getService(BatteryStatsInternal.class);
+        }
+
+        @Override
+        public FrameworkStatsLogger getFrameworkStatsLogger() {
+            return new FrameworkStatsLogger();
         }
     }
 }

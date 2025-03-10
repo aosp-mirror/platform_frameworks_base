@@ -26,6 +26,7 @@ import com.android.systemui.deviceentry.ui.viewmodel.DeviceEntryUdfpsAccessibili
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -34,7 +35,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class DefaultUdfpsAccessibilityOverlaySection
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val viewModel: DeviceEntryUdfpsAccessibilityOverlayViewModel,
 ) : KeyguardSection() {
     private val viewId = R.id.udfps_accessibility_overlay

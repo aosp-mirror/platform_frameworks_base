@@ -38,6 +38,8 @@ import android.util.AtomicFile;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.os.BackgroundThread;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -48,6 +50,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * Class used to provide one time hooks for existing OEM devices to migrate their config store
@@ -605,13 +609,35 @@ public final class WifiMigration {
     /**
      * Migrate any certificates in Legacy Keystore to the newer WifiBlobstore database.
      *
-     * If there are no certificates to migrate, this method will return immediately.
+     * Operation will be handled on the BackgroundThread, and the result will be posted
+     * to the provided Executor.
+     *
+     * @param executor The executor on which callback will be invoked
+     * @param resultsCallback Callback to receive the status code
      *
      * @hide
      */
     @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static @KeystoreMigrationStatus int migrateLegacyKeystoreToWifiBlobstore() {
+    public static void migrateLegacyKeystoreToWifiBlobstore(
+            @NonNull Executor executor, @NonNull IntConsumer resultsCallback) {
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(resultsCallback, "resultsCallback cannot be null");
+        BackgroundThread.getHandler().post(() -> {
+            int status = migrateLegacyKeystoreToWifiBlobstoreInternal();
+            executor.execute(() -> {
+                resultsCallback.accept(status);
+            });
+        });
+    }
+
+    /**
+     * Synchronously perform the Keystore migration described in
+     * {@link #migrateLegacyKeystoreToWifiBlobstore(Executor, IntConsumer)}
+     *
+     * @hide
+     */
+    public static @KeystoreMigrationStatus int migrateLegacyKeystoreToWifiBlobstoreInternal() {
         if (!WifiBlobStore.supplicantCanAccessBlobstore()) {
             // Supplicant cannot access WifiBlobstore, so keep the certs in Legacy Keystore
             Log.i(TAG, "Avoiding migration since supplicant cannot access WifiBlobstore");

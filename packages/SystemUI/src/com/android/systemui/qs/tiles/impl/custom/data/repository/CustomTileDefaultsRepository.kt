@@ -26,6 +26,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.tiles.impl.custom.data.entity.CustomTileDefaults
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -68,7 +69,7 @@ interface CustomTileDefaultsRepository {
 class CustomTileDefaultsRepositoryImpl
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     @Application applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : CustomTileDefaultsRepository {

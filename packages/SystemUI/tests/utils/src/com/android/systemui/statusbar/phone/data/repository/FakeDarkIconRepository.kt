@@ -24,7 +24,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @SysUISingleton
 class FakeDarkIconRepository @Inject constructor() : DarkIconRepository {
-    override val darkState = MutableStateFlow(DarkChange.EMPTY)
+    private val perDisplayStates = mutableMapOf<Int, MutableStateFlow<DarkChange>>()
+
+    override fun darkState(displayId: Int) =
+        perDisplayStates.computeIfAbsent(displayId) { MutableStateFlow(DarkChange.EMPTY) }
 }
 
 @Module

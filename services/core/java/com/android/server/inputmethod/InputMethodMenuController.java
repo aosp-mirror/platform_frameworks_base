@@ -287,10 +287,10 @@ final class InputMethodMenuController {
 
     void dump(@NonNull Printer pw, @NonNull String prefix) {
         final boolean showing = isisInputMethodPickerShownForTestLocked();
-        pw.println(prefix + "  isShowing: " + showing);
+        pw.println(prefix + "isShowing: " + showing);
 
         if (showing) {
-            pw.println(prefix + "  imList: " + mImList);
+            pw.println(prefix + "imList: " + mImList);
         }
     }
 

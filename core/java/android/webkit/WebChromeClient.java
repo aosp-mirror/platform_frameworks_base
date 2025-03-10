@@ -16,14 +16,21 @@
 
 package android.webkit;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Message;
 import android.view.View;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public class WebChromeClient {
 
@@ -547,17 +554,57 @@ public class WebChromeClient {
      * Parameters used in the {@link #onShowFileChooser} method.
      */
     public static abstract class FileChooserParams {
+        /**
+         * Enable File System Access for webview.
+         *
+         * File System Access JS APIs window.showOpenFileChooser(), showDirectoryChooser(), and
+         * showSaveFilePicker() will invoke #onFileChooser(). Additional MODE_OPEN_FOLDER will be
+         * returned by #getMode(), #getIntent() will return ACTION_OPEN_DOCUMENT,
+         * ACTION_OPEN_DOCUMENT_TREE, and ACTION_CREATE_DOCUMENT rather than the current
+         * ACTION_GET_CONTENT, and new function #getPermissionMode() will be available.
+         *
+         * @hide
+         */
+        @ChangeId
+        @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM)
+        @FlaggedApi(android.webkit.Flags.FLAG_FILE_SYSTEM_ACCESS)
+        @SystemApi
+        public static final long ENABLE_FILE_SYSTEM_ACCESS = 364980165L;
+
+        /** @hide */
+        @IntDef(prefix = { "MODE_" }, value = {
+            MODE_OPEN,
+            MODE_OPEN_MULTIPLE,
+            MODE_OPEN_FOLDER,
+            MODE_SAVE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Mode {}
+
         /** Open single file. Requires that the file exists before allowing the user to pick it. */
         public static final int MODE_OPEN = 0;
         /** Like Open but allows multiple files to be selected. */
         public static final int MODE_OPEN_MULTIPLE = 1;
-        /** Like Open but allows a folder to be selected. The implementation should enumerate
-            all files selected by this operation.
-            This feature is not supported at the moment.
-            @hide */
+        /** Like Open but allows a folder to be selected. */
+        @FlaggedApi(android.webkit.Flags.FLAG_FILE_SYSTEM_ACCESS)
         public static final int MODE_OPEN_FOLDER = 2;
         /**  Allows picking a nonexistent file and saving it. */
         public static final int MODE_SAVE = 3;
+
+        /** @hide */
+        @IntDef(prefix = { "PERMISSION_MODE_" }, value = {
+            PERMISSION_MODE_READ,
+            PERMISSION_MODE_READ_WRITE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface PermissionMode {}
+
+        /** File or directory should be opened for reading only. */
+        @FlaggedApi(android.webkit.Flags.FLAG_FILE_SYSTEM_ACCESS)
+        public static final int PERMISSION_MODE_READ = 0;
+        /** File or directory should be opened for read and write. */
+        @FlaggedApi(android.webkit.Flags.FLAG_FILE_SYSTEM_ACCESS)
+        public static final int PERMISSION_MODE_READ_WRITE = 1;
 
         /**
          * Parse the result returned by the file picker activity. This method should be used with
@@ -585,6 +632,7 @@ public class WebChromeClient {
         /**
          * Returns file chooser mode.
          */
+        @Mode
         public abstract int getMode();
 
         /**
@@ -614,6 +662,21 @@ public class WebChromeClient {
          */
         @Nullable
         public abstract String getFilenameHint();
+
+        /**
+         * Returns permission mode {@link #PERMISSION_MODE_READ} or
+         * {@link #PERMISSION_MODE_READ_WRITE} which indicates the intended mode for opening a file
+         * or directory.
+         *
+         * This can be used to determine whether an Intent such as
+         * {@link android.content.Intent#ACTION_OPEN_DOCUMENT} should be used rather than
+         * {@link android.content.Intent#ACTION_GET_CONTENT} to choose files.
+         */
+        @FlaggedApi(Flags.FLAG_FILE_SYSTEM_ACCESS)
+        @PermissionMode
+        public int getPermissionMode() {
+            return PERMISSION_MODE_READ;
+        }
 
         /**
          * Creates an intent that would start a file picker for file selection.

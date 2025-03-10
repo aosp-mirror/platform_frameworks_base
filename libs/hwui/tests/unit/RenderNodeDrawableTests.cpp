@@ -1280,7 +1280,7 @@ RENDERTHREAD_TEST(BackdropFilterDrawable, drawing) {
     canvas->drawDrawable(&backdropDrawable);
     // the drawable is still visible, ok to draw.
     EXPECT_EQ(2, canvas->mDrawCounter);
-    EXPECT_EQ(SkRect::MakeLTRB(0, 0, CANVAS_WIDTH - 30, CANVAS_HEIGHT - 30), canvas->mDstBounds);
+    EXPECT_EQ(SkRect::MakeLTRB(30, 30, CANVAS_WIDTH, CANVAS_HEIGHT), canvas->mDstBounds);
 
     canvas->translate(CANVAS_WIDTH, CANVAS_HEIGHT);
     canvas->drawDrawable(&drawable);

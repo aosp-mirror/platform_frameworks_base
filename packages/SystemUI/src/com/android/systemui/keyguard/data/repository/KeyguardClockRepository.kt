@@ -31,6 +31,7 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -68,11 +69,16 @@ interface KeyguardClockRepository {
 
     val previewClock: Flow<ClockController>
 
+    /** top of notifications without bcsmartspace in small clock settings */
+    val notificationDefaultTop: StateFlow<Float>
+
     val clockEventController: ClockEventController
 
     val shouldForceSmallClock: Boolean
 
     fun setClockSize(size: ClockSize)
+
+    fun setNotificationDefaultTop(top: Float)
 }
 
 @SysUISingleton
@@ -84,7 +90,7 @@ constructor(
     override val clockEventController: ClockEventController,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Application private val applicationScope: CoroutineScope,
-    @Application private val applicationContext: Context,
+    @ShadeDisplayAware private val context: Context,
     private val featureFlags: FeatureFlagsClassic,
 ) : KeyguardClockRepository {
 
@@ -108,7 +114,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = getClockSize()
+                initialValue = getClockSize(),
             )
 
     override val currentClockId: Flow<ClockId> =
@@ -138,7 +144,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = clockRegistry.createCurrentClock()
+                initialValue = null,
             )
 
     override val previewClock: Flow<ClockController> =
@@ -149,18 +155,26 @@ constructor(
             clockRegistry.createCurrentClock()
         }
 
+    private val _notificationDefaultTop: MutableStateFlow<Float> = MutableStateFlow(0F)
+
+    override val notificationDefaultTop: StateFlow<Float> = _notificationDefaultTop.asStateFlow()
+
+    override fun setNotificationDefaultTop(top: Float) {
+        _notificationDefaultTop.value = top
+    }
+
     override val shouldForceSmallClock: Boolean
         get() =
             featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE) &&
                 // True on small landscape screens
-                applicationContext.resources.getBoolean(R.bool.force_small_clock_on_lockscreen)
+                context.resources.getBoolean(R.bool.force_small_clock_on_lockscreen)
 
     private fun getClockSize(): ClockSizeSetting {
         return ClockSizeSetting.fromSettingValue(
             secureSettings.getIntForUser(
                 Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
                 /* defaultValue= */ 1,
-                UserHandle.USER_CURRENT
+                UserHandle.USER_CURRENT,
             )
         )
     }

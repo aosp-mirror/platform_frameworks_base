@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -72,7 +73,7 @@ public class AssistantFeedbackController {
     /** Injected constructor */
     @Inject
     public AssistantFeedbackController(@Main Handler handler,
-            Context context, DeviceConfigProxy proxy) {
+            @Application Context context, DeviceConfigProxy proxy) {
         mHandler = handler;
         mContext = context;
         mDeviceConfigProxy = proxy;

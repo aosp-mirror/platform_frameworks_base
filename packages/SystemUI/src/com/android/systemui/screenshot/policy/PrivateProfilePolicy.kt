@@ -31,11 +31,8 @@ import javax.inject.Inject
  *
  * Parameters: Capture the whole screen, owned by the private user.
  */
-class PrivateProfilePolicy
-@Inject
-constructor(
-    private val profileTypes: ProfileTypeRepository,
-) : CapturePolicy {
+class PrivateProfilePolicy @Inject constructor(private val profileTypes: ProfileTypeRepository) :
+    CapturePolicy {
     override suspend fun check(content: DisplayContentModel): PolicyResult {
         // The systemUI notification shade isn't a private profile app, skip.
         if (content.systemUiState.shadeExpanded) {
@@ -47,25 +44,23 @@ constructor(
             content.rootTasks
                 .filter { it.isVisible }
                 .firstNotNullOfOrNull { root ->
-                    root
-                        .childTasksTopDown()
-                        .firstOrNull {
-                            profileTypes.getProfileType(it.userId) == ProfileType.PRIVATE
-                        }
-                }
-                ?: return NotMatched(policy = NAME, reason = NO_VISIBLE_TASKS)
+                    root.childTasksTopDown().firstOrNull {
+                        profileTypes.getProfileType(it.userId) == ProfileType.PRIVATE
+                    }
+                } ?: return NotMatched(policy = NAME, reason = NO_VISIBLE_TASKS)
 
         // If matched, return parameters needed to modify the request.
         return Matched(
             policy = NAME,
             reason = PRIVATE_TASK_VISIBLE,
-            CaptureParameters(
+            LegacyCaptureParameters(
                 type = FullScreen(content.displayId),
                 component = content.rootTasks.first { it.isVisible }.topActivity,
                 owner = UserHandle.of(childTask.userId),
-            )
+            ),
         )
     }
+
     companion object {
         const val NAME = "PrivateProfile"
         const val SHADE_EXPANDED = "Notification shade is expanded"

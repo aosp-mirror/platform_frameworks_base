@@ -487,6 +487,20 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         return mHomeTaskOverlayContainer;
     }
 
+    /**
+     * Returns the home task surface, not for wide use.
+     */
+    @Nullable
+    public SurfaceControl getHomeTaskSurface() {
+        for (int i = 0; i < mTasks.size(); i++) {
+            final TaskAppearedInfo info = mTasks.valueAt(i);
+            if (info.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
+                return info.getLeash();
+            }
+        }
+        return null;
+    }
+
     @Override
     public void addStartingWindow(StartingWindowInfo info) {
         if (mStartingWindow != null) {
@@ -583,9 +597,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             }
             final boolean windowModeChanged =
                     data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode();
-            final boolean visibilityChanged = data.getTaskInfo().isVisible != taskInfo.isVisible;
-            if (windowModeChanged || (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                    && visibilityChanged)) {
+            if (windowModeChanged
+                    || hasFreeformConfigurationChanged(data.getTaskInfo(), taskInfo)) {
                 mRecentTasks.ifPresent(recentTasks ->
                         recentTasks.onTaskRunningInfoChanged(taskInfo));
             }
@@ -604,6 +617,17 @@ public class ShellTaskOrganizer extends TaskOrganizer {
                 mLastFocusedTaskInfo = taskInfo;
             }
         }
+    }
+
+    private boolean hasFreeformConfigurationChanged(RunningTaskInfo oldTaskInfo,
+            RunningTaskInfo newTaskInfo) {
+        if (newTaskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+            return false;
+        }
+        return oldTaskInfo.isVisible != newTaskInfo.isVisible
+                || !oldTaskInfo.positionInParent.equals(newTaskInfo.positionInParent)
+                || !Objects.equals(oldTaskInfo.configuration.windowConfiguration.getAppBounds(),
+                newTaskInfo.configuration.windowConfiguration.getAppBounds());
     }
 
     @Override

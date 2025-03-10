@@ -22,7 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -63,17 +66,20 @@ class DragAndDropTest : SysuiTestCase() {
             listState = listState,
             otherTiles = listOf(),
             columns = 4,
+            largeTilesSpan = 4,
             modifier = Modifier.fillMaxSize(),
             onRemoveTile = {},
             onSetTiles = onSetTiles,
             onResize = { _, _ -> },
+            onStopEditing = {},
+            onReset = null,
         )
     }
 
     @Test
     fun draggedTile_shouldDisappear() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) {
                 tiles = it.map { tileSpec -> createEditTile(tileSpec.spec) }
@@ -99,7 +105,7 @@ class DragAndDropTest : SysuiTestCase() {
     @Test
     fun draggedTile_shouldChangePosition() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) {
                 tiles = it.map { tileSpec -> createEditTile(tileSpec.spec) }
@@ -126,7 +132,7 @@ class DragAndDropTest : SysuiTestCase() {
     @Test
     fun draggedTileOut_shouldBeRemoved() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) {
                 tiles = it.map { tileSpec -> createEditTile(tileSpec.spec) }
@@ -151,7 +157,7 @@ class DragAndDropTest : SysuiTestCase() {
     @Test
     fun draggedNewTileIn_shouldBeAdded() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) {
                 tiles = it.map { tileSpec -> createEditTile(tileSpec.spec) }
@@ -179,11 +185,14 @@ class DragAndDropTest : SysuiTestCase() {
     }
 
     private fun ComposeContentTestRule.assertTileGridContainsExactly(specs: List<String>) {
-        onNodeWithTag(CURRENT_TILES_GRID_TEST_TAG).onChildren().apply {
-            fetchSemanticsNodes().forEachIndexed { index, _ ->
-                get(index).assert(hasContentDescription(specs[index]))
+        onNodeWithTag(CURRENT_TILES_GRID_TEST_TAG)
+            .onChildren()
+            .filter(SemanticsMatcher.keyIsDefined(SemanticsProperties.ContentDescription))
+            .apply {
+                fetchSemanticsNodes().forEachIndexed { index, _ ->
+                    get(index).assert(hasContentDescription(specs[index]))
+                }
             }
-        }
     }
 
     companion object {

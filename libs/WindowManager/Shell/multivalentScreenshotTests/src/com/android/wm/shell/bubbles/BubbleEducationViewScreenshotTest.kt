@@ -15,10 +15,12 @@
  */
 package com.android.wm.shell.bubbles
 
+import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.ViewGroup
+import com.android.wm.shell.R
 import com.android.wm.shell.shared.bubbles.BubblePopupView
 import com.android.wm.shell.testing.goldenpathmanager.WMShellGoldenPathManager
-import com.android.wm.shell.R
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +50,10 @@ class BubbleEducationViewScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     fun bubblesEducation() {
         screenshotRule.screenshotTest("bubbles_education") { activity ->
             activity.actionBar?.hide()
+            // Set the background color of the activity to be something not from the theme to
+            // ensure good contrast between the education view and the background
+            val rootView = activity.window.decorView.findViewById(android.R.id.content) as ViewGroup
+            rootView.setBackgroundColor(Color.RED)
             val view =
                 LayoutInflater.from(activity)
                     .inflate(R.layout.bubble_bar_stack_education, null) as BubblePopupView

@@ -140,6 +140,10 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logMedia3UnsupportedCommand(command: String) {
+        buffer.log(TAG, LogLevel.DEBUG, { str1 = command }, { "Unsupported media3 command $str1" })
+    }
+
     companion object {
         private const val TAG = "MediaLog"
     }

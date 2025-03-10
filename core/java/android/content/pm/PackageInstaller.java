@@ -218,6 +218,17 @@ public class PackageInstaller {
             "android.content.pm.action.CONFIRM_PRE_APPROVAL";
 
     /**
+     * Intent action to be sent to the implementer of
+     * {@link android.content.pm.dependencyinstaller.DependencyInstallerService}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+    @SystemApi
+    public static final String ACTION_INSTALL_DEPENDENCY =
+            "android.content.pm.action.INSTALL_DEPENDENCY";
+
+    /**
      * An integer session ID that an operation is working with.
      *
      * @see Intent#getIntExtra(String, int)
@@ -2799,6 +2810,8 @@ public class PackageInstaller {
         public int unarchiveId = -1;
         /** {@hide} */
         public @Nullable String dexoptCompilerFilter = null;
+        /** {@hide} */
+        public boolean isAutoInstallDependenciesEnabled = true;
 
         private final ArrayMap<String, Integer> mPermissionStates;
 
@@ -2853,6 +2866,7 @@ public class PackageInstaller {
             developmentInstallFlags = source.readInt();
             unarchiveId = source.readInt();
             dexoptCompilerFilter = source.readString();
+            isAutoInstallDependenciesEnabled = source.readBoolean();
         }
 
         /** {@hide} */
@@ -2889,6 +2903,7 @@ public class PackageInstaller {
             ret.developmentInstallFlags = developmentInstallFlags;
             ret.unarchiveId = unarchiveId;
             ret.dexoptCompilerFilter = dexoptCompilerFilter;
+            ret.isAutoInstallDependenciesEnabled = isAutoInstallDependenciesEnabled;
             return ret;
         }
 
@@ -3597,6 +3612,23 @@ public class PackageInstaller {
             return grantedPermissions.toArray(ArrayUtils.emptyArray(String.class));
         }
 
+        /**
+         * Optionally indicate whether missing SDK or static shared library dependencies should be
+         * automatically fetched and installed when installing an app that wants to use these
+         * dependencies.
+         *
+         * <p> This feature is enabled by default.
+         *
+         * @param enableAutoInstallDependencies {@code true} to enable auto-installation of missing
+         *                                      SDK or static shared library dependencies,
+         *                                      {@code false} to disable and fail immediately if
+         *                                      dependencies aren't already installed.
+         */
+        @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+        public void setAutoInstallDependenciesEnabled(boolean enableAutoInstallDependencies) {
+            isAutoInstallDependenciesEnabled = enableAutoInstallDependencies;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -3632,6 +3664,7 @@ public class PackageInstaller {
             pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
             pw.printPair("unarchiveId", unarchiveId);
             pw.printPair("dexoptCompilerFilter", dexoptCompilerFilter);
+            pw.printPair("isAutoInstallDependenciesEnabled", isAutoInstallDependenciesEnabled);
             pw.println();
         }
 
@@ -3678,6 +3711,7 @@ public class PackageInstaller {
             dest.writeInt(developmentInstallFlags);
             dest.writeInt(unarchiveId);
             dest.writeString(dexoptCompilerFilter);
+            dest.writeBoolean(isAutoInstallDependenciesEnabled);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -3856,6 +3890,9 @@ public class PackageInstaller {
         private String mSessionErrorMessage;
 
         /** {@hide} */
+        public boolean isAutoInstallingDependenciesEnabled;
+
+        /** {@hide} */
         public boolean isCommitted;
 
         /** {@hide} */
@@ -3948,6 +3985,7 @@ public class PackageInstaller {
             packageSource = source.readInt();
             applicationEnabledSettingPersistent = source.readBoolean();
             pendingUserActionReason = source.readInt();
+            isAutoInstallingDependenciesEnabled = source.readBoolean();
         }
 
         /**
@@ -4532,6 +4570,16 @@ public class PackageInstaller {
             return (installFlags & PackageManager.INSTALL_UNARCHIVE) != 0;
         }
 
+        /**
+         * Check whether missing SDK or static shared library dependencies should be automatically
+         * fetched and installed when installing an app that wants to use these dependencies.
+         *
+         * @return true if the dependencies will be auto-installed, false otherwise.
+         */
+        @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+        public boolean isAutoInstallDependenciesEnabled() {
+            return isAutoInstallingDependenciesEnabled;
+        }
 
         @Override
         public int describeContents() {
@@ -4586,6 +4634,7 @@ public class PackageInstaller {
             dest.writeInt(packageSource);
             dest.writeBoolean(applicationEnabledSettingPersistent);
             dest.writeInt(pendingUserActionReason);
+            dest.writeBoolean(isAutoInstallingDependenciesEnabled);
         }
 
         public static final Parcelable.Creator<SessionInfo>

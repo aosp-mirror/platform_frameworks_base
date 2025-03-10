@@ -18,9 +18,10 @@ package com.android.systemui.media.controls.util
 
 import android.app.StatusBarManager
 import android.os.UserHandle
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
+import com.android.systemui.flags.Flags as FlagsClassic
 import javax.inject.Inject
 
 @SysUISingleton
@@ -29,22 +30,29 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlagsClass
      * Check whether media control actions should be based on PlaybackState instead of notification
      */
     fun areMediaSessionActionsEnabled(packageName: String, user: UserHandle): Boolean {
-        // Allow global override with flag
         return StatusBarManager.useMediaSessionActionsForApp(packageName, user)
+    }
+
+    /** Check whether media control actions should be derived from Media3 controller */
+    fun areMedia3ActionsEnabled(packageName: String, user: UserHandle): Boolean {
+        val compatFlag = StatusBarManager.useMedia3ControllerForApp(packageName, user)
+        val featureFlag = Flags.mediaControlsButtonMedia3()
+        return featureFlag && compatFlag
     }
 
     /**
      * If true, keep active media controls for the lifetime of the MediaSession, regardless of
      * whether the underlying notification was dismissed
      */
-    fun isRetainingPlayersEnabled() = featureFlags.isEnabled(Flags.MEDIA_RETAIN_SESSIONS)
+    fun isRetainingPlayersEnabled() = featureFlags.isEnabled(FlagsClassic.MEDIA_RETAIN_SESSIONS)
 
     /** Check whether to get progress information for resume players */
-    fun isResumeProgressEnabled() = featureFlags.isEnabled(Flags.MEDIA_RESUME_PROGRESS)
+    fun isResumeProgressEnabled() = featureFlags.isEnabled(FlagsClassic.MEDIA_RESUME_PROGRESS)
 
     /** If true, do not automatically dismiss the recommendation card */
-    fun isPersistentSsCardEnabled() = featureFlags.isEnabled(Flags.MEDIA_RETAIN_RECOMMENDATIONS)
+    fun isPersistentSsCardEnabled() =
+        featureFlags.isEnabled(FlagsClassic.MEDIA_RETAIN_RECOMMENDATIONS)
 
     /** Check whether we allow remote media to generate resume controls */
-    fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
+    fun isRemoteResumeAllowed() = featureFlags.isEnabled(FlagsClassic.MEDIA_REMOTE_RESUME)
 }

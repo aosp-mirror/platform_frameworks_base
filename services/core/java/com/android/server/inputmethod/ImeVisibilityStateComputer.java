@@ -387,8 +387,9 @@ public final class ImeVisibilityStateComputer {
     @GuardedBy("ImfLock.class")
     void setWindowState(IBinder windowToken, @NonNull ImeTargetWindowState newState) {
         final ImeTargetWindowState state = mRequestWindowStateMap.get(windowToken);
-        if (state != null && newState.hasEditorFocused()
-                && newState.mToolType != MotionEvent.TOOL_TYPE_STYLUS) {
+        if (state != null && newState.hasEditorFocused() && (
+                newState.mToolType != MotionEvent.TOOL_TYPE_STYLUS
+                        || Flags.refactorInsetsController())) {
             // Inherit the last requested IME visible state when the target window is still
             // focused with an editor.
             newState.setRequestedImeVisible(state.mRequestedImeVisible);

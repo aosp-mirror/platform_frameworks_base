@@ -23,6 +23,8 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.statusbar.events.data.repository.SystemStatusEventAnimationRepository
+import com.android.systemui.statusbar.events.data.repository.SystemStatusEventAnimationRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
@@ -48,10 +50,10 @@ import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBase
 import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModelImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
-import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder
-import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinderImpl
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModelImpl
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinderImpl
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModelImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositorySwitcher
@@ -83,6 +85,11 @@ abstract class StatusBarPipelineModule {
 
     @Binds
     abstract fun connectivityRepository(impl: ConnectivityRepositoryImpl): ConnectivityRepository
+
+    @Binds
+    abstract fun systemStatusEventAnimationRepository(
+        impl: SystemStatusEventAnimationRepositoryImpl
+    ): SystemStatusEventAnimationRepository
 
     @Binds
     abstract fun realDeviceBasedSatelliteRepository(
@@ -131,14 +138,10 @@ abstract class StatusBarPipelineModule {
     abstract fun bindCarrierConfigStartable(impl: CarrierConfigCoreStartable): CoreStartable
 
     @Binds
-    abstract fun collapsedStatusBarViewModel(
-        impl: CollapsedStatusBarViewModelImpl
-    ): CollapsedStatusBarViewModel
+    abstract fun homeStatusBarViewModel(impl: HomeStatusBarViewModelImpl): HomeStatusBarViewModel
 
     @Binds
-    abstract fun collapsedStatusBarViewBinder(
-        impl: CollapsedStatusBarViewBinderImpl
-    ): CollapsedStatusBarViewBinder
+    abstract fun homeStatusBarViewBinder(impl: HomeStatusBarViewBinderImpl): HomeStatusBarViewBinder
 
     companion object {
 
@@ -162,7 +165,7 @@ abstract class StatusBarPipelineModule {
         @SysUISingleton
         @Named(FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON)
         fun provideFirstMobileSubShowingNetworkTypeIconProvider(
-            mobileIconsViewModel: MobileIconsViewModel,
+            mobileIconsViewModel: MobileIconsViewModel
         ): Supplier<Flow<Boolean>> {
             return Supplier<Flow<Boolean>> {
                 mobileIconsViewModel.firstMobileSubShowingNetworkTypeIcon

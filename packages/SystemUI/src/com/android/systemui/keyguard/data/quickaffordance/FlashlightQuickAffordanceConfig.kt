@@ -27,6 +27,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.FlashlightController
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -36,7 +37,7 @@ import kotlinx.coroutines.flow.Flow
 class FlashlightQuickAffordanceConfig
 @Inject
 constructor(
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val flashlightController: FlashlightController,
 ) : KeyguardQuickAffordanceConfig {
 

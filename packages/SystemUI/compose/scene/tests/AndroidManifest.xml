@@ -18,7 +18,8 @@
     package="com.android.compose.animation.scene.tests" >
 
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    <application>
+    <application
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         <uses-library android:name="android.test.runner" />
     </application>
 

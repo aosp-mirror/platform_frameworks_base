@@ -66,6 +66,9 @@ public class RadioAccessFamily implements Parcelable {
     // 5G
     public static final int RAF_NR = (int) TelephonyManager.NETWORK_TYPE_BITMASK_NR;
 
+    /** NB-IOT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology. */
+    public static final int RAF_NB_IOT_NTN = (int) TelephonyManager.NETWORK_TYPE_BITMASK_NB_IOT_NTN;
+
     // Grouping of RAFs
     // 2G
     private static final int GSM = RAF_GSM | RAF_GPRS | RAF_EDGE;
@@ -79,6 +82,9 @@ public class RadioAccessFamily implements Parcelable {
 
     // 5G
     private static final int NR = RAF_NR;
+
+    /** Non-Terrestrial Network. */
+    private static final int NB_IOT_NTN = RAF_NB_IOT_NTN;
 
     /* Phone ID of phone */
     private int mPhoneId;
@@ -258,7 +264,7 @@ public class RadioAccessFamily implements Parcelable {
         raf = ((EVDO & raf) > 0) ? (EVDO | raf) : raf;
         raf = ((LTE & raf) > 0) ? (LTE | raf) : raf;
         raf = ((NR & raf) > 0) ? (NR | raf) : raf;
-
+        raf = ((NB_IOT_NTN & raf) > 0) ? (NB_IOT_NTN | raf) : raf;
         return raf;
     }
 
@@ -364,6 +370,7 @@ public class RadioAccessFamily implements Parcelable {
             case "WCDMA":   return WCDMA;
             case "LTE_CA":  return RAF_LTE_CA;
             case "NR":      return RAF_NR;
+            case "NB_IOT_NTN": return RAF_NB_IOT_NTN;
             default:        return RAF_UNKNOWN;
         }
     }

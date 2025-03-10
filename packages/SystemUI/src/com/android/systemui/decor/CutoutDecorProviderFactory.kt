@@ -22,18 +22,15 @@ import android.view.Display
 import android.view.DisplayCutout
 import android.view.DisplayInfo
 
-class CutoutDecorProviderFactory constructor(
-    private val res: Resources,
-    private val display: Display?,
-) : DecorProviderFactory() {
+class CutoutDecorProviderFactory(private val res: Resources, private val display: Display?) :
+    DecorProviderFactory {
 
     val displayInfo = DisplayInfo()
 
     override val hasProviders: Boolean
         get() {
-            display?.getDisplayInfo(displayInfo) ?: run {
-                Log.w(TAG, "display is null, can't update displayInfo")
-            }
+            display?.getDisplayInfo(displayInfo)
+                ?: run { Log.w(TAG, "display is null, can't update displayInfo") }
             return DisplayCutout.getFillBuiltInDisplayCutout(res, displayInfo.uniqueId)
         }
 

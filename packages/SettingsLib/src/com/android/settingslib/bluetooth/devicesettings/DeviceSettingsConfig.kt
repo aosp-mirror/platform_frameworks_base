@@ -63,7 +63,8 @@ data class DeviceSettingsConfig(
                                 },
                             moreSettingsHelpItem = readParcelable(
                                 DeviceSettingItem::class.java.classLoader
-                            )
+                            ),
+                            extras = readBundle((Bundle::class.java.classLoader)) ?: Bundle.EMPTY,
                         )
                     }
 

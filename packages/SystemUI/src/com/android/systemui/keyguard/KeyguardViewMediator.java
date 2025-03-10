@@ -139,7 +139,6 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.ui.viewmodel.DreamViewModel;
 import com.android.systemui.dump.DumpManager;
@@ -147,6 +146,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionBootInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -177,6 +177,7 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
 import dagger.Lazy;
@@ -235,7 +236,10 @@ import java.util.function.Consumer;
  */
 public class KeyguardViewMediator implements CoreStartable,
         StatusBarStateController.StateListener {
-    private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
+
+    private static final boolean ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS =
+            Flags.ensureKeyguardDoesTransitionStarting();
+    public static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
 
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -265,6 +269,7 @@ public class KeyguardViewMediator implements CoreStartable,
     private static final int NOTIFY_STARTED_GOING_TO_SLEEP = 17;
     private static final int SYSTEM_READY = 18;
     private static final int CANCEL_KEYGUARD_EXIT_ANIM = 19;
+    private static final int BOOT_INTERACTOR = 20;
 
     /** Enum for reasons behind updating wakeAndUnlock state. */
     @Retention(RetentionPolicy.SOURCE)
@@ -1390,6 +1395,7 @@ public class KeyguardViewMediator implements CoreStartable,
     private final DozeParameters mDozeParameters;
     private final SelectedUserInteractor mSelectedUserInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
+    private final KeyguardTransitionBootInteractor mTransitionBootInteractor;
     @VisibleForTesting
     protected FoldGracePeriodProvider mFoldGracePeriodProvider =
             new FoldGracePeriodProvider();
@@ -1484,6 +1490,7 @@ public class KeyguardViewMediator implements CoreStartable,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
             SelectedUserInteractor selectedUserInteractor,
             KeyguardInteractor keyguardInteractor,
+            KeyguardTransitionBootInteractor transitionBootInteractor,
             WindowManagerOcclusionManager wmOcclusionManager) {
         mContext = context;
         mUserTracker = userTracker;
@@ -1524,6 +1531,7 @@ public class KeyguardViewMediator implements CoreStartable,
         mDozeParameters = dozeParameters;
         mSelectedUserInteractor = selectedUserInteractor;
         mKeyguardInteractor = keyguardInteractor;
+        mTransitionBootInteractor = transitionBootInteractor;
 
         mStatusBarStateController = statusBarStateController;
         statusBarStateController.addCallback(this);
@@ -1677,6 +1685,8 @@ public class KeyguardViewMediator implements CoreStartable,
             mUpdateMonitor.registerCallback(mUpdateCallback);
             adjustStatusBarLocked();
             mDreamOverlayStateController.addCallback(mDreamOverlayStateCallback);
+
+            mHandler.obtainMessage(BOOT_INTERACTOR).sendToTarget();
 
             final DreamViewModel dreamViewModel = mDreamViewModel.get();
             final CommunalTransitionViewModel communalViewModel =
@@ -2449,6 +2459,12 @@ public class KeyguardViewMediator implements CoreStartable,
             android.util.Log.i(TAG, "Ignoring request to dismiss (user switch in progress?)");
             return;
         }
+
+        if (mKeyguardStateController.isKeyguardGoingAway()) {
+            Log.i(TAG, "Ignoring dismiss because we're already going away.");
+            return;
+        }
+
         mHandler.obtainMessage(DISMISS, new DismissMessage(callback, message)).sendToTarget();
     }
 
@@ -2705,10 +2721,18 @@ public class KeyguardViewMediator implements CoreStartable,
                     message = "SYSTEM_READY";
                     handleSystemReady();
                     break;
+                case BOOT_INTERACTOR:
+                    message = "BOOT_INTERACTOR";
+                    handleBootInteractor();
+                    break;
             }
             Log.d(TAG, "KeyguardViewMediator queue processing message: " + message);
         }
     };
+
+    private void handleBootInteractor() {
+        mTransitionBootInteractor.start();
+    }
 
     private void tryKeyguardDone() {
         if (DEBUG) {
@@ -2850,9 +2874,14 @@ public class KeyguardViewMediator implements CoreStartable,
                 return;
             }
 
-            try {
-                mActivityTaskManagerService.setLockScreenShown(showing, aodShowing);
-            } catch (RemoteException ignored) {
+            if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+                startKeyguardTransition(showing, aodShowing);
+            } else {
+                try {
+
+                    mActivityTaskManagerService.setLockScreenShown(showing, aodShowing);
+                } catch (RemoteException ignored) {
+                }
             }
         });
     }
@@ -2946,7 +2975,7 @@ public class KeyguardViewMediator implements CoreStartable,
         @Override
         public void run() {
             Trace.beginSection("KeyguardViewMediator.mKeyGuardGoingAwayRunnable");
-            if (DEBUG) Log.d(TAG, "keyguardGoingAway");
+            Log.d(TAG, "keyguardGoingAwayRunnable");
             mKeyguardViewControllerLazy.get().keyguardGoingAway();
 
             int flags = 0;
@@ -2983,23 +3012,32 @@ public class KeyguardViewMediator implements CoreStartable,
 
             // Handled in WmLockscreenVisibilityManager if flag is enabled.
             if (!KeyguardWmStateRefactor.isEnabled()) {
-                    // Don't actually hide the Keyguard at the moment, wait for window manager 
-                    // until it tells us it's safe to do so with startKeyguardExitAnimation.
-		    // Posting to mUiOffloadThread to ensure that calls to ActivityTaskManager 
-		    // will be in order.
-		    final int keyguardFlag = flags;
-		    mUiBgExecutor.execute(() -> {
-		        try {
-		            mActivityTaskManagerService.keyguardGoingAway(keyguardFlag);
-		        } catch (RemoteException e) {
-		            Log.e(TAG, "Error while calling WindowManager", e);
-		        }
-		    });
+                // Don't actually hide the Keyguard at the moment, wait for window manager
+                // until it tells us it's safe to do so with startKeyguardExitAnimation.
+                // Posting to mUiOffloadThread to ensure that calls to ActivityTaskManager
+                // will be in order.
+                final int keyguardFlag = flags;
+                mUiBgExecutor.execute(() -> {
+                    if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+                        startKeyguardTransition(
+                                false /* keyguardShowing */, false /* aodShowing */);
+                        return;
+                    }
+                    try {
+                        mActivityTaskManagerService.keyguardGoingAway(keyguardFlag);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error while calling WindowManager", e);
+                    }
+                });
             }
 
             Trace.endSection();
         }
     };
+
+    private void startKeyguardTransition(boolean keyguardShowing, boolean aodShowing) {
+        mKeyguardTransitions.startKeyguardTransition(keyguardShowing, aodShowing);
+    }
 
     private final Runnable mHideAnimationFinishedRunnable = () -> {
         Log.e(TAG, "mHideAnimationFinishedRunnable#run");
@@ -3399,6 +3437,12 @@ public class KeyguardViewMediator implements CoreStartable,
             return;
         }
 
+        if (mIsKeyguardExitAnimationCanceled) {
+            Log.d(TAG, "Ignoring exitKeyguardAndFinishSurfaceBehindRemoteAnimation. "
+                    + "mIsKeyguardExitAnimationCanceled==true");
+            return;
+        }
+
         // Block the panel from expanding, in case we were doing a swipe to dismiss gesture.
         mKeyguardViewControllerLazy.get().blockPanelExpansionFromCurrentTouch();
         final boolean wasShowing = mShowing;
@@ -3448,6 +3492,11 @@ public class KeyguardViewMediator implements CoreStartable,
      */
     public void showSurfaceBehindKeyguard() {
         mSurfaceBehindRemoteAnimationRequested = true;
+
+        if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            startKeyguardTransition(false /* keyguardShowing */, false /* aodShowing */);
+            return;
+        }
 
         try {
             int flags = KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS
@@ -3522,9 +3571,7 @@ public class KeyguardViewMediator implements CoreStartable,
         }
 
         // Ensure that keyguard becomes visible if the going away animation is canceled
-        if (showKeyguard && !KeyguardWmStateRefactor.isEnabled()
-                && (MigrateClocksToBlueprint.isEnabled()
-                    || DeviceEntryUdfpsRefactor.isEnabled())) {
+        if (showKeyguard && !KeyguardWmStateRefactor.isEnabled()) {
             mKeyguardInteractor.showKeyguard();
         }
     }
@@ -3896,7 +3943,7 @@ public class KeyguardViewMediator implements CoreStartable,
     }
 
     private void notifyDefaultDisplayCallbacks(boolean showing) {
-        if (SceneContainerFlag.isEnabled()) {
+        if (SceneContainerFlag.isEnabled() || KeyguardWmStateRefactor.isEnabled()) {
             return;
         }
 

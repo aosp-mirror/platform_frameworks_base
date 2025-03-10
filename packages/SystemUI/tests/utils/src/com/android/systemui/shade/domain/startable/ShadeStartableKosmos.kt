@@ -40,7 +40,7 @@ val Kosmos.shadeExpansionStateManager by Fixture { ShadeExpansionStateManager() 
 val Kosmos.shadeStartable by Fixture {
     ShadeStartable(
         applicationScope = applicationCoroutineScope,
-        applicationContext = applicationContext,
+        context = applicationContext,
         touchLog = mock<LogBuffer>(),
         configurationRepository = configurationRepository,
         shadeRepository = shadeRepository,

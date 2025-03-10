@@ -22,6 +22,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -137,6 +139,14 @@ public final class CameraStateMonitorTests extends WindowTestsBase {
     }
 
     @Test
+    public void testOnCameraOpened_listenerAdded_cameraRegistersAsOpenedDuringTheCallback() {
+        mCameraStateMonitor.addCameraStateListener(mListener);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertTrue(mListener.mIsCameraOpened);
+    }
+
+    @Test
     public void testOnCameraOpened_cameraClosed_notifyCameraClosed() {
         mCameraStateMonitor.addCameraStateListener(mListener);
         // Listener returns true on `onCameraOpened`.
@@ -144,7 +154,18 @@ public final class CameraStateMonitorTests extends WindowTestsBase {
 
         mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
 
+        assertEquals(1, mListener.mCheckCanCloseCounter);
         assertEquals(1, mListener.mOnCameraClosedCounter);
+    }
+
+    @Test
+    public void testOnCameraOpenedAndClosed_cameraRegistersAsClosedDuringTheCallback() {
+        mCameraStateMonitor.addCameraStateListener(mListener);
+        // Listener returns true on `onCameraOpened`.
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
+        assertFalse(mListener.mIsCameraOpened);
     }
 
     @Test
@@ -155,7 +176,8 @@ public final class CameraStateMonitorTests extends WindowTestsBase {
 
         mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
 
-        assertEquals(2, mListenerCannotClose.mOnCameraClosedCounter);
+        assertEquals(2, mListenerCannotClose.mCheckCanCloseCounter);
+        assertEquals(1, mListenerCannotClose.mOnCameraClosedCounter);
     }
 
     @Test
@@ -197,39 +219,49 @@ public final class CameraStateMonitorTests extends WindowTestsBase {
             CameraStateMonitor.CameraCompatStateListener {
 
         int mOnCameraOpenedCounter = 0;
+        int mCheckCanCloseCounter = 0;
         int mOnCameraClosedCounter = 0;
 
-        private boolean mOnCameraClosedReturnValue = true;
+        boolean mIsCameraOpened;
+
+        private boolean mCheckCanCloseReturnValue = true;
 
         /**
-         * @param simulateUnsuccessfulCloseOnce When false, returns `true` on every
-         *                                      `onCameraClosed`. When true, returns `false` on the
-         *                                      first `onCameraClosed` callback, and `true on the
+         * @param simulateCannotCloseOnce When false, returns `true` on every
+         *                                      `checkCanClose`. When true, returns `false` on the
+         *                                      first `checkCanClose` callback, and `true on the
          *                                      subsequent calls. This fake implementation tests the
          *                                      retry mechanism in {@link CameraStateMonitor}.
          */
-        FakeCameraCompatStateListener(boolean simulateUnsuccessfulCloseOnce) {
-            mOnCameraClosedReturnValue = !simulateUnsuccessfulCloseOnce;
+        FakeCameraCompatStateListener(boolean simulateCannotCloseOnce) {
+            mCheckCanCloseReturnValue = !simulateCannotCloseOnce;
         }
 
         @Override
-        public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
-                @NonNull String cameraId) {
+        public void onCameraOpened(@NonNull ActivityRecord cameraActivity) {
             mOnCameraOpenedCounter++;
+            mIsCameraOpened = mCameraStateMonitor.isCameraRunningForActivity(cameraActivity);
         }
 
         @Override
-        public boolean onCameraClosed(@NonNull String cameraId) {
-            mOnCameraClosedCounter++;
-            boolean returnValue = mOnCameraClosedReturnValue;
+        public boolean canCameraBeClosed(@NonNull String cameraId) {
+            mCheckCanCloseCounter++;
+            final boolean returnValue = mCheckCanCloseReturnValue;
             // If false, return false only the first time, so it doesn't fall in the infinite retry
             // loop.
-            mOnCameraClosedReturnValue = true;
+            mCheckCanCloseReturnValue = true;
             return returnValue;
+        }
+
+        @Override
+        public void onCameraClosed() {
+            mOnCameraClosedCounter++;
+            mIsCameraOpened = mCameraStateMonitor.isCameraRunningForActivity(mActivity);
         }
 
         void resetCounters() {
             mOnCameraOpenedCounter = 0;
+            mCheckCanCloseCounter = 0;
             mOnCameraClosedCounter = 0;
         }
     }

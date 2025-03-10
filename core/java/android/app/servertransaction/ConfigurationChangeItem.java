@@ -46,7 +46,7 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
 
     @Override
     public void preExecute(@NonNull ClientTransactionHandler client) {
-        CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
+        CompatibilityInfo.applyOverrideIfNeeded(mConfiguration);
         client.updatePendingConfiguration(mConfiguration);
     }
 

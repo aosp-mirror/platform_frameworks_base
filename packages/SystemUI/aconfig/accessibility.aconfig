@@ -118,3 +118,10 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "floating_menu_hearing_device_status_icon"
+    namespace: "accessibility"
+    description: "Update hearing device icon in floating menu according to the connection status."
+    bug: "357882387"
+}

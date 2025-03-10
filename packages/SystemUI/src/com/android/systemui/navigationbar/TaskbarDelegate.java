@@ -159,7 +159,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private final AutoHideUiElement mAutoHideUiElement = new AutoHideUiElement() {
         @Override
         public void synchronizeState() {
-            checkNavBarModes();
+            checkNavBarModes(mDisplayId);
         }
 
         @Override
@@ -218,6 +218,16 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mLightBarTransitionsController = createLightBarTransitionsController();
         mTaskStackChangeListeners = taskStackChangeListeners;
         mEdgeBackGestureHandler = navBarHelper.getEdgeBackGestureHandler();
+    }
+
+    @Override
+    public void onDisplayReady(int displayId) {
+        CommandQueue.Callbacks.super.onDisplayReady(displayId);
+    }
+
+    @Override
+    public void onDisplayRemoved(int displayId) {
+        CommandQueue.Callbacks.super.onDisplayRemoved(displayId);
     }
 
     // Separated into a method to keep setDependencies() clean/readable.
@@ -349,31 +359,31 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         }
     }
 
-    void checkNavBarModes() {
+    void checkNavBarModes(int displayId) {
         if (mOverviewProxyService.getProxy() == null) {
             return;
         }
 
         try {
-            mOverviewProxyService.getProxy().checkNavBarModes();
+            mOverviewProxyService.getProxy().checkNavBarModes(displayId);
         } catch (RemoteException e) {
             Log.e(TAG, "checkNavBarModes() failed", e);
         }
     }
 
-    void finishBarAnimations() {
+    void finishBarAnimations(int displayId) {
         if (mOverviewProxyService.getProxy() == null) {
             return;
         }
 
         try {
-            mOverviewProxyService.getProxy().finishBarAnimations();
+            mOverviewProxyService.getProxy().finishBarAnimations(displayId);
         } catch (RemoteException e) {
             Log.e(TAG, "finishBarAnimations() failed", e);
         }
     }
 
-    void touchAutoDim() {
+    void touchAutoDim(int displayId) {
         if (mOverviewProxyService.getProxy() == null) {
             return;
         }
@@ -382,19 +392,19 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             int state = mStatusBarStateController.getState();
             boolean shouldReset =
                     state != StatusBarState.KEYGUARD && state != StatusBarState.SHADE_LOCKED;
-            mOverviewProxyService.getProxy().touchAutoDim(shouldReset);
+            mOverviewProxyService.getProxy().touchAutoDim(displayId, shouldReset);
         } catch (RemoteException e) {
             Log.e(TAG, "touchAutoDim() failed", e);
         }
     }
 
-    void transitionTo(@BarTransitions.TransitionMode int barMode, boolean animate) {
+    void transitionTo(int displayId, @BarTransitions.TransitionMode int barMode, boolean animate) {
         if (mOverviewProxyService.getProxy() == null) {
             return;
         }
 
         try {
-            mOverviewProxyService.getProxy().transitionTo(barMode, animate);
+            mOverviewProxyService.getProxy().transitionTo(displayId, barMode, animate);
         } catch (RemoteException e) {
             Log.e(TAG, "transitionTo() failed, barMode: " + barMode, e);
         }

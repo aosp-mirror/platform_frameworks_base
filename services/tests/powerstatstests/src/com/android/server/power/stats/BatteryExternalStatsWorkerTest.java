@@ -39,7 +39,6 @@ import android.hardware.power.stats.StateResidencyResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.connectivity.WifiActivityEnergyInfo;
-import android.platform.test.ravenwood.RavenwoodRule;
 import android.power.PowerStatsInternal;
 import android.util.IntArray;
 import android.util.SparseArray;
@@ -52,7 +51,6 @@ import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -67,25 +65,24 @@ import java.util.concurrent.CompletableFuture;
 @SuppressWarnings("GuardedBy")
 @android.platform.test.annotations.DisabledOnRavenwood
 public class BatteryExternalStatsWorkerTest {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
-
     private BatteryExternalStatsWorker mBatteryExternalStatsWorker;
     private TestPowerStatsInternal mPowerStatsInternal;
+    private Handler mHandler;
 
     @Before
     public void setUp() {
         final Context context = InstrumentationRegistry.getContext();
 
+        mHandler = new Handler(Looper.getMainLooper());
         BatteryStatsImpl batteryStats = new BatteryStatsImpl(
                 new BatteryStatsImpl.BatteryStatsConfig.Builder().build(), Clock.SYSTEM_CLOCK,
                 new MonotonicClock(0, Clock.SYSTEM_CLOCK), null,
-                new Handler(Looper.getMainLooper()), null, null, null,
+                mHandler, null, null, null,
                 new PowerProfile(context, true /* forTest */), buildScalingPolicies(),
                 new PowerStatsUidResolver());
         mPowerStatsInternal = new TestPowerStatsInternal();
         mBatteryExternalStatsWorker =
-                new BatteryExternalStatsWorker(new TestInjector(context), batteryStats);
+                new BatteryExternalStatsWorker(new TestInjector(context), batteryStats, mHandler);
     }
 
     @Test

@@ -1,0 +1,12 @@
+filegroup {
+    name: "crashrecovery-platform-adaptor-srcs",
+    srcs: select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [
+            "postModularization/java/**/*.java",
+        ],
+        default: [
+            "preModularization/java/**/*.java",
+        ],
+    }),
+    visibility: ["//frameworks/base:__subpackages__"],
+}

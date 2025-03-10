@@ -22,11 +22,13 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.animation.ObjectAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.animation.InterpolatorsAndroidX
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Dumpable
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.PulseExpansionInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
@@ -34,14 +36,14 @@ import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.KeyguardBypassController.OnBypassStateChangedListener
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.util.doOnEnd
 import com.android.systemui.util.doOnStart
 import java.io.PrintWriter
@@ -49,7 +51,6 @@ import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @SysUISingleton
 class NotificationWakeUpCoordinator
@@ -65,6 +66,7 @@ constructor(
     private val logger: NotificationWakeUpCoordinatorLogger,
     private val notifsKeyguardInteractor: NotificationsKeyguardInteractor,
     private val communalInteractor: CommunalInteractor,
+    private val pulseExpansionInteractor: PulseExpansionInteractor,
 ) :
     OnHeadsUpChangedListener,
     StatusBarStateController.StateListener,
@@ -115,7 +117,7 @@ constructor(
                     // they were blocked by the proximity sensor
                     updateNotificationVisibility(
                         animate = shouldAnimateVisibility(),
-                        increaseSpeed = false
+                        increaseSpeed = false,
                     )
                 }
             }
@@ -139,7 +141,7 @@ constructor(
                 // the waking up callback
                 updateNotificationVisibility(
                     animate = shouldAnimateVisibility(),
-                    increaseSpeed = false
+                    increaseSpeed = false,
                 )
             }
         }
@@ -200,7 +202,7 @@ constructor(
                         setNotificationsVisibleForExpansion(
                             visible = false,
                             animate = false,
-                            increaseSpeed = false
+                            increaseSpeed = false,
                         )
                     }
                 }
@@ -226,7 +228,7 @@ constructor(
                 for (listener in wakeUpListeners) {
                     listener.onPulseExpandingChanged(pulseExpanding)
                 }
-                notifsKeyguardInteractor.setPulseExpanding(pulseExpanding)
+                pulseExpansionInteractor.setPulseExpanding(pulseExpanding)
             }
         }
     }
@@ -241,7 +243,7 @@ constructor(
     fun setNotificationsVisibleForExpansion(
         visible: Boolean,
         animate: Boolean,
-        increaseSpeed: Boolean
+        increaseSpeed: Boolean,
     ) {
         notificationsVisibleForExpansion = visible
         updateNotificationVisibility(animate, increaseSpeed)
@@ -282,7 +284,7 @@ constructor(
     private fun setNotificationsVisible(
         visible: Boolean,
         animate: Boolean,
-        increaseSpeed: Boolean
+        increaseSpeed: Boolean,
     ) {
         if (notificationsVisible == visible) {
             return
@@ -363,7 +365,7 @@ constructor(
             hardOverride = hardDozeAmountOverride,
             outputLinear = outputLinearDozeAmount,
             state = statusBarStateController.state,
-            changed = changed
+            changed = changed,
         )
         stackScrollerController.setDozeAmount(outputEasedDozeAmount)
         updateHideAmount()
@@ -372,7 +374,7 @@ constructor(
             setNotificationsVisibleForExpansion(
                 visible = false,
                 animate = false,
-                increaseSpeed = false
+                increaseSpeed = false,
             )
         }
     }
@@ -389,10 +391,7 @@ constructor(
      * call with `false` at some point in the near future. A call with `true` before that will
      * happen if the animation is not already running.
      */
-    fun setWakingUp(
-        wakingUp: Boolean,
-        requestDelayedAnimation: Boolean,
-    ) {
+    fun setWakingUp(wakingUp: Boolean, requestDelayedAnimation: Boolean) {
         logger.logSetWakingUp(wakingUp, requestDelayedAnimation)
         this.wakingUp = wakingUp
         if (wakingUp && requestDelayedAnimation) {
@@ -432,7 +431,7 @@ constructor(
             // See: UnlockedScreenOffAnimationController.onFinishedWakingUp()
             setHardDozeAmountOverride(
                 dozing = false,
-                source = "Override: Shade->Shade (lock cancelled by unlock)"
+                source = "Override: Shade->Shade (lock cancelled by unlock)",
             )
             this.state = newState
             return
@@ -478,7 +477,7 @@ constructor(
                 wasCollapsedEnoughToHide,
                 isCollapsedEnoughToHide,
                 couldShowPulsingHuns,
-                canShowPulsingHuns
+                canShowPulsingHuns,
             )
 
             if (couldShowPulsingHuns && !canShowPulsingHuns) {

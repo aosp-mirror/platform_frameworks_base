@@ -99,6 +99,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         whenever(mainLooper.isCurrentThread).thenReturn(true)
         whenever(mainLooper.thread).thenReturn(thread)
         whenever(thread.name).thenReturn("backgroundThread")
+        whenever(context.applicationContext).thenReturn(context)
         whenever(context.resources).thenReturn(resources)
         whenever(context.mainExecutor).thenReturn(mContext.mainExecutor)
 

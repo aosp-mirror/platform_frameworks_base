@@ -762,6 +762,10 @@ public abstract class DynamicAnimation<T extends DynamicAnimation<T>>
         return mAnimationHandler != null ? mAnimationHandler : AnimationHandler.getInstance();
     }
 
+    public long getLastFrameTime() {
+        return mLastFrameTime;
+    }
+
     /****************Sub class animations**************/
     /**
      * Returns the acceleration at the given value with the given velocity.

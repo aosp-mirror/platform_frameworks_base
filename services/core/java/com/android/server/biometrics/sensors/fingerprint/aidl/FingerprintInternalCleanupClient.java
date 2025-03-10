@@ -71,11 +71,11 @@ public class FingerprintInternalCleanupClient
             Supplier<AidlSession> lazyDaemon, IBinder token, int biometricId, int userId,
             String owner, BiometricUtils<Fingerprint> utils, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            Map<Integer, Long> authenticatorIds) {
+            Map<Integer, Long> authenticatorIds, int reason) {
         return new FingerprintRemovalClient(context, lazyDaemon, token,
                 null /* ClientMonitorCallbackConverter */, new int[] {biometricId}, userId, owner,
                 utils, sensorId, logger.swapAction(context, BiometricsProtoEnums.ACTION_REMOVE),
-                biometricContext, authenticatorIds);
+                biometricContext, authenticatorIds, reason);
     }
 
     @Override

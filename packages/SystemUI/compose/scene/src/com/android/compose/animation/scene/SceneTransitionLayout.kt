@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
@@ -34,6 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
+import com.android.compose.animation.scene.effect.ContentOverscrollEffect
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever its state
@@ -67,7 +70,7 @@ fun SceneTransitionLayout(
         swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
-        builder,
+        builder = builder,
     )
 }
 
@@ -127,22 +130,23 @@ interface SceneTransitionLayoutScope {
 /** A scope that can be used to query the target state of an element or scene. */
 interface ElementStateScope {
     /**
-     * Return the *target* size of [this] element in the given [scene], i.e. the size of the element
-     * when idle, or `null` if the element is not composed and measured in that scene (yet).
+     * Return the *target* size of [this] element in the given [content], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and measured in that content
+     * (yet).
      */
-    fun ElementKey.targetSize(scene: SceneKey): IntSize?
+    fun ElementKey.targetSize(content: ContentKey): IntSize?
 
     /**
-     * Return the *target* offset of [this] element in the given [scene], i.e. the size of the
-     * element when idle, or `null` if the element is not composed and placed in that scene (yet).
+     * Return the *target* offset of [this] element in the given [content], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and placed in that content (yet).
      */
-    fun ElementKey.targetOffset(scene: SceneKey): Offset?
+    fun ElementKey.targetOffset(content: ContentKey): Offset?
 
     /**
-     * Return the *target* size of [this] scene, i.e. the size of the scene when idle, or `null` if
-     * the scene was never composed.
+     * Return the *target* size of [this] content, i.e. the size of the content when idle, or `null`
+     * if the content was not composed (yet).
      */
-    fun SceneKey.targetSize(): IntSize?
+    fun ContentKey.targetSize(): IntSize?
 }
 
 @Stable
@@ -259,13 +263,73 @@ interface BaseContentScope : ElementStateScope {
      * lists keep a constant size during transitions even if its elements are growing/shrinking.
      */
     fun Modifier.noResizeDuringTransitions(): Modifier
+
+    /**
+     * A [NestedSceneTransitionLayout] will share its elements with its ancestor STLs therefore
+     * enabling sharedElement transitions between them.
+     */
+    // TODO(b/380070506): Add more parameters when default params are supported in Kotlin 2.0.21
+    @Composable
+    fun NestedSceneTransitionLayout(
+        state: SceneTransitionLayoutState,
+        modifier: Modifier,
+        builder: SceneTransitionLayoutScope.() -> Unit,
+    )
 }
 
+@Deprecated("Use ContentScope instead", ReplaceWith("ContentScope"))
 typealias SceneScope = ContentScope
 
 @Stable
 @ElementDsl
 interface ContentScope : BaseContentScope {
+    /**
+     * The overscroll effect applied to the content in the vertical direction. This can be used to
+     * customize how the content behaves when the scene is over scrolled.
+     *
+     * For example, you can use it with the `Modifier.overscroll()` modifier:
+     * ```kotlin
+     * @Composable
+     * fun ContentScope.MyScene() {
+     *     Box(
+     *         modifier = Modifier
+     *             // Apply the effect
+     *             .overscroll(verticalOverscrollEffect)
+     *     ) {
+     *         // ... your content ...
+     *     }
+     * }
+     * ```
+     *
+     * Or you can read the `overscrollDistance` value directly, if you need some custom overscroll
+     * behavior:
+     * ```kotlin
+     * @Composable
+     * fun ContentScope.MyScene() {
+     *     Box(
+     *         modifier = Modifier
+     *             .graphicsLayer {
+     *                 // Translate half of the overscroll
+     *                 translationY = verticalOverscrollEffect.overscrollDistance * 0.5f
+     *             }
+     *     ) {
+     *         // ... your content ...
+     *     }
+     * }
+     * ```
+     *
+     * @see horizontalOverscrollEffect
+     */
+    val verticalOverscrollEffect: ContentOverscrollEffect
+
+    /**
+     * The overscroll effect applied to the content in the horizontal direction. This can be used to
+     * customize how the content behaves when the scene is over scrolled.
+     *
+     * @see verticalOverscrollEffect
+     */
+    val horizontalOverscrollEffect: ContentOverscrollEffect
+
     /**
      * Animate some value at the content level.
      *
@@ -403,9 +467,11 @@ data object Back : UserAction() {
 }
 
 /** The user swiped on the container. */
-data class Swipe(
+data class Swipe
+private constructor(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
+    val pointersType: PointerType? = null,
     val fromSource: SwipeSource? = null,
 ) : UserAction() {
     companion object {
@@ -415,12 +481,49 @@ data class Swipe(
         val Down = Swipe(SwipeDirection.Down)
         val Start = Swipe(SwipeDirection.Start)
         val End = Swipe(SwipeDirection.End)
+
+        fun Left(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Left, pointerCount, pointersType, fromSource)
+
+        fun Up(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Up, pointerCount, pointersType, fromSource)
+
+        fun Right(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Right, pointerCount, pointersType, fromSource)
+
+        fun Down(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Down, pointerCount, pointersType, fromSource)
+
+        fun Start(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Start, pointerCount, pointersType, fromSource)
+
+        fun End(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.End, pointerCount, pointersType, fromSource)
     }
 
     override fun resolve(layoutDirection: LayoutDirection): UserAction.Resolved {
         return Resolved(
             direction = direction.resolve(layoutDirection),
             pointerCount = pointerCount,
+            pointersType = pointersType,
             fromSource = fromSource?.resolve(layoutDirection),
         )
     }
@@ -430,6 +533,7 @@ data class Swipe(
         val direction: SwipeDirection.Resolved,
         val pointerCount: Int,
         val fromSource: SwipeSource.Resolved?,
+        val pointersType: PointerType?,
     ) : UserAction.Resolved()
 }
 
@@ -580,8 +684,8 @@ sealed class UserActionResult(
 
 fun interface UserActionDistance {
     /**
-     * Return the **absolute** distance of the user action given the size of the scene we are
-     * animating from and the [orientation].
+     * Return the **absolute** distance of the user action when going from [fromContent] to
+     * [toContent] in the given [orientation].
      *
      * Note: This function will be called for each drag event until it returns a value > 0f. This
      * for instance allows you to return 0f or a negative value until the first layout pass of a
@@ -589,7 +693,8 @@ fun interface UserActionDistance {
      * transitioning to when computing this absolute distance.
      */
     fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float
 }
@@ -599,7 +704,8 @@ interface UserActionDistanceScope : Density, ElementStateScope
 /** The user action has a fixed [absoluteDistance]. */
 class FixedDistance(private val distance: Dp) : UserActionDistance {
     override fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float = distance.toPx()
 }
@@ -618,6 +724,9 @@ internal fun SceneTransitionLayoutForTesting(
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
+    sharedElementMap: MutableMap<ElementKey, Element> = remember { mutableMapOf() },
+    ancestorContentKeys: List<ContentKey> = emptyList(),
+    lookaheadScope: LookaheadScope? = null,
     builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
@@ -632,6 +741,9 @@ internal fun SceneTransitionLayoutForTesting(
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = builder,
                 animationScope = animationScope,
+                elements = sharedElementMap,
+                ancestorContentKeys = ancestorContentKeys,
+                lookaheadScope = lookaheadScope,
             )
             .also { onLayoutImpl?.invoke(it) }
     }
@@ -645,6 +757,24 @@ internal fun SceneTransitionLayoutForTesting(
             error(
                 "This SceneTransitionLayout was bound to a different SceneTransitionLayoutState" +
                     " that was used when creating it, which is not supported"
+            )
+        }
+        if (layoutImpl.elements != sharedElementMap) {
+            error(
+                "This SceneTransitionLayout was bound to a different elements map that was used " +
+                    "when creating it, which is not supported"
+            )
+        }
+        if (layoutImpl.ancestorContentKeys != ancestorContentKeys) {
+            error(
+                "This SceneTransitionLayout was bound to a different ancestorContents that was " +
+                    "used when creating it, which is not supported"
+            )
+        }
+        if (lookaheadScope != null && layoutImpl.lookaheadScope != lookaheadScope) {
+            error(
+                "This SceneTransitionLayout was bound to a different lookaheadScope that was " +
+                    "used when creating it, which is not supported"
             )
         }
 

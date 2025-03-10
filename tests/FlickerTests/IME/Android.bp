@@ -24,27 +24,6 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Begin to cleanup after CL merges
-
-filegroup {
-    name: "FlickerTestsImeCommon-src",
-    srcs: ["src/**/common/*"],
-}
-
-filegroup {
-    name: "FlickerTestsIme1-src",
-    srcs: ["src/**/Close*"],
-}
-
-filegroup {
-    name: "FlickerTestsIme2-src",
-    srcs: ["src/**/ShowImeOnAppStart*"],
-}
-
-// End to cleanup after CL merges
-////////////////////////////////////////////////////////////////////////////////
-
 android_test {
     name: "FlickerTestsIme",
     defaults: ["FlickerTestsDefault"],
@@ -58,67 +37,6 @@ android_test {
     static_libs: ["FlickerTestsBase"],
     data: ["trace_config/*"],
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// Begin to cleanup after CL merges
-
-java_library {
-    name: "FlickerTestsImeCommon",
-    defaults: ["FlickerTestsDefault"],
-    srcs: [":FlickerTestsImeCommon-src"],
-    static_libs: ["FlickerTestsBase"],
-}
-
-android_test {
-    name: "FlickerTestsIme1",
-    defaults: ["FlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    test_config_template: "AndroidTestTemplate.xml",
-    test_suites: [
-        "device-tests",
-        "device-platinum-tests",
-    ],
-    srcs: [":FlickerTestsIme1-src"],
-    static_libs: [
-        "FlickerTestsBase",
-        "FlickerTestsImeCommon",
-    ],
-    data: ["trace_config/*"],
-}
-
-android_test {
-    name: "FlickerTestsIme2",
-    defaults: ["FlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [":FlickerTestsIme2-src"],
-    static_libs: [
-        "FlickerTestsBase",
-        "FlickerTestsImeCommon",
-    ],
-    data: ["trace_config/*"],
-}
-
-android_test {
-    name: "FlickerTestsIme3",
-    defaults: ["FlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: ["src/**/*"],
-    exclude_srcs: [
-        ":FlickerTestsIme1-src",
-        ":FlickerTestsIme2-src",
-        ":FlickerTestsImeCommon-src",
-    ],
-    static_libs: [
-        "FlickerTestsBase",
-        "FlickerTestsImeCommon",
-    ],
-    data: ["trace_config/*"],
-}
-
-// End to cleanup after CL merges
-////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // Begin breakdowns for FlickerTestsIme module

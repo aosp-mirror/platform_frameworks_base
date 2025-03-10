@@ -15,6 +15,7 @@
  */
 package android.hardware.camera2.impl;
 
+import android.hardware.camera2.CameraMetadataInfo;
 import android.hardware.camera2.impl.CameraMetadataNative;
 
 import android.os.Parcel;
@@ -25,7 +26,7 @@ import android.os.Parcelable;
  */
 public class PhysicalCaptureResultInfo implements Parcelable {
     private String cameraId;
-    private CameraMetadataNative cameraMetadata;
+    private CameraMetadataInfo cameraMetadataInfo;
 
     public static final @android.annotation.NonNull Parcelable.Creator<PhysicalCaptureResultInfo> CREATOR =
             new Parcelable.Creator<PhysicalCaptureResultInfo>() {
@@ -46,7 +47,7 @@ public class PhysicalCaptureResultInfo implements Parcelable {
 
     public PhysicalCaptureResultInfo(String cameraId, CameraMetadataNative cameraMetadata) {
         this.cameraId = cameraId;
-        this.cameraMetadata = cameraMetadata;
+        this.cameraMetadataInfo = CameraMetadataInfo.metadata(cameraMetadata);
     }
 
     @Override
@@ -57,13 +58,12 @@ public class PhysicalCaptureResultInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(cameraId);
-        cameraMetadata.writeToParcel(dest, flags);
+        cameraMetadataInfo.writeToParcel(dest, flags);
     }
 
     public void readFromParcel(Parcel in) {
         cameraId = in.readString();
-        cameraMetadata = new CameraMetadataNative();
-        cameraMetadata.readFromParcel(in);
+        cameraMetadataInfo = CameraMetadataInfo.CREATOR.createFromParcel(in);
     }
 
     public String getCameraId() {
@@ -71,6 +71,11 @@ public class PhysicalCaptureResultInfo implements Parcelable {
     }
 
     public CameraMetadataNative getCameraMetadata() {
-        return cameraMetadata;
+        return cameraMetadataInfo.getMetadata();
     }
+
+    public CameraMetadataInfo getCameraMetadataInfo() {
+        return cameraMetadataInfo;
+    }
+
 }

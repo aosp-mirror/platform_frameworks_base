@@ -23,12 +23,14 @@ import static com.android.internal.util.CollectionUtils.emptyIfNull;
 import static java.util.Objects.requireNonNull;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -234,6 +236,13 @@ public final class AssociationRequest implements Parcelable {
     private boolean mSkipPrompt;
 
     /**
+     * The device icon displayed in selfManaged association dialog.
+     * @hide
+     */
+    @Nullable
+    private Icon mDeviceIcon;
+
+    /**
      * Creates a new AssociationRequest.
      *
      * @param singleDevice
@@ -258,15 +267,16 @@ public final class AssociationRequest implements Parcelable {
             @Nullable @DeviceProfile String deviceProfile,
             @Nullable CharSequence displayName,
             boolean selfManaged,
-            boolean forceConfirmation) {
+            boolean forceConfirmation,
+            @Nullable Icon deviceIcon) {
         mSingleDevice = singleDevice;
         mDeviceFilters = requireNonNull(deviceFilters);
         mDeviceProfile = deviceProfile;
         mDisplayName = displayName;
         mSelfManaged = selfManaged;
         mForceConfirmation = forceConfirmation;
-
         mCreationTime = System.currentTimeMillis();
+        mDeviceIcon = deviceIcon;
     }
 
     /**
@@ -318,6 +328,19 @@ public final class AssociationRequest implements Parcelable {
         return mSingleDevice;
     }
 
+    /**
+     * Get the device icon of the self-managed association request.
+     *
+     * @return the device icon, or {@code null} if no device icon has been set.
+     *
+     * @see Builder#setDeviceIcon(Icon)
+     */
+    @FlaggedApi(Flags.FLAG_ASSOCIATION_DEVICE_ICON)
+    @Nullable
+    public Icon getDeviceIcon() {
+        return mDeviceIcon;
+    }
+
     /** @hide */
     public void setPackageName(@NonNull String packageName) {
         mPackageName = packageName;
@@ -365,6 +388,7 @@ public final class AssociationRequest implements Parcelable {
         private CharSequence mDisplayName;
         private boolean mSelfManaged = false;
         private boolean mForceConfirmation = false;
+        private Icon mDeviceIcon = null;
 
         public Builder() {}
 
@@ -450,6 +474,23 @@ public final class AssociationRequest implements Parcelable {
             return this;
         }
 
+        /**
+         * Set the device icon for the self-managed device and to display the icon in the
+         * self-managed association dialog.
+         *
+         * @throws IllegalArgumentException if the icon is not exactly 24dp by 24dp
+         * or if it is {@link Icon#TYPE_URI} or {@link Icon#TYPE_URI_ADAPTIVE_BITMAP}.
+         * @see #setSelfManaged(boolean)
+         */
+        @NonNull
+        @RequiresPermission(REQUEST_COMPANION_SELF_MANAGED)
+        @FlaggedApi(Flags.FLAG_ASSOCIATION_DEVICE_ICON)
+        public Builder setDeviceIcon(@NonNull Icon deviceIcon) {
+            checkNotUsed();
+            mDeviceIcon = requireNonNull(deviceIcon);
+            return this;
+        }
+
         /** @inheritDoc */
         @NonNull
         @Override
@@ -460,7 +501,7 @@ public final class AssociationRequest implements Parcelable {
                         + "provide the display name of the device");
             }
             return new AssociationRequest(mSingleDevice, emptyIfNull(mDeviceFilters),
-                    mDeviceProfile, mDisplayName, mSelfManaged, mForceConfirmation);
+                    mDeviceProfile, mDisplayName, mSelfManaged, mForceConfirmation, mDeviceIcon);
         }
     }
 
@@ -561,7 +602,9 @@ public final class AssociationRequest implements Parcelable {
                 && Objects.equals(mDeviceProfilePrivilegesDescription,
                         that.mDeviceProfilePrivilegesDescription)
                 && mCreationTime == that.mCreationTime
-                && mSkipPrompt == that.mSkipPrompt;
+                && mSkipPrompt == that.mSkipPrompt
+                && (mDeviceIcon == null ? that.mDeviceIcon == null
+                : mDeviceIcon.sameAs(that.mDeviceIcon));
     }
 
     @Override
@@ -579,6 +622,8 @@ public final class AssociationRequest implements Parcelable {
         _hash = 31 * _hash + Objects.hashCode(mDeviceProfilePrivilegesDescription);
         _hash = 31 * _hash + Long.hashCode(mCreationTime);
         _hash = 31 * _hash + Boolean.hashCode(mSkipPrompt);
+        _hash = 31 * _hash + Objects.hashCode(mDeviceIcon);
+
         return _hash;
     }
 
@@ -606,6 +651,12 @@ public final class AssociationRequest implements Parcelable {
             dest.writeString8(mDeviceProfilePrivilegesDescription);
         }
         dest.writeLong(mCreationTime);
+        if (mDeviceIcon != null) {
+            dest.writeInt(1);
+            mDeviceIcon.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     @Override
@@ -650,6 +701,11 @@ public final class AssociationRequest implements Parcelable {
         this.mDeviceProfilePrivilegesDescription = deviceProfilePrivilegesDescription;
         this.mCreationTime = creationTime;
         this.mSkipPrompt = skipPrompt;
+        if (in.readInt() == 1) {
+            mDeviceIcon = Icon.CREATOR.createFromParcel(in);
+        } else {
+            mDeviceIcon = null;
+        }
     }
 
     @NonNull

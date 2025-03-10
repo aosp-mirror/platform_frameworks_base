@@ -21,7 +21,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyZeroInteractions;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 
 import static org.junit.Assert.assertEquals;
@@ -161,31 +160,6 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertFalse(animator.isAnimating());
         assertNull(animator.getAnimation());
         verify(mSpec).onAnimationCancelled(any());
-        verify(mTransaction).remove(eq(mAnimatable.mLeash));
-    }
-
-    @Test
-    public void testDelayingAnimationStart() {
-        mAnimatable.mSurfaceAnimator.startDelayingAnimationStart();
-        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
-                ANIMATION_TYPE_APP_TRANSITION);
-        verifyZeroInteractions(mSpec);
-        assertAnimating(mAnimatable);
-        assertTrue(mAnimatable.mSurfaceAnimator.isAnimationStartDelayed());
-        mAnimatable.mSurfaceAnimator.endDelayingAnimationStart();
-        verify(mSpec).startAnimation(any(), any(), eq(ANIMATION_TYPE_APP_TRANSITION), any());
-    }
-
-    @Test
-    public void testDelayingAnimationStartAndCancelled() {
-        mAnimatable.mSurfaceAnimator.startDelayingAnimationStart();
-        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
-                ANIMATION_TYPE_APP_TRANSITION);
-        mAnimatable.mSurfaceAnimator.cancelAnimation();
-        verifyZeroInteractions(mSpec);
-        assertNotAnimating(mAnimatable);
-        assertTrue(mAnimatable.mFinishedCallbackCalled);
-        assertEquals(ANIMATION_TYPE_APP_TRANSITION, mAnimatable.mFinishedAnimationType);
         verify(mTransaction).remove(eq(mAnimatable.mLeash));
     }
 

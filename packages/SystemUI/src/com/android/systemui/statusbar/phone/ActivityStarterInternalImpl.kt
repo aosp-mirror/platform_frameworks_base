@@ -58,7 +58,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.kotlin.getOrNull
@@ -93,7 +93,7 @@ constructor(
     @Main private val mainExecutor: DelayableExecutor,
     private val shadeControllerLazy: Lazy<ShadeController>,
     private val communalSceneInteractor: CommunalSceneInteractor,
-    private val statusBarWindowController: StatusBarWindowController,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val shadeAnimationInteractor: ShadeAnimationInteractor,
     private val notifShadeWindowControllerLazy: Lazy<NotificationShadeWindowController>,
@@ -313,6 +313,7 @@ constructor(
                     // if it is volume panel.
                     options.setDisallowEnterPictureInPictureWhileLaunching(true)
                 }
+                intent.collectExtraIntentKeys()
                 try {
                     result[0] =
                         ActivityTaskManager.getService()
@@ -562,7 +563,7 @@ constructor(
         }
         val rootView = animationController.transitionContainer.rootView
         val controllerFromStatusBar: Optional<ActivityTransitionAnimator.Controller> =
-            statusBarWindowController.wrapAnimationControllerIfInStatusBar(
+            statusBarWindowControllerStore.defaultDisplay.wrapAnimationControllerIfInStatusBar(
                 rootView,
                 animationController
             )

@@ -25,6 +25,7 @@ import android.content.om.OverlayManager;
 import android.content.pm.ApplicationInfo;
 import android.content.res.ApkAssets;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.Flags;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -90,8 +91,10 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
             throws IOException {
         Objects.requireNonNull(overlayInfo);
         Preconditions.checkArgument(overlayInfo.isFabricated(), "Not accepted overlay");
-        Preconditions.checkStringNotEmpty(
-                overlayInfo.getTargetOverlayableName(), "Without overlayable name");
+        if (!Flags.selfTargetingAndroidResourceFrro()) {
+            Preconditions.checkStringNotEmpty(
+                    overlayInfo.getTargetOverlayableName(), "Without overlayable name");
+        }
         final String overlayName =
                 OverlayManagerImpl.checkOverlayNameValid(overlayInfo.getOverlayName());
         final String path =

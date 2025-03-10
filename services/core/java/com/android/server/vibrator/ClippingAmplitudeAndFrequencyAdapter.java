@@ -26,10 +26,10 @@ import java.util.List;
 
 /**
  * Adapter that clips frequency values to the supported range specified by
- * {@link VibratorInfo.FrequencyProfile}, then clips amplitude values to the max supported one at
+ * {@link VibratorInfo.FrequencyProfileLegacy}, then clips amplitude values to the max supported one at
  * each frequency.
  *
- * <p>The {@link VibratorInfo.FrequencyProfile} is only applicable to PWLE compositions. This
+ * <p>The {@link VibratorInfo.FrequencyProfileLegacy} is only applicable to PWLE compositions. This
  * adapter is only applied to {@link RampSegment} and all other segments will remain unchanged.
  */
 final class ClippingAmplitudeAndFrequencyAdapter implements VibrationSegmentsAdapter {
@@ -59,7 +59,7 @@ final class ClippingAmplitudeAndFrequencyAdapter implements VibrationSegmentsAda
     }
 
     private float clampFrequency(VibratorInfo info, float frequencyHz) {
-        Range<Float> frequencyRangeHz = info.getFrequencyProfile().getFrequencyRangeHz();
+        Range<Float> frequencyRangeHz = info.getFrequencyProfileLegacy().getFrequencyRangeHz();
         if (frequencyHz == 0 || frequencyRangeHz == null)  {
             return Float.isNaN(info.getResonantFrequencyHz()) ? 0 : info.getResonantFrequencyHz();
         }
@@ -67,7 +67,7 @@ final class ClippingAmplitudeAndFrequencyAdapter implements VibrationSegmentsAda
     }
 
     private float clampAmplitude(VibratorInfo info, float frequencyHz, float amplitude) {
-        VibratorInfo.FrequencyProfile mapping = info.getFrequencyProfile();
+        VibratorInfo.FrequencyProfileLegacy mapping = info.getFrequencyProfileLegacy();
         if (mapping.isEmpty()) {
             // No frequency mapping was specified so leave amplitude unchanged.
             // The frequency will be clamped to the device's resonant frequency.

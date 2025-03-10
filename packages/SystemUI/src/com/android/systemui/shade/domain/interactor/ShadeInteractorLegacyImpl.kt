@@ -17,13 +17,13 @@
 package com.android.systemui.shade.domain.interactor
 
 import com.android.app.tracing.FlowTracing.traceAsCounter
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
@@ -44,7 +44,6 @@ class ShadeInteractorLegacyImpl
 constructor(
     @Application val scope: CoroutineScope,
     keyguardRepository: KeyguardRepository,
-    sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) : BaseShadeInteractor {
     init {
@@ -61,17 +60,17 @@ constructor(
                 keyguardRepository.statusBarState,
                 repository.legacyShadeExpansion,
                 repository.qsExpansion,
-                sharedNotificationContainerInteractor.isSplitShadeEnabled,
+                repository.isShadeLayoutWide,
             ) {
                 lockscreenShadeExpansion,
                 statusBarState,
                 legacyShadeExpansion,
                 qsExpansion,
-                splitShadeEnabled ->
+                isShadeLayoutWide ->
                 when (statusBarState) {
                     // legacyShadeExpansion is 1 instead of 0 when QS is expanded
                     StatusBarState.SHADE ->
-                        if (!splitShadeEnabled && qsExpansion > 0f) 1f - qsExpansion
+                        if (!isShadeLayoutWide && qsExpansion > 0f) 1f - qsExpansion
                         else legacyShadeExpansion
                     StatusBarState.KEYGUARD -> lockscreenShadeExpansion
                     // dragDownAmount, which drives lockscreenShadeExpansion resets to 0f when
@@ -111,15 +110,37 @@ constructor(
     override val isUserInteractingWithQs: Flow<Boolean> =
         userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
 
-    override fun expandNotificationShade(loggingReason: String) {
+    override fun expandNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {
         throw UnsupportedOperationException(
             "expandNotificationShade() is not supported in legacy shade"
         )
     }
 
-    override fun expandQuickSettingsShade(loggingReason: String) {
+    override fun expandQuickSettingsShade(loggingReason: String, transitionKey: TransitionKey?) {
         throw UnsupportedOperationException(
             "expandQuickSettingsShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun collapseNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {
+        throw UnsupportedOperationException(
+            "collapseNotificationShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun collapseQuickSettingsShade(
+        loggingReason: String,
+        transitionKey: TransitionKey?,
+        bypassNotificationsShade: Boolean,
+    ) {
+        throw UnsupportedOperationException(
+            "collapseQuickSettingsShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun collapseEitherShade(loggingReason: String, transitionKey: TransitionKey?) {
+        throw UnsupportedOperationException(
+            "collapseEitherShade() is not supported in legacy shade"
         )
     }
 

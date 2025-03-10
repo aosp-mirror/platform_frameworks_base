@@ -50,11 +50,15 @@ public final class ActionSwitchPreferenceTest {
 
     @Test
     public void build_withAllFields_successfully() {
+        DeviceSettingIntentAction action =
+                new DeviceSettingIntentAction.Builder()
+                        .setIntent(new Intent("intent_action"))
+                        .build();
         ActionSwitchPreference unused =
                 new ActionSwitchPreference.Builder()
                         .setTitle("title")
                         .setSummary("summary")
-                        .setIntent(new Intent("intent_action"))
+                        .setAction(action)
                         .setIcon(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
                         .setHasSwitch(true)
                         .setChecked(true)
@@ -65,14 +69,17 @@ public final class ActionSwitchPreferenceTest {
 
     @Test
     public void getMethods() {
-        Intent intent = new Intent("intent_action");
+        DeviceSettingIntentAction action =
+                new DeviceSettingIntentAction.Builder()
+                        .setIntent(new Intent("intent_action"))
+                        .build();
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        ActionSwitchPreference preference = builder().setIcon(icon).setIntent(intent).build();
+        ActionSwitchPreference preference = builder().setIcon(icon).setAction(action).build();
 
         assertThat(preference.getTitle()).isEqualTo("title");
         assertThat(preference.getSummary()).isEqualTo("summary");
         assertThat(preference.getIcon()).isSameInstanceAs(icon);
-        assertThat(preference.getIntent()).isSameInstanceAs(intent);
+        assertThat(preference.getAction()).isSameInstanceAs(action);
         assertThat(preference.hasSwitch()).isTrue();
         assertThat(preference.getChecked()).isTrue();
         assertThat(preference.isAllowedChangingState()).isTrue();
@@ -81,16 +88,20 @@ public final class ActionSwitchPreferenceTest {
 
     @Test
     public void parcelOperation() {
-        Intent intent = new Intent("intent_action");
+        DeviceSettingIntentAction action =
+                new DeviceSettingIntentAction.Builder()
+                        .setIntent(new Intent("intent_action"))
+                        .build();
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        ActionSwitchPreference preference = builder().setIcon(icon).setIntent(intent).build();
+        ActionSwitchPreference preference = builder().setIcon(icon).setAction(action).build();
 
         ActionSwitchPreference fromParcel = writeAndRead(preference);
 
         assertThat(fromParcel.getTitle()).isEqualTo(preference.getTitle());
         assertThat(fromParcel.getSummary()).isEqualTo(preference.getSummary());
         assertThat(fromParcel.getIcon().sameAs(preference.getIcon())).isTrue();
-        assertThat(fromParcel.getIntent().getAction()).isSameInstanceAs("intent_action");
+        assertThat(((DeviceSettingIntentAction) fromParcel.getAction()).getIntent().getAction())
+                .isEqualTo("intent_action");
         assertThat(fromParcel.hasSwitch()).isEqualTo(preference.hasSwitch());
         assertThat(fromParcel.getChecked()).isEqualTo(preference.getChecked());
         assertThat(fromParcel.isAllowedChangingState())
@@ -102,14 +113,15 @@ public final class ActionSwitchPreferenceTest {
     @Test
     public void parcelOperation_noIntent() {
         Bitmap icon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        ActionSwitchPreference preference = builder().setIcon(icon).setIntent(null).build();
+        ActionSwitchPreference preference = builder().setIcon(icon).setAction(null).build();
 
         ActionSwitchPreference fromParcel = writeAndRead(preference);
 
         assertThat(fromParcel.getTitle()).isEqualTo(preference.getTitle());
         assertThat(fromParcel.getSummary()).isEqualTo(preference.getSummary());
         assertThat(fromParcel.getIcon().sameAs(preference.getIcon())).isTrue();
-        assertThat(preference.getIntent()).isNull();
+        assertThat(preference.getAction().getActionType())
+                .isEqualTo(DeviceSettingActionType.DEVICE_SETTING_ACTION_TYPE_UNKNOWN);
         assertThat(fromParcel.hasSwitch()).isEqualTo(preference.hasSwitch());
         assertThat(fromParcel.getChecked()).isEqualTo(preference.getChecked());
         assertThat(fromParcel.isAllowedChangingState())
@@ -120,15 +132,19 @@ public final class ActionSwitchPreferenceTest {
 
     @Test
     public void parcelOperation_noIcon() {
-        Intent intent = new Intent("intent_action");
-        ActionSwitchPreference preference = builder().setIcon(null).setIntent(intent).build();
+        DeviceSettingIntentAction action =
+                new DeviceSettingIntentAction.Builder()
+                        .setIntent(new Intent("intent_action"))
+                        .build();
+        ActionSwitchPreference preference = builder().setIcon(null).setAction(action).build();
 
         ActionSwitchPreference fromParcel = writeAndRead(preference);
 
         assertThat(fromParcel.getTitle()).isEqualTo(preference.getTitle());
         assertThat(fromParcel.getSummary()).isEqualTo(preference.getSummary());
         assertThat(fromParcel.getIcon()).isNull();
-        assertThat(fromParcel.getIntent().getAction()).isSameInstanceAs("intent_action");
+        assertThat(((DeviceSettingIntentAction) fromParcel.getAction()).getIntent().getAction())
+                .isEqualTo("intent_action");
         assertThat(fromParcel.hasSwitch()).isEqualTo(preference.hasSwitch());
         assertThat(fromParcel.getChecked()).isEqualTo(preference.getChecked());
         assertThat(fromParcel.isAllowedChangingState())

@@ -1348,7 +1348,7 @@ public abstract class Window {
     }
 
     /**
-     * <p>Sets the desired about of HDR headroom to be used when rendering as a ratio of
+     * <p>Sets the desired amount of HDR headroom to be used when rendering as a ratio of
      * targetHdrPeakBrightnessInNits / targetSdrWhitePointInNits. Only applies when
      * {@link #setColorMode(int)} is {@link ActivityInfo#COLOR_MODE_HDR}</p>
      *

@@ -32,7 +32,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.START;
 import static androidx.constraintlayout.widget.ConstraintSet.TOP;
 import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
 
-import static com.android.app.animation.InterpolatorsAndroidX.DECELERATE_QUINT;
+import static com.android.systemui.Flags.gsfBouncer;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
 import static java.lang.Integer.max;
@@ -52,6 +52,7 @@ import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -109,6 +110,8 @@ import com.android.systemui.util.settings.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /** Determines how the bouncer is displayed to the user. */
 public class KeyguardSecurityContainer extends ConstraintLayout {
@@ -170,6 +173,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     private ViewMode mViewMode = new DefaultViewMode();
     private boolean mIsInteractable;
     protected ViewMediatorCallback mViewMediatorCallback;
+    private Executor mBgExecutor;
     /*
      * Using MODE_UNINITIALIZED to mean the view mode is set to DefaultViewMode, but init() has not
      * yet been called on it. This will happen when the ViewController is initialized.
@@ -268,8 +272,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         public void onBackProgressed(BackEvent event) {
             float progress = event.getProgress();
             // TODO(b/263819310): Update the interpolator to match spec.
-            float scale = MIN_BACK_SCALE
-                    +  (1 - MIN_BACK_SCALE) * (1 - DECELERATE_QUINT.getInterpolation(progress));
+            float scale = MIN_BACK_SCALE +  (1 - MIN_BACK_SCALE) * (1 - progress);
             setScale(scale);
         }
     };
@@ -352,6 +355,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         updateBiometricRetry(securityMode, faceAuthEnabled);
     }
 
+    void setBackgroundExecutor(Executor bgExecutor) {
+        mBgExecutor = bgExecutor;
+    }
+
     void initMode(@Mode int mode, GlobalSettings globalSettings, FalsingManager falsingManager,
             UserSwitcherController userSwitcherController,
             UserSwitcherViewMode.UserSwitcherCallback userSwitcherCallback,
@@ -367,7 +374,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 mViewMode = new OneHandedViewMode();
                 break;
             case MODE_USER_SWITCHER:
-                mViewMode = new UserSwitcherViewMode(userSwitcherCallback);
+                mViewMode = new UserSwitcherViewMode(userSwitcherCallback, mBgExecutor);
                 break;
             default:
                 mViewMode = new DefaultViewMode();
@@ -991,6 +998,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         private FalsingManager mFalsingManager;
         private UserSwitcherController mUserSwitcherController;
         private KeyguardUserSwitcherPopupMenu mPopup;
+        private Executor mBgExecutor;
         private Resources mResources;
         private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
                 this::setupUserSwitcher;
@@ -998,8 +1006,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         private UserSwitcherCallback mUserSwitcherCallback;
         private FalsingA11yDelegate mFalsingA11yDelegate;
 
-        UserSwitcherViewMode(UserSwitcherCallback userSwitcherCallback) {
+        UserSwitcherViewMode(UserSwitcherCallback userSwitcherCallback, Executor bgExecutor) {
             mUserSwitcherCallback = userSwitcherCallback;
+            mBgExecutor = bgExecutor;
         }
 
         @Override
@@ -1058,6 +1067,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
         @Override
         public void onDestroy() {
+            mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
+
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone(mView);
             constraintSet.clear(mUserSwitcherViewGroup.getId());
@@ -1066,26 +1077,36 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
             mView.removeView(mUserSwitcherViewGroup);
             mView.removeView(mUserSwitcher);
+            mUserSwitcher = null;
+            mUserSwitcherViewGroup = null;
         }
 
-        private Drawable findLargeUserIcon(int userId) {
-            Bitmap userIcon = UserManager.get(mView.getContext()).getUserIcon(userId);
-            if (userIcon != null) {
-                int iconSize =
-                        mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size);
-                return CircleFramedDrawable.getInstance(
-                    mView.getContext(),
-                    Icon.scaleDownIfNecessary(userIcon, iconSize, iconSize)
-                );
-            }
-
-            return UserIcons.getDefaultUserIcon(mResources, userId, false);
+        private void findLargeUserIcon(int userId, Consumer<Drawable> consumer) {
+            mBgExecutor.execute(() -> {
+                Drawable icon;
+                Bitmap userIcon = UserManager.get(mView.getContext()).getUserIcon(userId);
+                if (userIcon != null) {
+                    int iconSize = mResources.getDimensionPixelSize(
+                            R.dimen.bouncer_user_switcher_icon_size);
+                    icon = CircleFramedDrawable.getInstance(
+                        mView.getContext(),
+                        Icon.scaleDownIfNecessary(userIcon, iconSize, iconSize)
+                    );
+                } else  {
+                    icon = UserIcons.getDefaultUserIcon(mResources, userId, false);
+                }
+                consumer.accept(icon);
+            });
         }
 
         @Override
         public void startAppearAnimation(SecurityMode securityMode) {
             // IME insets animations handle alpha and translation
             if (securityMode == SecurityMode.Password) {
+                return;
+            }
+
+            if (mUserSwitcherViewGroup == null) {
                 return;
             }
 
@@ -1097,14 +1118,18 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mUserSwitcherViewGroup.setAlpha(1f);
-                    mUserSwitcherViewGroup.setTranslationY(0f);
+                    if (mUserSwitcherViewGroup != null) {
+                        mUserSwitcherViewGroup.setAlpha(1f);
+                        mUserSwitcherViewGroup.setTranslationY(0f);
+                    }
                 }
             });
             animator.addUpdateListener(animation -> {
-                float value = (float) animation.getAnimatedValue();
-                mUserSwitcherViewGroup.setAlpha(value);
-                mUserSwitcherViewGroup.setTranslationY(yTrans - yTrans * value);
+                if (mUserSwitcherViewGroup != null) {
+                    float value = (float) animation.getAnimatedValue();
+                    mUserSwitcherViewGroup.setAlpha(value);
+                    mUserSwitcherViewGroup.setTranslationY(yTrans - yTrans * value);
+                }
             });
             animator.start();
         }
@@ -1135,9 +1160,20 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 Log.e(TAG, "Current user in user switcher is null.");
                 return;
             }
+            if (mUserSwitcher == null) {
+                Log.w(TAG, "User switcher is not inflated, cannot setupUserSwitcher");
+                return;
+            }
             final String currentUserName = mUserSwitcherController.getCurrentUserName();
-            Drawable userIcon = findLargeUserIcon(currentUser.info.id);
-            ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
+            findLargeUserIcon(currentUser.info.id,
+                    (Drawable userIcon) -> {
+                        mView.post(() -> {
+                            ImageView view = (ImageView) mView.findViewById(R.id.user_icon);
+                            if (view != null) {
+                                view.setImageDrawable(userIcon);
+                            }
+                        });
+                });
             mUserSwitcher.setText(currentUserName);
 
             KeyguardUserSwitcherAnchor anchor = mView.findViewById(R.id.user_switcher_anchor);
@@ -1301,6 +1337,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     true);
             mUserSwitcherViewGroup = mView.findViewById(R.id.keyguard_bouncer_user_switcher);
             mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
+            if (gsfBouncer()) {
+                mUserSwitcher.setTypeface(Typeface.create("gsf-label-medium", Typeface.NORMAL));
+            }
         }
 
         interface UserSwitcherCallback {

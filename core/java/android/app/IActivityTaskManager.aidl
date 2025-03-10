@@ -242,6 +242,9 @@ interface IActivityTaskManager {
 
     boolean supportsLocalVoiceInteraction();
 
+    // Requests the "Open in browser" education to be shown
+    void requestOpenInBrowserEducation(IBinder appToken);
+
     // Get device configuration
     ConfigurationInfo getDeviceConfigurationInfo();
 
@@ -357,6 +360,23 @@ interface IActivityTaskManager {
      */
     android.window.BackNavigationInfo startBackNavigation(
             in RemoteCallback navigationObserver, in BackAnimationAdapter adaptor);
+
+    /**
+     * registers a callback to be invoked when a background activity launch is aborted.
+     *
+     * @param observer callback to be registered.
+     * @return true if the callback was successfully registered, false otherwise.
+     * @hide
+     */
+    boolean registerBackgroundActivityStartCallback(in IBinder binder);
+
+    /**
+     * unregisters a callback to be invoked when a background activity launch is aborted.
+     *
+     * @param observer callback to be registered.
+     * @hide
+     */
+    void unregisterBackgroundActivityStartCallback(in IBinder binder);
 
     /**
      * registers a callback to be invoked when the screen is captured.

@@ -2,11 +2,6 @@
   "presubmit": [
     {
       "name": "FrameworksAppFunctionsTests"
-    }
-  ],
-  "postsubmit": [
-    {
-      "name": "FrameworksAppFunctionsTests"
     },
     {
       "name": "CtsAppFunctionTestCases"

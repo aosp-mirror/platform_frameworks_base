@@ -67,6 +67,7 @@ LIBHWUI_PLATFORM {
       SkFILEStream::SkFILEStream*;
       SkImageInfo::*;
       SkMemoryStream::SkMemoryStream*;
+      android::uirenderer::logBitmapDecode*;
     };
   local:
     *;

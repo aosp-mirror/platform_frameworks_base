@@ -15,6 +15,7 @@
  */
 package com.android.systemui.accessibility.extradim
 
+import android.os.Handler
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
@@ -32,18 +33,21 @@ constructor(
     private val extraDimDialogDelegateProvider: Provider<ExtraDimDialogDelegate>,
     private val mActivityStarter: ActivityStarter,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val mainHandler: Handler,
 ) {
     private var dialog: SystemUIDialog? = null
 
     @JvmOverloads
     fun dismissKeyguardIfNeededAndShowDialog(expandable: Expandable? = null) {
-        mActivityStarter.executeRunnableDismissingKeyguard(
-            { showRemoveExtraDimShortcutsDialog(expandable) },
-            /* cancelAction= */ null,
-            /* dismissShade= */ false,
-            /* afterKeyguardGone= */ true,
-            /* deferred= */ false,
-        )
+        mainHandler.post {
+            mActivityStarter.executeRunnableDismissingKeyguard(
+                { showRemoveExtraDimShortcutsDialog(expandable) },
+                /* cancelAction= */ null,
+                /* dismissShade= */ true,
+                /* afterKeyguardGone= */ true,
+                /* deferred= */ false,
+            )
+        }
     }
 
     /** Show the dialog for removing all Extra Dim shortcuts. */

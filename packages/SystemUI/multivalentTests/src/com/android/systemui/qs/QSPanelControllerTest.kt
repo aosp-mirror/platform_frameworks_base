@@ -1,10 +1,10 @@
 package com.android.systemui.qs
 
 import android.content.res.Configuration
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
 import android.testing.TestableResources
 import android.view.ContextThemeWrapper
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
@@ -37,8 +37,8 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -81,37 +81,39 @@ class QSPanelControllerTest : SysuiTestCase() {
         setShouldUseSplitShade(false)
         whenever(qsPanel.resources).thenReturn(testableResources.resources)
         whenever(qsPanel.context)
-                .thenReturn( ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings))
+            .thenReturn(ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings))
         whenever(qsPanel.getOrCreateTileLayout()).thenReturn(pagedTileLayout)
         whenever(statusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false)
         whenever(qsPanel.setListening(anyBoolean())).then {
             whenever(qsPanel.isListening).thenReturn(it.getArgument(0))
         }
 
-        controller = QSPanelController(
-            qsPanel,
-            tunerService,
-            qsHost,
-            qsCustomizerController,
-            /* usingMediaPlayer= */ usingMediaPlayer,
-            mediaHost,
-            qsTileRevealControllerFactory,
-            dumpManager,
-            metricsLogger,
-            uiEventLogger,
-            qsLogger,
-            brightnessControllerFactory,
-            brightnessSliderFactory,
-            falsingManager,
-            statusBarKeyguardViewManager,
-            ResourcesSplitShadeStateController(),
-            longPressEffectProvider,
-            mediaCarouselInteractor,
-        )
+        controller =
+            QSPanelController(
+                qsPanel,
+                tunerService,
+                qsHost,
+                qsCustomizerController,
+                /* usingMediaPlayer= */ usingMediaPlayer,
+                mediaHost,
+                qsTileRevealControllerFactory,
+                dumpManager,
+                metricsLogger,
+                uiEventLogger,
+                qsLogger,
+                brightnessControllerFactory,
+                brightnessSliderFactory,
+                falsingManager,
+                statusBarKeyguardViewManager,
+                ResourcesSplitShadeStateController(),
+                longPressEffectProvider,
+                mediaCarouselInteractor,
+            )
     }
 
     @After
     fun tearDown() {
+        controller.destroy()
         reset(mediaHost)
     }
 

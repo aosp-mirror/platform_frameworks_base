@@ -45,7 +45,6 @@ import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.BatteryUsageStatsRule;
 import com.android.server.power.stats.MockClock;
 import com.android.server.power.stats.PowerStatsStore;
-import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.format.CpuPowerStatsLayout;
 import com.android.server.power.stats.format.EnergyConsumerPowerStatsLayout;
 
@@ -132,8 +131,8 @@ public class PowerStatsExporterTest {
                 null, 0, mCpuStatsArrayLayout.getUidStatsArrayLength(), extras);
 
         mPowerAttributor = new MultiStatePowerAttributor(mock(Context.class), mPowerStatsStore,
-                mock(PowerProfile.class), mock(CpuScalingPolicies.class),
-                mock(PowerStatsUidResolver.class));
+                mock(PowerProfile.class), mock(CpuScalingPolicies.class), () -> 3500
+        );
     }
 
     @Test
@@ -340,11 +339,10 @@ public class PowerStatsExporterTest {
             AggregatedPowerStats aps,
             boolean includeProcessStateData, boolean includeScreenStateData,
             boolean includesPowerStateData) {
-        PowerStatsExporter
-                exporter = new PowerStatsExporter(mPowerStatsStore,
+        PowerStatsExporter exporter = new PowerStatsExporter(mPowerStatsStore,
                 mPowerStatsAggregator, /* batterySessionTimeSpanSlackMillis */ 0);
 
-        BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(new String[0], false,
+        BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(new String[0],
                 includeProcessStateData, includeScreenStateData, includesPowerStateData, 0);
         exporter.populateBatteryUsageStatsBuilder(builder, aps);
         return builder.build();
@@ -363,7 +361,7 @@ public class PowerStatsExporterTest {
     private void breakdownByProcState_fullRange(boolean includeScreenStateData,
             boolean includePowerStateData) throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                new String[]{"cu570m"}, /* includePowerModels */ false,
+                new String[]{"cu570m"},
                 /* includeProcessStateData */ true, includeScreenStateData,
                 includePowerStateData, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 1000, 10000);
@@ -408,7 +406,7 @@ public class PowerStatsExporterTest {
     @Test
     public void breakdownByProcState_subRange() throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                new String[]{"cu570m"}, /* includePowerModels */ false,
+                new String[]{"cu570m"},
                 /* includeProcessStateData */ true, true, true, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 3700, 6700);
 
@@ -440,7 +438,7 @@ public class PowerStatsExporterTest {
     @Test
     public void combinedProcessStates() throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                new String[]{"cu570m"}, /* includePowerModels */ false,
+                new String[]{"cu570m"},
                 /* includeProcessStateData */ false, true, true, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 1000, 10000);
 

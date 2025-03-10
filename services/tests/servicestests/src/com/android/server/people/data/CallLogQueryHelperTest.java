@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.provider.CallLog.Calls;
 import android.test.mock.MockContentProvider;
@@ -58,6 +59,7 @@ public final class CallLogQueryHelperTest {
     private MatrixCursor mCursor;
     private EventConsumer mEventConsumer;
     private CallLogQueryHelper mHelper;
+    private CallLogContentProvider mCallLogContentProvider;
 
     @Before
     public void setUp() {
@@ -66,7 +68,8 @@ public final class CallLogQueryHelperTest {
         mCursor = new MatrixCursor(CALL_LOG_COLUMNS);
 
         MockContentResolver contentResolver = new MockContentResolver();
-        contentResolver.addProvider(CALL_LOG_AUTHORITY, new CallLogContentProvider());
+        mCallLogContentProvider = new CallLogContentProvider();
+        contentResolver.addProvider(CALL_LOG_AUTHORITY, mCallLogContentProvider);
         when(mContext.getContentResolver()).thenReturn(contentResolver);
 
         mEventConsumer = new EventConsumer();
@@ -77,6 +80,12 @@ public final class CallLogQueryHelperTest {
     public void testQueryNoCalls() {
         assertFalse(mHelper.querySince(50L));
         assertFalse(mEventConsumer.mEventMap.containsKey(NORMALIZED_PHONE_NUMBER));
+    }
+
+    @Test
+    public void testQueryWithSQLiteException() {
+        mCallLogContentProvider.setThrowSQLiteException(true);
+        assertFalse(mHelper.querySince(50L));
     }
 
     @Test
@@ -159,11 +168,20 @@ public final class CallLogQueryHelperTest {
     }
 
     private class CallLogContentProvider extends MockContentProvider {
+        private boolean mThrowSQLiteException = false;
 
         @Override
         public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                 String sortOrder) {
+            if (mThrowSQLiteException) {
+                throw new SQLiteException();
+            }
+
             return mCursor;
+        }
+
+        public void setThrowSQLiteException(boolean throwException) {
+            this.mThrowSQLiteException = throwException;
         }
     }
 }

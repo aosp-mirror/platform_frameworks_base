@@ -2,6 +2,22 @@ package: "android.media.tv.flags"
 container: "system"
 
 flag {
+    name: "enable_le_audio_broadcast_ui"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Enable Broadcast UI for LE Audio on TV."
+    bug: "378732734"
+}
+
+flag {
+    name: "enable_le_audio_unicast_ui"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Enable Unicast UI for LE Audio on TV."
+    bug: "378732734"
+}
+
+flag {
     name: "broadcast_visibility_types"
     is_exported: true
     namespace: "media_tv"
@@ -55,4 +71,52 @@ flag {
     namespace: "media_tv"
     description: "Enhance HDMI-CEC power state and activeness transitions"
     bug: "332780751"
+}
+
+flag {
+    name: "media_quality_fw"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Media Quality V1.0 APIs for Android W"
+    bug: "348412562"
+}
+
+flag {
+    name: "tif_extension_standardization"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Standardize AIDL Extension Interface of TIS"
+    bug: "330366987"
+}
+
+flag {
+    name: "set_resource_holder_retain"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Feature flag to add setResourceOwnershipRetention api to MediaCas and Tuner JAVA."
+    bug: "372973197"
+}
+
+flag {
+    name: "mediacas_update_client_profile_priority"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Feature flag to add updateResourcePriority api to MediaCas"
+    bug: "372971241"
+}
+
+flag {
+    name: "apply_picture_profiles"
+    is_exported: true
+    namespace: "media_tv"
+    description : "Feature flag to enable APIs for applying picture profiles"
+    bug: "337330263"
+}
+
+flag {
+    name: "hdmi_control_collect_physical_address"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Collect physical address from HDMI-CEC messages in metrics"
+    bug: "376001043"
 }

@@ -23,6 +23,7 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -39,10 +40,10 @@ import kotlinx.coroutines.flow.onStart
 class DeviceEntryBackgroundViewModel
 @Inject
 constructor(
-    val context: Context,
+    @ShadeDisplayAware val context: Context,
     val deviceEntryIconViewModel: DeviceEntryIconViewModel,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
     alternateBouncerToDozingTransitionViewModel: AlternateBouncerToDozingTransitionViewModel,
     aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
@@ -56,6 +57,7 @@ constructor(
     occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
     occludedToDozingTransitionViewModel: OccludedToDozingTransitionViewModel,
     occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    offToLockscreenTransitionViewModel: OffToLockscreenTransitionViewModel,
     primaryBouncerToAodTransitionViewModel: PrimaryBouncerToAodTransitionViewModel,
     primaryBouncerToDozingTransitionViewModel: PrimaryBouncerToDozingTransitionViewModel,
     primaryBouncerToLockscreenTransitionViewModel: PrimaryBouncerToLockscreenTransitionViewModel,
@@ -68,14 +70,14 @@ constructor(
                     .map {
                         Utils.getColorAttrDefaultColor(
                             context,
-                            com.android.internal.R.attr.colorSurface
+                            com.android.internal.R.attr.colorSurface,
                         )
                     }
                     .onStart {
                         emit(
                             Utils.getColorAttrDefaultColor(
                                 context,
-                                com.android.internal.R.attr.colorSurface
+                                com.android.internal.R.attr.colorSurface,
                             )
                         )
                     }
@@ -87,23 +89,24 @@ constructor(
         deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBackground ->
             if (useBackground) {
                 setOf(
-                        lockscreenToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        aodToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        goneToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        primaryBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        occludedToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        occludedToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        dreamingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         alternateBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        goneToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        goneToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        primaryBouncerToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        dozingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         alternateBouncerToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        aodToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        dozingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         dreamingToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        dreamingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        goneToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        goneToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        goneToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        lockscreenToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        occludedToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        occludedToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        occludedToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        offToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        primaryBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        primaryBouncerToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         primaryBouncerToLockscreenTransitionViewModel
                             .deviceEntryBackgroundViewAlpha,
-                        occludedToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         lockscreenToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
                     )
                     .merge()
@@ -112,7 +115,6 @@ constructor(
                             keyguardTransitionInteractor.currentKeyguardState.replayCache.last()
                         ) {
                             KeyguardState.GLANCEABLE_HUB,
-                            KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
                             KeyguardState.GONE,
                             KeyguardState.OCCLUDED,
                             KeyguardState.OFF,
