@@ -14662,6 +14662,61 @@ public class AudioService extends IAudioService.Stub
 
     /**
      * @hide
+     * Returns the current audio output device delay value of key in milliseconds.
+     *
+     * In aidl implementation, the param of getParameters is "key" and reply delay of all supported
+     * devices which be composited as "key=device,address,delay|device,address,delay|...".
+     * e.g.
+     * param: additional_output_device_delay=
+     * reply: additional_output_device_delay=2,,0|4,,0|8,,0|128,,0|256,,0|512,,0|1024,,0|8192,,0|
+     * 16384,,0|262144,,0|262145,,0|524288,,0|67108864,,0|134217728,,0|536870912,,0|536870913,,0|
+     * 536870914,,0
+     *
+     * In hidl implementation, the param of getParameters is "key=device,address" and reply a
+     * specific device delay which be composited as "key=device,address,delay".
+     * e.g.
+     * param: additional_output_device_delay=2,
+     * reply: additional_output_device_delay=2,,0
+     *
+     * @param key
+     * @param deviceType
+     * @param address
+     * @return the delay value of key. This is a non-negative number.
+     *     {@code 0} is returned if unsupported.
+     */
+    private long getDelayByKeyDevice(@NonNull String key, @NonNull AudioDeviceAttributes device) {
+        long delayMillis = 0;
+
+        try {
+            if (AudioHalVersionInfo.AUDIO_HAL_TYPE_AIDL == getHalVersion().getHalType()) {
+                final String reply = AudioSystem.getParameters(key);
+                final String keyDeviceAddressPrefix =
+                    Integer.toUnsignedString(device.getInternalType()) + "," + device.getAddress() +
+                    ",";
+                int start = reply.indexOf(keyDeviceAddressPrefix);
+                int end = -1;
+                if (start != -1) {
+                    start += keyDeviceAddressPrefix.length();
+                    end = reply.indexOf("|", start);
+                    delayMillis = Long.parseLong(
+                            end == -1 ? reply.substring(start) : reply.substring(start, end));
+                }
+            } else {
+                final String reply = AudioSystem.getParameters(
+                    key + "=" + device.getInternalType() + "," + device.getAddress());
+                if (reply.contains(key)) {
+                    delayMillis = Long.parseLong(reply.substring(key.length() + 1));
+                }
+            }
+        } catch (NullPointerException e) {
+            Log.w(TAG, "NullPointerException when getting delay for device " + device, e);
+        }
+
+        return delayMillis;
+    }
+
+    /**
+     * @hide
      * Returns the current additional audio output device delay in milliseconds.
      *
      * @param deviceType
@@ -14677,17 +14732,8 @@ public class AudioService extends IAudioService.Stub
         device = retrieveBluetoothAddress(device);
 
         final String key = "additional_output_device_delay";
-        final String reply = AudioSystem.getParameters(
-                key + "=" + device.getInternalType() + "," + device.getAddress());
-        long delayMillis = 0;
-        if (reply.contains(key)) {
-            try {
-                delayMillis = Long.parseLong(reply.substring(key.length() + 1));
-            } catch (NullPointerException e) {
-                delayMillis = 0;
-            }
-        }
-        return delayMillis;
+
+        return getDelayByKeyDevice(key, device);
     }
 
     /**
@@ -14709,17 +14755,8 @@ public class AudioService extends IAudioService.Stub
         device = retrieveBluetoothAddress(device);
 
         final String key = "max_additional_output_device_delay";
-        final String reply = AudioSystem.getParameters(
-                key + "=" + device.getInternalType() + "," + device.getAddress());
-        long delayMillis = 0;
-        if (reply.contains(key)) {
-            try {
-                delayMillis = Long.parseLong(reply.substring(key.length() + 1));
-            } catch (NullPointerException e) {
-                delayMillis = 0;
-            }
-        }
-        return delayMillis;
+
+        return getDelayByKeyDevice(key, device);
     }
 
     @android.annotation.EnforcePermission(MODIFY_AUDIO_ROUTING)
