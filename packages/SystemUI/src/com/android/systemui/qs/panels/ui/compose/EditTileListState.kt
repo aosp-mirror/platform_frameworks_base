@@ -37,13 +37,17 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 fun rememberEditListState(
     tiles: List<SizedTile<EditTileViewModel>>,
     columns: Int,
+    largeTilesSpan: Int,
 ): EditTileListState {
-    return remember(tiles, columns) { EditTileListState(tiles, columns) }
+    return remember(tiles, columns) { EditTileListState(tiles, columns, largeTilesSpan) }
 }
 
 /** Holds the temporary state of the tile list during a drag movement where we move tiles around. */
-class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val columns: Int) :
-    DragAndDropState {
+class EditTileListState(
+    tiles: List<SizedTile<EditTileViewModel>>,
+    private val columns: Int,
+    private val largeTilesSpan: Int,
+) : DragAndDropState {
     private val _draggedCell = mutableStateOf<SizedTile<EditTileViewModel>?>(null)
     override val draggedCell
         get() = _draggedCell.value
@@ -64,29 +68,16 @@ class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val c
         return _tiles.indexOfFirst { it is TileGridCell && it.tile.tileSpec == tileSpec }
     }
 
-    /**
-     * Whether the tile with this [TileSpec] is currently an icon in the [EditTileListState]
-     *
-     * @return true if the tile is an icon, false if it's large, null if the tile isn't in the list
-     */
-    fun isIcon(tileSpec: TileSpec): Boolean? {
-        val index = indexOf(tileSpec)
-        return if (index != -1) {
-            val cell = _tiles[index]
-            cell as TileGridCell
-            return cell.isIcon
-        } else {
-            null
-        }
-    }
-
-    /** Toggle the size of the tile corresponding to the [TileSpec] */
-    fun toggleSize(tileSpec: TileSpec) {
+    /** Resize the tile corresponding to the [TileSpec] to [toIcon] */
+    fun resizeTile(tileSpec: TileSpec, toIcon: Boolean) {
         val fromIndex = indexOf(tileSpec)
         if (fromIndex != -1) {
-            val cell = _tiles.removeAt(fromIndex)
-            cell as TileGridCell
-            _tiles.add(fromIndex, cell.copy(width = if (cell.isIcon) 2 else 1))
+            val cell = _tiles[fromIndex] as TileGridCell
+
+            if (cell.isIcon == toIcon) return
+
+            _tiles.removeAt(fromIndex)
+            _tiles.add(fromIndex, cell.copy(width = if (toIcon) 1 else largeTilesSpan))
             regenerateGrid(fromIndex)
         }
     }
@@ -116,9 +107,9 @@ class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val c
             regenerateGrid()
             _tiles.add(insertionIndex.coerceIn(0, _tiles.size), cell)
         } else {
-            // Add the tile with a temporary row which will get reassigned when
+            // Add the tile with a temporary row/col which will get reassigned when
             // regenerating spacers
-            _tiles.add(insertionIndex.coerceIn(0, _tiles.size), TileGridCell(draggedTile, 0))
+            _tiles.add(insertionIndex.coerceIn(0, _tiles.size), TileGridCell(draggedTile, 0, 0))
         }
 
         regenerateGrid()

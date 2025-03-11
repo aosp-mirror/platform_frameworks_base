@@ -20,7 +20,9 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <jni_wrappers.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/jni_macros.h>
+#include <unicode/locid.h>
 #include <unicode/putil.h>
 #include <unicode/udata.h>
 
@@ -64,8 +66,8 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_libcore_util_NativeAllocationRegistry(JNIEnv* env) {
-    return jniRegisterNativeMethods(env, "libcore/util/NativeAllocationRegistry", gMethods,
-                                    NELEM(gMethods));
+    return android::RegisterMethodsOrDie(env, "libcore/util/NativeAllocationRegistry", gMethods,
+                                         NELEM(gMethods));
 }
 
 namespace android {
@@ -85,8 +87,8 @@ extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv* env);
-extern int register_android_os_Trace(JNIEnv* env);
 extern int register_android_text_AndroidCharacter(JNIEnv* env);
+extern int register_android_text_Hyphenator(JNIEnv* env);
 extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_jar_StrictJarFile(JNIEnv* env);
@@ -112,9 +114,11 @@ struct RegJNIRec {
 static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.animation.PropertyValuesHolder",
          REG_JNI(register_android_animation_PropertyValuesHolder)},
-#ifdef __linux__
         {"android.content.res.ApkAssets", REG_JNI(register_android_content_res_ApkAssets)},
         {"android.content.res.AssetManager", REG_JNI(register_android_content_AssetManager)},
+        {"android.content.res.StringBlock", REG_JNI(register_android_content_StringBlock)},
+        {"android.content.res.XmlBlock", REG_JNI(register_android_content_XmlBlock)},
+#ifdef __linux__
         {"android.database.CursorWindow", REG_JNI(register_android_database_CursorWindow)},
         {"android.database.sqlite.SQLiteConnection",
          REG_JNI(register_android_database_SQLiteConnection)},
@@ -122,10 +126,6 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.database.sqlite.SQLiteDebug", REG_JNI(register_android_database_SQLiteDebug)},
         {"android.database.sqlite.SQLiteRawStatement",
          REG_JNI(register_android_database_SQLiteRawStatement)},
-#endif
-        {"android.content.res.StringBlock", REG_JNI(register_android_content_StringBlock)},
-        {"android.content.res.XmlBlock", REG_JNI(register_android_content_XmlBlock)},
-#ifdef __linux__
         {"android.os.Binder", REG_JNI(register_android_os_Binder)},
         {"android.os.FileObserver", REG_JNI(register_android_os_FileObserver)},
         {"android.os.MessageQueue", REG_JNI(register_android_os_MessageQueue)},
@@ -133,8 +133,8 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
 #endif
         {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
         {"android.os.SystemProperties", REG_JNI(register_android_os_SystemProperties)},
-        {"android.os.Trace", REG_JNI(register_android_os_Trace)},
         {"android.text.AndroidCharacter", REG_JNI(register_android_text_AndroidCharacter)},
+        {"android.text.Hyphenator", REG_JNI(register_android_text_Hyphenator)},
         {"android.util.EventLog", REG_JNI(register_android_util_EventLog)},
         {"android.util.Log", REG_JNI(register_android_util_Log)},
         {"android.util.jar.StrictJarFile", REG_JNI(register_android_util_jar_StrictJarFile)},
@@ -259,35 +259,68 @@ static void* mmapFile(const char* dataFilePath) {
 #endif
 }
 
-// Loads the ICU data file from the location specified in the system property ro.icu.data.path
-static void loadIcuData() {
-    string icuPath = base::GetProperty("ro.icu.data.path", "");
-    if (!icuPath.empty()) {
-        // Set the location of ICU data
-        void* addr = mmapFile(icuPath.c_str());
-        UErrorCode err = U_ZERO_ERROR;
-        udata_setCommonData(addr, &err);
-        if (err != U_ZERO_ERROR) {
-            ALOGE("Unable to load ICU data\n");
-        }
-    }
-}
-
-static int register_android_core_classes(JNIEnv* env) {
+// returns result from java.lang.System.getProperty
+static string getJavaProperty(JNIEnv* env, const char* property_name,
+                              const char* defaultValue = "") {
     jclass system = FindClassOrDie(env, "java/lang/System");
     jmethodID getPropertyMethod =
             GetStaticMethodIDOrDie(env, system, "getProperty",
                                    "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
-    // Get the names of classes that need to register their native methods
-    auto nativesClassesJString =
-            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                 env->NewStringUTF("core_native_classes"),
-                                                 env->NewStringUTF(""));
-    const char* nativesClassesArray = env->GetStringUTFChars(nativesClassesJString, nullptr);
-    string nativesClassesString(nativesClassesArray);
+    auto jString = (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
+                                                        env->NewStringUTF(property_name),
+                                                        env->NewStringUTF(defaultValue));
+    ScopedUtfChars chars(env, jString);
+    return string(chars.c_str());
+}
+
+static void loadIcuData(string icuPath) {
+    void* addr = mmapFile(icuPath.c_str());
+    UErrorCode err = U_ZERO_ERROR;
+    udata_setCommonData(addr, &err);
+    if (err != U_ZERO_ERROR) {
+        ALOGE("Unable to load ICU data\n");
+    }
+}
+
+// Loads the ICU data file from the location specified in properties.
+// First try specified in the system property ro.icu.data.path,
+// then fallback to java property icu.data.path
+static void loadIcuData() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    string icuPath = base::GetProperty("ro.icu.data.path", "");
+    if (!icuPath.empty()) {
+        loadIcuData(icuPath);
+    } else {
+        // fallback to read from java.lang.System.getProperty
+        string icuPathFromJava = getJavaProperty(env, "icu.data.path");
+        if (!icuPathFromJava.empty()) {
+            loadIcuData(icuPathFromJava);
+        }
+    }
+
+    // Check for the ICU default locale property. In Libcore, the default ICU
+    // locale is set when ICU.setDefaultLocale is called, which is called by
+    // Libcore's implemenentation of Java's Locale.setDefault. The default
+    // locale is used in cases such as when ucol_open(NULL, ...) is called, for
+    // example in SQLite's 'COLLATE UNICODE'.
+    string icuLocaleDefault = getJavaProperty(env, "icu.locale.default");
+    if (!icuLocaleDefault.empty()) {
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(icuLocaleDefault.c_str(), status);
+        if (U_SUCCESS(status)) {
+            icu::Locale::setDefault(locale, status);
+        }
+        if (U_FAILURE(status)) {
+            fprintf(stderr, "Failed to set the ICU default locale to '%s' (error code %d)\n",
+                    icuLocaleDefault.c_str(), status);
+        }
+    }
+}
+
+static int register_android_core_classes(JNIEnv* env) {
+    string nativesClassesString = getJavaProperty(env, "core_native_classes");
     vector<string> classesToRegister = parseCsv(nativesClassesString);
-    env->ReleaseStringUTFChars(nativesClassesJString, nativesClassesArray);
 
     if (register_jni_procs(gRegJNIMap, classesToRegister, env) < 0) {
         return JNI_ERR;
@@ -359,6 +392,11 @@ void AndroidRuntime::onStarted() {
 
 void AndroidRuntime::start(const char* className, const Vector<String8>& options, bool zygote) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
+
+    auto method_binding_format = getJavaProperty(env, "method_binding_format");
+
+    setJniMethodFormat(method_binding_format);
+
     // Register native functions.
     if (startReg(env) < 0) {
         ALOGE("Unable to register all android native methods\n");
@@ -391,7 +429,6 @@ public:
 
 } // namespace android
 
-#ifndef _WIN32
 using namespace android;
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
@@ -400,12 +437,14 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
         return JNI_ERR;
     }
 
-    Vector<String8> args;
-    HostRuntime runtime;
+    string useBaseHostRuntime = getJavaProperty(env, "use_base_native_hostruntime", "true");
+    if (useBaseHostRuntime == "true") {
+        Vector<String8> args;
+        HostRuntime runtime;
 
-    runtime.onVmCreated(env);
-    runtime.start("HostRuntime", args, false);
+        runtime.onVmCreated(env);
+        runtime.start("HostRuntime", args, false);
+    }
 
     return JNI_VERSION_1_6;
 }
-#endif

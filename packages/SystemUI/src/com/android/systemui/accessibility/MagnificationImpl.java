@@ -18,7 +18,6 @@ package com.android.systemui.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
-import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
 import static com.android.systemui.accessibility.AccessibilityLogger.MagnificationSettingsEvent;
@@ -38,7 +37,6 @@ import android.view.IWindowManager;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
@@ -49,7 +47,6 @@ import androidx.annotation.NonNull;
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.Flags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
@@ -119,15 +116,13 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         @Override
         protected WindowMagnificationController createInstance(Display display) {
             final Context windowContext = mContext.createWindowContext(display,
-                    Flags.createWindowlessWindowMagnifier()
-                            ? TYPE_ACCESSIBILITY_OVERLAY
-                            : TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
-                    /* options */ null);
+                        TYPE_ACCESSIBILITY_OVERLAY,
+                        /* options */ null);
             windowContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
 
             Supplier<SurfaceControlViewHost> scvhSupplier = () ->
-                    Flags.createWindowlessWindowMagnifier() ? new SurfaceControlViewHost(mContext,
-                            mContext.getDisplay(), new InputTransferToken(), TAG) : null;
+                    new SurfaceControlViewHost(mContext,
+                            mContext.getDisplay(), new InputTransferToken(), TAG);
 
             return new WindowMagnificationController(
                     windowContext,
@@ -138,10 +133,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
                     mWindowMagnifierCallback,
                     mSysUiState,
                     mSecureSettings,
-                    scvhSupplier,
-                    new SfVsyncFrameCallbackProvider(),
-                    WindowManagerGlobal::getWindowSession,
-                    mViewCaptureAwareWindowManager);
+                    scvhSupplier);
         }
     }
 
@@ -407,7 +399,8 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         }
     }
 
-    boolean isMagnificationSettingsPanelShowing(int displayId) {
+    @MainThread
+    private boolean isMagnificationSettingsPanelShowing(int displayId) {
         final MagnificationSettingsController magnificationSettingsController =
                 mMagnificationSettingsSupplier.get(displayId);
         if (magnificationSettingsController != null) {

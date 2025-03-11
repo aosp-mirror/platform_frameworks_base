@@ -168,8 +168,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     public void showFullscreenModeButton_addViewAndSetImageResource() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
 
-        verify(mSpyImageView).setImageResource(
-                getIconResId(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
+        verify(mSpyImageView).setImageResource(getIconResId());
         assertEquals(mSpyImageView, mWindowManager.getAttachedView());
         assertShowFadingAnimation(FADE_IN_ALPHA);
         assertShowFadingAnimation(FADE_OUT_ALPHA);

@@ -24,7 +24,4 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class NotificationsKeyguardViewStateRepository @Inject constructor() {
     /** Are notifications fully hidden from view? */
     val areNotificationsFullyHidden = MutableStateFlow(false)
-
-    /** Is a pulse expansion occurring? */
-    val isPulseExpanding = MutableStateFlow(false)
 }

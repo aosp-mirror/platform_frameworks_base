@@ -63,7 +63,7 @@ flag {
    name: "remove_user_during_user_switch"
    namespace: "backstage_power"
    description: "Remove started user if user will be stopped due to user switch"
-   bug: "321598070"
+   bug: "337077643"
 }
 
 flag {
@@ -74,4 +74,25 @@ flag {
    metadata {
        purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+   name: "enforce_quota_policy_to_fgs_jobs"
+   namespace: "backstage_power"
+   description: "Applies the normal quota policy to FGS jobs"
+   bug: "341201311"
+}
+
+flag {
+   name: "adjust_quota_default_constants"
+   namespace: "backstage_power"
+   description: "Adjust quota default parameters"
+   bug: "347058927"
+}
+
+flag {
+   name: "enforce_quota_policy_to_top_started_jobs"
+   namespace: "backstage_power"
+   description: "Apply the quota policy to jobs started when the app was in TOP state"
+   bug: "374323858"
 }

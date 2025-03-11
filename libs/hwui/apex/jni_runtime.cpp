@@ -28,6 +28,7 @@
 extern int register_android_graphics_Bitmap(JNIEnv*);
 extern int register_android_graphics_BitmapFactory(JNIEnv*);
 extern int register_android_graphics_BitmapRegionDecoder(JNIEnv*);
+extern int register_android_graphics_RuntimeXfermode(JNIEnv*);
 extern int register_android_graphics_ByteBufferStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_Camera(JNIEnv* env);
 extern int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
@@ -107,6 +108,7 @@ extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
             REG_JNI(register_android_graphics_Bitmap),
             REG_JNI(register_android_graphics_BitmapFactory),
             REG_JNI(register_android_graphics_BitmapRegionDecoder),
+            REG_JNI(register_android_graphics_RuntimeXfermode),
             REG_JNI(register_android_graphics_ByteBufferStreamAdaptor),
             REG_JNI(register_android_graphics_Camera),
             REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor),

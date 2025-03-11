@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.KEY_LOW_ENERGY_USE;
+
 import android.content.Context;
 import android.os.PowerManager;
 
@@ -45,6 +47,12 @@ public class PowerManagerWrapper {
 
     WakeLockWrapper newWakeLock(int levelAndFlags, String tag) {
         return new DefaultWakeLockWrapper(mPowerManager.newWakeLock(levelAndFlags, tag));
+    }
+
+    boolean isLowPowerStandbyEnabled() {
+        PowerManager.LowPowerStandbyPolicy lowPowerStandbyPolicy
+                = mPowerManager.getLowPowerStandbyPolicy();
+        return lowPowerStandbyPolicy.getIdentifier().equals(KEY_LOW_ENERGY_USE);
     }
 
     /**

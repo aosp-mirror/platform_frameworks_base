@@ -18,6 +18,8 @@ package com.android.systemui.clipboardoverlay;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.systemui.Flags.showClipboardIndication;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -53,6 +55,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
@@ -103,6 +106,8 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
     private View mShareChip;
     private View mRemoteCopyChip;
     private View mActionContainerBackground;
+    private View mIndicationContainer;
+    private TextView mIndicationText;
     private View mDismissButton;
     private LinearLayout mActionContainer;
     private ClipboardOverlayCallbacks mClipboardCallbacks;
@@ -136,6 +141,8 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
         mShareChip = requireViewById(R.id.share_chip);
         mRemoteCopyChip = requireViewById(R.id.remote_copy_chip);
         mDismissButton = requireViewById(R.id.dismiss_button);
+        mIndicationContainer = requireViewById(R.id.indication_container);
+        mIndicationText = mIndicationContainer.findViewById(R.id.indication_text);
 
         bindDefaultActionChips();
 
@@ -208,6 +215,14 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
         }
     }
 
+    void setIndicationText(CharSequence text) {
+        mIndicationText.setText(text);
+
+        // Set the visibility of clipboard indication based on the text is empty or not.
+        int visibility = text.isEmpty() ? View.GONE : View.VISIBLE;
+        mIndicationContainer.setVisibility(visibility);
+    }
+
     void setMinimized(boolean minimized) {
         if (minimized) {
             mMinimizedPreview.setVisibility(View.VISIBLE);
@@ -220,6 +235,18 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
             mClipboardPreview.setVisibility(View.VISIBLE);
             mPreviewBorder.setVisibility(View.VISIBLE);
             mActionContainer.setVisibility(View.VISIBLE);
+        }
+
+        if (showClipboardIndication()) {
+            // Adjust the margin of clipboard indication based on the minimized state.
+            int marginStart = minimized ? getResources().getDimensionPixelSize(
+                    R.dimen.overlay_action_container_margin_horizontal)
+                    : getResources().getDimensionPixelSize(
+                            R.dimen.overlay_action_container_minimum_edge_spacing);
+            ConstraintLayout.LayoutParams params =
+                    (ConstraintLayout.LayoutParams) mIndicationContainer.getLayoutParams();
+            params.setMarginStart(marginStart);
+            mIndicationContainer.setLayoutParams(params);
         }
     }
 
@@ -313,6 +340,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
         setTranslationX(0);
         setAlpha(0);
         mActionContainerBackground.setVisibility(View.GONE);
+        mIndicationContainer.setVisibility(View.GONE);
         mDismissButton.setVisibility(View.GONE);
         mShareChip.setVisibility(View.GONE);
         mRemoteCopyChip.setVisibility(View.GONE);

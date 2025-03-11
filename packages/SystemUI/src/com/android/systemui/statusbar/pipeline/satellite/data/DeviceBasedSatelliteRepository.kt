@@ -37,6 +37,9 @@ interface DeviceBasedSatelliteRepository {
 
     /** Clients must observe this property, as device-based satellite is location-dependent */
     val isSatelliteAllowedForCurrentLocation: StateFlow<Boolean>
+
+    /** When enabled, a satellite icon will display when all other connections are OOS */
+    val isOpportunisticSatelliteIconEnabled: Boolean
 }
 
 /**

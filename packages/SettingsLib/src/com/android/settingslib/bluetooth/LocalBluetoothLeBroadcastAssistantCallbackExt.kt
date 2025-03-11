@@ -16,7 +16,6 @@
 
 package com.android.settingslib.bluetooth
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothLeBroadcastAssistant
 import android.bluetooth.BluetoothLeBroadcastMetadata
@@ -36,11 +35,7 @@ val LocalBluetoothLeBroadcastAssistant.onSourceConnectedOrRemoved: Flow<Unit>
                     sink: BluetoothDevice,
                     sourceId: Int,
                     state: BluetoothLeBroadcastReceiveState
-                ) {
-                    if (BluetoothUtils.isConnected(state)) {
-                        launch { send(Unit) }
-                    }
-                }
+                ) {}
 
                 override fun onSourceRemoved(sink: BluetoothDevice, sourceId: Int, reason: Int) {
                     launch { send(Unit) }
@@ -56,7 +51,9 @@ val LocalBluetoothLeBroadcastAssistant.onSourceConnectedOrRemoved: Flow<Unit>
 
                 override fun onSourceFound(source: BluetoothLeBroadcastMetadata) {}
 
-                override fun onSourceAdded(sink: BluetoothDevice, sourceId: Int, reason: Int) {}
+                override fun onSourceAdded(sink: BluetoothDevice, sourceId: Int, reason: Int) {
+                    launch { send(Unit) }
+                }
 
                 override fun onSourceAddFailed(
                     sink: BluetoothDevice,
@@ -82,9 +79,5 @@ val LocalBluetoothLeBroadcastAssistant.onSourceConnectedOrRemoved: Flow<Unit>
             ConcurrentUtils.DIRECT_EXECUTOR,
             callback,
         )
-        awaitClose {
-            if (BluetoothAdapter.getDefaultAdapter()?.isEnabled == true) {
-                unregisterServiceCallBack(callback)
-            }
-        }
+        awaitClose { unregisterServiceCallBack(callback) }
     }

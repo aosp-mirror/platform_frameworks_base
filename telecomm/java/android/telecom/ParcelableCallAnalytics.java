@@ -16,12 +16,12 @@
 
 package android.telecom;
 
+import android.annotation.FlaggedApi;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -255,6 +255,11 @@ public class ParcelableCallAnalytics implements Parcelable {
     public static final int CALLTYPE_OUTGOING = 2;
 
     // Constants for call technology
+    /**
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CDMA_PHONE = 0x1;
     public static final int GSM_PHONE = 0x2;
     public static final int IMS_PHONE = 0x4;

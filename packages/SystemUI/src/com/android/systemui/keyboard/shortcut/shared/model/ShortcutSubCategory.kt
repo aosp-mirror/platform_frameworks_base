@@ -16,7 +16,9 @@
 
 package com.android.systemui.keyboard.shortcut.shared.model
 
-data class ShortcutSubCategory(val label: String, val shortcuts: List<Shortcut>)
+data class ShortcutSubCategory(val label: String, val shortcuts: List<Shortcut>) {
+    val containsCustomShortcuts: Boolean = shortcuts.any { it.containsCustomShortcutCommands }
+}
 
 class ShortcutSubCategoryBuilder(val label: String) {
     private val shortcuts = mutableListOf<Shortcut>()

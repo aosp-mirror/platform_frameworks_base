@@ -38,9 +38,9 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.testing.UiThreadTest;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;

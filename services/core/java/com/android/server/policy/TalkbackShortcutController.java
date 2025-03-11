@@ -44,6 +44,11 @@ class TalkbackShortcutController {
     private final Context mContext;
     private final PackageManager mPackageManager;
 
+    public enum ShortcutSource {
+        GESTURE,
+        KEYBOARD,
+    }
+
     TalkbackShortcutController(Context context) {
         mContext = context;
         mPackageManager = mContext.getPackageManager();
@@ -55,7 +60,7 @@ class TalkbackShortcutController {
      * @return talkback state after toggle. {@code true} if talkback is enabled, {@code false} if
      * talkback is disabled
      */
-    boolean toggleTalkback(int userId) {
+    boolean toggleTalkback(int userId, ShortcutSource source) {
         final Set<ComponentName> enabledServices =
                 AccessibilityUtils.getEnabledServicesFromSettings(mContext, userId);
         ComponentName componentName = getTalkbackComponent();
@@ -65,13 +70,13 @@ class TalkbackShortcutController {
 
         boolean isTalkbackAlreadyEnabled = enabledServices.contains(componentName);
 
-        if (isTalkBackShortcutGestureEnabled()) {
+        if (source == ShortcutSource.KEYBOARD || isTalkBackShortcutGestureEnabled()) {
             isTalkbackAlreadyEnabled = !isTalkbackAlreadyEnabled;
             AccessibilityUtils.setAccessibilityServiceState(mContext, componentName,
-                    isTalkbackAlreadyEnabled);
+                    isTalkbackAlreadyEnabled, userId);
 
             // log stem triple press telemetry if it's a talkback enabled event.
-            if (isTalkbackAlreadyEnabled) {
+            if (source == ShortcutSource.GESTURE && isTalkbackAlreadyEnabled) {
                 logStemTriplePressAccessibilityTelemetry(componentName);
             }
         }

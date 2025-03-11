@@ -87,7 +87,7 @@ immediately for any callbacks added.
 
 There are a few places where CommandQueue is used as a bus to communicate
 across sysui. Such as when StatusBar calls CommandQueue#recomputeDisableFlags.
-This is generally used a shortcut to directly trigger CommandQueue rather than
+This is generally used as a shortcut to directly trigger CommandQueue rather than
 calling StatusManager and waiting for the call to come back to IStatusBar.
 
 ### [com.android.systemui.util.NotificationChannels](/packages/SystemUI/src/com/android/systemui/util/NotificationChannels.java)

@@ -11,10 +11,42 @@ flag {
 }
 
 flag {
+    name: "deprecate_start_safe_browsing"
+    is_exported: true
+    namespace: "webview"
+    description: "Deprecating startSafeBrowsing API because it is a NOOP"
+    bug: "372193372"
+}
+
+flag {
     name: "mainline_apis"
     is_exported: true
     namespace: "webview"
     description: "New APIs required by WebViewBootstrap mainline module"
     bug: "310653407"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "user_agent_reduction"
+    is_exported: true
+    namespace: "webview"
+    description: "New feature reduce user-agent for webview"
+    bug: "371034303"
+}
+
+flag {
+    name: "file_system_access"
+    is_exported: true
+    namespace: "webview"
+    description: "New APIs required by File System Access"
+    bug: "40101963"
+}
+
+flag {
+    name: "use_b_entry_point"
+    namespace: "webview"
+    description: "Use B-specific entry point to WebView APK"
+    bug: "373617389"
     is_fixed_read_only: true
 }

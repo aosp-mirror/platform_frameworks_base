@@ -20,10 +20,19 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.panels.data.repository.gridLayoutTypeRepository
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
+import com.android.systemui.qs.panels.shared.model.PaginatedGridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.infiniteGridLayout
+import com.android.systemui.qs.panels.ui.compose.paginatedGridLayout
+import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 
 val Kosmos.gridLayoutTypeInteractor by
-    Kosmos.Fixture { GridLayoutTypeInteractor(gridLayoutTypeRepository) }
+    Kosmos.Fixture { GridLayoutTypeInteractor(gridLayoutTypeRepository, shadeModeInteractor) }
 
 val Kosmos.gridLayoutMap: Map<GridLayoutType, GridLayout> by
-    Kosmos.Fixture { mapOf(Pair(InfiniteGridLayoutType, infiniteGridLayout)) }
+    Kosmos.Fixture {
+        mapOf(
+            Pair(InfiniteGridLayoutType, infiniteGridLayout),
+            Pair(PaginatedGridLayoutType, paginatedGridLayout),
+        )
+    }

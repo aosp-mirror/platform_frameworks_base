@@ -17,7 +17,9 @@
 package android.content.res;
 
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Canvas;
 import android.graphics.Insets;
@@ -34,14 +36,17 @@ import android.util.MergedConfiguration;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+
+import com.android.aconfig.annotations.VisibleForTesting;
 
 /**
  * CompatibilityInfo class keeps the information about the screen compatibility mode that the
  * application is running under.
- * 
- *  {@hide} 
+ *
+ *  {@hide}
  */
 @RavenwoodKeepWholeClass
 public class CompatibilityInfo implements Parcelable {
@@ -129,11 +134,36 @@ public class CompatibilityInfo implements Parcelable {
      */
     public final float applicationDensityInvertedScale;
 
+    /**
+     * Application's display rotation.
+     *
+     * <p>This field is used to sandbox fixed-orientation activities on displays or display areas
+     * with ignoreOrientationRequest, where the display orientation is more likely to be different
+     * from the orientation the activity requested (e.g. in desktop windowing, or letterboxed).
+     * Mainly set for activities which use the display rotation to orient their content, for example
+     * camera previews.
+     *
+     * <p>In the case of camera activities, assuming the wrong posture
+     * can lead to sideways or stretched previews. As part of camera compat treatment for desktop
+     * windowing, the app is sandboxed to believe that the app and the device are in the posture the
+     * app requested. For example for portrait fixed-orientation apps, the app is letterboxed to
+     * portrait, camera feed is cropped to portrait, and the display rotation is changed via this
+     * field, for example to {@link Surface.Rotation#ROTATION_0} on devices with portrait natural
+     * orientation. All of these parameters factor in common calculations for setting up the camera
+     * preview.
+     */
+    @Surface.Rotation
+    public int applicationDisplayRotation = WindowConfiguration.ROTATION_UNDEFINED;
+
     /** The process level override inverted scale. See {@link #HAS_OVERRIDE_SCALING}. */
     private static float sOverrideInvertedScale = 1f;
 
     /** The process level override inverted density scale. See {@link #HAS_OVERRIDE_SCALING}. */
     private static float sOverrideDensityInvertScale = 1f;
+
+    /** The process level override display rotation. */
+    @Surface.Rotation
+    private static int sOverrideDisplayRotation = WindowConfiguration.ROTATION_UNDEFINED;
 
     @UnsupportedAppUsage
     @Deprecated
@@ -346,11 +376,16 @@ public class CompatibilityInfo implements Parcelable {
         return (mCompatibilityFlags & HAS_OVERRIDE_SCALING) != 0;
     }
 
+    /** Returns {@code true} if {@link #sOverrideDisplayRotation} should be set. */
+    public boolean isOverrideDisplayRotationRequired() {
+        return applicationDisplayRotation != WindowConfiguration.ROTATION_UNDEFINED;
+    }
+
     @UnsupportedAppUsage
     public boolean supportsScreen() {
         return (mCompatibilityFlags&NEEDS_SCREEN_COMPAT) == 0;
     }
-    
+
     public boolean neverSupportsScreen() {
         return (mCompatibilityFlags&ALWAYS_NEEDS_COMPAT) != 0;
     }
@@ -618,6 +653,9 @@ public class CompatibilityInfo implements Parcelable {
     }
 
     public void applyToConfiguration(int displayDensity, Configuration inoutConfig) {
+        if (hasOverrideDisplayRotation()) {
+            applyDisplayRotationConfiguration(sOverrideDisplayRotation, inoutConfig);
+        }
         if (hasOverrideScale()) return;
         if (!supportsScreen()) {
             // This is a larger screen device and the app is not
@@ -650,21 +688,42 @@ public class CompatibilityInfo implements Parcelable {
         inoutConfig.windowConfiguration.scale(invertScale);
     }
 
-    /** @see #sOverrideInvertedScale */
-    public static void applyOverrideScaleIfNeeded(Configuration config) {
-        if (!hasOverrideScale()) return;
-        scaleConfiguration(sOverrideInvertedScale, sOverrideDensityInvertScale, config);
+    /** Changes the WindowConfiguration display rotation for the given configuration. */
+    public static void applyDisplayRotationConfiguration(@Surface.Rotation int displayRotation,
+            Configuration inoutConfig) {
+        if (displayRotation != WindowConfiguration.ROTATION_UNDEFINED) {
+            inoutConfig.windowConfiguration.setDisplayRotation(displayRotation);
+        }
     }
 
-    /** @see #sOverrideInvertedScale */
-    public static void applyOverrideScaleIfNeeded(MergedConfiguration mergedConfig) {
-        if (!hasOverrideScale()) return;
-        scaleConfiguration(sOverrideInvertedScale, sOverrideDensityInvertScale,
-                mergedConfig.getGlobalConfiguration());
-        scaleConfiguration(sOverrideInvertedScale, sOverrideDensityInvertScale,
-                mergedConfig.getOverrideConfiguration());
-        scaleConfiguration(sOverrideInvertedScale, sOverrideDensityInvertScale,
-                mergedConfig.getMergedConfiguration());
+    /** @see #sOverrideInvertedScale and #sOverrideDisplayRotation. */
+    public static void applyOverrideIfNeeded(Configuration config) {
+        if (hasOverrideDisplayRotation()) {
+            applyDisplayRotationConfiguration(sOverrideDisplayRotation, config);
+        }
+        if (hasOverrideScale()) {
+            scaleConfiguration(sOverrideInvertedScale, sOverrideDensityInvertScale, config);
+        }
+    }
+
+    /** @see #sOverrideInvertedScale and #sOverrideDisplayRotation. */
+    public static void applyOverrideIfNeeded(MergedConfiguration mergedConfig) {
+        if (hasOverrideDisplayRotation()) {
+            applyDisplayRotationConfiguration(sOverrideDisplayRotation,
+                    mergedConfig.getGlobalConfiguration());
+            applyDisplayRotationConfiguration(sOverrideDisplayRotation,
+                    mergedConfig.getOverrideConfiguration());
+            applyDisplayRotationConfiguration(sOverrideDisplayRotation,
+                    mergedConfig.getMergedConfiguration());
+        }
+        if (hasOverrideScale()) {
+            scaleConfiguration(sOverrideInvertedScale, sOverrideDensityInvertScale,
+                    mergedConfig.getGlobalConfiguration());
+            scaleConfiguration(sOverrideInvertedScale, sOverrideDensityInvertScale,
+                    mergedConfig.getOverrideConfiguration());
+            scaleConfiguration(sOverrideInvertedScale, sOverrideDensityInvertScale,
+                    mergedConfig.getMergedConfiguration());
+        }
     }
 
     /** Returns {@code true} if this process is in a environment with override scale. */
@@ -691,6 +750,22 @@ public class CompatibilityInfo implements Parcelable {
     /** @see #sOverrideDensityInvertScale */
     public static float getOverrideDensityInvertedScale() {
         return sOverrideDensityInvertScale;
+    }
+
+    /** Returns {@code true} if this process is in a environment with override display rotation. */
+    private static boolean hasOverrideDisplayRotation() {
+        return sOverrideDisplayRotation != WindowConfiguration.ROTATION_UNDEFINED;
+    }
+
+    /** @see #sOverrideInvertedScale */
+    public static void setOverrideDisplayRotation(@Surface.Rotation int displayRotation) {
+        sOverrideDisplayRotation = displayRotation;
+    }
+
+    /** @see #sOverrideDisplayRotation */
+    @VisibleForTesting
+    public static int getOverrideDisplayRotation() {
+        return sOverrideDisplayRotation;
     }
 
     /**
@@ -747,18 +822,50 @@ public class CompatibilityInfo implements Parcelable {
         if (this == o) {
             return true;
         }
-        try {
-            CompatibilityInfo oc = (CompatibilityInfo)o;
-            if (mCompatibilityFlags != oc.mCompatibilityFlags) return false;
-            if (applicationDensity != oc.applicationDensity) return false;
-            if (applicationScale != oc.applicationScale) return false;
-            if (applicationInvertedScale != oc.applicationInvertedScale) return false;
-            if (applicationDensityScale != oc.applicationDensityScale) return false;
-            if (applicationDensityInvertedScale != oc.applicationDensityInvertedScale) return false;
-            return true;
-        } catch (ClassCastException e) {
+
+        if (!(o instanceof CompatibilityInfo oc)) {
             return false;
         }
+
+        if (!isCompatibilityFlagsEqual(oc)) return false;
+        if (!isScaleEqual(oc)) return false;
+        if (!isDisplayRotationEqual(oc)) return false;
+        return true;
+    }
+
+    /**
+     * Checks the difference between this and given {@link CompatibilityInfo} o, and returns the
+     * combination of {@link ActivityInfo}.CONFIG_* changes that this difference should trigger.
+     */
+    public int getCompatibilityChangesForConfig(@Nullable CompatibilityInfo o) {
+        int changes = 0;
+        if (!isDisplayRotationEqual(o)) {
+            changes |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+        }
+        if (!isScaleEqual(o) || !isCompatibilityFlagsEqual(o)) {
+            changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
+                    | ActivityInfo.CONFIG_SCREEN_SIZE
+                    | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+        }
+        return changes;
+    }
+
+    private boolean isScaleEqual(@Nullable CompatibilityInfo oc) {
+        if (oc == null) return false;
+        if (applicationDensity != oc.applicationDensity) return false;
+        if (applicationScale != oc.applicationScale) return false;
+        if (applicationInvertedScale != oc.applicationInvertedScale) return false;
+        if (applicationDensityScale != oc.applicationDensityScale) return false;
+        if (applicationDensityInvertedScale != oc.applicationDensityInvertedScale) return false;
+        return true;
+    }
+
+    private boolean isDisplayRotationEqual(@Nullable CompatibilityInfo oc) {
+        return oc != null && oc.applicationDisplayRotation == applicationDisplayRotation;
+    }
+
+    private boolean isCompatibilityFlagsEqual(@Nullable CompatibilityInfo oc) {
+        return oc != null && oc.mCompatibilityFlags == mCompatibilityFlags;
     }
 
     @Override
@@ -777,6 +884,10 @@ public class CompatibilityInfo implements Parcelable {
             sb.append(applicationInvertedScale);
             sb.append(" overrideDensityInvScale=");
             sb.append(applicationDensityInvertedScale);
+        }
+        if (isOverrideDisplayRotationRequired()) {
+            sb.append(" overrideDisplayRotation=");
+            sb.append(applicationDisplayRotation);
         }
         if (!supportsScreen()) {
             sb.append(" resizing");
@@ -800,6 +911,7 @@ public class CompatibilityInfo implements Parcelable {
         result = 31 * result + Float.floatToIntBits(applicationInvertedScale);
         result = 31 * result + Float.floatToIntBits(applicationDensityScale);
         result = 31 * result + Float.floatToIntBits(applicationDensityInvertedScale);
+        result = 31 * result + applicationDisplayRotation;
         return result;
     }
 
@@ -816,6 +928,7 @@ public class CompatibilityInfo implements Parcelable {
         dest.writeFloat(applicationInvertedScale);
         dest.writeFloat(applicationDensityScale);
         dest.writeFloat(applicationDensityInvertedScale);
+        dest.writeInt(applicationDisplayRotation);
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -839,6 +952,7 @@ public class CompatibilityInfo implements Parcelable {
         applicationInvertedScale = source.readFloat();
         applicationDensityScale = source.readFloat();
         applicationDensityInvertedScale = source.readFloat();
+        applicationDisplayRotation = source.readInt();
     }
 
     /**

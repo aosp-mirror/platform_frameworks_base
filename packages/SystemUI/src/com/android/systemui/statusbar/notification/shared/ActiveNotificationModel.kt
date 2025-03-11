@@ -17,7 +17,9 @@ package com.android.systemui.statusbar.notification.shared
 
 import android.app.PendingIntent
 import android.graphics.drawable.Icon
+import android.util.Log
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.stack.PriorityBucket
 
 /**
@@ -76,7 +78,24 @@ data class ActiveNotificationModel(
     @PriorityBucket val bucket: Int,
     /** The call type set on the notification. */
     val callType: CallType,
-) : ActiveNotificationEntryModel()
+    /**
+     * The content needed to render this as a promoted notification on various surfaces, or null if
+     * this notification cannot be rendered as a promoted notification.
+     */
+    val promotedContent: PromotedNotificationContentModel?,
+) : ActiveNotificationEntryModel() {
+    init {
+        if (!PromotedNotificationContentModel.featureFlagEnabled()) {
+            if (promotedContent != null) {
+                Log.wtf(TAG, "passing non-null promoted content without feature flag enabled")
+            }
+        }
+    }
+
+    companion object {
+        private const val TAG = "ActiveNotificationEntryModel"
+    }
+}
 
 /** Model for a group of notifications. */
 data class ActiveNotificationGroupModel(

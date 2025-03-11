@@ -36,7 +36,7 @@ import org.junit.runners.Parameterized
  * Setup: Launch A|B in split with B being the secondary activity. Transitions: Rotate display, and
  * expect A and B to split evenly in new rotation.
  *
- * To run this test: `atest FlickerTestsOther:RotateSplitNoChangeTest`
+ * To run this test: `atest FlickerTestsActivityEmbedding:RotateSplitNoChangeTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

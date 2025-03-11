@@ -19,18 +19,18 @@ package com.android.wm.shell.windowdecor
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.graphics.Point
-import android.graphics.Rect
+import android.view.View
 import android.view.WindowManager
 import android.window.TaskSnapshot
 import androidx.compose.ui.graphics.toArgb
-import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer
-import com.android.wm.shell.shared.split.SplitScreenConstants
+import com.android.wm.shell.R
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer
+import com.android.wm.shell.windowdecor.common.calculateMenuPosition
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
-import com.android.wm.shell.windowdecor.extension.isFullscreen
-import com.android.wm.shell.windowdecor.extension.isMultiWindow
 
 /**
  * Implementation of [ManageWindowsViewContainer] meant to be used in desktop header and app
@@ -53,57 +53,46 @@ class DesktopHandleManageWindowsMenu(
     private var menuViewContainer: AdditionalViewContainer? = null
 
     init {
-        show(snapshotList, onIconClickListener, onOutsideClickListener)
-    }
-
-    override fun close() {
-        menuViewContainer?.releaseView()
+        createMenu(snapshotList, onIconClickListener, onOutsideClickListener)
+        animateOpen()
     }
 
     private fun calculateMenuPosition(): Point {
-        val position = Point()
-        val nonFreeformX = (captionX + (captionWidth / 2) - (menuView.menuWidth / 2))
-        when {
-            callerTaskInfo.isFreeform -> {
-                val taskBounds = callerTaskInfo.getConfiguration().windowConfiguration.bounds
-                position.set(taskBounds.left, taskBounds.top)
-            }
-            callerTaskInfo.isFullscreen -> {
-                position.set(nonFreeformX, 0)
-            }
-            callerTaskInfo.isMultiWindow -> {
-                val splitPosition = splitScreenController.getSplitPosition(callerTaskInfo.taskId)
-                val leftOrTopStageBounds = Rect()
-                val rightOrBottomStageBounds = Rect()
-                splitScreenController.getStageBounds(leftOrTopStageBounds, rightOrBottomStageBounds)
-                // TODO(b/343561161): This needs to be calculated differently if the task is in
-                //  top/bottom split.
-                when (splitPosition) {
-                    SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT -> {
-                        position.set(leftOrTopStageBounds.width() + nonFreeformX, /* y= */ 0)
-                    }
-
-                    SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT -> {
-                        position.set(nonFreeformX, /* y= */ 0)
-                    }
-                }
-            }
-        }
-        return position
+        return calculateMenuPosition(
+            splitScreenController,
+            callerTaskInfo,
+            marginStart = 0,
+            marginTop = context.resources.getDimensionPixelSize(
+                R.dimen.desktop_mode_handle_menu_margin_top
+            ),
+            captionX,
+            0,
+            captionWidth,
+            menuView.menuWidth,
+            context.isRtl()
+        )
     }
 
     override fun addToContainer(menuView: ManageWindowsView) {
         val menuPosition = calculateMenuPosition()
         menuViewContainer = AdditionalSystemViewContainer(
-            windowManagerWrapper,
-            callerTaskInfo.taskId,
-            menuPosition.x,
-            menuPosition.y,
-            menuView.menuWidth,
-            menuView.menuHeight,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            windowManagerWrapper = windowManagerWrapper,
+            taskId = callerTaskInfo.taskId,
+            x = menuPosition.x,
+            y = menuPosition.y,
+            width = menuView.menuWidth,
+            height = menuView.menuHeight,
+            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-            menuView.rootView
+            view = menuView.rootView,
+            ignoreCutouts = DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context),
         )
     }
+
+    override fun removeFromContainer() {
+        menuViewContainer?.releaseView()
+    }
+
+    private fun Context.isRtl() =
+        resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
 }

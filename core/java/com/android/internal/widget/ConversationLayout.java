@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import static android.app.Flags.notificationsRedesignTemplates;
 import static android.widget.flags.Flags.conversationLayoutUseMaximumChildHeight;
 
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_EXTERNAL;
@@ -692,7 +693,7 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateActionListPadding() {
-        if (mActions != null) {
+        if (!notificationsRedesignTemplates() && mActions != null) {
             mActions.setCollapsibleIndentDimen(R.dimen.call_notification_collapsible_indent);
         }
     }
@@ -776,37 +777,40 @@ public class ConversationLayout extends FrameLayout
 
         }
 
-        int conversationAvatarSize;
-        int facepileAvatarSize;
-        int facePileBackgroundSize;
-        if (mIsCollapsed) {
-            conversationAvatarSize = mConversationAvatarSize;
-            facepileAvatarSize = mFacePileAvatarSize;
-            facePileBackgroundSize = facepileAvatarSize + 2 * mFacePileProtectionWidth;
-        } else {
-            conversationAvatarSize = mConversationAvatarSizeExpanded;
-            facepileAvatarSize = mFacePileAvatarSizeExpandedGroup;
-            facePileBackgroundSize = facepileAvatarSize + 2 * mFacePileProtectionWidthExpanded;
+        if (!notificationsRedesignTemplates()) {
+            // We no longer need to update the size based on expansion state.
+            int conversationAvatarSize;
+            int facepileAvatarSize;
+            int facePileBackgroundSize;
+            if (mIsCollapsed) {
+                conversationAvatarSize = mConversationAvatarSize;
+                facepileAvatarSize = mFacePileAvatarSize;
+                facePileBackgroundSize = facepileAvatarSize + 2 * mFacePileProtectionWidth;
+            } else {
+                conversationAvatarSize = mConversationAvatarSizeExpanded;
+                facepileAvatarSize = mFacePileAvatarSizeExpandedGroup;
+                facePileBackgroundSize = facepileAvatarSize + 2 * mFacePileProtectionWidthExpanded;
+            }
+            LayoutParams layoutParams = (LayoutParams) mConversationFacePile.getLayoutParams();
+            layoutParams.width = conversationAvatarSize;
+            layoutParams.height = conversationAvatarSize;
+            mConversationFacePile.setLayoutParams(layoutParams);
+
+            layoutParams = (LayoutParams) bottomView.getLayoutParams();
+            layoutParams.width = facepileAvatarSize;
+            layoutParams.height = facepileAvatarSize;
+            bottomView.setLayoutParams(layoutParams);
+
+            layoutParams = (LayoutParams) topView.getLayoutParams();
+            layoutParams.width = facepileAvatarSize;
+            layoutParams.height = facepileAvatarSize;
+            topView.setLayoutParams(layoutParams);
+
+            layoutParams = (LayoutParams) bottomBackground.getLayoutParams();
+            layoutParams.width = facePileBackgroundSize;
+            layoutParams.height = facePileBackgroundSize;
+            bottomBackground.setLayoutParams(layoutParams);
         }
-        LayoutParams layoutParams = (LayoutParams) mConversationFacePile.getLayoutParams();
-        layoutParams.width = conversationAvatarSize;
-        layoutParams.height = conversationAvatarSize;
-        mConversationFacePile.setLayoutParams(layoutParams);
-
-        layoutParams = (LayoutParams) bottomView.getLayoutParams();
-        layoutParams.width = facepileAvatarSize;
-        layoutParams.height = facepileAvatarSize;
-        bottomView.setLayoutParams(layoutParams);
-
-        layoutParams = (LayoutParams) topView.getLayoutParams();
-        layoutParams.width = facepileAvatarSize;
-        layoutParams.height = facepileAvatarSize;
-        topView.setLayoutParams(layoutParams);
-
-        layoutParams = (LayoutParams) bottomBackground.getLayoutParams();
-        layoutParams.width = facePileBackgroundSize;
-        layoutParams.height = facePileBackgroundSize;
-        bottomBackground.setLayoutParams(layoutParams);
     }
 
     /**
@@ -831,6 +835,11 @@ public class ConversationLayout extends FrameLayout
      * update the icon position and sizing
      */
     private void updateIconPositionAndSize() {
+        if (notificationsRedesignTemplates()) {
+            // Icon size is fixed in the redesign.
+            return;
+        }
+
         int badgeProtrusion;
         int conversationAvatarSize;
         if (mIsOneToOne || mIsCollapsed) {
@@ -863,6 +872,11 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updatePaddingsBasedOnContentAvailability() {
+        if (notificationsRedesignTemplates()) {
+            // group icons have the same size as 1:1 conversations
+            return;
+        }
+
         // groups have avatars that need more spacing
         mMessagingLinearLayout.setSpacing(
                 mIsOneToOne ? mMessageSpacingStandard : mMessageSpacingGroup);

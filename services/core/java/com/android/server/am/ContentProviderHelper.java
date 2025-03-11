@@ -90,7 +90,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
-import com.android.server.RescueParty;
+import com.android.server.crashrecovery.CrashRecoveryAdaptor;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
@@ -325,7 +325,8 @@ public class ContentProviderHelper {
                     final int verifiedAdj = cpr.proc.mState.getVerifiedAdj();
                     boolean success = !serviceBindingOomAdjPolicy()
                             || mService.mOomAdjuster.evaluateProviderConnectionAdd(r, cpr.proc)
-                            ? mService.updateOomAdjLocked(cpr.proc, OOM_ADJ_REASON_GET_PROVIDER)
+                            ? mService.mProcessStateController.runUpdate(cpr.proc,
+                            OOM_ADJ_REASON_GET_PROVIDER)
                             : true;
                     // XXX things have changed so updateOomAdjLocked doesn't actually tell us
                     // if the process has been successfully adjusted.  So to reduce races with
@@ -534,10 +535,9 @@ public class ContentProviderHelper {
                             if (ActivityManagerDebugConfig.DEBUG_PROVIDER) {
                                 Slog.d(TAG, "Installing in existing process " + proc);
                             }
-                            final ProcessProviderRecord pr = proc.mProviders;
-                            if (!pr.hasProvider(cpi.name)) {
+                            if (mService.mProcessStateController.addPublishedProvider(proc,
+                                    cpi.name, cpr)) {
                                 checkTime(startTime, "getContentProviderImpl: scheduling install");
-                                pr.installProvider(cpi.name, cpr);
                                 mService.mOomAdjuster.unfreezeTemporarily(proc,
                                         CachedAppOptimizer.UNFREEZE_REASON_GET_PROVIDER);
                                 try {
@@ -881,7 +881,8 @@ public class ContentProviderHelper {
             ComponentName comp = new ComponentName(cpr.info.packageName, cpr.info.name);
             ContentProviderRecord localCpr = mProviderMap.getProviderByClass(comp, userId);
             if (localCpr.hasExternalProcessHandles()) {
-                if (localCpr.removeExternalProcessHandleLocked(token)) {
+                if (mService.mProcessStateController.removeExternalProviderClient(localCpr,
+                        token)) {
                     mService.updateOomAdjLocked(localCpr.proc, OOM_ADJ_REASON_REMOVE_PROVIDER);
                 } else {
                     Slog.e(TAG, "Attempt to remove content provider " + localCpr
@@ -1381,7 +1382,7 @@ public class ContentProviderHelper {
         mService.mOomAdjuster.initSettings();
 
         // Now that the settings provider is published we can consider sending in a rescue party.
-        RescueParty.onSettingsProviderPublished(mService.mContext);
+        CrashRecoveryAdaptor.rescuePartyOnSettingsProviderPublished(mService.mContext);
     }
 
     /**
@@ -1447,7 +1448,8 @@ public class ContentProviderHelper {
             String callingPackage, String callingTag, boolean stable, boolean updateLru,
             long startTime, ProcessList processList, @UserIdInt int expectedUserId) {
         if (r == null) {
-            cpr.addExternalProcessHandleLocked(externalProcessToken, callingUid, callingTag);
+            mService.mProcessStateController.addExternalProviderClient(cpr, externalProcessToken,
+                    callingUid, callingTag);
             return null;
         }
 
@@ -1470,7 +1472,7 @@ public class ContentProviderHelper {
         if (cpr.proc != null) {
             cpr.proc.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_PROVIDER);
         }
-        pr.addProviderConnection(conn);
+        mService.mProcessStateController.addProviderConnection(r, conn);
         mService.startAssociationLocked(r.uid, r.processName, r.mState.getCurProcState(),
                 cpr.uid, cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
         if (updateLru && cpr.proc != null
@@ -1493,7 +1495,8 @@ public class ContentProviderHelper {
             ContentProviderRecord cpr, IBinder externalProcessToken, boolean stable,
             boolean enforceDelay, boolean updateOomAdj) {
         if (conn == null) {
-            cpr.removeExternalProcessHandleLocked(externalProcessToken);
+            mService.mProcessStateController.removeExternalProviderClient(cpr,
+                    externalProcessToken);
             return false;
         }
 
@@ -1537,14 +1540,15 @@ public class ContentProviderHelper {
             if (cpr.proc != null && !hasProviderConnectionLocked(cpr.proc)) {
                 cpr.proc.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_PROVIDER);
             }
-            conn.client.mProviders.removeProviderConnection(conn);
+            mService.mProcessStateController.removeProviderConnection(conn.client, conn);
             if (conn.client.mState.getSetProcState()
                     < ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
                 // The client is more important than last activity -- note the time this
                 // is happening, so we keep the old provider process around a bit as last
                 // activity to avoid thrashing it.
                 if (cpr.proc != null) {
-                    cpr.proc.mProviders.setLastProviderTime(SystemClock.uptimeMillis());
+                    mService.mProcessStateController.setLastProviderTime(cpr.proc,
+                            SystemClock.uptimeMillis());
                 }
             }
             mService.stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid,
@@ -1821,7 +1825,7 @@ public class ContentProviderHelper {
                 }
             }
             if (removed && cpr.proc != null) {
-                cpr.proc.mProviders.removeProvider(cpr.info.name);
+                mService.mProcessStateController.removePublishedProvider(cpr.proc, cpr.info.name);
             }
         }
 

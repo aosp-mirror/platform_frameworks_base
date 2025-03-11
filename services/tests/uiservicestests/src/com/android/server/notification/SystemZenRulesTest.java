@@ -69,6 +69,8 @@ public class SystemZenRulesTest extends UiServiceTestCase {
                 R.string.zen_mode_trigger_summary_range_symbol_combination, "%1$s-%2$s");
         mContext.getOrCreateTestableResources().addOverride(
                 R.string.zen_mode_trigger_summary_divider_text, ",");
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.zen_mode_trigger_summary_combined, "%1$s,%2$s");
     }
 
     @Test
@@ -209,15 +211,27 @@ public class SystemZenRulesTest extends UiServiceTestCase {
     }
 
     @Test
-    public void getShortDaysSummary_onlyDays() {
+    public void getDaysOfWeekShort_summarizesDays() {
         ScheduleInfo scheduleInfo = new ScheduleInfo();
         scheduleInfo.startHour = 10;
         scheduleInfo.endHour = 16;
         scheduleInfo.days = new int[] {Calendar.MONDAY, Calendar.TUESDAY,
                 Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY};
 
-        assertThat(SystemZenRules.getShortDaysSummary(mContext, scheduleInfo))
+        assertThat(SystemZenRules.getDaysOfWeekShort(mContext, scheduleInfo))
                 .isEqualTo("Mon-Fri");
+    }
+
+    @Test
+    public void getDaysOfWeekFull_summarizesDays() {
+        ScheduleInfo scheduleInfo = new ScheduleInfo();
+        scheduleInfo.startHour = 10;
+        scheduleInfo.endHour = 16;
+        scheduleInfo.days = new int[] {Calendar.MONDAY, Calendar.TUESDAY,
+                Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY};
+
+        assertThat(SystemZenRules.getDaysOfWeekFull(mContext, scheduleInfo))
+                .isEqualTo("Monday to Friday");
     }
 
     @Test

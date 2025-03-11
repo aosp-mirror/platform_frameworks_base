@@ -27,8 +27,6 @@ import com.android.systemui.screenshot.ImageCaptureImpl;
 import com.android.systemui.screenshot.InteractiveScreenshotHandler;
 import com.android.systemui.screenshot.LegacyScreenshotController;
 import com.android.systemui.screenshot.ScreenshotController;
-import com.android.systemui.screenshot.ScreenshotPolicy;
-import com.android.systemui.screenshot.ScreenshotPolicyImpl;
 import com.android.systemui.screenshot.ScreenshotSoundController;
 import com.android.systemui.screenshot.ScreenshotSoundControllerImpl;
 import com.android.systemui.screenshot.ScreenshotSoundProvider;
@@ -40,7 +38,7 @@ import com.android.systemui.screenshot.appclips.AppClipsScreenshotHelperService;
 import com.android.systemui.screenshot.appclips.AppClipsService;
 import com.android.systemui.screenshot.message.MessageModule;
 import com.android.systemui.screenshot.policy.ScreenshotPolicyModule;
-import com.android.systemui.screenshot.proxy.SystemUiProxyModule;
+import com.android.systemui.screenshot.proxy.ScreenshotProxyModule;
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel;
 
 import dagger.Binds;
@@ -52,7 +50,7 @@ import dagger.multibindings.IntoMap;
 /**
  * Defines injectable resources for Screenshots
  */
-@Module(includes = {ScreenshotPolicyModule.class, SystemUiProxyModule.class, MessageModule.class})
+@Module(includes = {ScreenshotPolicyModule.class, ScreenshotProxyModule.class, MessageModule.class})
 public abstract class ScreenshotModule {
 
     @Binds
@@ -64,9 +62,6 @@ public abstract class ScreenshotModule {
     @SysUISingleton
     abstract TakeScreenshotExecutor bindTakeScreenshotExecutor(
             TakeScreenshotExecutorImpl impl);
-
-    @Binds
-    abstract ScreenshotPolicy bindScreenshotPolicyImpl(ScreenshotPolicyImpl impl);
 
     @Binds
     abstract ImageCapture bindImageCaptureImpl(ImageCaptureImpl capture);

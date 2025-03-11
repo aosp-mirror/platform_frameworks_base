@@ -55,6 +55,10 @@ interface ShadeModeInteractor {
     val isDualShade: Boolean
         get() = shadeMode.value is ShadeMode.Dual
 
+    /** Convenience shortcut for querying whether the current [shadeMode] is [ShadeMode.Split]. */
+    val isSplitShade: Boolean
+        get() = shadeMode.value is ShadeMode.Split
+
     /**
      * The fraction between [0..1] (i.e., percentage) of screen width to consider the threshold
      * between "top-left" and "top-right" for the purposes of dual-shade invocation.

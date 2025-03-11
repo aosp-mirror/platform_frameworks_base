@@ -128,7 +128,7 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
                     R.string.quick_settings_flashlight_camera_in_use);
             state.stateDescription = state.secondaryLabel;
             state.state = Tile.STATE_UNAVAILABLE;
-            state.icon = ResourceIcon.get(R.drawable.qs_flashlight_icon_off);
+            state.icon = maybeLoadResourceIcon(R.drawable.qs_flashlight_icon_off);
             return;
         }
         if (arg instanceof Boolean) {
@@ -143,7 +143,7 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
         state.contentDescription = mContext.getString(R.string.quick_settings_flashlight_label);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.icon = ResourceIcon.get(state.value
+        state.icon = maybeLoadResourceIcon(state.value
                 ? R.drawable.qs_flashlight_icon_on : R.drawable.qs_flashlight_icon_off);
     }
 

@@ -18,10 +18,10 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowContainerChildProto.WINDOW_TOKEN;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -49,6 +49,7 @@ import android.window.WindowContext;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -89,6 +90,9 @@ class WindowToken extends WindowContainer<WindowState> {
 
     // Is key dispatching paused for this token?
     boolean paused = false;
+
+    /** Whether this container should be removed when it no longer animates. */
+    boolean mIsExiting;
 
     /** The owner has {@link android.Manifest.permission#MANAGE_APP_TOKENS} */
     final boolean mOwnerCanManageAppTokens;
@@ -276,6 +280,28 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
+    @Override
+    void removeIfPossible() {
+        if (mTransitionController.isPlayingTarget(this)) {
+            // Defer removing this container until the transition is finished. So the removal can
+            // execute after the finish transaction (see Transition#buildFinishTransaction) which
+            // may reparent it to original parent.
+            mIsExiting = true;
+            return;
+        }
+        mIsExiting = false;
+        removeAllWindowsIfPossible();
+        removeImmediately();
+    }
+
+    @Override
+    boolean handleCompleteDeferredRemoval() {
+        if (mIsExiting) {
+            removeIfPossible();
+        }
+        return super.handleCompleteDeferredRemoval();
+    }
+
     /**
      * @return The scale for applications running in compatibility mode. Multiply the size in the
      *         application by this scale will be the size in the screen.
@@ -361,7 +387,15 @@ class WindowToken extends WindowContainer<WindowState> {
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        dc.reParentWindowToken(this);
+        if (!Flags.reparentWindowTokenApi()) {
+            dc.reParentWindowToken(this);
+        } else {
+            // This check is needed to break recursion, as DisplayContent#reparentWindowToken also
+            // triggers a WindowToken#onDisplayChanged.
+            if (dc.getWindowToken(token) == null) {
+                dc.reParentWindowToken(this);
+            }
+        }
 
         // TODO(b/36740756): One day this should perhaps be hooked
         // up with goodToGo, so we don't move a window
@@ -589,6 +623,12 @@ class WindowToken extends WindowContainer<WindowState> {
         final int rotation = getRelativeDisplayRotation();
         if (rotation == Surface.ROTATION_0) return mFixedRotationTransformLeash;
         if (mFixedRotationTransformLeash != null) return mFixedRotationTransformLeash;
+        if (ActivityTaskManagerService.isPip2ExperimentEnabled() && asActivityRecord() != null
+                && mTransitionController.getWindowingModeAtStart(
+                asActivityRecord()) == WINDOWING_MODE_PINNED) {
+            // PiP handles fixed rotation animation in Shell, so do not create the rotation leash.
+            return null;
+        }
 
         final SurfaceControl leash = makeSurface().setContainerLayer()
                 .setParent(getParentSurfaceControl())
@@ -598,7 +638,7 @@ class WindowToken extends WindowContainer<WindowState> {
                 .build();
         t.setPosition(leash, mLastSurfacePosition.x, mLastSurfacePosition.y);
         t.reparent(getSurfaceControl(), leash);
-        getPendingTransaction().setFixedTransformHint(leash,
+        mDisplayContent.setFixedTransformHint(getPendingTransaction(), leash,
                 getWindowConfiguration().getDisplayRotation());
         mFixedRotationTransformLeash = leash;
         updateSurfaceRotation(t, rotation, mFixedRotationTransformLeash);
@@ -640,6 +680,15 @@ class WindowToken extends WindowContainer<WindowState> {
             // override configuration can update to the same state.
             getResolvedOverrideConfiguration().updateFrom(
                     mFixedRotationTransformState.mRotatedOverrideConfiguration);
+        }
+        if (asActivityRecord() == null) {
+            // Let ActivityRecord override the config if there is one. Otherwise, override here.
+            // Resolve WindowToken's configuration by the latest window.
+            final WindowState win = getTopChild();
+            if (win != null) {
+                final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+                win.applySizeOverride(newParentConfig, resolvedConfig);
+            }
         }
     }
 
@@ -724,6 +773,9 @@ class WindowToken extends WindowContainer<WindowState> {
             pw.print(prefix);
             pw.print("fixedRotationConfig=");
             pw.println(mFixedRotationTransformState.mRotatedOverrideConfiguration);
+        }
+        if (mIsExiting) {
+            pw.print(prefix); pw.println("isExiting=true");
         }
     }
 

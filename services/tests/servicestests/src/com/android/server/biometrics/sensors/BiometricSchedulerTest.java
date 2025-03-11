@@ -37,6 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.kotlin.StubberKt.doReturn;
 
 import android.content.Context;
 import android.hardware.biometrics.AuthenticateOptions;
@@ -810,14 +811,16 @@ public class BiometricSchedulerTest {
         final ClientMonitorCallback callback0 = mock(ClientMonitorCallback.class);
         final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
         final ClientMonitorCallback callback2 = mock(ClientMonitorCallback.class);
+        final BiometricLogger logger = mock(BiometricLogger.class);
+        doReturn(logger).when(logger).swapAction(any(), anyInt());
 
         final TestInternalCleanupClient client1 = new
                 TestInternalCleanupClient(mContext, daemon, userId,
-                owner, TEST_SENSOR_ID, mock(BiometricLogger.class),
+                owner, TEST_SENSOR_ID, logger,
                 mBiometricContext, utils, authenticatorIds);
         final TestInternalCleanupClient client2 = new
                 TestInternalCleanupClient(mContext, daemon, userId,
-                owner, TEST_SENSOR_ID, mock(BiometricLogger.class),
+                owner, TEST_SENSOR_ID, logger,
                 mBiometricContext, utils, authenticatorIds);
 
         //add initial start client to scheduler, so later clients will be on pending operation queue
@@ -1248,9 +1251,9 @@ public class BiometricSchedulerTest {
                 @Nullable ClientMonitorCallbackConverter listener, int[] biometricIds, int userId,
                 @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
                 @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-                @NonNull Map<Integer, Long> authenticatorIds) {
+                @NonNull Map<Integer, Long> authenticatorIds, int reason) {
             super(context, lazyDaemon, token, listener, userId, owner, utils, sensorId,
-                    logger, biometricContext, authenticatorIds);
+                    logger, biometricContext, authenticatorIds, reason);
         }
 
         @Override
@@ -1289,10 +1292,10 @@ public class BiometricSchedulerTest {
                 Supplier<Object> lazyDaemon, IBinder token, int biometricId, int userId,
                 String owner, BiometricUtils<Fingerprint> utils, int sensorId,
                 @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-                Map<Integer, Long> authenticatorIds) {
+                Map<Integer, Long> authenticatorIds, int reason) {
             return new TestRemovalClient(context, lazyDaemon, token, null,
                     new int[]{biometricId}, userId, owner, utils, sensorId, logger,
-                    biometricContext, authenticatorIds);
+                    biometricContext, authenticatorIds, reason);
         }
 
         @Override

@@ -23,9 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
-import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.ListPreference
@@ -33,6 +31,8 @@ import com.android.settingslib.spa.widget.preference.ListPreferenceModel
 import com.android.settingslib.spa.widget.preference.ListPreferenceOption
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
+import com.android.settingslib.spa.widget.ui.Category
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
@@ -41,30 +41,24 @@ private const val TITLE = "Sample ListPreference"
 
 object ListPreferencePageProvider : SettingsPageProvider {
     override val name = "ListPreference"
-    private val owner = createSettingsPage()
 
-    override fun buildEntry(arguments: Bundle?) = listOf(
-        SettingsEntryBuilder.create("ListPreference", owner)
-            .setUiLayoutFn {
+    @Composable
+    override fun Page(arguments: Bundle?) {
+        RegularScaffold(TITLE) {
+            Category {
                 SampleListPreference()
-            }.build(),
-        SettingsEntryBuilder.create("ListPreference not changeable", owner)
-            .setUiLayoutFn {
                 SampleNotChangeableListPreference()
-            }.build(),
-    )
-
-    fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner)
-            .setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
             }
+        }
     }
 
-    override fun getTitle(arguments: Bundle?) = TITLE
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
+    }
 }
 
 @Composable

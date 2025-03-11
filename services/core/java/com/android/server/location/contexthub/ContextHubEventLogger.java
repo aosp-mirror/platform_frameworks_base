@@ -333,10 +333,6 @@ public class ContextHubEventLogger {
      */
     public synchronized void logReliableMessageToNanoappStatus(
             int messageSequenceNumber, byte errorCode) {
-        if (!Flags.reliableMessage()) {
-            return;
-        }
-
         for (NanoappMessageEvent event : mMessageToNanoappQueue) {
             if (event.message.isReliable()
                     && event.message.getMessageSequenceNumber()

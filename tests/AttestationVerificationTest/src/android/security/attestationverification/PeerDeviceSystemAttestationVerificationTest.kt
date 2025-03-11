@@ -2,10 +2,11 @@ package android.security.attestationverification
 
 import android.app.Activity
 import android.os.Bundle
+import android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_CERTS
+import android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS
 import android.security.attestationverification.AttestationVerificationManager.PARAM_CHALLENGE
 import android.security.attestationverification.AttestationVerificationManager.PARAM_PUBLIC_KEY
 import android.security.attestationverification.AttestationVerificationManager.PROFILE_PEER_DEVICE
-import android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE
 import android.security.attestationverification.AttestationVerificationManager.TYPE_CHALLENGE
 import android.security.attestationverification.AttestationVerificationManager.TYPE_PUBLIC_KEY
 import android.security.attestationverification.AttestationVerificationManager.TYPE_UNKNOWN
@@ -54,7 +55,7 @@ class PeerDeviceSystemAttestationVerificationTest {
             future.complete(result)
         }
 
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     @Test
@@ -66,7 +67,7 @@ class PeerDeviceSystemAttestationVerificationTest {
             future.complete(result)
         }
 
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     @Test
@@ -80,7 +81,7 @@ class PeerDeviceSystemAttestationVerificationTest {
             future.complete(result)
         }
 
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
 
         val future2 = CompletableFuture<Int>()
         val challengeRequirements = Bundle()
@@ -90,7 +91,7 @@ class PeerDeviceSystemAttestationVerificationTest {
             future2.complete(result)
         }
 
-        assertThat(future2.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future2.getSoon()).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     @Test
@@ -104,7 +105,7 @@ class PeerDeviceSystemAttestationVerificationTest {
             future.complete(result)
         }
 
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     @Test
@@ -118,7 +119,7 @@ class PeerDeviceSystemAttestationVerificationTest {
             future.complete(result)
         }
 
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_CERTS)
     }
 
     @Test
@@ -131,7 +132,7 @@ class PeerDeviceSystemAttestationVerificationTest {
             invalidAttestationByteArray, activity.mainExecutor) { result, _ ->
             future.complete(result)
         }
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_CERTS)
     }
 
     private fun <T> CompletableFuture<T>.getSoon(): T {

@@ -304,11 +304,17 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
         @Override
         public void unloadModel(int modelHandle) {
             synchronized (SoundTriggerModule.this) {
-                int sessionId;
                 checkValid();
-                sessionId = mLoadedModels.get(modelHandle).unload();
-                mAudioSessionProvider.releaseSession(sessionId);
+                final var session = mLoadedModels.get(modelHandle).getSession();
+                mLoadedModels.remove(modelHandle);
+                mAudioSessionProvider.releaseSession(session.mSessionHandle);
             }
+            // We don't need to post-synchronize on anything once the HAL has finished the unload
+            // and dispatched any appropriate callbacks -- since we don't do any state checking
+            // onModelUnloaded regardless.
+            // This is generally safe since there is no post-condition on the framework side when
+            // a model is unloaded. We assume that we won't ever have a modelHandle collision.
+            mHalService.unloadSoundModel(modelHandle);
         }
 
         @Override
@@ -402,6 +408,10 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                 return mState;
             }
 
+            private SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession getSession() {
+                return mSession;
+            }
+
             private void setState(@NonNull ModelState state) {
                 mState = state;
                 SoundTriggerModule.this.notifyAll();
@@ -424,16 +434,6 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
-            }
-
-            /**
-             * Unloads the model.
-             * @return The audio session handle.
-             */
-            private int unload() {
-                mHalService.unloadSoundModel(mHandle);
-                mLoadedModels.remove(mHandle);
-                return mSession.mSessionHandle;
             }
 
             private IBinder startRecognition(@NonNull RecognitionConfig config) {

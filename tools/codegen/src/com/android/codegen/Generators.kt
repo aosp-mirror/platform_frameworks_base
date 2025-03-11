@@ -43,7 +43,7 @@ fun ClassPrinter.generateConstDef(consts: List<Pair<VariableDeclarator, FieldDec
     }
     var AnnotationName = prefix.split("_")
             .filterNot { it.isBlank() }
-            .map { it.toLowerCase().capitalize() }
+            .map { it.lowercase().capitalize() }
             .joinToString("")
     val annotatedConst = consts.find { it.second.annotations.isNonEmpty }
     if (annotatedConst != null) {
@@ -122,7 +122,7 @@ fun FileInfo.generateAidl() {
     if (aidl.exists()) return
     aidl.writeText(buildString {
         sourceLines.dropLastWhile { !it.startsWith("package ") }.forEach {
-            appendln(it)
+            appendLine(it)
         }
         append("\nparcelable ${mainClass.nameAsString};\n")
     })

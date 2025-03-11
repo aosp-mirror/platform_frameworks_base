@@ -33,6 +33,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.media.AudioDeviceInfo;
+import android.media.AudioManager;
 import android.media.MediaRoute2Info;
 import android.os.SystemProperties;
 import android.util.SparseIntArray;
@@ -116,20 +118,38 @@ public class DeviceIconUtil {
 
     @SuppressLint("SwitchIntDef")
     @DrawableRes
-    private static int getIconResourceIdForTv(@MediaRoute2Info.Type int type) {
+    private int getIconResourceIdForTv(@MediaRoute2Info.Type int type) {
         return switch (type) {
             case MediaRoute2Info.TYPE_USB_DEVICE, MediaRoute2Info.TYPE_USB_HEADSET ->
                     R.drawable.ic_headphone;
             case MediaRoute2Info.TYPE_USB_ACCESSORY -> R.drawable.ic_usb;
             case MediaRoute2Info.TYPE_DOCK -> R.drawable.ic_dock_device;
-            case MediaRoute2Info.TYPE_HDMI, MediaRoute2Info.TYPE_BUILTIN_SPEAKER ->
-                    R.drawable.ic_tv;
+            case MediaRoute2Info.TYPE_BUILTIN_SPEAKER ->
+                    isPanelTv() ? R.drawable.ic_tv : R.drawable.ic_tv_box_internal_speaker;
+            case MediaRoute2Info.TYPE_HDMI -> R.drawable.ic_tv;
             case MediaRoute2Info.TYPE_HDMI_ARC, MediaRoute2Info.TYPE_HDMI_EARC ->
                     R.drawable.ic_hdmi;
             case MediaRoute2Info.TYPE_WIRED_HEADSET, MediaRoute2Info.TYPE_WIRED_HEADPHONES ->
                     R.drawable.ic_wired_device;
             default -> R.drawable.ic_media_speaker_device;
         };
+    }
+
+    private boolean isPanelTv() {
+        if (mContext == null) {
+            // This should only happen during testing.
+            return true;
+        }
+        AudioManager audioManager = mContext.getSystemService(AudioManager.class);
+        AudioDeviceInfo[] devices = audioManager.getDevices(
+                AudioManager.GET_DEVICES_OUTPUTS);
+        // If we have an HDMI output (not ARC/eARC) we can assume it's a dongle / set top box.
+        for (AudioDeviceInfo device : devices) {
+            if (device.getType() == TYPE_HDMI) {
+                return false;
+            }
+        }
+        return true;
     }
 
     static {

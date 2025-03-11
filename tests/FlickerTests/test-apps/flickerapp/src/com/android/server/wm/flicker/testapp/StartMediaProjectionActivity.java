@@ -19,7 +19,8 @@ package com.android.server.wm.flicker.testapp;
 import static com.android.wm.shell.flicker.utils.MediaProjectionUtils.EXTRA_MESSENGER;
 import static com.android.wm.shell.flicker.utils.MediaProjectionUtils.MSG_SERVICE_DESTROYED;
 import static com.android.wm.shell.flicker.utils.MediaProjectionUtils.MSG_START_FOREGROUND_DONE;
-import static com.android.wm.shell.flicker.utils.MediaProjectionUtils.REQUEST_CODE;
+import static com.android.wm.shell.flicker.utils.MediaProjectionUtils.REQUEST_CODE_NORMAL;
+import static com.android.wm.shell.flicker.utils.MediaProjectionUtils.REQUEST_CODE_EXTRA_INTENT;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -71,13 +72,17 @@ public class StartMediaProjectionActivity extends Activity {
         setContentView(R.layout.activity_start_media_projection);
 
         Button startMediaProjectionButton = findViewById(R.id.button_start_mp);
+        Button startMediaProjectionButton2 = findViewById(R.id.button_start_mp_new_intent);
         startMediaProjectionButton.setOnClickListener(v ->
-                startActivityForResult(mService.createScreenCaptureIntent(), REQUEST_CODE));
+                startActivityForResult(mService.createScreenCaptureIntent(), REQUEST_CODE_NORMAL));
+        startMediaProjectionButton2.setOnClickListener(v ->
+                startActivityForResult(mService.createScreenCaptureIntent(),
+                        REQUEST_CODE_EXTRA_INTENT));
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != REQUEST_CODE) {
+        if (requestCode != REQUEST_CODE_NORMAL && requestCode != REQUEST_CODE_EXTRA_INTENT) {
             throw new IllegalStateException("Unknown request code: " + requestCode);
         }
         if (resultCode != RESULT_OK) {
@@ -85,6 +90,11 @@ public class StartMediaProjectionActivity extends Activity {
         }
         Log.d(TAG, "onActivityResult");
         startMediaProjectionService(resultCode, data);
+        if (requestCode == REQUEST_CODE_EXTRA_INTENT) {
+            Intent startMain = new Intent(Intent.ACTION_MAIN);
+            startMain.addCategory(Intent.CATEGORY_HOME);
+            startActivity(startMain);
+        }
     }
 
     private void startMediaProjectionService(int resultCode, Intent resultData) {
@@ -122,7 +132,7 @@ public class StartMediaProjectionActivity extends Activity {
                 displayBounds.width(), displayBounds.height(), PixelFormat.RGBA_8888, 1);
 
         mVirtualDisplay = mMediaProjection.createVirtualDisplay(
-                "DanielDisplay",
+                "TestDisplay",
                 displayBounds.width(),
                 displayBounds.height(),
                 DisplayMetrics.DENSITY_HIGH,

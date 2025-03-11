@@ -45,31 +45,31 @@
             android:tint="?android:attr/colorPrimary"
         />
 
-        <!-- Only one of [ongoing_activity_chip_time, ongoing_activity_chip_text] will ever
-             be shown at one time. -->
+        <!-- Only one of [ongoing_activity_chip_time, ongoing_activity_chip_text,
+             ongoing_activity_chip_short_time_delta] will ever be shown at one time. -->
+
+        <!-- Shows a timer, like 00:01. -->
         <com.android.systemui.statusbar.chips.ui.view.ChipChronometer
             android:id="@+id/ongoing_activity_chip_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:gravity="center|start"
-            android:paddingStart="@dimen/ongoing_activity_chip_icon_text_padding"
-            android:textAppearance="@android:style/TextAppearance.Material.Small"
-            android:fontFamily="@*android:string/config_headlineFontFamily"
-            android:textColor="?android:attr/colorPrimary"
+            style="@style/StatusBar.Chip.Text"
         />
 
-        <!-- Used to show generic text in the chip instead of a timer. -->
+        <!-- Shows generic text. -->
+        <!-- Since there's so little room in the status bar chip area, don't ellipsize the text and
+             instead just fade it out a bit at the end. -->
         <TextView
             android:id="@+id/ongoing_activity_chip_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:gravity="center|start"
-            android:paddingStart="@dimen/ongoing_activity_chip_icon_text_padding"
-            android:textAppearance="@android:style/TextAppearance.Material.Small"
-            android:fontFamily="@*android:string/config_headlineFontFamily"
-            android:textColor="?android:attr/colorPrimary"
+            style="@style/StatusBar.Chip.Text"
+            android:ellipsize="none"
+            android:requiresFadingEdge="horizontal"
+            android:fadingEdgeLength="@dimen/ongoing_activity_chip_text_fading_edge_length"
+            android:visibility="gone"
+            />
+
+        <!-- Shows a time delta in short form, like "15min" or "1hr". -->
+        <android.widget.DateTimeView
+            android:id="@+id/ongoing_activity_chip_short_time_delta"
+            style="@style/StatusBar.Chip.Text"
             android:visibility="gone"
             />
 

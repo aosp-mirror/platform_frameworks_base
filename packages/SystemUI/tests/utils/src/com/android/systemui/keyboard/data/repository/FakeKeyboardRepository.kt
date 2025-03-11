@@ -19,8 +19,10 @@ package com.android.systemui.keyboard.data.repository
 
 import com.android.systemui.keyboard.data.model.Keyboard
 import com.android.systemui.keyboard.shared.model.BacklightModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterNotNull
 
 class FakeKeyboardRepository : KeyboardRepository {
@@ -32,8 +34,14 @@ class FakeKeyboardRepository : KeyboardRepository {
     // filtering to make sure backlight doesn't have default initial value
     override val backlight: Flow<BacklightModel> = _backlightState.filterNotNull()
 
-    private val _newlyConnectedKeyboard: MutableStateFlow<Keyboard?> = MutableStateFlow(null)
-    override val newlyConnectedKeyboard: Flow<Keyboard> = _newlyConnectedKeyboard.filterNotNull()
+    // implemented as channel because original implementation is modeling events: it doesn't hold
+    // state so it won't always emit once connected. And it's bad if some tests depend on that
+    // incorrect behaviour.
+    private val _newlyConnectedKeyboard: Channel<Keyboard> = Channel()
+    override val newlyConnectedKeyboard: Flow<Keyboard> = _newlyConnectedKeyboard.consumeAsFlow()
+
+    private val _connectedKeyboards: MutableStateFlow<Set<Keyboard>> = MutableStateFlow(setOf())
+    override val connectedKeyboards: Flow<Set<Keyboard>> = _connectedKeyboards
 
     fun setBacklight(state: BacklightModel) {
         _backlightState.value = state
@@ -43,7 +51,14 @@ class FakeKeyboardRepository : KeyboardRepository {
         _isAnyKeyboardConnected.value = connected
     }
 
+    fun setConnectedKeyboards(keyboards: Set<Keyboard>) {
+        _connectedKeyboards.value = keyboards
+        _isAnyKeyboardConnected.value = keyboards.isNotEmpty()
+    }
+
     fun setNewlyConnectedKeyboard(keyboard: Keyboard) {
-        _newlyConnectedKeyboard.value = keyboard
+        _newlyConnectedKeyboard.trySend(keyboard)
+        _connectedKeyboards.value += keyboard
+        _isAnyKeyboardConnected.value = true
     }
 }

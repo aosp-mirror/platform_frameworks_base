@@ -16,17 +16,28 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
+import com.android.systemui.classifier.domain.interactor.falsingInteractor
+import com.android.systemui.development.ui.viewmodel.buildNumberViewModelFactory
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
+import com.android.systemui.qs.panels.ui.viewmodel.toolbar.editModeButtonViewModelFactory
 
 val Kosmos.paginatedGridViewModel by
     Kosmos.Fixture {
         PaginatedGridViewModel(
             iconTilesViewModel,
-            fixedColumnsSizeViewModel,
-            iconLabelVisibilityViewModel,
+            qsColumnsViewModelFactory,
             paginatedGridInteractor,
-            applicationCoroutineScope,
+            inFirstPageViewModel,
+            buildNumberViewModelFactory,
+            editModeButtonViewModelFactory,
+            falsingInteractor,
         )
+    }
+
+val Kosmos.paginatedGridViewModelFactory by
+    Kosmos.Fixture {
+        object : PaginatedGridViewModel.Factory {
+            override fun create() = paginatedGridViewModel
+        }
     }

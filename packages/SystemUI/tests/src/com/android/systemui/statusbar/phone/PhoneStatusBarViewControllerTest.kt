@@ -33,22 +33,26 @@ import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.systemui.Flags as AconfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.fakeDarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.StatusBarLongPressGestureDetector
+import com.android.systemui.shade.display.StatusBarTouchShadeDisplayPolicy
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.data.repository.fakeStatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
@@ -58,12 +62,14 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
+import dagger.Lazy
 import java.util.Optional
 import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -75,7 +81,9 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
-    private val kosmos = Kosmos()
+    private val kosmos = testKosmos()
+    private val statusBarContentInsetsProviderStore = kosmos.fakeStatusBarContentInsetsProviderStore
+    private val statusBarContentInsetsProvider = statusBarContentInsetsProviderStore.defaultDisplay
 
     private val fakeDarkIconDispatcher = kosmos.fakeDarkIconDispatcher
     @Mock private lateinit var shadeViewController: ShadeViewController
@@ -93,7 +101,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var windowRootView: Provider<WindowRootView>
     @Mock private lateinit var shadeLogger: ShadeLogger
     @Mock private lateinit var viewUtil: ViewUtil
-    @Mock private lateinit var statusBarContentInsetsProvider: StatusBarContentInsetsProvider
+    @Mock private lateinit var mStatusBarLongPressGestureDetector: StatusBarLongPressGestureDetector
+    @Mock private lateinit var statusBarTouchShadeDisplayPolicy: StatusBarTouchShadeDisplayPolicy
     private lateinit var statusBarWindowStateController: StatusBarWindowStateController
 
     private lateinit var view: PhoneStatusBarView
@@ -325,6 +334,30 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(AconfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
+    fun onTouch_actionDown_propagatesToDisplayPolicy() {
+        controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
+
+        verify(statusBarTouchShadeDisplayPolicy).onStatusBarTouched(eq(mContext.displayId))
+    }
+
+    @Test
+    @EnableFlags(AconfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
+    fun onTouch_actionUp_notPropagatesToDisplayPolicy() {
+        controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0))
+
+        verify(statusBarTouchShadeDisplayPolicy, never()).onStatusBarTouched(any())
+    }
+
+    @Test
+    @DisableFlags(AconfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
+    fun onTouch_shadeWindowGoesAroundDisabled_notPropagatesToDisplayPolicy() {
+        controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
+
+        verify(statusBarTouchShadeDisplayPolicy, never()).onStatusBarTouched(any())
+    }
+
+    @Test
     fun shadeIsExpandedOnStatusIconMouseClick() {
         val view = createViewMock()
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
@@ -390,13 +423,15 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                 shadeControllerImpl,
                 shadeViewController,
                 panelExpansionInteractor,
+                { mStatusBarLongPressGestureDetector },
                 windowRootView,
                 shadeLogger,
                 viewUtil,
                 configurationController,
                 mStatusOverlayHoverListenerFactory,
                 fakeDarkIconDispatcher,
-                statusBarContentInsetsProvider,
+                statusBarContentInsetsProviderStore,
+                Lazy { statusBarTouchShadeDisplayPolicy },
             )
             .create(view)
             .also { it.init() }

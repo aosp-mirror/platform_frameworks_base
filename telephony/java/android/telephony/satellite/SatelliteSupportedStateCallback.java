@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
+import android.annotation.SystemApi;
 
 import com.android.internal.telephony.flags.Flags;
 
@@ -25,16 +26,14 @@ import com.android.internal.telephony.flags.Flags;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public interface SatelliteSupportedStateCallback {
     /**
      * Called when satellite supported state changes.
      *
      * @param supported The new supported state. {@code true} means satellite is supported,
      * {@code false} means satellite is not supported.
-     *
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSatelliteSupportedStateChanged(boolean supported);
 }

@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.telephony.TelephonyManager;
 
@@ -96,6 +98,8 @@ public class BluetoothEventManagerTest {
     private LocalBluetoothProfileManager mLocalProfileManager;
     @Mock
     private BluetoothUtils.ErrorListener mErrorListener;
+    @Mock
+    private LocalBluetoothLeBroadcast mBroadcast;
 
     private Context mContext;
     private Intent mIntent;
@@ -107,7 +111,7 @@ public class BluetoothEventManagerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
+        mContext = spy(RuntimeEnvironment.application);
 
         mBluetoothEventManager =
                 new BluetoothEventManager(
@@ -208,28 +212,14 @@ public class BluetoothEventManagerTest {
      */
     @Test
     public void dispatchProfileConnectionStateChanged_flagOff_noUpdateFallbackDevice() {
-        ShadowBluetoothAdapter shadowBluetoothAdapter =
-                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
-        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
-                BluetoothStatusCodes.FEATURE_SUPPORTED);
-        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
-                BluetoothStatusCodes.FEATURE_SUPPORTED);
-        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
-        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
-        when(broadcast.isProfileReady()).thenReturn(true);
-        LocalBluetoothLeBroadcastAssistant assistant =
-                mock(LocalBluetoothLeBroadcastAssistant.class);
-        when(assistant.isProfileReady()).thenReturn(true);
-        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
-        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
-        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
-        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        setUpAudioSharing(/* enableFlag= */ false, /* enableFeature= */ true, /* enableProfile= */
+                true, /* workProfile= */ false);
         mBluetoothEventManager.dispatchProfileConnectionStateChanged(
                 mCachedBluetoothDevice,
                 BluetoothProfile.STATE_DISCONNECTED,
                 BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
 
-        verify(broadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
+        verify(mBroadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
     }
 
     /**
@@ -239,28 +229,14 @@ public class BluetoothEventManagerTest {
      */
     @Test
     public void dispatchProfileConnectionStateChanged_notSupport_noUpdateFallbackDevice() {
-        ShadowBluetoothAdapter shadowBluetoothAdapter =
-                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
-        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
-                BluetoothStatusCodes.FEATURE_NOT_SUPPORTED);
-        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
-                BluetoothStatusCodes.FEATURE_SUPPORTED);
-        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
-        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
-        when(broadcast.isProfileReady()).thenReturn(true);
-        LocalBluetoothLeBroadcastAssistant assistant =
-                mock(LocalBluetoothLeBroadcastAssistant.class);
-        when(assistant.isProfileReady()).thenReturn(true);
-        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
-        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
-        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
-        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        setUpAudioSharing(/* enableFlag= */ true, /* enableFeature= */ false, /* enableProfile= */
+                true, /* workProfile= */ false);
         mBluetoothEventManager.dispatchProfileConnectionStateChanged(
                 mCachedBluetoothDevice,
                 BluetoothProfile.STATE_DISCONNECTED,
                 BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
 
-        verify(broadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
+        verify(mBroadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
     }
 
     /**
@@ -270,28 +246,14 @@ public class BluetoothEventManagerTest {
      */
     @Test
     public void dispatchProfileConnectionStateChanged_profileNotReady_noUpdateFallbackDevice() {
-        ShadowBluetoothAdapter shadowBluetoothAdapter =
-                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
-        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
-                BluetoothStatusCodes.FEATURE_SUPPORTED);
-        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
-                BluetoothStatusCodes.FEATURE_SUPPORTED);
-        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
-        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
-        when(broadcast.isProfileReady()).thenReturn(false);
-        LocalBluetoothLeBroadcastAssistant assistant =
-                mock(LocalBluetoothLeBroadcastAssistant.class);
-        when(assistant.isProfileReady()).thenReturn(true);
-        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
-        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
-        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
-        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        setUpAudioSharing(/* enableFlag= */ true, /* enableFeature= */ true, /* enableProfile= */
+                false, /* workProfile= */ false);
         mBluetoothEventManager.dispatchProfileConnectionStateChanged(
                 mCachedBluetoothDevice,
                 BluetoothProfile.STATE_DISCONNECTED,
                 BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
 
-        verify(broadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
+        verify(mBroadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
     }
 
     /**
@@ -301,28 +263,31 @@ public class BluetoothEventManagerTest {
      */
     @Test
     public void dispatchProfileConnectionStateChanged_notAssistantProfile_noUpdateFallbackDevice() {
-        ShadowBluetoothAdapter shadowBluetoothAdapter =
-                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
-        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
-                BluetoothStatusCodes.FEATURE_SUPPORTED);
-        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
-                BluetoothStatusCodes.FEATURE_SUPPORTED);
-        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
-        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
-        when(broadcast.isProfileReady()).thenReturn(true);
-        LocalBluetoothLeBroadcastAssistant assistant =
-                mock(LocalBluetoothLeBroadcastAssistant.class);
-        when(assistant.isProfileReady()).thenReturn(true);
-        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
-        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
-        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
-        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        setUpAudioSharing(/* enableFlag= */ true, /* enableFeature= */ true, /* enableProfile= */
+                true, /* workProfile= */ false);
         mBluetoothEventManager.dispatchProfileConnectionStateChanged(
                 mCachedBluetoothDevice,
                 BluetoothProfile.STATE_DISCONNECTED,
                 BluetoothProfile.LE_AUDIO);
 
-        verify(broadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
+        verify(mBroadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
+    }
+
+    /**
+     * dispatchProfileConnectionStateChanged should not call {@link
+     * LocalBluetoothLeBroadcast}#updateFallbackActiveDeviceIfNeeded when triggered for
+     * work profile.
+     */
+    @Test
+    public void dispatchProfileConnectionStateChanged_workProfile_noUpdateFallbackDevice() {
+        setUpAudioSharing(/* enableFlag= */ true, /* enableFeature= */ true, /* enableProfile= */
+                true, /* workProfile= */ true);
+        mBluetoothEventManager.dispatchProfileConnectionStateChanged(
+                mCachedBluetoothDevice,
+                BluetoothProfile.STATE_DISCONNECTED,
+                BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
+
+        verify(mBroadcast).updateFallbackActiveDeviceIfNeeded();
     }
 
     /**
@@ -332,28 +297,40 @@ public class BluetoothEventManagerTest {
      */
     @Test
     public void dispatchProfileConnectionStateChanged_audioSharing_updateFallbackDevice() {
-        ShadowBluetoothAdapter shadowBluetoothAdapter =
-                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
-        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
-                BluetoothStatusCodes.FEATURE_SUPPORTED);
-        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
-                BluetoothStatusCodes.FEATURE_SUPPORTED);
-        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
-        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
-        when(broadcast.isProfileReady()).thenReturn(true);
-        LocalBluetoothLeBroadcastAssistant assistant =
-                mock(LocalBluetoothLeBroadcastAssistant.class);
-        when(assistant.isProfileReady()).thenReturn(true);
-        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
-        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
-        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
-        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        setUpAudioSharing(/* enableFlag= */ true, /* enableFeature= */ true, /* enableProfile= */
+                true, /* workProfile= */ false);
         mBluetoothEventManager.dispatchProfileConnectionStateChanged(
                 mCachedBluetoothDevice,
                 BluetoothProfile.STATE_DISCONNECTED,
                 BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
 
-        verify(broadcast).updateFallbackActiveDeviceIfNeeded();
+        verify(mBroadcast).updateFallbackActiveDeviceIfNeeded();
+    }
+
+    private void setUpAudioSharing(boolean enableFlag, boolean enableFeature,
+            boolean enableProfile, boolean workProfile) {
+        if (enableFlag) {
+            mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        } else {
+            mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        }
+        ShadowBluetoothAdapter shadowBluetoothAdapter =
+                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
+        int code = enableFeature ? BluetoothStatusCodes.FEATURE_SUPPORTED
+                : BluetoothStatusCodes.FEATURE_NOT_SUPPORTED;
+        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(code);
+        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(code);
+        when(mBroadcast.isProfileReady()).thenReturn(enableProfile);
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mock(LocalBluetoothLeBroadcastAssistant.class);
+        when(assistant.isProfileReady()).thenReturn(enableProfile);
+        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
+        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(mBroadcast);
+        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
+        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        UserManager userManager = mock(UserManager.class);
+        when(mContext.getSystemService(UserManager.class)).thenReturn(userManager);
+        when(userManager.isManagedProfile()).thenReturn(workProfile);
     }
 
     @Test

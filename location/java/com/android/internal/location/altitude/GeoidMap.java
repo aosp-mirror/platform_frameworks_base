@@ -26,6 +26,7 @@ import android.util.LruCache;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.altitude.nano.MapParamsProto;
 import com.android.internal.location.altitude.nano.S2TileProto;
+import com.android.internal.location.geometry.S2CellIdUtils;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;

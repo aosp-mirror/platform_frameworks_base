@@ -50,7 +50,6 @@ import android.util.IntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -137,16 +136,14 @@ class BackgroundLaunchProcessController {
         }
         // Allow if the caller is bound by a UID that's currently foreground.
         // But still respect the appSwitchState.
-        if (checkConfiguration.checkVisibility && (
-                Flags.balRespectAppSwitchStateWhenCheckBoundByForegroundUid()
-                        ? appSwitchState != APP_SWITCH_DISALLOW && isBoundByForegroundUid()
-                        : isBoundByForegroundUid())) {
+        if (checkConfiguration.checkVisibility && appSwitchState != APP_SWITCH_DISALLOW
+                && isBoundByForegroundUid()) {
             return new BalVerdict(balImprovedMetrics() ? BAL_ALLOW_BOUND_BY_FOREGROUND
                     : BAL_ALLOW_VISIBLE_WINDOW, /*background*/ false,
                     "process bound by foreground uid");
         }
         // Allow if the caller has an activity in any foreground task.
-        if (checkConfiguration.checkVisibility && hasActivityInVisibleTask
+        if (checkConfiguration.checkOtherExemptions && hasActivityInVisibleTask
                 && appSwitchState != APP_SWITCH_DISALLOW) {
             return new BalVerdict(BAL_ALLOW_FOREGROUND, /*background*/ false,
                     "process has activity in foreground task");

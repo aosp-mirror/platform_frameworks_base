@@ -19,13 +19,13 @@ package com.android.systemui.communal.smartspace
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
-import android.content.Context
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.UI_SURFACE_GLANCEABLE_HUB
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.GLANCEABLE_HUB_SMARTSPACE_DATA_PLUGIN
@@ -42,8 +42,7 @@ import javax.inject.Named
 class CommunalSmartspaceController
 @Inject
 constructor(
-    private val context: Context,
-    private val smartspaceManager: SmartspaceManager?,
+    private val userTracker: UserTracker,
     private val execution: Execution,
     @Main private val uiExecutor: Executor,
     @Named(LOCKSCREEN_SMARTSPACE_PRECONDITION) private val precondition: SmartspacePrecondition,
@@ -55,6 +54,7 @@ constructor(
         private const val TAG = "CommunalSmartspaceCtrlr"
     }
 
+    private var userSmartspaceManager: SmartspaceManager? = null
     private var session: SmartspaceSession? = null
     private val plugin: BcSmartspaceDataPlugin? = optionalPlugin.orElse(null)
     private var targetFilter: SmartspaceTargetFilter? = optionalTargetFilter.orElse(null)
@@ -104,7 +104,11 @@ constructor(
     }
 
     private fun connectSession() {
-        if (smartspaceManager == null) {
+        if (userSmartspaceManager == null) {
+            userSmartspaceManager =
+                userTracker.userContext.getSystemService(SmartspaceManager::class.java)
+        }
+        if (userSmartspaceManager == null) {
             return
         }
         if (plugin == null) {
@@ -119,11 +123,11 @@ constructor(
         }
 
         val newSession =
-            smartspaceManager.createSmartspaceSession(
-                SmartspaceConfig.Builder(context, UI_SURFACE_GLANCEABLE_HUB).build()
+            userSmartspaceManager?.createSmartspaceSession(
+                SmartspaceConfig.Builder(userTracker.userContext, UI_SURFACE_GLANCEABLE_HUB).build()
             )
         Log.d(TAG, "Starting smartspace session for communal")
-        newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
+        newSession?.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 
         plugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
@@ -163,7 +167,7 @@ constructor(
 
     private fun addAndRegisterListener(
         listener: SmartspaceTargetListener,
-        smartspaceDataPlugin: BcSmartspaceDataPlugin?
+        smartspaceDataPlugin: BcSmartspaceDataPlugin?,
     ) {
         execution.assertIsMainThread()
         smartspaceDataPlugin?.registerListener(listener)
@@ -174,7 +178,7 @@ constructor(
 
     private fun removeAndUnregisterListener(
         listener: SmartspaceTargetListener,
-        smartspaceDataPlugin: BcSmartspaceDataPlugin?
+        smartspaceDataPlugin: BcSmartspaceDataPlugin?,
     ) {
         execution.assertIsMainThread()
         smartspaceDataPlugin?.unregisterListener(listener)

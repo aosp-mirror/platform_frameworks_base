@@ -29,20 +29,24 @@ import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.statusbar.BatteryStatusChip
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimatingIn
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimatingOut
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimationQueued
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.RunningChipAnim
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.ShowingPersistentDot
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.time.FakeSystemClock
-import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,6 +57,10 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
@@ -63,6 +71,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     @Mock private lateinit var systemEventCoordinator: SystemEventCoordinator
 
     @Mock private lateinit var statusBarWindowController: StatusBarWindowController
+    @Mock private lateinit var statusBarWindowControllerStore: StatusBarWindowControllerStore
 
     @Mock private lateinit var statusBarContentInsetProvider: StatusBarContentInsetsProvider
 
@@ -82,32 +91,30 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
+        whenever(statusBarWindowControllerStore.defaultDisplay)
+            .thenReturn(statusBarWindowController)
         systemClock = FakeSystemClock()
         chipAnimationController =
-            SystemEventChipAnimationController(
+            SystemEventChipAnimationControllerImpl(
                 mContext,
                 statusBarWindowController,
-                statusBarContentInsetProvider
+                statusBarContentInsetProvider,
             )
 
         // StatusBarContentInsetProvider is mocked. Ensure that it returns some mocked values.
         whenever(statusBarContentInsetProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(
-                Insets.of(/* left = */ 10, /* top = */ 10, /* right = */ 10, /* bottom = */ 0)
-            )
+            .thenReturn(Insets.of(/* left= */ 10, /* top= */ 10, /* right= */ 10, /* bottom= */ 0))
         whenever(statusBarContentInsetProvider.getStatusBarContentAreaForCurrentRotation())
-            .thenReturn(
-                Rect(/* left = */ 10, /* top = */ 10, /* right = */ 990, /* bottom = */ 100)
-            )
+            .thenReturn(Rect(/* left= */ 10, /* top= */ 10, /* right= */ 990, /* bottom= */ 100))
 
         // StatusBarWindowController is mocked. The addViewToWindow function needs to be mocked to
         // ensure that the chip view is added to a parent view
         whenever(statusBarWindowController.addViewToWindow(any(), any())).then {
             val statusbarFake = FrameLayout(mContext)
-            statusbarFake.layout(/* l = */ 0, /* t = */ 0, /* r = */ 1000, /* b = */ 100)
+            statusbarFake.layout(/* l= */ 0, /* t= */ 0, /* r= */ 1000, /* b= */ 100)
             statusbarFake.addView(
                 it.arguments[0] as View,
-                it.arguments[1] as FrameLayout.LayoutParams
+                it.arguments[1] as FrameLayout.LayoutParams,
             )
         }
     }
@@ -120,12 +127,12 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         val batteryChip = createAndScheduleFakeBatteryEvent()
 
         // assert that animation is queued
-        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimationQueued, systemStatusAnimationScheduler.animationState.value)
 
         // skip debounce delay
         advanceTimeBy(DEBOUNCE_DELAY + 1)
         // status chip starts animating in after debounce delay
-        assertEquals(ANIMATING_IN, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingIn, systemStatusAnimationScheduler.animationState.value)
         assertEquals(0f, batteryChip.contentView.alpha)
         assertEquals(0f, batteryChip.view.alpha)
         verify(listener, times(1)).onSystemEventAnimationBegin()
@@ -134,14 +141,14 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         animatorTestRule.advanceTimeBy(APPEAR_ANIMATION_DURATION)
         advanceTimeBy(APPEAR_ANIMATION_DURATION)
         // assert that status chip is visible
-        assertEquals(RUNNING_CHIP_ANIM, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(RunningChipAnim, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, batteryChip.contentView.alpha)
         assertEquals(1f, batteryChip.view.alpha)
 
         // skip status chip display time
         advanceTimeBy(DISPLAY_LENGTH + 1)
-        // assert that it is still visible but switched to the ANIMATING_OUT state
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        // assert that it is still visible but switched to the AnimatingOut state
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, batteryChip.contentView.alpha)
         assertEquals(1f, batteryChip.view.alpha)
         verify(listener, times(1)).onSystemEventAnimationFinish(false)
@@ -149,7 +156,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // skip disappear animation
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
         // assert that it is not visible anymore
-        assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(Idle, systemStatusAnimationScheduler.animationState.value)
         assertEquals(0f, batteryChip.contentView.alpha)
         assertEquals(0f, batteryChip.view.alpha)
     }
@@ -166,7 +173,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         createAndScheduleFakePrivacyEvent()
 
         // THEN the privacy event still happens
-        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimationQueued, systemStatusAnimationScheduler.animationState.value)
     }
 
     @Test
@@ -177,12 +184,12 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         val privacyChip = createAndScheduleFakePrivacyEvent()
 
         // assert that animation is queued
-        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimationQueued, systemStatusAnimationScheduler.animationState.value)
 
         // skip debounce delay
         advanceTimeBy(DEBOUNCE_DELAY + 1)
         // status chip starts animating in after debounce delay
-        assertEquals(ANIMATING_IN, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingIn, systemStatusAnimationScheduler.animationState.value)
         assertEquals(0f, privacyChip.view.alpha)
         verify(listener, times(1)).onSystemEventAnimationBegin()
 
@@ -190,13 +197,13 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         animatorTestRule.advanceTimeBy(APPEAR_ANIMATION_DURATION)
         advanceTimeBy(APPEAR_ANIMATION_DURATION + 1)
         // assert that status chip is visible
-        assertEquals(RUNNING_CHIP_ANIM, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(RunningChipAnim, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, privacyChip.view.alpha)
 
         // skip status chip display time
         advanceTimeBy(DISPLAY_LENGTH + 1)
-        // assert that it is still visible but switched to the ANIMATING_OUT state
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        // assert that it is still visible but switched to the AnimatingOut state
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, privacyChip.view.alpha)
         verify(listener, times(1)).onSystemEventAnimationFinish(true)
         verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
@@ -205,13 +212,13 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         advanceTimeBy(DISAPPEAR_ANIMATION_DURATION + 1)
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
         // assert that it the dot is now visible
-        assertEquals(SHOWING_PERSISTENT_DOT, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(ShowingPersistentDot, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, privacyChip.view.alpha)
 
         // notify SystemStatusAnimationScheduler to remove persistent dot
         systemStatusAnimationScheduler.removePersistentDot()
-        // assert that IDLE state is entered
-        assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
+        // assert that Idle state is entered
+        assertEquals(Idle, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onHidePersistentDot()
     }
 
@@ -225,19 +232,19 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         batteryChip.view.alpha = 0f
 
         // assert that animation is queued
-        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimationQueued, systemStatusAnimationScheduler.animationState.value)
 
         // create and schedule high priority event
         val privacyChip = createAndScheduleFakePrivacyEvent()
 
         // assert that animation is queued
-        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimationQueued, systemStatusAnimationScheduler.animationState.value)
 
         // skip debounce delay and appear animation duration
-        fastForwardAnimationToState(RUNNING_CHIP_ANIM)
+        fastForwardAnimationToState(RunningChipAnim)
 
         // high priority status chip is visible while low priority status chip is not visible
-        assertEquals(RUNNING_CHIP_ANIM, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(RunningChipAnim, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, privacyChip.view.alpha)
         assertEquals(0f, batteryChip.view.alpha)
     }
@@ -250,11 +257,11 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // create and schedule low priority event
         val batteryChip = createAndScheduleFakeBatteryEvent()
 
-        // fast forward to RUNNING_CHIP_ANIM state
-        fastForwardAnimationToState(RUNNING_CHIP_ANIM)
+        // fast forward to RunningChipAnim state
+        fastForwardAnimationToState(RunningChipAnim)
 
         // assert that chip is displayed
-        assertEquals(RUNNING_CHIP_ANIM, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(RunningChipAnim, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, batteryChip.view.alpha)
 
         // create and schedule high priority event
@@ -264,20 +271,20 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         testScheduler.runCurrent()
 
         // assert that currently displayed chip is immediately animated out
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
 
         // skip disappear animation
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
 
         // assert that high priority privacy chip animation is queued
-        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimationQueued, systemStatusAnimationScheduler.animationState.value)
 
         // skip debounce delay and appear animation
         advanceTimeBy(DEBOUNCE_DELAY + APPEAR_ANIMATION_DURATION + 1)
         animatorTestRule.advanceTimeBy(APPEAR_ANIMATION_DURATION)
 
         // high priority status chip is visible while low priority status chip is not visible
-        assertEquals(RUNNING_CHIP_ANIM, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(RunningChipAnim, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, privacyChip.view.alpha)
         assertEquals(0f, batteryChip.view.alpha)
     }
@@ -294,7 +301,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         advanceTimeBy(DEBOUNCE_DELAY + 1)
 
         // assert that chip is animated in
-        assertEquals(ANIMATING_IN, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingIn, systemStatusAnimationScheduler.animationState.value)
 
         // create and schedule high priority event
         val privacyChip = createAndScheduleFakePrivacyEvent()
@@ -303,7 +310,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         testScheduler.runCurrent()
 
         // assert that currently animated chip keeps animating
-        assertEquals(ANIMATING_IN, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingIn, systemStatusAnimationScheduler.animationState.value)
 
         // skip appear animation
         animatorTestRule.advanceTimeBy(APPEAR_ANIMATION_DURATION)
@@ -311,20 +318,20 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
         // assert that low priority chip is animated out immediately after finishing the appear
         // animation
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
 
         // skip disappear animation
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
 
         // assert that high priority privacy chip animation is queued
-        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimationQueued, systemStatusAnimationScheduler.animationState.value)
 
         // skip debounce delay and appear animation
         advanceTimeBy(DEBOUNCE_DELAY + APPEAR_ANIMATION_DURATION + 1)
         animatorTestRule.advanceTimeBy(APPEAR_ANIMATION_DURATION)
 
         // high priority status chip is visible while low priority status chip is not visible
-        assertEquals(RUNNING_CHIP_ANIM, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(RunningChipAnim, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, privacyChip.view.alpha)
         assertEquals(0f, batteryChip.view.alpha)
     }
@@ -346,7 +353,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         animatorTestRule.advanceTimeBy(APPEAR_ANIMATION_DURATION)
 
         // high priority status chip is visible while low priority status chip is not visible
-        assertEquals(RUNNING_CHIP_ANIM, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(RunningChipAnim, systemStatusAnimationScheduler.animationState.value)
         assertEquals(1f, privacyChip.view.alpha)
         assertEquals(0f, batteryChip.view.alpha)
     }
@@ -359,14 +366,14 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // create and schedule high priority event
         createAndScheduleFakePrivacyEvent()
 
-        // skip chip animation lifecycle and fast forward to SHOWING_PERSISTENT_DOT state
-        fastForwardAnimationToState(SHOWING_PERSISTENT_DOT)
-        assertEquals(SHOWING_PERSISTENT_DOT, systemStatusAnimationScheduler.getAnimationState())
+        // skip chip animation lifecycle and fast forward to ShowingPersistentDot state
+        fastForwardAnimationToState(ShowingPersistentDot)
+        assertEquals(ShowingPersistentDot, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
 
-        // remove persistent dot and verify that animationState changes to IDLE
+        // remove persistent dot and verify that animationState changes to Idle
         systemStatusAnimationScheduler.removePersistentDot()
-        assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(Idle, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onHidePersistentDot()
     }
 
@@ -377,14 +384,14 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         val accessibilityDesc = "Some desc"
         val mockView = mock<View>()
         val mockAnimatableView =
-            mock<BackgroundAnimatableView> { whenever(view).thenReturn(mockView) }
+            mock<BackgroundAnimatableView> { whenever(it.view).thenReturn(mockView) }
 
         scheduleFakeEventWithView(
             accessibilityDesc,
             mockAnimatableView,
-            shouldAnnounceAccessibilityEvent = true
+            shouldAnnounceAccessibilityEvent = true,
         )
-        fastForwardAnimationToState(ANIMATING_OUT)
+        fastForwardAnimationToState(AnimatingOut)
 
         verify(mockView).announceForAccessibility(eq(accessibilityDesc))
     }
@@ -396,14 +403,14 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         val accessibilityDesc = null
         val mockView = mock<View>()
         val mockAnimatableView =
-            mock<BackgroundAnimatableView> { whenever(view).thenReturn(mockView) }
+            mock<BackgroundAnimatableView> { whenever(it.view).thenReturn(mockView) }
 
         scheduleFakeEventWithView(
             accessibilityDesc,
             mockAnimatableView,
-            shouldAnnounceAccessibilityEvent = true
+            shouldAnnounceAccessibilityEvent = true,
         )
-        fastForwardAnimationToState(ANIMATING_OUT)
+        fastForwardAnimationToState(AnimatingOut)
 
         verify(mockView, never()).announceForAccessibility(any())
     }
@@ -415,14 +422,14 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         val accessibilityDesc = "something"
         val mockView = mock<View>()
         val mockAnimatableView =
-            mock<BackgroundAnimatableView> { whenever(view).thenReturn(mockView) }
+            mock<BackgroundAnimatableView> { whenever(it.view).thenReturn(mockView) }
 
         scheduleFakeEventWithView(
             accessibilityDesc,
             mockAnimatableView,
-            shouldAnnounceAccessibilityEvent = false
+            shouldAnnounceAccessibilityEvent = false,
         )
-        fastForwardAnimationToState(ANIMATING_OUT)
+        fastForwardAnimationToState(AnimatingOut)
 
         verify(mockView, never()).announceForAccessibility(any())
     }
@@ -435,21 +442,21 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // create and schedule high priority event
         createAndScheduleFakePrivacyEvent()
 
-        // skip chip animation lifecycle and fast forward to RUNNING_CHIP_ANIM state
-        fastForwardAnimationToState(RUNNING_CHIP_ANIM)
-        assertEquals(RUNNING_CHIP_ANIM, systemStatusAnimationScheduler.getAnimationState())
+        // skip chip animation lifecycle and fast forward to RunningChipAnim state
+        fastForwardAnimationToState(RunningChipAnim)
+        assertEquals(RunningChipAnim, systemStatusAnimationScheduler.animationState.value)
 
         // request removal of persistent dot
         systemStatusAnimationScheduler.removePersistentDot()
 
         // skip display time and verify that disappear animation is run
         advanceTimeBy(DISPLAY_LENGTH + 1)
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
 
-        // skip disappear animation and verify that animationState changes to IDLE instead of
-        // SHOWING_PERSISTENT_DOT
+        // skip disappear animation and verify that animationState changes to Idle instead of
+        // ShowingPersistentDot
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
-        assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(Idle, systemStatusAnimationScheduler.animationState.value)
         // verify that the persistent dot callbacks are not invoked
         verify(listener, never()).onSystemStatusAnimationTransitionToPersistentDot(any())
         verify(listener, never()).onHidePersistentDot()
@@ -463,9 +470,9 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // create and schedule high priority event
         createAndScheduleFakePrivacyEvent()
 
-        // fast forward to ANIMATING_OUT state
-        fastForwardAnimationToState(ANIMATING_OUT)
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        // fast forward to AnimatingOut state
+        fastForwardAnimationToState(AnimatingOut)
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
 
         // remove persistent dot
@@ -478,8 +485,8 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
         testScheduler.runCurrent()
 
-        // verify that animationState changes to IDLE
-        assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
+        // verify that animationState changes to Idle
+        assertEquals(Idle, systemStatusAnimationScheduler.animationState.value)
     }
 
     @Test
@@ -494,11 +501,11 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // create and schedule a privacy event again (resets forceVisible to true)
         createAndScheduleFakePrivacyEvent()
 
-        // skip chip animation lifecycle and fast forward to SHOWING_PERSISTENT_DOT state
-        fastForwardAnimationToState(SHOWING_PERSISTENT_DOT)
+        // skip chip animation lifecycle and fast forward to ShowingPersistentDot state
+        fastForwardAnimationToState(ShowingPersistentDot)
 
-        // verify that we reach SHOWING_PERSISTENT_DOT and that listener callback is invoked
-        assertEquals(SHOWING_PERSISTENT_DOT, systemStatusAnimationScheduler.getAnimationState())
+        // verify that we reach ShowingPersistentDot and that listener callback is invoked
+        assertEquals(ShowingPersistentDot, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
     }
 
@@ -511,21 +518,21 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         createAndScheduleFakePrivacyEvent()
         // request removal of persistent dot (sets forceVisible to false)
         systemStatusAnimationScheduler.removePersistentDot()
-        fastForwardAnimationToState(RUNNING_CHIP_ANIM)
+        fastForwardAnimationToState(RunningChipAnim)
 
         // create and schedule a privacy event again (resets forceVisible to true)
         createAndScheduleFakePrivacyEvent()
 
         // skip status chip display time
         advanceTimeBy(DISPLAY_LENGTH + 1)
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onSystemEventAnimationFinish(anyBoolean())
 
         // skip disappear animation
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
 
-        // verify that we reach SHOWING_PERSISTENT_DOT and that listener callback is invoked
-        assertEquals(SHOWING_PERSISTENT_DOT, systemStatusAnimationScheduler.getAnimationState())
+        // verify that we reach ShowingPersistentDot and that listener callback is invoked
+        assertEquals(ShowingPersistentDot, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
     }
 
@@ -537,9 +544,9 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // create and schedule high priority event
         createAndScheduleFakePrivacyEvent()
 
-        // skip chip animation lifecycle and fast forward to ANIMATING_OUT state
-        fastForwardAnimationToState(ANIMATING_OUT)
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        // skip chip animation lifecycle and fast forward to AnimatingOut state
+        fastForwardAnimationToState(AnimatingOut)
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
 
         // request removal of persistent dot
@@ -548,13 +555,13 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // schedule another high priority event while the event is animating out
         createAndScheduleFakePrivacyEvent()
 
-        // verify that the state is still ANIMATING_OUT
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        // verify that the state is still AnimatingOut
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
 
-        // skip disappear animation duration and verify that new state is ANIMATION_QUEUED
+        // skip disappear animation duration and verify that new state is AnimationQueued
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
         testScheduler.runCurrent()
-        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimationQueued, systemStatusAnimationScheduler.animationState.value)
         // also verify that onHidePersistentDot callback is called
         verify(listener, times(1)).onHidePersistentDot()
     }
@@ -567,16 +574,16 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // create and schedule high priority event
         createAndScheduleFakePrivacyEvent()
 
-        // skip chip animation lifecycle and fast forward to ANIMATING_OUT state
-        fastForwardAnimationToState(ANIMATING_OUT)
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        // skip chip animation lifecycle and fast forward to AnimatingOut state
+        fastForwardAnimationToState(AnimatingOut)
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
 
         // request removal of persistent dot
         systemStatusAnimationScheduler.removePersistentDot()
 
-        // verify that the state is still ANIMATING_OUT
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        // verify that the state is still AnimatingOut
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
 
         // skip disappear animation duration
         testScheduler.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION + 1)
@@ -591,33 +598,33 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         // verify that onHidePersistentDot is invoked despite the animator callback being delayed
         // (it's invoked more than DISAPPEAR_ANIMATION_DURATION after the dot removal was requested)
         verify(listener, times(1)).onHidePersistentDot()
-        // verify that animationState is IDLE
-        assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
+        // verify that animationState is Idle
+        assertEquals(Idle, systemStatusAnimationScheduler.animationState.value)
     }
 
-    private fun TestScope.fastForwardAnimationToState(@SystemAnimationState animationState: Int) {
+    private fun TestScope.fastForwardAnimationToState(animationState: SystemEventAnimationState) {
         // this function should only be called directly after posting a status event
-        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
-        if (animationState == IDLE || animationState == ANIMATION_QUEUED) return
+        assertEquals(AnimationQueued, systemStatusAnimationScheduler.animationState.value)
+        if (animationState == Idle || animationState == AnimationQueued) return
         // skip debounce delay
         advanceTimeBy(DEBOUNCE_DELAY + 1)
 
         // status chip starts animating in after debounce delay
-        assertEquals(ANIMATING_IN, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingIn, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onSystemEventAnimationBegin()
-        if (animationState == ANIMATING_IN) return
+        if (animationState == AnimatingIn) return
 
         // skip appear animation
         animatorTestRule.advanceTimeBy(APPEAR_ANIMATION_DURATION)
         advanceTimeBy(APPEAR_ANIMATION_DURATION)
-        assertEquals(RUNNING_CHIP_ANIM, systemStatusAnimationScheduler.getAnimationState())
-        if (animationState == RUNNING_CHIP_ANIM) return
+        assertEquals(RunningChipAnim, systemStatusAnimationScheduler.animationState.value)
+        if (animationState == RunningChipAnim) return
 
         // skip status chip display time
         advanceTimeBy(DISPLAY_LENGTH + 1)
-        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        assertEquals(AnimatingOut, systemStatusAnimationScheduler.animationState.value)
         verify(listener, times(1)).onSystemEventAnimationFinish(anyBoolean())
-        if (animationState == ANIMATING_OUT) return
+        if (animationState == AnimatingOut) return
 
         // skip disappear animation
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
@@ -633,13 +640,13 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     private fun scheduleFakeEventWithView(
         desc: String?,
         view: BackgroundAnimatableView,
-        shouldAnnounceAccessibilityEvent: Boolean
+        shouldAnnounceAccessibilityEvent: Boolean,
     ) {
         val fakeEvent =
             FakeStatusEvent(
                 viewCreator = { view },
                 contentDescription = desc,
-                shouldAnnounceAccessibilityEvent = shouldAnnounceAccessibilityEvent
+                shouldAnnounceAccessibilityEvent = shouldAnnounceAccessibilityEvent,
             )
         systemStatusAnimationScheduler.onStatusEvent(fakeEvent)
     }
@@ -660,11 +667,11 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
             SystemStatusAnimationSchedulerImpl(
                 systemEventCoordinator,
                 chipAnimationController,
-                statusBarWindowController,
+                statusBarWindowControllerStore,
                 dumpManager,
                 systemClock,
                 CoroutineScope(StandardTestDispatcher(testScope.testScheduler)),
-                logger
+                logger,
             )
         // add a mock listener
         systemStatusAnimationScheduler.addCallback(listener)

@@ -42,6 +42,7 @@ import android.text.Layout.Alignment;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StrikethroughSpan;
 
+import androidx.annotation.NonNull;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -72,6 +73,7 @@ public class LayoutTest {
     private static final int STATIC_LINE_COUNT = 9;
     private static final int LINE_HEIGHT = 12;
     private static final int LINE_DESCENT = 4;
+    private static final int LINE_HEIGHT_TOLERANCE_PER_ITERATION = 3;
     private static final CharSequence LAYOUT_TEXT = "alwei\t;sdfs\ndf @";
 
     private SpannableString mSpannedText;
@@ -697,7 +699,7 @@ public class LayoutTest {
 
             if (drawCommand.path != null) {
                 expect.that(drawCommand.path).isEqualTo(selectionPath);
-                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.YELLOW);
+                expect.that(removeAlpha(drawCommand.paint.getColor())).isEqualTo(Color.YELLOW);
                 expect.that(drawCommand.paint.getBlendMode()).isNotNull();
                 highlightsFound++;
             } else if (drawCommand.text != null) {
@@ -750,7 +752,7 @@ public class LayoutTest {
 
             if (drawCommand.path != null) {
                 expect.that(drawCommand.path).isEqualTo(selectionPath);
-                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.YELLOW);
+                expect.that(removeAlpha(drawCommand.paint.getColor())).isEqualTo(Color.YELLOW);
                 expect.that(drawCommand.paint.getBlendMode()).isNotNull();
                 highlightsFound++;
             } else if (drawCommand.text != null) {
@@ -802,7 +804,7 @@ public class LayoutTest {
 
             if (drawCommand.path != null) {
                 expect.that(drawCommand.path).isEqualTo(selectionPath);
-                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.CYAN);
+                expect.that(removeAlpha(drawCommand.paint.getColor())).isEqualTo(Color.CYAN);
                 expect.that(drawCommand.paint.getBlendMode()).isNull();
                 highlightsFound++;
             } else if (drawCommand.text != null) {
@@ -855,7 +857,7 @@ public class LayoutTest {
 
             if (drawCommand.path != null) {
                 expect.that(drawCommand.path).isEqualTo(selectionPath);
-                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.CYAN);
+                expect.that(removeAlpha(drawCommand.paint.getColor())).isEqualTo(Color.CYAN);
                 expect.that(drawCommand.paint.getBlendMode()).isNull();
                 highlightsFound++;
             } else if (drawCommand.text != null) {
@@ -914,10 +916,11 @@ public class LayoutTest {
 
             if (drawCommand.rect != null) {
                 numBackgroundsFound++;
-                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.BLACK);
+                expect.that(removeAlpha(drawCommand.paint.getColor())).isEqualTo(Color.BLACK);
                 expect.that(drawCommand.rect.height()).isAtLeast(LINE_HEIGHT);
                 expect.that(drawCommand.rect.width()).isGreaterThan(0);
-                float expectedY = (numBackgroundsFound) * (LINE_HEIGHT + LINE_DESCENT);
+                float expectedY = numBackgroundsFound
+                        * (LINE_HEIGHT + LINE_DESCENT - LINE_HEIGHT_TOLERANCE_PER_ITERATION);
                 expect.that(drawCommand.rect.bottom).isAtLeast(expectedY);
             } else if (drawCommand.text != null) {
                 // draw text
@@ -997,18 +1000,36 @@ public class LayoutTest {
                 .filter(it -> it.rect != null)
                 .toList();
 
-        expect.that(backgroundCommands.get(0).paint.getColor()).isEqualTo(Color.BLACK);
-        expect.that(backgroundCommands.get(1).paint.getColor()).isEqualTo(Color.WHITE);
-        expect.that(backgroundCommands.get(2).paint.getColor()).isEqualTo(Color.WHITE);
-        expect.that(backgroundCommands.get(3).paint.getColor()).isEqualTo(Color.WHITE);
-        expect.that(backgroundCommands.get(4).paint.getColor()).isEqualTo(Color.WHITE);
-        expect.that(backgroundCommands.get(5).paint.getColor()).isEqualTo(Color.BLACK);
-        expect.that(backgroundCommands.get(6).paint.getColor()).isEqualTo(Color.BLACK);
-        expect.that(backgroundCommands.get(7).paint.getColor()).isEqualTo(Color.BLACK);
-        expect.that(backgroundCommands.get(8).paint.getColor()).isEqualTo(Color.BLACK);
-        expect.that(backgroundCommands.get(9).paint.getColor()).isEqualTo(Color.BLACK);
+        expect.that(removeAlpha(backgroundCommands.get(0).paint.getColor()))
+                .isEqualTo(Color.BLACK);
+        expect.that(removeAlpha(backgroundCommands.get(1).paint.getColor()))
+                .isEqualTo(Color.WHITE);
+        expect.that(removeAlpha(backgroundCommands.get(2).paint.getColor()))
+                .isEqualTo(Color.WHITE);
+        expect.that(removeAlpha(backgroundCommands.get(3).paint.getColor()))
+                .isEqualTo(Color.WHITE);
+        expect.that(removeAlpha(backgroundCommands.get(4).paint.getColor()))
+                .isEqualTo(Color.WHITE);
+        expect.that(removeAlpha(backgroundCommands.get(5).paint.getColor()))
+                .isEqualTo(Color.BLACK);
+        expect.that(removeAlpha(backgroundCommands.get(6).paint.getColor()))
+                .isEqualTo(Color.BLACK);
+        expect.that(removeAlpha(backgroundCommands.get(7).paint.getColor()))
+                .isEqualTo(Color.BLACK);
+        expect.that(removeAlpha(backgroundCommands.get(8).paint.getColor()))
+                .isEqualTo(Color.BLACK);
+        expect.that(removeAlpha(backgroundCommands.get(9).paint.getColor()))
+                .isEqualTo(Color.BLACK);
 
         expect.that(backgroundCommands.size()).isEqualTo(backgroundRectsDrawn);
+    }
+
+    private int removeAlpha(int color) {
+        return Color.rgb(
+                Color.red(color),
+                Color.green(color),
+                Color.blue(color)
+        );
     }
 
     private static final class MockCanvas extends Canvas {
@@ -1120,6 +1141,11 @@ public class LayoutTest {
         @Override
         public void drawRect(RectF rect, Paint p) {
             mDrawCommands.add(new DrawCommand(rect, p));
+        }
+
+        @Override
+        public void drawRoundRect(@NonNull RectF rect, float rx, float ry, @NonNull Paint paint) {
+            mDrawCommands.add(new DrawCommand(rect, paint));
         }
 
         List<DrawCommand> getDrawCommands() {

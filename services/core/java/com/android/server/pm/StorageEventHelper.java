@@ -227,7 +227,7 @@ public final class StorageEventHelper extends StorageEventListener {
         }
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Loaded packages " + loaded);
-        mBroadcastHelper.sendResourcesChangedBroadcastAndNotify(mPm.snapshotComputer(),
+        mBroadcastHelper.sendResourcesChangedBroadcastAndNotify(mPm::snapshotComputer,
                 true /* mediaStatus */, false /* replacing */, loaded);
         synchronized (mLoadedVolumes) {
             mLoadedVolumes.add(vol.getId());
@@ -279,7 +279,7 @@ public final class StorageEventHelper extends StorageEventListener {
         }
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
-        mBroadcastHelper.sendResourcesChangedBroadcastAndNotify(mPm.snapshotComputer(),
+        mBroadcastHelper.sendResourcesChangedBroadcastAndNotify(mPm::snapshotComputer,
                 false /* mediaStatus */, false /* replacing */, unloaded);
         synchronized (mLoadedVolumes) {
             mLoadedVolumes.remove(vol.getId());

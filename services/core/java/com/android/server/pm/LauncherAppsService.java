@@ -88,6 +88,7 @@ import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
+import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.multiuser.Flags;
 import android.net.Uri;
@@ -249,6 +250,7 @@ public class LauncherAppsService extends SystemService {
         private PackageInstallerService mPackageInstallerService;
 
         final LauncherAppsServiceInternal mInternal;
+        private SecureSettingsObserver mSecureSettingsObserver;
 
         @NonNull
         private final RemoteCallbackList<IDumpCallback> mDumpCallbacks =
@@ -278,6 +280,7 @@ public class LauncherAppsService extends SystemService {
             mCallbackHandler = BackgroundThread.getHandler();
             mDpm = (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
             mInternal = new LocalService();
+            registerSettingsObserver();
         }
 
         @VisibleForTesting
@@ -1674,18 +1677,32 @@ public class LauncherAppsService extends SystemService {
         @Override
         public PendingIntent getActivityLaunchIntent(String callingPackage, ComponentName component,
                 UserHandle user) {
+            try {
+                Log.d(TAG,
+                        "getActivityLaunchIntent callingPackage=" + callingPackage + " component="
+                                + component + " user=" + user);
+            } catch (Exception e) {
+                Log.e(TAG, "getActivityLaunchIntent is called and error occurred when"
+                        + " printing the logs", e);
+            }
             if (mContext.checkPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS,
                     injectBinderCallingPid(), injectBinderCallingUid())
                             != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "getActivityLaunchIntent no permission callingPid="
+                        + injectBinderCallingPid() + " callingUid=" + injectBinderCallingUid());
                 throw new SecurityException("Permission START_TASKS_FROM_RECENTS required");
             }
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
+                Log.d(TAG, "getActivityLaunchIntent cannot access profile user="
+                        + user.getIdentifier());
                 throw new ActivityNotFoundException("Activity could not be found");
             }
 
             final Intent launchIntent = getMainActivityLaunchIntent(component, user,
                     false /* includeArchivedApps */);
             if (launchIntent == null) {
+                Log.d(TAG, "getActivityLaunchIntent cannot access profile user="
+                        + user.getIdentifier() + " component=" + component);
                 throw new SecurityException("Attempt to launch activity without "
                         + " category Intent.CATEGORY_LAUNCHER " + component);
             }
@@ -1965,6 +1982,17 @@ public class LauncherAppsService extends SystemService {
                     canLaunch = true;
                 }
                 if (!canLaunch) {
+                    try {
+                        Log.w(TAG, "getMainActivityLaunchIntent return null because it can't launch"
+                                + " component=" + component + " user=" + user + " appsSize=" + size
+                                + " includeArchivedApps=" + includeArchivedApps
+                                + " isArchivingEnabled=" + isArchivingEnabled()
+                                + " matchingArchivedAppActivityInfo="
+                                + getMatchingArchivedAppActivityInfo(component, user));
+                    } catch (Exception e) {
+                        Log.e(TAG, "getMainActivityLaunchIntent return null and error occurred when"
+                                + " printing the logs", e);
+                    }
                     return null;
                 }
             } finally {
@@ -2284,6 +2312,13 @@ public class LauncherAppsService extends SystemService {
                                 user.getIdentifier());
                     }
                 }, user.getIdentifier());
+            }
+        }
+
+        void registerSettingsObserver() {
+            if (Flags.addLauncherUserConfig()) {
+                mSecureSettingsObserver = new SecureSettingsObserver();
+                mSecureSettingsObserver.register();
             }
         }
 
@@ -2631,6 +2666,7 @@ public class LauncherAppsService extends SystemService {
                 }
                 final String[] packagesNullExtras = packagesWithoutExtras.toArray(
                         new String[packagesWithoutExtras.size()]);
+
                 final int n = mListeners.beginBroadcast();
                 try {
                     for (int i = 0; i < n; i++) {
@@ -2810,6 +2846,82 @@ public class LauncherAppsService extends SystemService {
                 return LauncherAppsImpl.this.startShortcutInner(callerUid, callerPid,
                         UserHandle.getUserId(callerUid), callingPackage, packageName, featureId,
                         shortcutId, sourceBounds, startActivityOptions, targetUserId);
+            }
+        }
+
+        class SecureSettingsObserver extends ContentObserver {
+
+            SecureSettingsObserver() {
+                super(mCallbackHandler);
+            }
+
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                super.onChange(selfChange, uri);
+                if (uri.equals(
+                        Settings.Secure.getUriFor(Settings.Secure.HIDE_PRIVATESPACE_ENTRY_POINT))) {
+
+                    // This setting key only apply to private profile at the moment
+                    UserHandle privateProfile = getPrivateProfile();
+                    if (privateProfile.getIdentifier() == UserHandle.USER_NULL) {
+                        return;
+                    }
+                    final int n = mListeners.beginBroadcast();
+                    try {
+                        for (int i = 0; i < n; i++) {
+                            final IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                            final BroadcastCookie cookie =
+                                    (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                            if (!isEnabledProfileOf(cookie, privateProfile,
+                                    "onSecureSettingsChange")) {
+                                Log.d(TAG, "onSecureSettingsChange: Skipping - profile not enabled"
+                                        + " or not accessible for package=" + cookie.packageName
+                                        + ", packageUid=" + cookie.callingUid);
+                                continue;
+                            }
+                            try {
+                                Log.d(TAG, "onUserConfigChanged: triggering onUserConfigChanged");
+                                listener.onUserConfigChanged(
+                                        mUserManagerInternal.getLauncherUserInfo(
+                                                privateProfile.getIdentifier()));
+                            } catch (RemoteException re) {
+                                Slog.d(TAG, "onUserConfigChanged: Callback failed ", re);
+                            }
+                        }
+
+                    } finally {
+                        mListeners.finishBroadcast();
+                    }
+                }
+            }
+
+            public void register() {
+                UserHandle privateProfile = getPrivateProfile();
+                int parentUserId;
+                if (privateProfile.getIdentifier() == UserHandle.USER_NULL) {
+                    // No private space available, register the observer for the current user
+                    parentUserId = mContext.getUserId();
+                } else {
+                    parentUserId = mUserManagerInternal.getProfileParentId(
+                            privateProfile.getIdentifier());
+                }
+                mContext.getContentResolver().registerContentObserver(
+                        Settings.Secure.getUriFor(Settings.Secure.HIDE_PRIVATESPACE_ENTRY_POINT),
+                        true, this, parentUserId);
+            }
+
+            public void unregister() {
+                mContext.getContentResolver().unregisterContentObserver(this);
+            }
+
+            private UserHandle getPrivateProfile() {
+                UserInfo[] userInfos = mUserManagerInternal.getUserInfos();
+                for (UserInfo u : userInfos) {
+                    if (u.isPrivateProfile()) {
+                        return UserHandle.of(u.id);
+                    }
+                }
+                return UserHandle.of(UserHandle.USER_NULL);
             }
         }
     }

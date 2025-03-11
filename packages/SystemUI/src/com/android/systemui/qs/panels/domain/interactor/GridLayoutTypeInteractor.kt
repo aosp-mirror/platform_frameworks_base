@@ -19,14 +19,23 @@ package com.android.systemui.qs.panels.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 
 @SysUISingleton
-class GridLayoutTypeInteractor @Inject constructor(private val repo: GridLayoutTypeRepository) {
-    val layout: StateFlow<GridLayoutType> = repo.layout
-
-    fun setLayoutType(type: GridLayoutType) {
-        repo.setLayout(type)
-    }
+@OptIn(ExperimentalCoroutinesApi::class)
+class GridLayoutTypeInteractor
+@Inject
+constructor(private val repo: GridLayoutTypeRepository, shadeModeInteractor: ShadeModeInteractor) {
+    val layout: Flow<GridLayoutType> =
+        shadeModeInteractor.shadeMode.flatMapLatest { shadeMode ->
+            when (shadeMode) {
+                is ShadeMode.Dual -> repo.dualShadeLayoutType
+                else -> repo.defaultLayoutType
+            }
+        }
 }

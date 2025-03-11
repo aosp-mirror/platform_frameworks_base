@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -40,6 +41,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -76,6 +79,7 @@ class AppWarnings {
     public static final int FLAG_HIDE_COMPILE_SDK = 0x02;
     public static final int FLAG_HIDE_DEPRECATED_SDK = 0x04;
     public static final int FLAG_HIDE_DEPRECATED_ABI = 0x08;
+    public static final int FLAG_HIDE_PAGE_SIZE_MISMATCH = 0x10;
 
     /**
      * Map of package flags for each user.
@@ -101,6 +105,7 @@ class AppWarnings {
     private SparseArray<UnsupportedCompileSdkDialog> mUnsupportedCompileSdkDialogs;
     private SparseArray<DeprecatedTargetSdkVersionDialog> mDeprecatedTargetSdkVersionDialogs;
     private SparseArray<DeprecatedAbiDialog> mDeprecatedAbiDialogs;
+    private SparseArray<PageSizeMismatchDialog> mPageSizeMismatchDialogs;
 
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
     private final ArraySet<ComponentName> mAlwaysShowUnsupportedCompileSdkWarningActivities =
@@ -250,6 +255,19 @@ class AppWarnings {
         }
     }
 
+    public void showPageSizeMismatchDialogIfNeeded(ActivityRecord r) {
+        // Don't show dialog if the app compat is enabled using property
+        final boolean appCompatEnabled = SystemProperties.getBoolean(
+                "bionic.linker.16kb.app_compat.enabled", false);
+        if (appCompatEnabled) {
+            return;
+        }
+        boolean is16KbDevice = Os.sysconf(OsConstants._SC_PAGESIZE) == 16384;
+        if (is16KbDevice) {
+            mUiHandler.showPageSizeMismatchDialog(r);
+        }
+    }
+
     /**
      * Called when an activity is being started.
      *
@@ -260,6 +278,9 @@ class AppWarnings {
         showUnsupportedDisplaySizeDialogIfNeeded(r);
         showDeprecatedTargetDialogIfNeeded(r);
         showDeprecatedAbiDialogIfNeeded(r);
+        if (Flags.appCompatOption16kb()) {
+            showPageSizeMismatchDialogIfNeeded(r);
+        }
     }
 
     /**
@@ -457,6 +478,41 @@ class AppWarnings {
         }
     }
 
+    @UiThread
+    private void showPageSizeMismatchDialogUiThread(@NonNull ActivityRecord ar) {
+        String warning =
+                mAtm.mContext
+                        .getPackageManager()
+                        .getPageSizeCompatWarningMessage(ar.info.packageName);
+        if (warning == null) {
+            return;
+        }
+
+        final int userId = getUserIdForActivity(ar);
+        PageSizeMismatchDialog pageSizeMismatchDialog;
+        if (mPageSizeMismatchDialogs != null) {
+            pageSizeMismatchDialog = mPageSizeMismatchDialogs.get(userId);
+            if (pageSizeMismatchDialog != null) {
+                pageSizeMismatchDialog.dismiss();
+                mPageSizeMismatchDialogs.remove(userId);
+            }
+        }
+        if (!hasPackageFlag(userId, ar.packageName, FLAG_HIDE_PAGE_SIZE_MISMATCH)) {
+            pageSizeMismatchDialog =
+                    new PageSizeMismatchDialog(
+                            AppWarnings.this,
+                            getUiContextForActivity(ar),
+                            ar.info.applicationInfo,
+                            userId,
+                            warning);
+            pageSizeMismatchDialog.show();
+            if (mPageSizeMismatchDialogs == null) {
+                mPageSizeMismatchDialogs = new SparseArray<>();
+            }
+            mPageSizeMismatchDialogs.put(userId, pageSizeMismatchDialog);
+        }
+    }
+
     /**
      * Dismisses all warnings for the given package.
      * <p>
@@ -508,6 +564,16 @@ class AppWarnings {
                     deprecatedAbiDialog.mPackageName))) {
                 deprecatedAbiDialog.dismiss();
                 mDeprecatedAbiDialogs.remove(userId);
+            }
+        }
+
+        // Hides the "page size app compat" dialog if necessary.
+        if (mPageSizeMismatchDialogs != null) {
+            PageSizeMismatchDialog pageSizeMismatchDialog = mPageSizeMismatchDialogs.get(userId);
+            if (pageSizeMismatchDialog != null
+                    && (name == null || name.equals(pageSizeMismatchDialog.mPackageName))) {
+                pageSizeMismatchDialog.dismiss();
+                mPageSizeMismatchDialogs.remove(userId);
             }
         }
     }
@@ -649,6 +715,7 @@ class AppWarnings {
         private static final int MSG_HIDE_DIALOGS_FOR_PACKAGE = 4;
         private static final int MSG_SHOW_DEPRECATED_TARGET_SDK_DIALOG = 5;
         private static final int MSG_SHOW_DEPRECATED_ABI_DIALOG = 6;
+        private static final int MSG_SHOW_PAGE_SIZE_APP_MISMATCH_DIALOG = 7;
 
         public UiHandler(Looper looper) {
             super(looper, null, true);
@@ -681,6 +748,10 @@ class AppWarnings {
                     final ActivityRecord ar = (ActivityRecord) msg.obj;
                     showDeprecatedAbiDialogUiThread(ar);
                 } break;
+                case MSG_SHOW_PAGE_SIZE_APP_MISMATCH_DIALOG: {
+                    final ActivityRecord ar = (ActivityRecord) msg.obj;
+                    showPageSizeMismatchDialogUiThread(ar);
+                } break;
             }
         }
 
@@ -711,6 +782,11 @@ class AppWarnings {
 
         public void hideDialogsForPackage(String name, int userId) {
             obtainMessage(MSG_HIDE_DIALOGS_FOR_PACKAGE, userId, 0, name).sendToTarget();
+        }
+
+        public void showPageSizeMismatchDialog(ActivityRecord r) {
+            removeMessages(MSG_SHOW_PAGE_SIZE_APP_MISMATCH_DIALOG);
+            obtainMessage(MSG_SHOW_PAGE_SIZE_APP_MISMATCH_DIALOG, r).sendToTarget();
         }
     }
 

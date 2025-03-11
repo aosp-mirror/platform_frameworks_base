@@ -1,53 +1,35 @@
-soong_config_module_type {
-    name: "platform_filegroup",
-    module_type: "filegroup",
-    config_namespace: "ANDROID",
-    bool_variables: [
-        "crashrecovery_files_in_platform",
-    ],
-    properties: [
-        "srcs",
-    ],
-}
-
-platform_filegroup {
+filegroup {
     name: "framework-crashrecovery-sources",
-    soong_config_variables: {
-        // if this flag is enabled, then files are part of platform
-        crashrecovery_files_in_platform: {
-            srcs: [
-                "java/**/*.java",
-                "java/**/*.aidl",
-            ],
-        },
-    },
-    path: "java",
-    visibility: ["//frameworks/base:__subpackages__"],
-}
-
-soong_config_module_type {
-    name: "module_filegroup",
-    module_type: "filegroup",
-    config_namespace: "ANDROID",
-    bool_variables: [
-        "crashrecovery_files_in_module",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.aidl",
     ],
-    properties: [
-        "srcs",
+    path: "java",
+    visibility: [
+        "//packages/modules/CrashRecovery/framework",
     ],
 }
 
-module_filegroup {
-    name: "framework-crashrecovery-module-sources",
-    soong_config_variables: {
-        // if this flag is enabled, then files are part of module
-        crashrecovery_files_in_module: {
-            srcs: [
-                "java/**/*.java",
-                "java/**/*.aidl",
-            ],
-        },
+java_sdk_library {
+    name: "framework-platformcrashrecovery",
+    srcs: [":framework-crashrecovery-sources"],
+    defaults: ["framework-non-updatable-unbundled-defaults"],
+    permitted_packages: [
+        "android.service.watchdog",
+        "android.crashrecovery",
+    ],
+    static_libs: ["android.crashrecovery.flags-aconfig-java"],
+    aidl: {
+        include_dirs: [
+            "frameworks/base/core/java",
+        ],
     },
-    path: "java",
-    visibility: ["//packages/modules/CrashRecovery/framework"],
+    impl_library_visibility: [
+        "//frameworks/base:__subpackages__",
+    ],
+}
+
+platform_compat_config {
+    name: "framework-platformcrashrecovery-compat-config",
+    src: ":framework-platformcrashrecovery",
 }

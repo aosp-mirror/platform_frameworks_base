@@ -91,9 +91,14 @@ import java.util.function.IntConsumer;
 public class BatteryStatsNoteTest {
 
     @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
-            .setProvideMainThread(true)
-            .build();
+    public final RavenwoodRule mRavenwood =
+            new RavenwoodRule.Builder()
+                    .setProvideMainThread(true)
+                    .setSystemPropertyImmutable(
+                            "persist.sys.com.android.server.power.feature.flags."
+                                    + "framework_wakelock_info-override",
+                            null)
+                    .build();
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -192,6 +197,7 @@ public class BatteryStatsNoteTest {
      * Test BatteryStatsImpl.Uid.noteStartWakeLocked.
      */
     @Test
+    @EnableFlags(com.android.server.power.feature.flags.Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
     public void testNoteStartWakeLocked() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -222,6 +228,7 @@ public class BatteryStatsNoteTest {
      * Test BatteryStatsImpl.Uid.noteStartWakeLocked for an isolated uid.
      */
     @Test
+    @EnableFlags(com.android.server.power.feature.flags.Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
     public void testNoteStartWakeLocked_isolatedUid() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
@@ -264,6 +271,7 @@ public class BatteryStatsNoteTest {
      * isolated uid is removed from batterystats before the wakelock has been stopped.
      */
     @Test
+    @EnableFlags(com.android.server.power.feature.flags.Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
     public void testNoteStartWakeLocked_isolatedUidRace() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();

@@ -18,11 +18,11 @@ package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 import android.content.res.Resources
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.icon.domain.interactor.AlwaysOnDisplayNotificationIconsInteractor
 import javax.inject.Inject
@@ -44,17 +44,16 @@ constructor(
     iconsInteractor: AlwaysOnDisplayNotificationIconsInteractor,
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    @Main resources: Resources,
+    @ShadeDisplayAware resources: Resources,
     shadeInteractor: ShadeInteractor,
 ) {
     private val maxIcons = resources.getInteger(R.integer.max_notif_icons_on_aod)
 
     /** Are changes to the icon container animated? */
     val areContainerChangesAnimated: Flow<Boolean> =
-        combine(
-                shadeInteractor.isShadeTouchable,
-                keyguardInteractor.isKeyguardVisible,
-            ) { panelTouchesEnabled, isKeyguardVisible ->
+        combine(shadeInteractor.isShadeTouchable, keyguardInteractor.isKeyguardVisible) {
+                panelTouchesEnabled,
+                isKeyguardVisible ->
                 panelTouchesEnabled && isKeyguardVisible
             }
             .flowOn(bgContext)

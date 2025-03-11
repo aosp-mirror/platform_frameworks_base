@@ -16,6 +16,7 @@
 
 package com.android.overlaytest;
 
+import static android.content.res.Flags.FLAG_SELF_TARGETING_ANDROID_RESOURCE_FRRO;
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.pm.PackageManager.SIGNATURE_NO_MATCH;
 
@@ -41,6 +42,8 @@ import android.os.FabricatedOverlayInternal;
 import android.os.FabricatedOverlayInternalEntry;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
@@ -76,6 +79,8 @@ import java.util.List;
  */
 @RunWith(AndroidJUnit4.class)
 public class OverlayManagerImplTest {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private static final String TAG = "OverlayManagerImplTest";
 
     private static final String TARGET_COLOR_RES = "color/mycolor";
@@ -210,6 +215,7 @@ public class OverlayManagerImplTest {
     }
 
     @Test
+    @DisableFlags(FLAG_SELF_TARGETING_ANDROID_RESOURCE_FRRO)
     public void registerOverlay_forAndroidPackage_shouldFail() {
         FabricatedOverlayInternal overlayInternal =
                 createOverlayWithName(

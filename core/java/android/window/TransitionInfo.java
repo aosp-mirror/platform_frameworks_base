@@ -49,6 +49,7 @@ import android.content.ComponentName;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.BinderProxy;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -169,8 +170,11 @@ public final class TransitionInfo implements Parcelable {
     /** This change represents its start configuration for the duration of the animation. */
     public static final int FLAG_CONFIG_AT_END = 1 << 22;
 
+    /** This change represents one of a Task Display Area. */
+    public static final int FLAG_IS_TASK_DISPLAY_AREA = 1 << 23;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 23;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 24;
 
     /** The change belongs to a window that won't contain activities. */
     public static final int FLAGS_IS_NON_APP_WINDOW =
@@ -205,6 +209,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_MOVED_TO_TOP,
             FLAG_SYNC,
             FLAG_CONFIG_AT_END,
+            FLAG_IS_TASK_DISPLAY_AREA,
             FLAG_FIRST_CUSTOM
     }, flag = true)
     public @interface ChangeFlags {}
@@ -552,6 +557,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_MOVED_TO_TOP) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("MOVE_TO_TOP");
+        }
+        if ((flags & FLAG_IS_TASK_DISPLAY_AREA) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("FLAG_IS_TASK_DISPLAY_AREA");
         }
         return sb.toString();
     }
@@ -1082,8 +1090,13 @@ public final class TransitionInfo implements Parcelable {
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder();
-            sb.append('{'); sb.append(mContainer);
-            sb.append(" m="); sb.append(modeToString(mMode));
+            sb.append('{');
+            if (mContainer != null && !(mContainer.asBinder() instanceof BinderProxy)) {
+                // Only log the token if it is not a binder proxy and has additional container info
+                sb.append(mContainer);
+                sb.append(" ");
+            }
+            sb.append("m="); sb.append(modeToString(mMode));
             sb.append(" f="); sb.append(flagsToString(mFlags));
             if (mParent != null) {
                 sb.append(" p="); sb.append(mParent);

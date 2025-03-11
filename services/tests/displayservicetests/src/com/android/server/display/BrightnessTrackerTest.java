@@ -130,34 +130,64 @@ public class BrightnessTrackerTest {
     }
 
     @Test
-    public void testStartStopTrackerScreenOnOff() {
+    public void testStartStopTrackerScreenStates() {
         mInjector.mInteractive = false;
+        mInjector.mDisplayState = Display.STATE_OFF;
         startTracker(mTracker);
         assertNull(mInjector.mSensorListener);
         assertNotNull(mInjector.mBroadcastReceiver);
         assertTrue(mInjector.mIdleScheduled);
-        mInjector.sendScreenChange(/* screenOn= */ true);
+        mInjector.sendInteractivityChange(true);
+        mInjector.setDisplayState(Display.STATE_ON);
         assertNotNull(mInjector.mSensorListener);
         assertTrue(mInjector.mColorSamplingEnabled);
+        assertNotNull(mInjector.mDisplayListener);
 
-        mInjector.sendScreenChange(/* screenOn= */ false);
+        mInjector.setDisplayState(Display.STATE_OFF);
         assertNull(mInjector.mSensorListener);
         assertFalse(mInjector.mColorSamplingEnabled);
 
-        // Turn screen on while brightness mode is manual
+        mInjector.setDisplayState(Display.STATE_DOZE);
+        assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
+
+        mInjector.setDisplayState(Display.STATE_DOZE_SUSPEND);
+        assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
+
+        mInjector.setDisplayState(Display.STATE_ON_SUSPEND);
+        assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
+
+        // Screen on while device is not interactive
+        mInjector.setDisplayState(Display.STATE_ON);
+        mInjector.sendInteractivityChange(false);
+        assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
+
+        // Device becomes interactive while brightness mode is manual
         mInjector.setBrightnessMode(/* isBrightnessModeAutomatic= */ false);
-        mInjector.sendScreenChange(/* screenOn= */ true);
+        mInjector.sendInteractivityChange(true);
         assertNull(mInjector.mSensorListener);
         assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
 
         // Set brightness mode to automatic while screen is off.
-        mInjector.sendScreenChange(/* screenOn= */ false);
         mInjector.setBrightnessMode(/* isBrightnessModeAutomatic= */ true);
+        mInjector.setDisplayState(Display.STATE_OFF);
+        assertNull(mInjector.mSensorListener);
+        assertFalse(mInjector.mColorSamplingEnabled);
+        assertNotNull(mInjector.mDisplayListener);
+
+        // Set brightness mode to automatic while screen is in doze.
+        mInjector.setBrightnessMode(/* isBrightnessModeAutomatic= */ true);
+        mInjector.setDisplayState(Display.STATE_DOZE);
         assertNull(mInjector.mSensorListener);
         assertFalse(mInjector.mColorSamplingEnabled);
 
         // Turn on screen while brightness mode is automatic.
-        mInjector.sendScreenChange(/* screenOn= */ true);
+        mInjector.setDisplayState(Display.STATE_ON);
         assertNotNull(mInjector.mSensorListener);
         assertTrue(mInjector.mColorSamplingEnabled);
 
@@ -166,11 +196,11 @@ public class BrightnessTrackerTest {
         assertNull(mInjector.mBroadcastReceiver);
         assertFalse(mInjector.mIdleScheduled);
         assertFalse(mInjector.mColorSamplingEnabled);
+        assertNull(mInjector.mDisplayListener);
     }
 
     @Test
     public void testModifyBrightnessConfiguration() {
-        mInjector.mInteractive = true;
         // Start with tracker not listening for color samples.
         startTracker(mTracker, DEFAULT_INITIAL_BRIGHTNESS, /* collectColorSamples= */ false);
         assertFalse(mInjector.mColorSamplingEnabled);
@@ -186,13 +216,17 @@ public class BrightnessTrackerTest {
         assertFalse(mInjector.mColorSamplingEnabled);
 
         // Pretend screen is off, update config to turn on color sampling.
-        mInjector.sendScreenChange(/* screenOn= */ false);
+        mInjector.setDisplayState(Display.STATE_OFF);
         mTracker.setShouldCollectColorSample(/* collectColorSamples= */ true);
         mInjector.waitForHandler();
         assertFalse(mInjector.mColorSamplingEnabled);
 
+        // Pretend screen is in doze
+        mInjector.setDisplayState(Display.STATE_DOZE);
+        assertFalse(mInjector.mColorSamplingEnabled);
+
         // Pretend screen is on.
-        mInjector.sendScreenChange(/* screenOn= */ true);
+        mInjector.setDisplayState(Display.STATE_ON);
         assertTrue(mInjector.mColorSamplingEnabled);
 
         mTracker.stop();
@@ -208,7 +242,6 @@ public class BrightnessTrackerTest {
                         mInjector.mDefaultSamplingAttributes.getComponentMask());
         startTracker(mTracker);
         assertFalse(mInjector.mColorSamplingEnabled);
-        assertNull(mInjector.mDisplayListener);
     }
 
     @Test
@@ -220,7 +253,6 @@ public class BrightnessTrackerTest {
                         0x2);
         startTracker(mTracker);
         assertFalse(mInjector.mColorSamplingEnabled);
-        assertNull(mInjector.mDisplayListener);
     }
 
     @Test
@@ -228,14 +260,12 @@ public class BrightnessTrackerTest {
         mInjector.mDefaultSamplingAttributes = null;
         startTracker(mTracker);
         assertFalse(mInjector.mColorSamplingEnabled);
-        assertNull(mInjector.mDisplayListener);
     }
 
     @Test
     public void testColorSampling_FrameRateChange() {
         startTracker(mTracker);
         assertTrue(mInjector.mColorSamplingEnabled);
-        assertNotNull(mInjector.mDisplayListener);
         int noFramesSampled = mInjector.mNoColorSamplingFrames;
         mInjector.mFrameRate = 120.0f;
         // Wrong display
@@ -248,7 +278,6 @@ public class BrightnessTrackerTest {
 
     @Test
     public void testAdaptiveOnOff() {
-        mInjector.mInteractive = true;
         mInjector.mIsBrightnessModeAutomatic = false;
         startTracker(mTracker);
         assertNull(mInjector.mSensorListener);
@@ -256,7 +285,6 @@ public class BrightnessTrackerTest {
         assertNotNull(mInjector.mContentObserver);
         assertTrue(mInjector.mIdleScheduled);
         assertFalse(mInjector.mColorSamplingEnabled);
-        assertNull(mInjector.mDisplayListener);
 
         mInjector.setBrightnessMode(/* isBrightnessModeAutomatic= */ true);
         assertNotNull(mInjector.mSensorListener);
@@ -835,12 +863,14 @@ public class BrightnessTrackerTest {
         mInjector.waitForHandler();
         assertNull(mInjector.mSensorListener);
         assertNull(mInjector.mLightSensor);
+        assertNull(mInjector.mDisplayListener);
 
         // Resetting sensor should start listener again
         mTracker.setLightSensor(mLightSensorFake);
         mInjector.waitForHandler();
         assertNotNull(mInjector.mSensorListener);
         assertEquals(mInjector.mLightSensor, mLightSensorFake);
+        assertNotNull(mInjector.mDisplayListener);
 
         Sensor secondSensor = new Sensor(mInputSensorInfoMock);
         // Setting a different listener should keep things working
@@ -848,6 +878,7 @@ public class BrightnessTrackerTest {
         mInjector.waitForHandler();
         assertNotNull(mInjector.mSensorListener);
         assertEquals(mInjector.mLightSensor, secondSensor);
+        assertNotNull(mInjector.mDisplayListener);
     }
 
     @Test
@@ -862,6 +893,7 @@ public class BrightnessTrackerTest {
         startTracker(mTracker);
         assertNull(mInjector.mSensorListener);
         assertNull(mInjector.mLightSensor);
+        assertNull(mInjector.mDisplayListener);
     }
 
     @Test
@@ -895,6 +927,7 @@ public class BrightnessTrackerTest {
         assertNull(mInjector.mContentObserver);
         assertNull(mInjector.mBroadcastReceiver);
         assertFalse(mInjector.mIdleScheduled);
+        assertNull(mInjector.mDisplayListener);
 
         // mInjector asserts that we aren't removing a null receiver
         mTracker.stop();
@@ -1017,6 +1050,7 @@ public class BrightnessTrackerTest {
         Handler mHandler;
         boolean mIdleScheduled;
         boolean mInteractive = true;
+        int mDisplayState = Display.STATE_ON;
         int[] mProfiles;
         ContentObserver mContentObserver;
         boolean mIsBrightnessModeAutomatic = true;
@@ -1042,11 +1076,17 @@ public class BrightnessTrackerTest {
             waitForHandler();
         }
 
-        void sendScreenChange(boolean screenOn) {
-            mInteractive = screenOn;
+        void sendInteractivityChange(boolean interactive) {
+            mInteractive = interactive;
             Intent intent = new Intent();
-            intent.setAction(screenOn ? Intent.ACTION_SCREEN_ON : Intent.ACTION_SCREEN_OFF);
+            intent.setAction(interactive ? Intent.ACTION_SCREEN_ON : Intent.ACTION_SCREEN_OFF);
             mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(), intent);
+            waitForHandler();
+        }
+
+        void setDisplayState(int state) {
+            mDisplayState = state;
+            mDisplayListener.onDisplayChanged(Display.DEFAULT_DISPLAY);
             waitForHandler();
         }
 
@@ -1183,6 +1223,11 @@ public class BrightnessTrackerTest {
         }
 
         @Override
+        public int getDisplayState(Context context) {
+            return mDisplayState;
+        }
+
+        @Override
         public int getNightDisplayColorTemperature(Context context) {
             return mSecureIntSettings.getOrDefault(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
                     mDefaultNightModeColorTemperature);
@@ -1239,7 +1284,7 @@ public class BrightnessTrackerTest {
         }
 
         @Override
-        public void unRegisterDisplayListener(Context context,
+        public void unregisterDisplayListener(Context context,
                 DisplayManager.DisplayListener listener) {
             mDisplayListener = null;
         }

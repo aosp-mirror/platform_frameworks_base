@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
+import static com.android.server.wm.SnapshotPersistQueue.MAX_STORE_QUEUE_DEPTH;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -343,6 +345,11 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         if (DEBUG) {
             Slog.d(TAG, "ActivitySnapshotController#recordSnapshot " + activity);
         }
+        if (mPersister.mSnapshotPersistQueue.peekWriteQueueSize() >= MAX_STORE_QUEUE_DEPTH
+                || mPersister.mSnapshotPersistQueue.peekQueueSize() > MAX_PERSIST_SNAPSHOT_COUNT) {
+            Slog.w(TAG, "Skipping recording activity snapshot, too many requests!");
+            return;
+        }
         final int size = activity.size();
         final int[] mixedCode = new int[size];
         if (size == 1) {
@@ -432,7 +439,7 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
             addBelowActivityIfExist(ar, mPendingLoadActivity, false, "load-snapshot");
         } else {
             // remove the snapshot for the one below close
-            addBelowActivityIfExist(ar, mPendingRemoveActivity, true, "remove-snapshot");
+            addBelowActivityIfExist(ar, mPendingRemoveActivity, false, "remove-snapshot");
         }
     }
 

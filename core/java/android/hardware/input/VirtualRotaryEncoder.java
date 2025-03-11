@@ -18,7 +18,6 @@ package android.hardware.input;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtualdevice.flags.Flags;
@@ -48,7 +47,6 @@ public class VirtualRotaryEncoder extends VirtualInputDevice {
      *
      * @param event the event to send
      */
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendScrollEvent(@NonNull VirtualRotaryEncoderScrollEvent event) {
         try {
             if (!mVirtualDevice.sendRotaryEncoderScrollEvent(mToken, event)) {

@@ -23,12 +23,16 @@ object KeyguardPreviewConstants {
     const val MESSAGE_ID_PREVIEW_QUICK_AFFORDANCE_SELECTED = 1988
     const val MESSAGE_ID_SLOT_SELECTED = 1337
     const val MESSAGE_ID_START_CUSTOMIZING_QUICK_AFFORDANCES = 214
+    const val MESSAGE_ID_PREVIEW_CLOCK_SIZE = 1119
 
     const val KEY_HIDE_SMART_SPACE = "hide_smart_space"
     const val KEY_HIGHLIGHT_QUICK_AFFORDANCES = "highlight_quick_affordances"
     const val KEY_INITIALLY_SELECTED_SLOT_ID = "initially_selected_slot_id"
     const val KEY_QUICK_AFFORDANCE_ID = "quick_affordance_id"
     const val KEY_SLOT_ID = "slot_id"
+    const val KEY_CLOCK_SIZE = "clock_size"
 
     const val KEYGUARD_QUICK_AFFORDANCE_ID_NONE = "none"
+    const val CLOCK_SIZE_DYNAMIC = "clock_size_dynamic"
+    const val CLOCK_SIZE_SMALL = "clock_size_small"
 }

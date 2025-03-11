@@ -16,11 +16,16 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
 
+import android.content.mockedContext
+import android.content.packageManager
+import android.content.pm.PackageManager.FEATURE_PC
 import android.graphics.drawable.TestStubDrawable
 import android.media.AudioManager
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.media.flags.Flags;
 import com.android.settingslib.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -42,6 +47,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.whenever
 
 private const val builtInDeviceName = "This phone"
 
@@ -79,6 +85,8 @@ class MediaOutputComponentInteractorTest : SysuiTestCase() {
     fun inCall_stateIs_Calling() =
         with(kosmos) {
             testScope.runTest {
+                whenever(mockedContext.getPackageManager()).thenReturn(packageManager)
+                whenever(packageManager.hasSystemFeature(FEATURE_PC)).thenReturn(false)
                 with(audioRepository) {
                     setMode(AudioManager.MODE_IN_CALL)
                     setCommunicationDevice(TestAudioDevicesFactory.builtInDevice())
@@ -93,6 +101,33 @@ class MediaOutputComponentInteractorTest : SysuiTestCase() {
                             device = AudioOutputDevice.BuiltIn(builtInDeviceName, testIcon),
                             isInAudioSharing = false,
                             canOpenAudioSwitcher = false,
+                        )
+                    )
+            }
+        }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    fun inCall_stateIs_Calling_enableInputRouting_desktop() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(mockedContext.getPackageManager()).thenReturn(packageManager)
+                whenever(packageManager.hasSystemFeature(FEATURE_PC)).thenReturn(true)
+
+                with(audioRepository) {
+                    setMode(AudioManager.MODE_IN_CALL)
+                    setCommunicationDevice(TestAudioDevicesFactory.builtInDevice())
+                }
+
+                val model by collectLastValue(underTest.mediaOutputModel.filterData())
+                runCurrent()
+
+                assertThat(model)
+                    .isEqualTo(
+                        MediaOutputComponentModel.Calling(
+                            device = AudioOutputDevice.BuiltIn(builtInDeviceName, testIcon),
+                            isInAudioSharing = false,
+                            canOpenAudioSwitcher = true,
                         )
                     )
             }

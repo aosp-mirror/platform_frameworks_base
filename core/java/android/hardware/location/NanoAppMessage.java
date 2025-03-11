@@ -97,7 +97,7 @@ public final class NanoAppMessage implements Parcelable {
     /**
      * Creates a NanoAppMessage object sent from a nanoapp.
      *
-     * This factory method is intended only to be used by the Context Hub Service when delivering
+     * <p>This factory method is intended only to be used by the Context Hub Service when delivering
      * messages from a nanoapp to clients.
      *
      * @param sourceNanoAppId the ID of the nanoapp that the message was sent from
@@ -106,12 +106,14 @@ public final class NanoAppMessage implements Parcelable {
      * @param broadcasted {@code true} if the message was broadcasted, {@code false} otherwise
      * @param isReliable if the NanoAppMessage is reliable
      * @param messageSequenceNumber the message sequence number of the NanoAppMessage
-     *
      * @return the NanoAppMessage object
      */
-    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
-    public static @NonNull NanoAppMessage createMessageFromNanoApp(long sourceNanoAppId,
-            int messageType, @NonNull byte[] messageBody, boolean broadcasted, boolean isReliable,
+    public static @NonNull NanoAppMessage createMessageFromNanoApp(
+            long sourceNanoAppId,
+            int messageType,
+            @NonNull byte[] messageBody,
+            boolean broadcasted,
+            boolean isReliable,
             int messageSequenceNumber) {
         return new NanoAppMessage(sourceNanoAppId, messageType, messageBody, broadcasted,
                 isReliable, messageSequenceNumber);
@@ -147,18 +149,18 @@ public final class NanoAppMessage implements Parcelable {
 
     /**
      * Returns if the message is reliable. The default value is {@code false}
+     *
      * @return {@code true} if the message is reliable, {@code false} otherwise
      */
-    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
     public boolean isReliable() {
         return mIsReliable;
     }
 
     /**
      * Returns the message sequence number. The default value is 0
+     *
      * @return the message sequence number of the message
      */
-    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
     public int getMessageSequenceNumber() {
         return mMessageSequenceNumber;
     }

@@ -30,23 +30,19 @@ import android.view.windowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.model.KeyPath
-import com.android.keyguard.keyguardUpdateMonitor
 import com.android.settingslib.Utils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
-import com.android.systemui.biometrics.data.repository.biometricStatusRepository
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.biometrics.domain.interactor.displayStateInteractor
-import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.LottieCallback
 import com.android.systemui.biometrics.shared.model.SensorStrength
-import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
+import com.android.systemui.biometrics.updateSfpsIndicatorRequests
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.display.data.repository.displayStateRepository
-import com.android.systemui.keyguard.ui.viewmodel.sideFpsProgressBarViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
@@ -84,17 +80,17 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     private val indicatorColor =
         Utils.getColorAttrDefaultColor(
             context,
-            com.android.internal.R.attr.materialColorPrimaryFixed
+            com.android.internal.R.attr.materialColorPrimaryFixed,
         )
     private val outerRimColor =
         Utils.getColorAttrDefaultColor(
             context,
-            com.android.internal.R.attr.materialColorPrimaryFixedDim
+            com.android.internal.R.attr.materialColorPrimaryFixedDim,
         )
     private val chevronFill =
         Utils.getColorAttrDefaultColor(
             context,
-            com.android.internal.R.attr.materialColorOnPrimaryFixed
+            com.android.internal.R.attr.materialColorOnPrimaryFixed,
         )
     private val color_blue400 =
         context.getColor(com.android.settingslib.color.R.color.settingslib_color_blue400)
@@ -133,7 +129,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
-                isInRearDisplayMode = false
+                isInRearDisplayMode = false,
             )
 
             val overlayViewProperties by
@@ -167,7 +163,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             setupTestConfiguration(
                 DeviceConfig.Y_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
-                isInRearDisplayMode = false
+                isInRearDisplayMode = false,
             )
 
             val overlayViewProperties by
@@ -201,7 +197,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
-                isInRearDisplayMode = false
+                isInRearDisplayMode = false,
             )
 
             val overlayViewParams by
@@ -243,7 +239,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             setupTestConfiguration(
                 DeviceConfig.Y_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
-                isInRearDisplayMode = false
+                isInRearDisplayMode = false,
             )
 
             val overlayViewParams by
@@ -284,17 +280,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
         kosmos.testScope.runTest {
             val lottieCallbacks by collectLastValue(kosmos.sideFpsOverlayViewModel.lottieCallbacks)
 
-            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
-                AuthenticationReason.NotRunning
-            )
-            kosmos.sideFpsProgressBarViewModel.setVisible(false)
-
-            updatePrimaryBouncer(
-                isShowing = true,
-                isAnimatingAway = false,
-                fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = true
-            )
+            updateSfpsIndicatorRequests(kosmos, mContext, primaryBouncerRequest = true)
             runCurrent()
 
             assertThat(lottieCallbacks)
@@ -312,17 +298,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             val lottieCallbacks by collectLastValue(kosmos.sideFpsOverlayViewModel.lottieCallbacks)
             setDarkMode(true)
 
-            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
-                AuthenticationReason.BiometricPromptAuthentication
-            )
-            kosmos.sideFpsProgressBarViewModel.setVisible(false)
-
-            updatePrimaryBouncer(
-                isShowing = false,
-                isAnimatingAway = false,
-                fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = true
-            )
+            updateSfpsIndicatorRequests(kosmos, mContext, biometricPromptRequest = true)
             runCurrent()
 
             assertThat(lottieCallbacks)
@@ -338,17 +314,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             val lottieCallbacks by collectLastValue(kosmos.sideFpsOverlayViewModel.lottieCallbacks)
             setDarkMode(false)
 
-            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
-                AuthenticationReason.BiometricPromptAuthentication
-            )
-            kosmos.sideFpsProgressBarViewModel.setVisible(false)
-
-            updatePrimaryBouncer(
-                isShowing = false,
-                isAnimatingAway = false,
-                fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = true
-            )
+            updateSfpsIndicatorRequests(kosmos, mContext, biometricPromptRequest = true)
             runCurrent()
 
             assertThat(lottieCallbacks)
@@ -369,29 +335,6 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             }
 
         mContext.resources.configuration.uiMode = uiMode
-    }
-
-    private fun updatePrimaryBouncer(
-        isShowing: Boolean,
-        isAnimatingAway: Boolean,
-        fpsDetectionRunning: Boolean,
-        isUnlockingWithFpAllowed: Boolean,
-    ) {
-        kosmos.keyguardBouncerRepository.setPrimaryShow(isShowing)
-        kosmos.keyguardBouncerRepository.setPrimaryStartingToHide(false)
-        val primaryStartDisappearAnimation = if (isAnimatingAway) Runnable {} else null
-        kosmos.keyguardBouncerRepository.setPrimaryStartDisappearAnimation(
-            primaryStartDisappearAnimation
-        )
-
-        whenever(kosmos.keyguardUpdateMonitor.isFingerprintDetectionRunning)
-            .thenReturn(fpsDetectionRunning)
-        whenever(kosmos.keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed)
-            .thenReturn(isUnlockingWithFpAllowed)
-        mContext.orCreateTestableResources.addOverride(
-            R.bool.config_show_sidefps_hint_on_bouncer,
-            true
-        )
     }
 
     private suspend fun TestScope.setupTestConfiguration(
@@ -432,7 +375,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             sensorId = 1,
             strength = SensorStrength.STRONG,
             sensorType = FingerprintSensorType.POWER_BUTTON,
-            sensorLocations = mapOf(DISPLAY_ID to sensorLocation)
+            sensorLocations = mapOf(DISPLAY_ID to sensorLocation),
         )
 
         kosmos.displayStateRepository.setIsInRearDisplayMode(isInRearDisplayMode)

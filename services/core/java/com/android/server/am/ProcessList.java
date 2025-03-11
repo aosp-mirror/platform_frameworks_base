@@ -22,6 +22,7 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RESTRICTION_CHANGE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
+import static android.content.pm.Flags.appCompatOption16kb;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
@@ -225,6 +226,7 @@ public final class ProcessList {
     // UI flow such as clicking on a URI in the e-mail app to view in the browser,
     // and then pressing back to return to e-mail.
     public static final int PREVIOUS_APP_ADJ = 700;
+    public static final int PREVIOUS_APP_MAX_ADJ = Flags.oomadjusterPrevLaddering() ? 799 : 700;
 
     // This is a process holding the home application -- we want to try
     // avoiding killing it, even if it would normally be in the background,
@@ -2024,6 +2026,16 @@ public final class ProcessList {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
             }
 
+            if (appCompatOption16kb()) {
+                boolean is16KbDevice = Os.sysconf(OsConstants._SC_PAGESIZE) == 16384;
+                if (is16KbDevice
+                        && mService.mContext
+                        .getPackageManager()
+                        .isPageSizeCompatEnabled(app.info.packageName)) {
+                    runtimeFlags |= Zygote.ENABLE_PAGE_SIZE_APP_COMPAT;
+                }
+            }
+
             String invokeWith = null;
             if (debuggableFlag) {
                 // Debuggable apps may include a wrapper script with their library directory.
@@ -3399,8 +3411,7 @@ public final class ProcessList {
         // Check if we should mark the processrecord for first launch after force-stopping
         if (wasStopped) {
             boolean wasEverLaunched = false;
-            if (android.app.Flags.useAppInfoNotLaunched()
-                    || mService.mConstants.mFlagUseAppInfoNotLaunched) {
+            if (android.app.Flags.useAppInfoNotLaunched()) {
                 wasEverLaunched = !info.isNotLaunched();
             } else {
                 try {
@@ -3421,8 +3432,7 @@ public final class ProcessList {
                         : STOPPED_STATE_FIRST_LAUNCH;
                 r.getWindowProcessController().setStoppedState(stoppedState);
             } else {
-                if (android.app.Flags.useAppInfoNotLaunched()
-                        || mService.mConstants.mFlagUseAppInfoNotLaunched) {
+                if (android.app.Flags.useAppInfoNotLaunched()) {
                     // If it was launched before, then it must be a force-stop
                     r.setWasForceStopped(wasEverLaunched);
                 } else {
@@ -3439,12 +3449,12 @@ public final class ProcessList {
             state.setCurrentSchedulingGroup(ProcessList.SCHED_GROUP_DEFAULT);
             state.setSetSchedGroup(ProcessList.SCHED_GROUP_DEFAULT);
             r.setPersistent(true);
-            state.setMaxAdj(ProcessList.PERSISTENT_PROC_ADJ);
+            mService.mProcessStateController.setMaxAdj(r, ProcessList.PERSISTENT_PROC_ADJ);
         }
         if (isolated && isolatedUid != 0) {
             // Special case for startIsolatedProcess (internal only) - assume the process
             // is required by the system server to prevent it being killed.
-            state.setMaxAdj(ProcessList.PERSISTENT_SERVICE_ADJ);
+            mService.mProcessStateController.setMaxAdj(r, ProcessList.PERSISTENT_SERVICE_ADJ);
         }
         addProcessNameLocked(r);
         return r;
@@ -3629,42 +3639,68 @@ public final class ProcessList {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    private int updateLruProcessInternalLSP(ProcessRecord app, long now, int index,
-            int lruSeq, String what, Object obj, ProcessRecord srcApp) {
+    private int offerLruProcessInternalLSP(ProcessRecord app, long now, String what, Object obj,
+            ProcessRecord srcApp) {
         app.setLastActivityTime(now);
 
         if (app.hasActivitiesOrRecentTasks()) {
             // Don't want to touch dependent processes that are hosting activities.
-            return index;
+            return -1;
         }
 
-        int lrui = mLruProcesses.lastIndexOf(app);
+        final int lrui = mLruProcesses.lastIndexOf(app);
         if (lrui < 0) {
             Slog.wtf(TAG, "Adding dependent process " + app + " not on LRU list: "
                     + what + " " + obj + " from " + srcApp);
-            return index;
         }
+        return lrui;
+    }
 
-        if (lrui >= index) {
-            // Don't want to cause this to move dependent processes *back* in the
-            // list as if they were less frequently used.
-            return index;
-        }
+    /**
+     * This method is called after the indices array is populated by the indices offered by
+     * {@link #offerLruProcessInternalLSP} to actually move the processes to the desired locations
+     * in the LRU list. Since the indices array is a SparseBooleanArray, the indices are sorted
+     * and this allows us to preserve the previous order of the processes relative to each other.
+     * Key of the indices array holds the current index of the process in the LRU list and the value
+     * is a boolean indicating whether the process is an activity process or not. Activity processes
+     * are moved to the nextActivityIndex and non-activity processes are moved to the nextIndex
+     * positions, which are provided by the caller.
+     *
+     * @param indices The indices of the processes to move.
+     * @param nextActivityIndex The next index to insert an activity process.
+     * @param nextIndex The next index to insert a non-activity process.
+     */
+    @GuardedBy({"mService", "mProcLock"})
+    private void completeLruProcessInternalLSP(SparseBooleanArray indices, int nextActivityIndex,
+            int nextIndex) {
+        for (int i = indices.size() - 1; i >= 0; i--) {
+            final int lrui = indices.keyAt(i);
+            if (lrui < 0) {
+                // Rest of the indices are invalid, we can return early.
+                return;
+            }
+            final boolean isActivity = indices.valueAt(i);
+            int index = isActivity ? nextActivityIndex : nextIndex;
 
-        if (lrui >= mLruProcessActivityStart && index < mLruProcessActivityStart) {
-            // Don't want to touch dependent processes that are hosting activities.
-            return index;
-        }
+            if (lrui >= index) {
+                // Don't want to cause this to move dependent processes *back* in the
+                // list as if they were less frequently used.
+                continue;
+            }
 
-        mLruProcesses.remove(lrui);
-        if (index > 0) {
+            final ProcessRecord app = mLruProcesses.remove(lrui);
             index--;
+            if (DEBUG_LRU) Slog.d(TAG_LRU, "Moving dep from " + lrui + " to " + index
+                    + " in LRU list: " + app);
+            mLruProcesses.add(index, app);
+            app.setLruSeq(mLruSeq);
+
+            if (isActivity) {
+                nextActivityIndex = index;
+            } else {
+                nextIndex = index;
+            }
         }
-        if (DEBUG_LRU) Slog.d(TAG_LRU, "Moving dep from " + lrui + " to " + index
-                + " in LRU list: " + app);
-        mLruProcesses.add(index, app);
-        app.setLruSeq(lruSeq);
-        return index;
     }
 
     /**
@@ -4058,6 +4094,15 @@ public final class ProcessList {
 
         app.setLruSeq(mLruSeq);
 
+        // Key of the indices array holds the current index of the process in the LRU list and the
+        // value is a boolean indicating whether the process is an activity process or not.
+        // Activity processes will be moved to the nextActivityIndex and non-activity processes will
+        // be moved to the nextIndex positions when completeLruProcessInternalLSP is called.
+        // Since SparseBooleanArray's keys are sorted, we'll be able to keep the existing order of
+        // the processes relative to each other after the move.
+        final SparseBooleanArray indices = new SparseBooleanArray(psr.numberOfConnections()
+                + app.mProviders.numberOfProviderConnections());
+
         // If the app is currently using a content provider or service,
         // bump those processes as well.
         for (int j = psr.numberOfConnections() - 1; j >= 0; j--) {
@@ -4069,16 +4114,12 @@ public final class ProcessList {
                     && !cr.binding.service.app.isPersistent()) {
                 if (cr.binding.service.app.mServices.hasClientActivities()) {
                     if (nextActivityIndex >= 0) {
-                        nextActivityIndex = updateLruProcessInternalLSP(cr.binding.service.app,
-                                now,
-                                nextActivityIndex, mLruSeq,
-                                "service connection", cr, app);
+                        indices.append(offerLruProcessInternalLSP(cr.binding.service.app, now,
+                                "service connection", cr, app), true);
                     }
                 } else {
-                    nextIndex = updateLruProcessInternalLSP(cr.binding.service.app,
-                            now,
-                            nextIndex, mLruSeq,
-                            "service connection", cr, app);
+                    indices.append(offerLruProcessInternalLSP(cr.binding.service.app, now,
+                            "service connection", cr, app), false);
                 }
             }
         }
@@ -4086,10 +4127,11 @@ public final class ProcessList {
         for (int j = ppr.numberOfProviderConnections() - 1; j >= 0; j--) {
             ContentProviderRecord cpr = ppr.getProviderConnectionAt(j).provider;
             if (cpr.proc != null && cpr.proc.getLruSeq() != mLruSeq && !cpr.proc.isPersistent()) {
-                nextIndex = updateLruProcessInternalLSP(cpr.proc, now, nextIndex, mLruSeq,
-                        "provider reference", cpr, app);
+                indices.append(offerLruProcessInternalLSP(cpr.proc, now,
+                        "provider reference", cpr, app), false);
             }
         }
+        completeLruProcessInternalLSP(indices, nextActivityIndex, nextIndex);
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})

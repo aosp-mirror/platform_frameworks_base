@@ -21,7 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.testKosmos
@@ -44,7 +44,6 @@ import org.mockito.kotlin.mock
 class CommunalMediaRepositoryImplTest : SysuiTestCase() {
     private val mediaDataManager = mock<MediaDataManager>()
     private val mediaData = mock<MediaData>()
-    private val tableLogBuffer = mock<TableLogBuffer>()
 
     private lateinit var underTest: CommunalMediaRepositoryImpl
 
@@ -52,14 +51,11 @@ class CommunalMediaRepositoryImplTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
+    private val tableLogBuffer = logcatTableLogBuffer(kosmos, "CommunalMediaRepositoryImplTest")
 
     @Before
     fun setUp() {
-        underTest =
-            CommunalMediaRepositoryImpl(
-                mediaDataManager,
-                tableLogBuffer,
-            )
+        underTest = CommunalMediaRepositoryImpl(mediaDataManager, tableLogBuffer)
     }
 
     @Test

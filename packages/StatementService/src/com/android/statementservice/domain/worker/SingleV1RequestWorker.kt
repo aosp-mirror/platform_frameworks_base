@@ -22,7 +22,9 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
+import com.android.statementservice.database.DomainGroups
 import com.android.statementservice.utils.AndroidUtils
+import com.android.statementservice.utils.StatementUtils
 import kotlinx.coroutines.coroutineScope
 
 class SingleV1RequestWorker(appContext: Context, params: WorkerParameters) :
@@ -60,7 +62,9 @@ class SingleV1RequestWorker(appContext: Context, params: WorkerParameters) :
         val packageName = params.inputData.getString(PACKAGE_NAME_KEY)!!
         val host = params.inputData.getString(HOST_KEY)!!
 
-        val (result, status) = verifier.verifyHost(host, packageName, params.network)
+        database.clear(packageName, host)
+
+        val (result, status, statement) = verifier.verifyHost(host, packageName, params.network)
 
         if (DEBUG) {
             Log.d(
@@ -75,6 +79,10 @@ class SingleV1RequestWorker(appContext: Context, params: WorkerParameters) :
                 val deContext = appContext.createDeviceProtectedStorageContext()
                 val sp = deContext?.getSharedPreferences(packageName, Context.MODE_PRIVATE)
                 sp?.edit()?.putInt("$HOST_SUCCESS_PREFIX$host", status.value)?.apply()
+                val groups = statement?.dynamicAppLinkComponents.orEmpty().map {
+                    StatementUtils.createUriRelativeFilterGroup(it)
+                }
+                database.insertDomainGroups(DomainGroups(packageName, host, groups))
                 Result.success()
             }
             is Result.Failure -> {

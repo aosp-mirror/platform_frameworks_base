@@ -54,6 +54,7 @@ import static com.android.server.am.ProcessList.PERCEPTIBLE_RECENT_FOREGROUND_AP
 import static com.android.server.am.ProcessList.PERSISTENT_PROC_ADJ;
 import static com.android.server.am.ProcessList.PERSISTENT_SERVICE_ADJ;
 import static com.android.server.am.ProcessList.PREVIOUS_APP_ADJ;
+import static com.android.server.am.ProcessList.PREVIOUS_APP_MAX_ADJ;
 import static com.android.server.am.ProcessList.SCHED_GROUP_BACKGROUND;
 import static com.android.server.am.ProcessList.SERVICE_ADJ;
 import static com.android.server.am.ProcessList.SERVICE_B_ADJ;
@@ -756,18 +757,10 @@ public class OomAdjusterModernImpl extends OomAdjuster {
             new ComputeConnectionsConsumer();
 
     OomAdjusterModernImpl(ActivityManagerService service, ProcessList processList,
-            ActiveUids activeUids) {
-        this(service, processList, activeUids, createAdjusterThread());
-    }
-
-    OomAdjusterModernImpl(ActivityManagerService service, ProcessList processList,
-            ActiveUids activeUids, ServiceThread adjusterThread) {
-        super(service, processList, activeUids, adjusterThread);
-    }
-
-    OomAdjusterModernImpl(ActivityManagerService service, ProcessList processList,
-            ActiveUids activeUids, Injector injector) {
-        super(service, processList, activeUids, injector);
+            ActiveUids activeUids, ServiceThread adjusterThread, GlobalState globalState,
+            CachedAppOptimizer cachedAppOptimizer, Injector injector) {
+        super(service, processList, activeUids, adjusterThread, globalState, cachedAppOptimizer,
+                injector);
     }
 
     private final ProcessRecordNodes mProcessRecordProcStateNodes = new ProcessRecordNodes(
@@ -977,7 +970,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         mTmpOomAdjusterArgs.update(topApp, now, UNKNOWN_ADJ, oomAdjReason, null, true);
         computeConnectionsLSP();
 
-        assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
+        applyLruAdjust(mProcessList.getLruProcessesLOSP());
         postUpdateOomAdjInnerLSP(oomAdjReason, mActiveUids, now, nowElapsed, oldTime, true);
     }
 
@@ -1058,20 +1051,24 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         // Now traverse and compute the connections of processes with changed importance.
         computeConnectionsLSP();
 
-        boolean unassignedAdj = false;
+        boolean needLruAdjust = false;
         for (int i = 0, size = reachables.size(); i < size; i++) {
             final ProcessStateRecord state = reachables.get(i).mState;
             state.setReachable(false);
             state.setCompletedAdjSeq(mAdjSeq);
-            if (state.getCurAdj() >= UNKNOWN_ADJ) {
-                unassignedAdj = true;
+            final int curAdj = state.getCurAdj();
+            // Processes assigned the PREV oomscore will have a laddered oomscore with respect to
+            // their positions in the LRU list. i.e. prev+0, prev+1, prev+2, etc.
+            final boolean isPrevApp = PREVIOUS_APP_ADJ <= curAdj && curAdj <= PREVIOUS_APP_MAX_ADJ;
+            if (curAdj >= UNKNOWN_ADJ || (Flags.oomadjusterPrevLaddering() && isPrevApp)) {
+                needLruAdjust = true;
             }
         }
 
         // If all processes have an assigned adj, no need to calculate and assign cached adjs.
-        if (unassignedAdj) {
+        if (needLruAdjust) {
             // TODO: b/319163103 - optimize cache adj assignment to not require the whole lru list.
-            assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
+            applyLruAdjust(mProcessList.getLruProcessesLOSP());
         }
 
         // Repopulate any uid record that may have changed.

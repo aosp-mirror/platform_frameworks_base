@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInterac
 val Kosmos.fromAodTransitionInteractor by
     Kosmos.Fixture {
         FromAodTransitionInteractor(
-            transitionRepository = fakeKeyguardTransitionRepository,
+            transitionRepository = keyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
             internalTransitionInteractor = internalKeyguardTransitionInteractor,
             scope = applicationCoroutineScope,

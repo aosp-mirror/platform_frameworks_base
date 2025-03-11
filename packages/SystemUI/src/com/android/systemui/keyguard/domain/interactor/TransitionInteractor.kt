@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import android.util.Log
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -33,7 +34,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 /**
  * Each TransitionInteractor is responsible for determining under which conditions to notify
@@ -71,14 +71,14 @@ sealed class TransitionInteractor(
         ownerReason: String = "",
     ): UUID? {
         toState.checkValidState()
-        if (fromState != internalTransitionInteractor.currentTransitionInfoInternal.value.to) {
+        if (fromState != internalTransitionInteractor.currentTransitionInfoInternal().to) {
             Log.e(
                 name,
                 "Ignoring startTransition: This interactor asked to transition from " +
                     "$fromState -> $toState, but we last transitioned to " +
-                    "${internalTransitionInteractor.currentTransitionInfoInternal.value.to}, not" +
+                    "${internalTransitionInteractor.currentTransitionInfoInternal().to}, not" +
                     " $fromState. This should never happen - check currentTransitionInfoInternal" +
-                    " or use filterRelevantKeyguardState before starting transitions."
+                    " or use filterRelevantKeyguardState before starting transitions.",
             )
             return null
         }
@@ -149,7 +149,7 @@ sealed class TransitionInteractor(
             if (keyguardInteractor.isKeyguardDismissible.value) {
                 startTransitionTo(
                     KeyguardState.GONE,
-                    ownerReason = "Power button gesture while keyguard is dismissible"
+                    ownerReason = "Power button gesture while keyguard is dismissible",
                 )
 
                 return true
@@ -159,7 +159,7 @@ sealed class TransitionInteractor(
                 // should transition to GONE.
                 startTransitionTo(
                     KeyguardState.GONE,
-                    ownerReason = "Power button gesture on dismissable keyguard"
+                    ownerReason = "Power button gesture on dismissable keyguard",
                 )
 
                 return true
@@ -190,23 +190,29 @@ sealed class TransitionInteractor(
                 startTransitionTo(
                     toState = keyguardInteractor.asleepKeyguardState.value,
                     modeOnCanceled = modeOnCanceled,
-                    ownerReason = "Sleep transition triggered"
+                    ownerReason = "Sleep transition triggered",
                 )
             }
     }
 
     /** This signal may come in before the occlusion signal, and can provide a custom transition */
-    fun listenForTransitionToCamera(
-        scope: CoroutineScope,
-        keyguardInteractor: KeyguardInteractor,
-    ) {
+    fun listenForTransitionToCamera(scope: CoroutineScope, keyguardInteractor: KeyguardInteractor) {
         if (!KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
                 keyguardInteractor.onCameraLaunchDetected.filterRelevantKeyguardState().collect {
                     if (!maybeHandleInsecurePowerGesture()) {
+                        val lastStep = transitionInteractor.transitionState.value
+                        val modeOnCanceled =
+                            if (lastStep.to == KeyguardState.AOD) {
+                                // Enabled smooth transition when double-tap camera cancels
+                                // transition to AOD
+                                TransitionModeOnCanceled.REVERSE
+                            } else {
+                                TransitionModeOnCanceled.RESET
+                            }
                         startTransitionTo(
                             toState = KeyguardState.OCCLUDED,
-                            modeOnCanceled = TransitionModeOnCanceled.RESET,
+                            modeOnCanceled = modeOnCanceled,
                             ownerReason = "keyguardInteractor.onCameraLaunchDetected",
                         )
                     }
@@ -223,7 +229,7 @@ sealed class TransitionInteractor(
      * [startedKeyguardState] as it does not wait for the emission of the first STARTED step.
      */
     fun inOrTransitioningToRelevantKeyguardState(): Boolean {
-        return internalTransitionInteractor.currentTransitionInfoInternal.value.to == fromState
+        return internalTransitionInteractor.currentTransitionInfoInternal().to == fromState
     }
 
     /**

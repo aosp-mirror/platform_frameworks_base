@@ -34,6 +34,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.wallet.controller.QuickAccessWalletController
 import com.android.systemui.wallet.util.getPaymentCards
 import javax.inject.Inject
@@ -51,7 +52,7 @@ import kotlinx.coroutines.withContext
 class QuickAccessWalletKeyguardQuickAffordanceConfig
 @Inject
 constructor(
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val walletController: QuickAccessWalletController,
     private val activityStarter: ActivityStarter,

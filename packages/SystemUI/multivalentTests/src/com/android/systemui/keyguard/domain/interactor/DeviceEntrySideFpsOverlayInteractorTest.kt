@@ -39,7 +39,6 @@ import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsReposi
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -100,18 +99,14 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 FakeTrustRepository(),
                 testScope.backgroundScope,
                 mSelectedUserInteractor,
-                faceAuthInteractor
+                faceAuthInteractor,
             )
 
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
-                mock(StatusBarStateController::class.java),
-                mock(KeyguardStateController::class.java),
                 bouncerRepository,
                 FakeFingerprintPropertyRepository(),
-                biometricSettingsRepository,
                 FakeSystemClock(),
-                keyguardUpdateMonitor,
                 { mock(DeviceEntryBiometricsAllowedInteractor::class.java) },
                 { mock(KeyguardInteractor::class.java) },
                 { mock(KeyguardTransitionInteractor::class.java) },
@@ -121,13 +116,12 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
 
         underTest =
             DeviceEntrySideFpsOverlayInteractor(
-                testScope.backgroundScope,
                 mContext,
                 deviceEntryFingerprintAuthRepository,
                 kosmos.sceneInteractor,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
-                keyguardUpdateMonitor
+                keyguardUpdateMonitor,
             )
     }
 
@@ -142,7 +136,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 isShowing = true,
                 isAnimatingAway = false,
                 fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = true
+                isUnlockingWithFpAllowed = true,
             )
             assertThat(showIndicatorForDeviceEntry).isTrue()
         }
@@ -158,7 +152,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 isShowing = false,
                 isAnimatingAway = false,
                 fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = true
+                isUnlockingWithFpAllowed = true,
             )
             assertThat(showIndicatorForDeviceEntry).isFalse()
         }
@@ -169,13 +163,12 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest =
                 DeviceEntrySideFpsOverlayInteractor(
-                    testScope.backgroundScope,
                     mContext,
                     deviceEntryFingerprintAuthRepository,
                     kosmos.sceneInteractor,
                     primaryBouncerInteractor,
                     alternateBouncerInteractor,
-                    keyguardUpdateMonitor
+                    keyguardUpdateMonitor,
                 )
 
             val showIndicatorForDeviceEntry by
@@ -185,7 +178,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             updateBouncerScene(
                 isActive = true,
                 fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = true
+                isUnlockingWithFpAllowed = true,
             )
             assertThat(showIndicatorForDeviceEntry).isTrue()
         }
@@ -196,13 +189,12 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest =
                 DeviceEntrySideFpsOverlayInteractor(
-                    testScope.backgroundScope,
                     mContext,
                     deviceEntryFingerprintAuthRepository,
                     kosmos.sceneInteractor,
                     primaryBouncerInteractor,
                     alternateBouncerInteractor,
-                    keyguardUpdateMonitor
+                    keyguardUpdateMonitor,
                 )
 
             val showIndicatorForDeviceEntry by
@@ -212,7 +204,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             updateBouncerScene(
                 isActive = false,
                 fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = true
+                isUnlockingWithFpAllowed = true,
             )
             assertThat(showIndicatorForDeviceEntry).isFalse()
         }
@@ -228,7 +220,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 isShowing = true,
                 isAnimatingAway = false,
                 fpsDetectionRunning = false,
-                isUnlockingWithFpAllowed = true
+                isUnlockingWithFpAllowed = true,
             )
             assertThat(showIndicatorForDeviceEntry).isFalse()
         }
@@ -245,7 +237,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 isShowing = true,
                 isAnimatingAway = false,
                 fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = false
+                isUnlockingWithFpAllowed = false,
             )
             assertThat(showIndicatorForDeviceEntry).isFalse()
         }
@@ -261,7 +253,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             updateBouncerScene(
                 isActive = true,
                 fpsDetectionRunning = false,
-                isUnlockingWithFpAllowed = true
+                isUnlockingWithFpAllowed = true,
             )
             assertThat(showIndicatorForDeviceEntry).isFalse()
         }
@@ -277,7 +269,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             updateBouncerScene(
                 isActive = true,
                 fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = false
+                isUnlockingWithFpAllowed = false,
             )
             assertThat(showIndicatorForDeviceEntry).isFalse()
         }
@@ -294,7 +286,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 isShowing = true,
                 isAnimatingAway = true,
                 fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = true
+                isUnlockingWithFpAllowed = true,
             )
             assertThat(showIndicatorForDeviceEntry).isFalse()
         }
@@ -325,7 +317,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 isShowing = true,
                 isAnimatingAway = false,
                 fpsDetectionRunning = true,
-                isUnlockingWithFpAllowed = true
+                isUnlockingWithFpAllowed = true,
             )
 
             // Another request to show indicator for deviceEntryFingerprintAuthRepository update
@@ -355,7 +347,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             .thenReturn(isUnlockingWithFpAllowed)
         mContext.orCreateTestableResources.addOverride(
             R.bool.config_show_sidefps_hint_on_bouncer,
-            true
+            true,
         )
     }
 
@@ -366,7 +358,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
     ) {
         kosmos.sceneInteractor.changeScene(
             if (isActive) Scenes.Bouncer else Scenes.Lockscreen,
-            "reason"
+            "reason",
         )
 
         whenever(keyguardUpdateMonitor.isFingerprintDetectionRunning)
@@ -375,7 +367,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             .thenReturn(isUnlockingWithFpAllowed)
         mContext.orCreateTestableResources.addOverride(
             R.bool.config_show_sidefps_hint_on_bouncer,
-            true
+            true,
         )
         runCurrent()
     }

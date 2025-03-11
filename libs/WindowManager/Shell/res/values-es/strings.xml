@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"¿Problemas con la cámara?\nToca para reajustar"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"¿No se ha solucionado?\nToca para revertir"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"¿No hay problemas con la cámara? Toca para cerrar."</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"El menú de la aplicación se encuentra aquí"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Entra en la vista para ordenador si quieres abrir varias aplicaciones a la vez"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Vuelve a la pantalla completa en cualquier momento desde el menú de aplicaciones"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Consulta más información y haz más"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Arrastra otra aplicación para activar la pantalla dividida"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Toca dos veces fuera de una aplicación para cambiarla de posición"</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"Seleccionar"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Captura de pantalla"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Abrir en el navegador"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"Abrir en la aplicación"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Ventana nueva"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"Gestionar ventanas"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"Cambiar relación de aspecto"</string>
     <string name="close_text" msgid="4986518933445178928">"Cerrar"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Cerrar menú"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Abrir menú"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maximizar pantalla"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Ajustar pantalla"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"No se puede cambiar el tamaño de esta aplicación"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Cambiar tamaño"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"La aplicación no se puede mover aquí"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Inmersivo"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Restaurar"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maximizar"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Restaurar"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Acoplar a la izquierda"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Acoplar a la derecha"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"Abrir con los ajustes predeterminados"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"Elige cómo quieres abrir los enlaces web de esta aplicación"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"En la aplicación"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"En el navegador"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"Aceptar"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"Abre rápidamente aplicaciones en tu navegador aquí"</string>
 </resources>

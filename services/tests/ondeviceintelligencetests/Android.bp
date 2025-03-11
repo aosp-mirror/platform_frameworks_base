@@ -44,14 +44,18 @@ android_test {
         "truth",
         "frameworks-base-testutils",
         "androidx.test.rules",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_ondevice_intelligence_module"), {
+        "true": [
+            "service-ondeviceintelligence.impl",
+        ],
+        default: [],
+    }),
 
     libs: [
         "android.test.mock.stubs.system",
         "android.test.base.stubs.system",
         "android.test.runner.stubs.system",
     ],
-
     certificate: "platform",
     platform_apis: true,
     test_suites: ["device-tests"],

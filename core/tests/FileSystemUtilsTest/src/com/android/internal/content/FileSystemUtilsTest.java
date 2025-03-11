@@ -47,4 +47,13 @@ public class FileSystemUtilsTest extends BaseHostJUnit4Test {
         assertTrue(isPackageInstalled(appPackage));
         runDeviceTests(appPackage, appPackage + "." + testName);
     }
+
+    @Test
+    @AppModeFull
+    public void runAppWith4KbLib_overrideCompatMode() throws DeviceNotAvailableException {
+        String appPackage = "android.test.pagesizecompat";
+        String testName = "PageSizeCompatTest";
+        assertTrue(isPackageInstalled(appPackage));
+        runDeviceTests(appPackage, appPackage + "." + testName);
+    }
 }

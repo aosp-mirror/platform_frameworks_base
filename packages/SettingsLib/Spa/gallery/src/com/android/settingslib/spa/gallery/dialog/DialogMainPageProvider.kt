@@ -18,50 +18,94 @@ package com.android.settingslib.spa.gallery.dialog
 
 import android.os.Bundle
 import androidx.compose.material3.Text
-import com.android.settingslib.spa.framework.common.SettingsEntry
-import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
-import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.widget.dialog.AlertDialogButton
+import com.android.settingslib.spa.widget.dialog.SettingsAlertDialogWithIcon
 import com.android.settingslib.spa.widget.dialog.rememberAlertDialogPresenter
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
+import com.android.settingslib.spa.widget.ui.Category
 
 private const val TITLE = "Category: Dialog"
 
 object DialogMainPageProvider : SettingsPageProvider {
     override val name = "DialogMain"
-    private val owner = createSettingsPage()
 
-    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> = listOf(
-        SettingsEntryBuilder.create("AlertDialog", owner).setUiLayoutFn {
-            val alertDialogPresenter = rememberAlertDialogPresenter(
-                confirmButton = AlertDialogButton("Ok"),
-                dismissButton = AlertDialogButton("Cancel"),
-                title = "Title",
-                text = { Text("Text") },
-            )
-            Preference(object : PreferenceModel {
-                override val title = "Show AlertDialog"
-                override val onClick = alertDialogPresenter::open
-            })
-        }.build(),
-        SettingsEntryBuilder.create("NavDialog", owner).setUiLayoutFn {
-            Preference(object : PreferenceModel {
-                override val title = "Navigate to Dialog"
-                override val onClick = navigator(route = NavDialogProvider.name)
-            })
-        }.build(),
-    )
+    @Composable
+    override fun Page(arguments: Bundle?) {
+        RegularScaffold(TITLE) {
+            Category {
+                AlertDialog()
+                AlertDialogWithIcon()
+                NavDialog()
+            }
+        }
+    }
 
-    fun buildInjectEntry() = SettingsEntryBuilder.createInject(owner)
-        .setUiLayoutFn {
-            Preference(object : PreferenceModel {
+    @Composable
+    fun Entry() {
+        Preference(
+            object : PreferenceModel {
                 override val title = TITLE
                 override val onClick = navigator(name)
-            })
-        }
+            }
+        )
+    }
 
     override fun getTitle(arguments: Bundle?) = TITLE
+}
+
+@Composable
+private fun AlertDialog() {
+    val alertDialogPresenter =
+        rememberAlertDialogPresenter(
+            confirmButton = AlertDialogButton("Ok"),
+            dismissButton = AlertDialogButton("Cancel"),
+            title = "Title",
+            text = { Text("Text") },
+        )
+    Preference(
+        object : PreferenceModel {
+            override val title = "Show AlertDialog"
+            override val onClick = alertDialogPresenter::open
+        }
+    )
+}
+
+@Composable
+private fun AlertDialogWithIcon() {
+    var openDialog by rememberSaveable { mutableStateOf(false) }
+    val close = { openDialog = false }
+    val open = { openDialog = true }
+    if (openDialog) {
+        SettingsAlertDialogWithIcon(
+            title = "Title",
+            onDismissRequest = close,
+            confirmButton = AlertDialogButton("OK", onClick = close),
+            dismissButton = AlertDialogButton("Dismiss", onClick = close),
+        ) {}
+    }
+    Preference(
+        object : PreferenceModel {
+            override val title = "Show AlertDialogWithIcon"
+            override val onClick = open
+        }
+    )
+}
+
+@Composable
+private fun NavDialog() {
+    Preference(
+        object : PreferenceModel {
+            override val title = "Navigate to Dialog"
+            override val onClick = navigator(route = NavDialogProvider.name)
+        }
+    )
 }

@@ -17,6 +17,7 @@
 package com.android.wm.shell.draganddrop;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.ClipDescription.EXTRA_HIDE_DRAG_SOURCE_TASK_ID;
 
@@ -28,7 +29,6 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.PersistableBundle;
 
 import androidx.annotation.Nullable;
 
@@ -43,6 +43,7 @@ import java.util.List;
  */
 public class DragSession {
     private final ActivityTaskManager mActivityTaskManager;
+    @Nullable
     private final ClipData mInitialDragData;
     private final int mInitialDragFlags;
 
@@ -65,7 +66,7 @@ public class DragSession {
     @WindowConfiguration.ActivityType
     int runningTaskActType = ACTIVITY_TYPE_STANDARD;
     boolean dragItemSupportsSplitscreen;
-    int hideDragSourceTaskId = -1;
+    final int hideDragSourceTaskId;
 
     DragSession(ActivityTaskManager activityTaskManager,
             DisplayLayout dispLayout, ClipData data, int dragFlags) {
@@ -73,7 +74,7 @@ public class DragSession {
         mInitialDragData = data;
         mInitialDragFlags = dragFlags;
         displayLayout = dispLayout;
-        hideDragSourceTaskId = data.getDescription().getExtras() != null
+        hideDragSourceTaskId = data != null && data.getDescription().getExtras() != null
                 ? data.getDescription().getExtras().getInt(EXTRA_HIDE_DRAG_SOURCE_TASK_ID, -1)
                 : -1;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
@@ -82,7 +83,6 @@ public class DragSession {
 
     /**
      * Returns the clip description associated with the drag.
-     * @return
      */
     ClipDescription getClipDescription() {
         return mInitialDragData.getDescription();
@@ -94,33 +94,40 @@ public class DragSession {
     void updateRunningTask() {
         final boolean hideDragSourceTask = hideDragSourceTaskId != -1;
         final List<ActivityManager.RunningTaskInfo> tasks =
-                mActivityTaskManager.getTasks(hideDragSourceTask ? 2 : 1,
-                        false /* filterOnlyVisibleRecents */);
-        if (!tasks.isEmpty()) {
-            for (int i = tasks.size() - 1; i >= 0; i--) {
-                final ActivityManager.RunningTaskInfo task = tasks.get(i);
-                if (hideDragSourceTask && hideDragSourceTaskId == task.taskId) {
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
-                            "Skipping running task: id=%d component=%s", task.taskId,
-                            task.baseIntent != null ? task.baseIntent.getComponent() : "null");
-                    continue;
-                }
-                runningTaskInfo = task;
-                runningTaskWinMode = task.getWindowingMode();
-                runningTaskActType = task.getActivityType();
+                mActivityTaskManager.getTasks(5, false /* filterOnlyVisibleRecents */);
+        for (int i = 0; i < tasks.size(); i++) {
+            final ActivityManager.RunningTaskInfo task = tasks.get(i);
+            if (hideDragSourceTask && hideDragSourceTaskId == task.taskId) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
-                        "Running task: id=%d component=%s", task.taskId,
+                        "Skipping running task: id=%d component=%s", task.taskId,
                         task.baseIntent != null ? task.baseIntent.getComponent() : "null");
-                break;
+                continue;
             }
+            if (!task.isVisible) {
+                // Skip invisible tasks
+                continue;
+            }
+            if (task.configuration.windowConfiguration.isAlwaysOnTop()) {
+                // Skip always-on-top floating tasks
+                continue;
+            }
+            runningTaskInfo = task;
+            runningTaskWinMode = task.getWindowingMode();
+            runningTaskActType = task.getActivityType();
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                    "Running task: id=%d component=%s", task.taskId,
+                    task.baseIntent != null ? task.baseIntent.getComponent() : "null");
+            break;
         }
     }
 
     /**
      * Updates the session data based on the current state of the system at the start of the drag.
      */
-    void initialize() {
-        updateRunningTask();
+    void initialize(boolean skipUpdateRunningTask) {
+        if (!skipUpdateRunningTask) {
+            updateRunningTask();
+        }
 
         activityInfo = mInitialDragData.getItemAt(0).getActivityInfo();
         // TODO: This should technically check & respect config_supportsNonResizableMultiWindow

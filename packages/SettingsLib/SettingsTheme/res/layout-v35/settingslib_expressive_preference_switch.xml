@@ -19,4 +19,5 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:theme="@style/Theme.Material3.DynamicColors.DayNight"
     android:id="@+id/switchWidget"
+    android:filterTouchesWhenObscured="false"
     style="@style/SettingslibSwitchStyle.Expressive"/>

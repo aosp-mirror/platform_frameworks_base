@@ -554,10 +554,16 @@ public final class SQLiteRawStatement implements Closeable {
      *
      * @see <a href="http://sqlite.org/c3ref/column_blob.html">sqlite3_column_type</a>
      *
+     * If the row has no data then a {@link SQLiteMisuseException} is thrown.  This condition can
+     * occur the last call to {@link #step()} returned false or if {@link #step()} was not called
+     * before the statement was created or after the last call to {@link #reset()}.  Note that
+     * {@link SQLiteMisuseException} may be thrown for other reasons.
+     *
      * @param columnIndex The index of a column in the result row. It is zero-based.
      * @return The type of the value in the column of the result row.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
+     * @throws SQLiteMisuseException if the row has no data.
      * @throws SQLiteException if a native error occurs.
      */
     @SQLiteDataType
@@ -580,6 +586,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @return The name of the column in the result row.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
+     * @throws SQLiteMisuseException if the row has no data. See {@link #getColumnType()}.
      * @throws SQLiteOutOfMemoryException if the database cannot allocate memory for the name.
      */
     @NonNull
@@ -606,6 +613,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @return The length, in bytes, of the value in the column.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
+     * @throws SQLiteMisuseException if the row has no data. See {@link #getColumnType()}.
      * @throws SQLiteException if a native error occurs.
      */
     public int getColumnLength(int columnIndex) {
@@ -631,6 +639,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @return The value of the column as a blob, or null if the column is NULL.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
+     * @throws SQLiteMisuseException if the row has no data. See {@link #getColumnType()}.
      * @throws SQLiteException if a native error occurs.
      */
     @Nullable
@@ -664,6 +673,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws IllegalArgumentException if the buffer is too small for offset+length.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
+     * @throws SQLiteMisuseException if the row has no data. See {@link #getColumnType()}.
      * @throws SQLiteException if a native error occurs.
      */
     public int readColumnBlob(int columnIndex, @NonNull byte[] buffer, int offset,
@@ -691,6 +701,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @return The value of a column as a double.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
+     * @throws SQLiteMisuseException if the row has no data. See {@link #getColumnType()}.
      * @throws SQLiteException if a native error occurs.
      */
     public double getColumnDouble(int columnIndex) {
@@ -715,6 +726,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @return The value of the column as an int.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
+     * @throws SQLiteMisuseException if the row has no data. See {@link #getColumnType()}.
      * @throws SQLiteException if a native error occurs.
      */
     public int getColumnInt(int columnIndex) {
@@ -739,6 +751,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @return The value of the column as an long.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
+     * @throws SQLiteMisuseException if the row has no data. See {@link #getColumnType()}.
      * @throws SQLiteException if a native error occurs.
      */
     public long getColumnLong(int columnIndex) {
@@ -763,6 +776,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @return The value of the column as a string.
      * @throws IllegalStateException if the statement is closed or this is a foreign thread.
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
+     * @throws SQLiteMisuseException if the row has no data. See {@link #getColumnType()}.
      * @throws SQLiteException if a native error occurs.
      */
     @NonNull

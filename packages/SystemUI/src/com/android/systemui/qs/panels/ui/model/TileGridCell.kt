@@ -31,8 +31,8 @@ sealed interface GridCell {
 }
 
 /**
- * Represents a [EditTileViewModel] from a grid associated with a tile format and the row it's
- * positioned at
+ * Represents a [EditTileViewModel] from a grid associated with a tile format and the row and column
+ * it's positioned at
  */
 @Immutable
 data class TileGridCell(
@@ -41,13 +41,15 @@ data class TileGridCell(
     override val width: Int,
     override val span: GridItemSpan = GridItemSpan(width),
     override val s: String = "${tile.tileSpec.spec}-$row-$width",
+    val column: Int,
 ) : GridCell, SizedTile<EditTileViewModel>, CategoryAndName by tile {
     val key: String = "${tile.tileSpec.spec}-$row"
 
     constructor(
         sizedTile: SizedTile<EditTileViewModel>,
         row: Int,
-    ) : this(tile = sizedTile.tile, row = row, width = sizedTile.width)
+        column: Int,
+    ) : this(tile = sizedTile.tile, row = row, column = column, width = sizedTile.width)
 }
 
 /** Represents an empty space used to fill incomplete rows. Will always display as a 1x1 tile */
@@ -73,7 +75,13 @@ fun List<SizedTile<EditTileViewModel>>.toGridCells(
     return splitInRowsSequence(this, columns)
         .flatMapIndexed { rowIndex, sizedTiles ->
             val correctedRowIndex = rowIndex + startingRow
-            val row: List<GridCell> = sizedTiles.map { TileGridCell(it, correctedRowIndex) }
+            var column = 0
+            val row: List<GridCell> =
+                sizedTiles.map {
+                    TileGridCell(it, correctedRowIndex, column).also { cell ->
+                        column += cell.width
+                    }
+                }
 
             // Fill the incomplete rows with spacers
             val numSpacers = columns - sizedTiles.sumOf { it.width }

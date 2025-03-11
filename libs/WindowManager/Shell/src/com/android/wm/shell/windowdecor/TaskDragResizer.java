@@ -26,4 +26,19 @@ public interface TaskDragResizer {
      * a resize is complete.
      */
     boolean isResizingOrAnimating();
+
+    /**
+     * Adds a drag start listener to be notified of drag start events.
+     *
+     * @param dragEventListener Listener to be added.
+     */
+    void addDragEventListener(DragPositioningCallbackUtility.DragEventListener dragEventListener);
+
+    /**
+     * Removes a drag start listener from the listener set.
+     *
+     * @param dragEventListener Listener to be removed.
+     */
+    void removeDragEventListener(
+            DragPositioningCallbackUtility.DragEventListener dragEventListener);
 }

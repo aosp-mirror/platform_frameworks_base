@@ -18,8 +18,11 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
+import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.CameraCompatTaskInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
 import android.widget.Toast;
@@ -48,8 +51,9 @@ class AppCompatCameraPolicy {
         // without the need to restart the device.
         final boolean needsDisplayRotationCompatPolicy =
                 wmService.mAppCompatConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
-        final boolean needsCameraCompatFreeformPolicy = Flags.cameraCompatForFreeform()
-                && DesktopModeHelper.canEnterDesktopMode(wmService.mContext);
+        final boolean needsCameraCompatFreeformPolicy =
+                Flags.enableCameraCompatForDesktopWindowing()
+                        && DesktopModeHelper.canEnterDesktopMode(wmService.mContext);
         if (needsDisplayRotationCompatPolicy || needsCameraCompatFreeformPolicy) {
             mCameraStateMonitor = new CameraStateMonitor(displayContent, wmService.mH);
             mActivityRefresher = new ActivityRefresher(wmService, wmService.mH);
@@ -67,10 +71,17 @@ class AppCompatCameraPolicy {
         }
     }
 
-    void onActivityRefreshed(@NonNull ActivityRecord activity) {
-        if (mActivityRefresher != null) {
-            mActivityRefresher.onActivityRefreshed(activity);
+    static void onActivityRefreshed(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        if (cameraPolicy != null && cameraPolicy.mActivityRefresher != null) {
+            cameraPolicy.mActivityRefresher.onActivityRefreshed(activity);
         }
+    }
+
+    @Nullable
+    static AppCompatCameraPolicy getAppCompatCameraPolicy(@NonNull ActivityRecord activityRecord) {
+        return activityRecord.mDisplayContent != null
+                ? activityRecord.mDisplayContent.mAppCompatCameraPolicy : null;
     }
 
     /**
@@ -79,10 +90,11 @@ class AppCompatCameraPolicy {
      * camera preview and can lead to sideways or stretching issues persisting even after force
      * rotation.
      */
-    void onActivityConfigurationChanging(@NonNull ActivityRecord activity,
+    static void onActivityConfigurationChanging(@NonNull ActivityRecord activity,
             @NonNull Configuration newConfig, @NonNull Configuration lastReportedConfig) {
-        if (mActivityRefresher != null) {
-            mActivityRefresher.onActivityConfigurationChanging(activity, newConfig,
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        if (cameraPolicy != null && cameraPolicy.mActivityRefresher != null) {
+            cameraPolicy.mActivityRefresher.onActivityConfigurationChanging(activity, newConfig,
                     lastReportedConfig);
         }
     }
@@ -99,11 +111,11 @@ class AppCompatCameraPolicy {
         }
     }
 
-    boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
-        if (mDisplayRotationCompatPolicy != null) {
-            return mDisplayRotationCompatPolicy.isActivityEligibleForOrientationOverride(activity);
-        }
-        return false;
+    static boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        return cameraPolicy != null && cameraPolicy.mDisplayRotationCompatPolicy != null
+                && cameraPolicy.mDisplayRotationCompatPolicy
+                        .isActivityEligibleForOrientationOverride(activity);
     }
 
     /**
@@ -116,11 +128,11 @@ class AppCompatCameraPolicy {
      *     <li>The activity has fixed orientation but not "locked" or "nosensor" one.
      * </ul>
      */
-    boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity) {
-        if (mDisplayRotationCompatPolicy != null) {
-            return mDisplayRotationCompatPolicy.isTreatmentEnabledForActivity(activity);
-        }
-        return false;
+    static boolean isTreatmentEnabledForActivity(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        return cameraPolicy != null && cameraPolicy.mDisplayRotationCompatPolicy != null
+                && cameraPolicy.mDisplayRotationCompatPolicy
+                        .isTreatmentEnabledForActivity(activity);
     }
 
     void start() {
@@ -166,28 +178,93 @@ class AppCompatCameraPolicy {
                 : SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
+    // TODO(b/369070416): have policies implement the same interface.
+    static boolean shouldCameraCompatControlOrientation(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        if (cameraPolicy == null) {
+            return false;
+        }
+        return (cameraPolicy.mDisplayRotationCompatPolicy != null
+                        && cameraPolicy.mDisplayRotationCompatPolicy
+                                .shouldCameraCompatControlOrientation(activity))
+                || (cameraPolicy.mCameraCompatFreeformPolicy != null
+                        && cameraPolicy.mCameraCompatFreeformPolicy
+                                .shouldCameraCompatControlOrientation(activity));
+    }
+
+    // TODO(b/369070416): have policies implement the same interface.
+    static boolean shouldCameraCompatControlAspectRatio(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        if (cameraPolicy == null) {
+            return false;
+        }
+        return (cameraPolicy.mDisplayRotationCompatPolicy != null
+                        && cameraPolicy.mDisplayRotationCompatPolicy
+                                .shouldCameraCompatControlAspectRatio(activity))
+                || (cameraPolicy.mCameraCompatFreeformPolicy != null
+                        && cameraPolicy.mCameraCompatFreeformPolicy
+                                .shouldCameraCompatControlAspectRatio(activity));
+    }
+
+    // TODO(b/369070416): have policies implement the same interface.
     /**
-     * @return {@code true} if the Camera is active for the provided {@link ActivityRecord}.
+     * @return {@code true} if the Camera is active for the provided {@link ActivityRecord} and
+     * any camera compat treatment could be triggered for the current windowing mode.
      */
-    boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
-        return mDisplayRotationCompatPolicy != null
-                && mDisplayRotationCompatPolicy.isCameraActive(activity, mustBeFullscreen);
+    private static boolean isCameraRunningAndWindowingModeEligible(
+            @NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        if (cameraPolicy == null) {
+            return false;
+        }
+        return (cameraPolicy.mDisplayRotationCompatPolicy != null
+                && cameraPolicy.mDisplayRotationCompatPolicy
+                        .isCameraRunningAndWindowingModeEligible(activity,
+                                /* mustBeFullscreen */ true))
+                || (cameraPolicy.mCameraCompatFreeformPolicy != null
+                        && cameraPolicy.mCameraCompatFreeformPolicy
+                                .isCameraRunningAndWindowingModeEligible(activity));
     }
 
     @Nullable
     String getSummaryForDisplayRotationHistoryRecord() {
-        if (mDisplayRotationCompatPolicy != null) {
-            return mDisplayRotationCompatPolicy.getSummaryForDisplayRotationHistoryRecord();
+        return mDisplayRotationCompatPolicy != null
+                ? mDisplayRotationCompatPolicy.getSummaryForDisplayRotationHistoryRecord()
+                : null;
+    }
+
+    // TODO(b/369070416): have policies implement the same interface.
+    static float getCameraCompatMinAspectRatio(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        if (cameraPolicy == null) {
+            return 1.0f;
         }
-        return null;
+        float displayRotationCompatPolicyAspectRatio =
+                cameraPolicy.mDisplayRotationCompatPolicy != null
+                ? cameraPolicy.mDisplayRotationCompatPolicy.getCameraCompatAspectRatio(activity)
+                : MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+        float cameraCompatFreeformPolicyAspectRatio =
+                cameraPolicy.mCameraCompatFreeformPolicy != null
+                ? cameraPolicy.mCameraCompatFreeformPolicy.getCameraCompatAspectRatio(activity)
+                : MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+        return Math.max(displayRotationCompatPolicyAspectRatio,
+                cameraCompatFreeformPolicyAspectRatio);
+    }
+
+    @CameraCompatTaskInfo.FreeformCameraCompatMode
+    static int getCameraCompatFreeformMode(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        return cameraPolicy != null && cameraPolicy.mCameraCompatFreeformPolicy != null
+                ? cameraPolicy.mCameraCompatFreeformPolicy.getCameraCompatMode(activity)
+                : CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
     }
 
     /**
      * Whether we should apply the min aspect ratio per-app override only when an app is connected
      * to the camera.
      */
-    boolean shouldOverrideMinAspectRatioForCamera(@NonNull ActivityRecord activityRecord) {
-        return isCameraActive(activityRecord, /* mustBeFullscreen= */ true)
+    static boolean shouldOverrideMinAspectRatioForCamera(@NonNull ActivityRecord activityRecord) {
+        return AppCompatCameraPolicy.isCameraRunningAndWindowingModeEligible(activityRecord)
                 && activityRecord.mAppCompatController.getAppCompatCameraOverrides()
                         .isOverrideMinAspectRatioForCameraEnabled();
     }

@@ -16,15 +16,17 @@
 
 package com.android.systemui.screenshot.policy
 
-import android.content.ComponentName
 import android.os.UserHandle
 
-/** The parameters dictated by a [CapturePolicy], used to adjust alter screenshot request. */
 data class CaptureParameters(
-    /** How should the content be captured? */
+    /** Describes how the image should be obtained. */
     val type: CaptureType,
-    /** The focused or top component at the time of the screenshot. */
-    val component: ComponentName?,
-    /** Which user should receive the screenshot file? */
+    /** Which user to receive the image. */
     val owner: UserHandle,
+    /**
+     * The task which represents the main content or focal point of the screenshot. This is the task
+     * used for retrieval of [AssistContent][android.app.assist.AssistContent] as well as
+     * [Scroll Capture][android.view.IWindowManager.requestScrollCapture].
+     */
+    val contentTask: TaskReference,
 )

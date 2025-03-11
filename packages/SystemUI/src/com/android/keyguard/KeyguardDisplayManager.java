@@ -15,6 +15,8 @@
  */
 package com.android.keyguard;
 
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
+
 import android.annotation.NonNull;
 import android.app.Presentation;
 import android.content.Context;
@@ -36,18 +38,25 @@ import android.view.WindowManager;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.shade.ShadeDisplayAware;
+import com.android.systemui.shade.data.repository.ShadeDisplaysRepository;
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 @SysUISingleton
 public class KeyguardDisplayManager {
@@ -58,6 +67,7 @@ public class KeyguardDisplayManager {
     private final DisplayManager mDisplayService;
     private final DisplayTracker mDisplayTracker;
     private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
+    private final Provider<ShadeDisplaysRepository> mShadePositionRepositoryProvider;
     private final ConnectedDisplayKeyguardPresentation.Factory
             mConnectedDisplayKeyguardPresentationFactory;
     private final Context mContext;
@@ -94,7 +104,8 @@ public class KeyguardDisplayManager {
             };
 
     @Inject
-    public KeyguardDisplayManager(Context context,
+    public KeyguardDisplayManager(
+            @ShadeDisplayAware Context context,
             Lazy<NavigationBarController> navigationBarControllerLazy,
             DisplayTracker displayTracker,
             @Main Executor mainExecutor,
@@ -102,9 +113,12 @@ public class KeyguardDisplayManager {
             DeviceStateHelper deviceStateHelper,
             KeyguardStateController keyguardStateController,
             ConnectedDisplayKeyguardPresentation.Factory
-                    connectedDisplayKeyguardPresentationFactory) {
+                    connectedDisplayKeyguardPresentationFactory,
+            Provider<ShadeDisplaysRepository> shadePositionRepositoryProvider,
+            @Application CoroutineScope appScope) {
         mContext = context;
         mNavigationBarControllerLazy = navigationBarControllerLazy;
+        mShadePositionRepositoryProvider = shadePositionRepositoryProvider;
         uiBgExecutor.execute(() -> mMediaRouter = mContext.getSystemService(MediaRouter.class));
         mDisplayService = mContext.getSystemService(DisplayManager.class);
         mDisplayTracker = displayTracker;
@@ -112,6 +126,17 @@ public class KeyguardDisplayManager {
         mDeviceStateHelper = deviceStateHelper;
         mKeyguardStateController = keyguardStateController;
         mConnectedDisplayKeyguardPresentationFactory = connectedDisplayKeyguardPresentationFactory;
+        if (ShadeWindowGoesAround.isEnabled()) {
+            collectFlow(appScope, shadePositionRepositoryProvider.get().getDisplayId(),
+                    (id) -> onShadeWindowMovedToDisplayId(id));
+        }
+    }
+
+    private void onShadeWindowMovedToDisplayId(int shadeDisplayId) {
+        if (mShowing) {
+            hidePresentation(shadeDisplayId);
+            updateDisplays(/* showing= */ true);
+        }
     }
 
     private boolean isKeyguardShowable(Display display) {
@@ -119,9 +144,20 @@ public class KeyguardDisplayManager {
             if (DEBUG) Log.i(TAG, "Cannot show Keyguard on null display");
             return false;
         }
-        if (display.getDisplayId() == mDisplayTracker.getDefaultDisplayId()) {
-            if (DEBUG) Log.i(TAG, "Do not show KeyguardPresentation on the default display");
-            return false;
+        if (ShadeWindowGoesAround.isEnabled()) {
+            int shadeDisplayId = mShadePositionRepositoryProvider.get().getDisplayId().getValue();
+            if (display.getDisplayId() == shadeDisplayId) {
+                if (DEBUG) {
+                    Log.i(TAG,
+                            "Do not show KeyguardPresentation on the shade window display");
+                }
+                return false;
+            }
+        } else {
+            if (display.getDisplayId() == mDisplayTracker.getDefaultDisplayId()) {
+                if (DEBUG) Log.i(TAG, "Do not show KeyguardPresentation on the default display");
+                return false;
+            }
         }
         display.getDisplayInfo(mTmpDisplayInfo);
         if ((mTmpDisplayInfo.flags & Display.FLAG_PRIVATE) != 0) {
@@ -297,7 +333,8 @@ public class KeyguardDisplayManager {
         private boolean mIsInConcurrentDisplayState;
 
         @Inject
-        DeviceStateHelper(Context context,
+        DeviceStateHelper(
+                @ShadeDisplayAware Context context,
                 DeviceStateManager deviceStateManager,
                 @Main Executor mainExecutor) {
 

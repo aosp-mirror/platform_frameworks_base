@@ -1157,7 +1157,11 @@ public class ImageWriter implements AutoCloseable {
         @Override
         public void setFence(@NonNull SyncFence fence) throws IOException {
             throwISEIfImageIsInvalid();
-            nativeSetFenceFd(fence.getFdDup().detachFd());
+            if (fence.isValid()) {
+                nativeSetFenceFd(fence.getFdDup().detachFd());
+            } else {
+                nativeSetFenceFd(-1);
+            }
         }
 
         @Override

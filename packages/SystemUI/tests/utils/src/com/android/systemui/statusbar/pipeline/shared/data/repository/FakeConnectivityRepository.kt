@@ -42,10 +42,7 @@ class FakeConnectivityRepository : ConnectivityRepository {
      * validated
      */
     @JvmOverloads
-    fun setMobileConnected(
-        default: Boolean = true,
-        validated: Boolean = true,
-    ) {
+    fun setMobileConnected(default: Boolean = true, validated: Boolean = true) {
         defaultConnections.value =
             DefaultConnectionModel(
                 mobile = DefaultConnectionModel.Mobile(default),
@@ -55,10 +52,7 @@ class FakeConnectivityRepository : ConnectivityRepository {
 
     /** Similar convenience method for ethernet */
     @JvmOverloads
-    fun setEthernetConnected(
-        default: Boolean = true,
-        validated: Boolean = true,
-    ) {
+    fun setEthernetConnected(default: Boolean = true, validated: Boolean = true) {
         defaultConnections.value =
             DefaultConnectionModel(
                 ethernet = DefaultConnectionModel.Ethernet(default),
@@ -67,10 +61,7 @@ class FakeConnectivityRepository : ConnectivityRepository {
     }
 
     @JvmOverloads
-    fun setWifiConnected(
-        default: Boolean = true,
-        validated: Boolean = true,
-    ) {
+    fun setWifiConnected(default: Boolean = true, validated: Boolean = true) {
         defaultConnections.value =
             DefaultConnectionModel(
                 wifi = DefaultConnectionModel.Wifi(default),
@@ -78,3 +69,6 @@ class FakeConnectivityRepository : ConnectivityRepository {
             )
     }
 }
+
+val ConnectivityRepository.fake
+    get() = this as FakeConnectivityRepository

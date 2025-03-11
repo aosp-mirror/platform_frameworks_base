@@ -1195,7 +1195,12 @@ public class ResolverListAdapter extends BaseAdapter {
 
         @Nullable
         protected Drawable loadIconFromResource(Resources res, int resId) {
-            return res.getDrawableForDensity(resId, mIconDpi);
+            try {
+                return res.getDrawableForDensity(resId, mIconDpi);
+            } catch (Resources.NotFoundException e) {
+                Log.e(TAG, "Resource not found", e);
+                return null;
+            }
         }
 
     }

@@ -150,6 +150,7 @@ public class SensorEvent {
      * All values are in micro-Tesla (uT) and measure the ambient magnetic field
      * in the X, Y and Z axis.
      *
+     *
      * <h4>{@link android.hardware.Sensor#TYPE_GYROSCOPE Sensor.TYPE_GYROSCOPE}:
      * </h4> All values are in radians/second and measure the rate of rotation
      * around the device's local X, Y and Z axis. The coordinate system is the
@@ -406,9 +407,8 @@ public class SensorEvent {
      * </h4>
      *
      * <ul>
-     * <li> values[0]: ambient (room) temperature in degree Celsius.</li>
+     * <li> values[0]: Ambient (room) temperature in degrees Celsius</li>
      * </ul>
-     *
      *
      * <h4>{@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD_UNCALIBRATED
      * Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED}:</h4>
@@ -549,8 +549,20 @@ public class SensorEvent {
      *  <li> values[0]: 1.0 </li>
      * </ul>
      *
-     *   <h4>{@link android.hardware.Sensor#TYPE_HEART_BEAT
-     * Sensor.TYPE_HEART_BEAT}:</h4>
+     * <h4>{@link android.hardware.Sensor#TYPE_STEP_COUNTER Sensor.TYPE_STEP_COUNTER}:</h4>
+     *
+     * <ul>
+     * <li>values[0]: Number of steps taken by the user since the last reboot while the sensor is
+     * activated</li>
+     * </ul>
+     *
+     * <h4>{@link android.hardware.Sensor#TYPE_STEP_DETECTOR Sensor.TYPE_STEP_DETECTOR}:</h4>
+     *
+     * <ul>
+     * <li>values[0]: Always set to 1.0, representing a single step detected event</li>
+     * </ul>
+     *
+     * <h4>{@link android.hardware.Sensor#TYPE_HEART_BEAT Sensor.TYPE_HEART_BEAT}:</h4>
      *
      * A sensor of this type returns an event everytime a heart beat peak is
      * detected.

@@ -24,6 +24,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -37,8 +39,8 @@ import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.launcher3.Flags.enableRefactorTaskThumbnail;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
+import static com.android.launcher3.Flags.enableUseTopVisibleActivityForExcludeFromRecentTask;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
@@ -324,9 +326,12 @@ class RecentTasks {
         ProtoLog.i(WM_DEBUG_TASKS, "Setting frozen recents task list");
 
         // Always update the reordering time when this is called to ensure that the timeout
-        // is reset
+        // is reset.  Extend this duration when running in tests.
+        final long timeout = ActivityManager.isRunningInUserTestHarness()
+                ? mFreezeTaskListTimeoutMs * 10
+                : mFreezeTaskListTimeoutMs;
         mService.mH.removeCallbacks(mResetFreezeTaskListOnTimeoutRunnable);
-        mService.mH.postDelayed(mResetFreezeTaskListOnTimeoutRunnable, mFreezeTaskListTimeoutMs);
+        mService.mH.postDelayed(mResetFreezeTaskListOnTimeoutRunnable, timeout);
     }
 
     /**
@@ -490,11 +495,18 @@ class RecentTasks {
         mTaskNotificationController.notifyTaskListUpdated();
     }
 
-    private void notifyTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess) {
+    private void notifyTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess,
+            boolean removedForAddTask) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             mCallbacks.get(i).onRecentTaskRemoved(task, wasTrimmed, killProcess);
         }
         mTaskNotificationController.notifyTaskListUpdated();
+        if (removedForAddTask) {
+            mTaskNotificationController.notifyRecentTaskRemovedForAddTask(task.mTaskId);
+        }
+    }
+    private void notifyTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess) {
+        notifyTaskRemoved(task, wasTrimmed, killProcess, false /* removedForAddTask */);
     }
 
     /**
@@ -549,6 +561,12 @@ class RecentTasks {
         long currentElapsedTime = SystemClock.elapsedRealtime();
         for (int i = 0; i < tasks.size(); i++) {
             Task task = tasks.get(i);
+            // Remove the task restored from xml if any existing tasks match.
+            if (findRemoveIndexForAddTask(task) >= 0) {
+                tasks.remove(i);
+                i--;
+                continue;
+            }
             task.lastActiveTime = currentElapsedTime - i;
         }
 
@@ -559,6 +577,7 @@ class RecentTasks {
         if (existedTaskIds.size() > 0) {
             syncPersistentTaskIdsLocked();
         }
+        mTaskNotificationController.notifyTaskListUpdated();
     }
 
     private boolean isRecentTasksLoaded(int userId) {
@@ -677,26 +696,34 @@ class RecentTasks {
         if (isRecentTasksLoaded(userId)) {
             Slog.i(TAG, "Unloading recents for user " + userId + " from memory.");
             mUsersWithRecentsLoaded.delete(userId);
-            removeTasksForUserLocked(userId);
+            removeTasksForUserFromMemoryLocked(userId);
         }
         mPersistedTaskIds.delete(userId);
         mTaskPersister.unloadUserDataFromMemory(userId);
     }
 
     /** Remove recent tasks for a user. */
-    private void removeTasksForUserLocked(int userId) {
+    private void removeTasksForUserFromMemoryLocked(int userId) {
         if (userId <= 0) {
             Slog.i(TAG, "Can't remove recent task on user " + userId);
             return;
         }
 
+        boolean notifyTaskUpdated = false;
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             Task task = mTasks.get(i);
             if (task.mUserId == userId) {
                 ProtoLog.i(WM_DEBUG_TASKS, "remove RecentTask %s when finishing user "
                         + "%d", task, userId);
-                remove(task);
+                mTasks.remove(task);
+                mService.mWindowManager.mSnapshotController.mTaskSnapshotController
+                        .removeSnapshotCache(task.mTaskId);
+                // Only notify if list has changed.
+                notifyTaskUpdated = true;
             }
+        }
+        if (notifyTaskUpdated) {
+            mTaskNotificationController.notifyTaskListUpdated();
         }
     }
 
@@ -1502,7 +1529,7 @@ class RecentTasks {
                 // The Recents is only supported on default display now, we should only keep the
                 // most recent task of home display.
                 boolean isMostRecentTask;
-                if (enableRefactorTaskThumbnail()) {
+                if (enableUseTopVisibleActivityForExcludeFromRecentTask()) {
                     isMostRecentTask = task.getTopVisibleActivity() != null;
                 } else {
                     isMostRecentTask = taskIndex == 0;
@@ -1615,7 +1642,8 @@ class RecentTasks {
                 // from becoming dangling.
                 mHiddenTasks.add(0, removedTask);
             }
-            notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */);
+            notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */,
+                    true /* removedForAddTask */);
             if (DEBUG_RECENTS_TRIM_TASKS) {
                 Slog.d(TAG, "Trimming task=" + removedTask
                         + " for addition of task=" + task);
@@ -2005,21 +2033,8 @@ class RecentTasks {
         // Fill in some deprecated values.
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
-        rti.lastSnapshotData.set(tr.mLastTaskSnapshotData);
         if (!getTasksAllowed) {
             Task.trimIneffectiveInfo(tr, rti);
-        }
-
-        // Fill in organized child task info for the task created by organizer.
-        if (tr.mCreatedByOrganizer) {
-            for (int i = tr.getChildCount() - 1; i >= 0; i--) {
-                final Task childTask = tr.getChildAt(i).asTask();
-                if (childTask != null && childTask.isOrganized()) {
-                    final ActivityManager.RecentTaskInfo cti = new ActivityManager.RecentTaskInfo();
-                    childTask.fillTaskInfo(cti, true /* stripExtras */, tda);
-                    rti.childrenTaskInfos.add(cti);
-                }
-            }
         }
         return rti;
     }
@@ -2040,10 +2055,15 @@ class RecentTasks {
         final boolean isOtherUndefinedMode = otherWindowingMode == WINDOWING_MODE_UNDEFINED;
 
         // An activity type and windowing mode is compatible if they are the exact same type/mode,
-        // or if one of the type/modes is undefined
+        // or if one of the type/modes is undefined. This is with the exception of
+        // freeform/fullscreen where both modes are assumed to be compatible with each other.
         final boolean isCompatibleType = activityType == otherActivityType
                 || isUndefinedType || isOtherUndefinedType;
         final boolean isCompatibleMode = windowingMode == otherWindowingMode
+                || (windowingMode == WINDOWING_MODE_FREEFORM
+                && otherWindowingMode == WINDOWING_MODE_FULLSCREEN)
+                || (windowingMode == WINDOWING_MODE_FULLSCREEN
+                && otherWindowingMode == WINDOWING_MODE_FREEFORM)
                 || isUndefinedMode || isOtherUndefinedMode;
 
         return isCompatibleType && isCompatibleMode;

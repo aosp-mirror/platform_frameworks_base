@@ -22,7 +22,7 @@
     <string name="string_continue" msgid="1346732695941131882">"Շարունակել"</string>
     <string name="string_more_options" msgid="2763852250269945472">"Պահել մեկ այլ եղանակ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Իմանալ ավելին"</string>
-    <string name="content_description_show_password" msgid="3283502010388521607">"Ցուցադրել գաղտնաբառը"</string>
+    <string name="content_description_show_password" msgid="3283502010388521607">"Ցույց տալ գաղտնաբառը"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Թաքցնել գաղտնաբառը"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Մուտքի բանալիների հետ ավելի ապահով է"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Մուտքի բանալիների շնորհիվ դուք բարդ գաղտնաբառեր ստեղծելու կամ հիշելու անհրաժեշտություն չեք ունենա"</string>

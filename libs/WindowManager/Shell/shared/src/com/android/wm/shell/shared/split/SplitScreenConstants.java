@@ -61,19 +61,81 @@ public class SplitScreenConstants {
     @IntDef(prefix = {"SPLIT_POSITION_"}, value = {
             SPLIT_POSITION_UNDEFINED,
             SPLIT_POSITION_TOP_OR_LEFT,
-            SPLIT_POSITION_BOTTOM_OR_RIGHT
+            SPLIT_POSITION_BOTTOM_OR_RIGHT,
     })
     public @interface SplitPosition {
     }
 
-    /** A snap target in the first half of the screen, where the split is roughly 30-70. */
-    public static final int SNAP_TO_30_70 = 0;
+    // These SPLIT_INDEX constants will be used in the same way as the above SPLIT_POSITION ints,
+    // but scalable to n apps. Eventually, SPLIT_POSITION can be deprecated and only the below
+    // will be used.
+    public static final int SPLIT_INDEX_UNDEFINED = -1;
+    public static final int SPLIT_INDEX_0 = 0;
+    public static final int SPLIT_INDEX_1 = 1;
+    public static final int SPLIT_INDEX_2 = 2;
+    public static final int SPLIT_INDEX_3 = 3;
 
-    /** The 50-50 snap target */
-    public static final int SNAP_TO_50_50 = 1;
+    @IntDef(prefix = {"SPLIT_INDEX_"}, value = {
+            SPLIT_INDEX_UNDEFINED,
+            SPLIT_INDEX_0,
+            SPLIT_INDEX_1,
+            SPLIT_INDEX_2,
+            SPLIT_INDEX_3
+    })
+    public @interface SplitIndex {
+    }
 
-    /** A snap target in the latter half of the screen, where the split is roughly 70-30. */
-    public static final int SNAP_TO_70_30 = 2;
+    /** Signifies that user is currently not in split screen. */
+    public static final int NOT_IN_SPLIT = -1;
+
+    /**
+     * A snap target for two apps, where the split is 33-66. With FLAG_ENABLE_FLEXIBLE_SPLIT,
+     * only used on tablets.
+     */
+    public static final int SNAP_TO_2_33_66 = 0;
+
+    /** A snap target for two apps, where the split is 50-50.  */
+    public static final int SNAP_TO_2_50_50 = 1;
+
+    /**
+     * A snap target for two apps, where the split is 66-33. With FLAG_ENABLE_FLEXIBLE_SPLIT,
+     * only used on tablets.
+     */
+    public static final int SNAP_TO_2_66_33 = 2;
+
+    /**
+     * A snap target for two apps, where the split is 90-10. The "10" app extends off the screen,
+     * and is actually the same size as the onscreen app, but the visible portion takes up 10% of
+     * the screen. With FLAG_ENABLE_FLEXIBLE_SPLIT, used on phones and foldables.
+     */
+    public static final int SNAP_TO_2_90_10 = 3;
+
+    /**
+     * A snap target for two apps, where the split is 10-90. The "10" app extends off the screen,
+     * and is actually the same size as the onscreen app, but the visible portion takes up 10% of
+     * the screen. With FLAG_ENABLE_FLEXIBLE_SPLIT, used on phones and foldables.
+     */
+    public static final int SNAP_TO_2_10_90 = 4;
+
+    /**
+     * A snap target for three apps, where the split is 33-33-33. With FLAG_ENABLE_FLEXIBLE_SPLIT,
+     * only used on tablets.
+     */
+    public static final int SNAP_TO_3_33_33_33 = 5;
+
+    /**
+     * A snap target for three apps, where the split is 45-45-10. The "10" app extends off the
+     * screen, and is actually the same size as the onscreen apps, but the visible portion takes
+     * up 10% of the screen. With FLAG_ENABLE_FLEXIBLE_SPLIT, only used on unfolded foldables.
+     */
+    public static final int SNAP_TO_3_45_45_10 = 6;
+
+    /**
+     * A snap target for three apps, where the split is 10-45-45. The "10" app extends off the
+     * screen, and is actually the same size as the onscreen apps, but the visible portion takes
+     * up 10% of the screen. With FLAG_ENABLE_FLEXIBLE_SPLIT, only used on unfolded foldables.
+     */
+    public static final int SNAP_TO_3_10_45_45 = 7;
 
     /**
      * These snap targets are used for split pairs in a stable, non-transient state. They may be
@@ -81,19 +143,46 @@ public class SplitScreenConstants {
      * {@link SnapPosition}.
      */
     @IntDef(prefix = { "SNAP_TO_" }, value = {
-            SNAP_TO_30_70,
-            SNAP_TO_50_50,
-            SNAP_TO_70_30
+            SNAP_TO_2_33_66,
+            SNAP_TO_2_50_50,
+            SNAP_TO_2_66_33,
+            SNAP_TO_2_90_10,
+            SNAP_TO_2_10_90,
+            SNAP_TO_3_33_33_33,
+            SNAP_TO_3_45_45_10,
+            SNAP_TO_3_10_45_45,
     })
     public @interface PersistentSnapPosition {}
+
+    /**
+     * These are all the valid "states" that split screen can be in. It's the set of
+     * {@link PersistentSnapPosition} + {@link #NOT_IN_SPLIT}.
+     */
+    @IntDef(value = {
+            NOT_IN_SPLIT,
+            SNAP_TO_2_33_66,
+            SNAP_TO_2_50_50,
+            SNAP_TO_2_66_33,
+            SNAP_TO_2_90_10,
+            SNAP_TO_2_10_90,
+            SNAP_TO_3_33_33_33,
+            SNAP_TO_3_45_45_10,
+            SNAP_TO_3_10_45_45,
+    })
+    public @interface SplitScreenState {}
 
     /**
      * Checks if the snapPosition in question is a {@link PersistentSnapPosition}.
      */
     public static boolean isPersistentSnapPosition(@SnapPosition int snapPosition) {
-        return snapPosition == SNAP_TO_30_70
-                || snapPosition == SNAP_TO_50_50
-                || snapPosition == SNAP_TO_70_30;
+        return snapPosition == SNAP_TO_2_33_66
+                || snapPosition == SNAP_TO_2_50_50
+                || snapPosition == SNAP_TO_2_66_33
+                || snapPosition == SNAP_TO_2_90_10
+                || snapPosition == SNAP_TO_2_10_90
+                || snapPosition == SNAP_TO_3_33_33_33
+                || snapPosition == SNAP_TO_3_45_45_10
+                || snapPosition == SNAP_TO_3_10_45_45;
     }
 
     /** The divider doesn't snap to any target and is freely placeable. */
@@ -109,13 +198,18 @@ public class SplitScreenConstants {
     public static final int SNAP_TO_MINIMIZE = 13;
 
     @IntDef(prefix = { "SNAP_TO_" }, value = {
-            SNAP_TO_30_70,
-            SNAP_TO_50_50,
-            SNAP_TO_70_30,
+            SNAP_TO_2_33_66,
+            SNAP_TO_2_50_50,
+            SNAP_TO_2_66_33,
+            SNAP_TO_2_90_10,
+            SNAP_TO_2_10_90,
+            SNAP_TO_3_33_33_33,
+            SNAP_TO_3_45_45_10,
+            SNAP_TO_3_10_45_45,
             SNAP_TO_NONE,
             SNAP_TO_START_AND_DISMISS,
             SNAP_TO_END_AND_DISMISS,
-            SNAP_TO_MINIMIZE
+            SNAP_TO_MINIMIZE,
     })
     public @interface SnapPosition {}
 

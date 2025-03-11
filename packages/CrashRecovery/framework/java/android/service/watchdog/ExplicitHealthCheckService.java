@@ -18,15 +18,17 @@ package android.service.watchdog;
 
 import static android.os.Parcelable.Creator;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.crashrecovery.flags.Flags;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -42,7 +44,9 @@ import com.android.internal.util.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * A service to provide packages supporting explicit health checks and route checks to these
@@ -89,11 +93,10 @@ public abstract class ExplicitHealthCheckService extends Service {
 
     /**
      * {@link Bundle} key for a {@link String} value.
-     *
-     * {@hide}
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_CRASHRECOVERY)
     public static final String EXTRA_HEALTH_CHECK_PASSED_PACKAGE =
-            "android.service.watchdog.extra.health_check_passed_package";
+            "android.service.watchdog.extra.HEALTH_CHECK_PASSED_PACKAGE";
 
     /**
      * The Intent action that a service must respond to. Add it to the intent filter of the service
@@ -152,7 +155,8 @@ public abstract class ExplicitHealthCheckService extends Service {
     @NonNull public abstract List<String> onGetRequestedPackages();
 
     private final Handler mHandler = Handler.createAsync(Looper.getMainLooper());
-    @Nullable private RemoteCallback mCallback;
+    @Nullable private Consumer<Bundle> mHealthCheckResultCallback;
+    @Nullable private Executor mCallbackExecutor;
 
     @Override
     @NonNull
@@ -161,30 +165,49 @@ public abstract class ExplicitHealthCheckService extends Service {
     }
 
     /**
-     * Sets {@link RemoteCallback}, for testing purpose.
+     * Sets a callback to be invoked when an explicit health check passes for a package.
+     * <p>
+     * The callback will receive a {@link Bundle} containing the package name that passed the
+     * health check, identified by the key {@link #EXTRA_HEALTH_CHECK_PASSED_PACKAGE}.
+     * <p>
+     * <b>Note:</b> This API is primarily intended for testing purposes. Calling this outside of a
+     * test environment will override the default callback mechanism used to notify the system
+     * about health check results. Use with caution in production code.
      *
-     * @hide
+     * @param executor The executor on which the callback should be invoked. If {@code null}, the
+     *                 callback will be executed on the main thread.
+     * @param callback A callback that receives a {@link Bundle} containing the package name that
+     *                 passed the health check.
      */
-    @TestApi
-    public void setCallback(@Nullable RemoteCallback callback) {
-        mCallback = callback;
+    @FlaggedApi(Flags.FLAG_ENABLE_CRASHRECOVERY)
+    public final void setHealthCheckResultCallback(@CallbackExecutor @Nullable Executor executor,
+            @Nullable Consumer<Bundle> callback) {
+        mCallbackExecutor = executor;
+        mHealthCheckResultCallback = callback;
     }
+
+    private void executeCallback(@NonNull String packageName) {
+        if (mHealthCheckResultCallback != null) {
+            Objects.requireNonNull(packageName,
+                    "Package passing explicit health check must be non-null");
+            Bundle bundle = new Bundle();
+            bundle.putString(EXTRA_HEALTH_CHECK_PASSED_PACKAGE, packageName);
+            mHealthCheckResultCallback.accept(bundle);
+        } else {
+            Log.wtf(TAG, "System missed explicit health check result for " + packageName);
+        }
+    }
+
     /**
      * Implementors should call this to notify the system when explicit health check passes
      * for {@code packageName};
      */
     public final void notifyHealthCheckPassed(@NonNull String packageName) {
-        mHandler.post(() -> {
-            if (mCallback != null) {
-                Objects.requireNonNull(packageName,
-                        "Package passing explicit health check must be non-null");
-                Bundle bundle = new Bundle();
-                bundle.putString(EXTRA_HEALTH_CHECK_PASSED_PACKAGE, packageName);
-                mCallback.sendResult(bundle);
-            } else {
-                Log.wtf(TAG, "System missed explicit health check result for " + packageName);
-            }
-        });
+        if (mCallbackExecutor != null) {
+            mCallbackExecutor.execute(() -> executeCallback(packageName));
+        } else {
+            mHandler.post(() -> executeCallback(packageName));
+        }
     }
 
     /**
@@ -296,9 +319,7 @@ public abstract class ExplicitHealthCheckService extends Service {
     private class ExplicitHealthCheckServiceWrapper extends IExplicitHealthCheckService.Stub {
         @Override
         public void setCallback(RemoteCallback callback) throws RemoteException {
-            mHandler.post(() -> {
-                mCallback = callback;
-            });
+            mHandler.post(() -> mHealthCheckResultCallback = callback::sendResult);
         }
 
         @Override

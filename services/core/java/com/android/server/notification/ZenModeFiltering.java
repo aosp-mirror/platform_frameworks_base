@@ -37,7 +37,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
-import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.util.NotificationMessagingUtil;
 
 import java.io.PrintWriter;
@@ -171,13 +170,6 @@ public class ZenModeFiltering {
         if (isCritical(record)) {
             // Zen mode is ignored for critical notifications.
             maybeLogInterceptDecision(record, false, "criticalNotification");
-            return false;
-        }
-        // Make an exception to policy for the notification saying that policy has changed
-        if (NotificationManager.Policy.areAllVisualEffectsSuppressed(policy.suppressedVisualEffects)
-                && "android".equals(record.getSbn().getPackageName())
-                && SystemMessageProto.SystemMessage.NOTE_ZEN_UPGRADE == record.getSbn().getId()) {
-            maybeLogInterceptDecision(record, false, "systemDndChangedNotification");
             return false;
         }
         switch (zen) {

@@ -41,11 +41,16 @@ import java.util.ArrayList;
  * Bubble bar expanded view menu
  */
 public class BubbleBarMenuView extends LinearLayout {
+
     private ViewGroup mBubbleSectionView;
     private ViewGroup mActionsSectionView;
     private ImageView mBubbleIconView;
     private ImageView mBubbleDismissIconView;
     private TextView mBubbleTitleView;
+    // The animation has three stages. Each stage transition lasts until the animation ends. In
+    // stage 1, the title item content fades in. In stage 2, the background of the option items
+    // fades in. In stage 3, the option item content fades in.
+    private static final int SHOW_MENU_STAGES_COUNT = 3;
 
     public BubbleBarMenuView(Context context) {
         this(context, null /* attrs */);
@@ -93,6 +98,35 @@ public class BubbleBarMenuView extends LinearLayout {
             mActionsSectionView.getBackground().setTint(ta.getColor(0, Color.WHITE));
             ImageViewCompat.setImageTintList(mBubbleDismissIconView,
                     ColorStateList.valueOf(ta.getColor(1, Color.BLACK)));
+        }
+    }
+
+    /** Animates the menu from the specified start scale. */
+    public void animateFromStartScale(float currentScale, float progress) {
+        int menuItemElevation = getResources().getDimensionPixelSize(
+                R.dimen.bubble_manage_menu_elevation);
+        setScaleX(currentScale);
+        setScaleY(currentScale);
+        setAlphaForTitleViews(progress);
+        mBubbleSectionView.setElevation(menuItemElevation * progress);
+        float actionsBackgroundAlpha = Math.max(0,
+                (progress - (float) 1 / SHOW_MENU_STAGES_COUNT) * (SHOW_MENU_STAGES_COUNT - 1));
+        float actionItemsAlpha = Math.max(0,
+                (progress - (float) 2 / SHOW_MENU_STAGES_COUNT) * SHOW_MENU_STAGES_COUNT);
+        mActionsSectionView.setAlpha(actionsBackgroundAlpha);
+        mActionsSectionView.setElevation(menuItemElevation * actionsBackgroundAlpha);
+        setMenuItemViewsAlpha(actionItemsAlpha);
+    }
+
+    private void setAlphaForTitleViews(float alpha) {
+        mBubbleIconView.setAlpha(alpha);
+        mBubbleTitleView.setAlpha(alpha);
+        mBubbleDismissIconView.setAlpha(alpha);
+    }
+
+    private void setMenuItemViewsAlpha(float alpha) {
+        for (int i = mActionsSectionView.getChildCount() - 1; i >= 0; i--) {
+            mActionsSectionView.getChildAt(i).setAlpha(alpha);
         }
     }
 
@@ -150,6 +184,11 @@ public class BubbleBarMenuView extends LinearLayout {
     @Override
     public float getAlpha() {
         return mBubbleSectionView.getAlpha();
+    }
+
+    /** Return title menu item height. */
+    public float getTitleItemHeight() {
+        return mBubbleSectionView.getHeight();
     }
 
     /**

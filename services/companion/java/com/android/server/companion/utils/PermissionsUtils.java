@@ -86,7 +86,7 @@ public final class PermissionsUtils {
             @NonNull AssociationRequest request, int packageUid) {
         enforcePermissionForRequestingProfile(context, request.getDeviceProfile(), packageUid);
 
-        if (request.isSelfManaged()) {
+        if (request.isSelfManaged() || request.getDeviceIcon() != null) {
             enforcePermissionForRequestingSelfManaged(context, packageUid);
         }
     }

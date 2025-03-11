@@ -32,22 +32,29 @@ public class AppSwitchPreference extends SwitchPreferenceCompat {
     public AppSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        setLayoutResource(R.layout.preference_app);
+        init(context);
     }
 
     public AppSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        setLayoutResource(R.layout.preference_app);
+        init(context);
     }
 
     public AppSwitchPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setLayoutResource(R.layout.preference_app);
+        init(context);
     }
 
     public AppSwitchPreference(Context context) {
         super(context);
-        setLayoutResource(R.layout.preference_app);
+        init(context);
+    }
+
+    private void init(Context context) {
+        int resId = SettingsThemeHelper.isExpressiveTheme(context)
+                ? com.android.settingslib.widget.theme.R.layout.settingslib_expressive_preference
+                : R.layout.preference_app;
+        setLayoutResource(resId);
     }
 
     @Override

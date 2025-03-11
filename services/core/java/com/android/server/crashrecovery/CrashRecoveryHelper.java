@@ -93,7 +93,8 @@ public final class CrashRecoveryHelper {
                     return;
                 }
                 final List<VersionedPackage> pkgList = Collections.singletonList(pkg);
-                PackageWatchdog.getInstance(mContext).onPackageFailure(pkgList,  PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+                PackageWatchdog.getInstance(mContext).notifyPackageFailure(pkgList,
+                        PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
             });
     }
 

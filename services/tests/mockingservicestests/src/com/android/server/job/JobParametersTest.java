@@ -16,7 +16,7 @@
 
 package com.android.server.job;
 
-import static android.app.job.Flags.FLAG_CLEANUP_EMPTY_JOBS;
+import static android.app.job.Flags.FLAG_HANDLE_ABANDONED_JOBS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -129,9 +129,9 @@ public class JobParametersTest {
     }
 
     /** Test to verify that the JobParameters Cleaner is disabled */
-    @RequiresFlagsEnabled(FLAG_CLEANUP_EMPTY_JOBS)
+    @RequiresFlagsEnabled(FLAG_HANDLE_ABANDONED_JOBS)
     @Test
-    public void testCleanerWithLeakedJobCleanerDisabled_flagCleanupEmptyJobsEnabled() {
+    public void testCleanerWithLeakedJobCleanerDisabled_flagHandleAbandonedJobs() {
         // Inject real JobCallbackCleanup
         JobParameters jobParameters = JobParameters.CREATOR.createFromParcel(mMockParcel);
 

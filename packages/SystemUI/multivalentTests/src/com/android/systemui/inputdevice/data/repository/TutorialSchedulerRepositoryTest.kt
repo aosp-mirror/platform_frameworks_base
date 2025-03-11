@@ -47,13 +47,13 @@ class TutorialSchedulerRepositoryTest : SysuiTestCase() {
             TutorialSchedulerRepository(
                 context,
                 testScope.backgroundScope,
-                "TutorialSchedulerRepositoryTest"
+                "TutorialSchedulerRepositoryTest",
             )
     }
 
     @After
     fun clear() {
-        testScope.launch { underTest.clearDataStore() }
+        testScope.launch { underTest.clear() }
     }
 
     @Test

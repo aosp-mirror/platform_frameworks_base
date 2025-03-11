@@ -30,6 +30,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.format.BluetoothPowerStatsLayout;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -142,6 +143,7 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        Arrays.fill(mDeviceStats, 0);
         mPowerStats.uidStats.clear();
 
         collectBluetoothActivityInfo();

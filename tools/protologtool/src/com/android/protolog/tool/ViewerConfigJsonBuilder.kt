@@ -21,8 +21,7 @@ import com.android.protolog.tool.Constants.VERSION
 import java.io.StringWriter
 
 class ViewerConfigJsonBuilder : ProtoLogTool.ProtologViewerConfigBuilder {
-    override fun build(statements: Map<ProtoLogTool.LogCall, Long>): ByteArray {
-        val groups = statements.map { it.key.logGroup }.toSet()
+    override fun build(groups: Collection<LogGroup>, statements: Map<ProtoLogTool.LogCall, Long>): ByteArray {
         val stringWriter = StringWriter()
         val writer = JsonWriter(stringWriter)
         writer.setIndent("  ")

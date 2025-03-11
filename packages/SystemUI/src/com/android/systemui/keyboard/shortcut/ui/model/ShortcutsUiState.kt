@@ -16,15 +16,16 @@
 
 package com.android.systemui.keyboard.shortcut.ui.model
 
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 
 sealed interface ShortcutsUiState {
 
     data class Active(
         val searchQuery: String,
-        val shortcutCategories: List<ShortcutCategory>,
+        val shortcutCategories: List<ShortcutCategoryUi>,
         val defaultSelectedCategory: ShortcutCategoryType?,
+        val isShortcutCustomizerFlagEnabled: Boolean = false,
+        val shouldShowResetButton: Boolean = false,
     ) : ShortcutsUiState
 
     data object Inactive : ShortcutsUiState

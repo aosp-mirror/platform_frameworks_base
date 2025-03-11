@@ -46,7 +46,6 @@ import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
-import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
 import android.window.ScreenCapture;
@@ -158,26 +157,8 @@ public abstract class WindowManagerInternal {
      * accessibility changed.
      */
     public interface WindowsForAccessibilityCallback {
-
         /**
-         * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
-         * false.
-         *
-         * @param forceSend Send the windows for accessibility even if they haven't changed.
-         * @param topFocusedDisplayId The display Id which has the top focused window.
-         * @param topFocusedWindowToken The window token of top focused window.
-         * @param windows The windows for accessibility.
-         */
-        void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
-                IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows);
-
-        /**
-         * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
-         * true.
-         * TODO(b/322444245): Remove screenSize parameter by getting it from
-         *  DisplayManager#getDisplay(int).getRealSize() on the a11y side.
+         * Called when the windows for accessibility changed.
          *
          * @param forceSend Send the windows for accessibility even if they haven't changed.
          * @param topFocusedDisplayId The display Id which has the top focused window.
@@ -857,6 +838,18 @@ public abstract class WindowManagerInternal {
      * and can also be set via {@link VirtualDisplayConfig.Builder#setHomeSupported}.</p>
      */
     public abstract boolean isHomeSupportedOnDisplay(int displayId);
+
+    /**
+     * Sets whether the relevant display content ignores fixed orientation, aspect ratio
+     * and resizability of apps.
+     *
+     * @param displayUniqueId The unique ID of the display. Note that the display may not yet be
+     *   created, but whenever it is, this property will be applied.
+     * @param displayType The type of the display, e.g. {@link Display#TYPE_VIRTUAL}.
+     * @param enabled Whether app is universal resizable on this display.
+     */
+    public abstract void setIgnoreActivitySizeRestrictionsOnDisplay(
+            @NonNull String displayUniqueId, int displayType, boolean enabled);
 
     /**
      * Removes any settings relevant to the given display.

@@ -16,24 +16,12 @@
 
 package com.android.systemui.inputdevice.tutorial.ui.composable
 
-import android.graphics.ColorFilter
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
+import android.content.res.Configuration
 import androidx.annotation.RawRes
-import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,30 +34,29 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.airbnb.lottie.LottieProperty
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.LottieDynamicProperties
-import com.airbnb.lottie.compose.LottieDynamicProperty
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
-import com.airbnb.lottie.compose.rememberLottieDynamicProperty
-import com.android.compose.modifiers.background
-import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.FINISHED
-import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.IN_PROGRESS
-import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NOT_STARTED
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
 
-enum class TutorialActionState {
-    NOT_STARTED,
-    IN_PROGRESS,
-    FINISHED,
+sealed interface TutorialActionState {
+    data object NotStarted : TutorialActionState
+
+    data class InProgress(
+        val progress: Float = 0f,
+        val startMarker: String? = null,
+        val endMarker: String? = null,
+    ) : TutorialActionState
+
+    data class Finished(@RawRes val successAnimation: Int) : TutorialActionState
 }
 
 @Composable
@@ -86,42 +73,77 @@ fun ActionTutorialContent(
                 .safeDrawingPadding()
                 .padding(start = 48.dp, top = 100.dp, end = 48.dp, bottom = 8.dp),
     ) {
-        Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            TutorialDescription(
-                titleTextId =
-                    if (actionState == FINISHED) config.strings.titleSuccessResId
-                    else config.strings.titleResId,
-                titleColor = config.colors.title,
-                bodyTextId =
-                    if (actionState == FINISHED) config.strings.bodySuccessResId
-                    else config.strings.bodyResId,
-                modifier = Modifier.weight(1f),
-            )
-            Spacer(modifier = Modifier.width(76.dp))
-            TutorialAnimation(
-                actionState,
-                config,
-                modifier = Modifier.weight(1f).padding(top = 8.dp),
-            )
+        when (LocalConfiguration.current.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                HorizontalDescriptionAndAnimation(actionState, config, Modifier.weight(1f))
+            }
+            else -> {
+                VerticalDescriptionAndAnimation(actionState, config, Modifier.weight(1f))
+            }
         }
-        AnimatedVisibility(visible = actionState == FINISHED, enter = fadeIn()) {
-            DoneButton(onDoneButtonClicked = onDoneButtonClicked)
-        }
+        val buttonAlpha by animateFloatAsState(if (actionState is Finished) 1f else 0f)
+        DoneButton(
+            onDoneButtonClicked = onDoneButtonClicked,
+            modifier = Modifier.graphicsLayer { alpha = buttonAlpha },
+            enabled = actionState is Finished,
+        )
+    }
+}
+
+@Composable
+private fun HorizontalDescriptionAndAnimation(
+    actionState: TutorialActionState,
+    config: TutorialScreenConfig,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier.fillMaxWidth()) {
+        TutorialDescription(actionState, config, modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.width(70.dp))
+        TutorialAnimation(actionState, config, modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun VerticalDescriptionAndAnimation(
+    actionState: TutorialActionState,
+    config: TutorialScreenConfig,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 40.dp, vertical = 40.dp)) {
+        Spacer(modifier = Modifier.weight(0.1f))
+        TutorialDescription(
+            actionState,
+            config,
+            modifier =
+                Modifier.weight(0.2f)
+                    // extra padding to better align with animation which has embedded padding
+                    .padding(horizontal = 15.dp),
+        )
+        Spacer(modifier = Modifier.width(70.dp))
+        TutorialAnimation(actionState, config, modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
 fun TutorialDescription(
-    @StringRes titleTextId: Int,
-    titleColor: Color,
-    @StringRes bodyTextId: Int,
+    actionState: TutorialActionState,
+    config: TutorialScreenConfig,
     modifier: Modifier = Modifier,
 ) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    val (titleTextId, bodyTextId) =
+        if (actionState is Finished) {
+            config.strings.titleSuccessResId to config.strings.bodySuccessResId
+        } else {
+            config.strings.titleResId to config.strings.bodyResId
+        }
     Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
         Text(
             text = stringResource(id = titleTextId),
             style = MaterialTheme.typography.displayLarge,
-            color = titleColor,
+            color = config.colors.title,
+            modifier = Modifier.focusRequester(focusRequester).focusable(),
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -130,105 +152,4 @@ fun TutorialDescription(
             color = Color.White,
         )
     }
-}
-
-@Composable
-fun TutorialAnimation(
-    actionState: TutorialActionState,
-    config: TutorialScreenConfig,
-    modifier: Modifier = Modifier,
-) {
-    Box(modifier = modifier.fillMaxWidth()) {
-        AnimatedContent(
-            targetState = actionState,
-            transitionSpec = {
-                if (initialState == NOT_STARTED) {
-                    val transitionDurationMillis = 150
-                    fadeIn(animationSpec = tween(transitionDurationMillis, easing = LinearEasing))
-                        .togetherWith(
-                            fadeOut(animationSpec = snap(delayMillis = transitionDurationMillis))
-                        )
-                        // we explicitly don't want size transform because when targetState
-                        // animation is loaded for the first time, AnimatedContent thinks target
-                        // size is smaller and tries to shrink initial state animation
-                        .using(sizeTransform = null)
-                } else {
-                    // empty transition works because all remaining transitions are from IN_PROGRESS
-                    // state which shares initial animation frame with both FINISHED and NOT_STARTED
-                    EnterTransition.None togetherWith ExitTransition.None
-                }
-            },
-        ) { state ->
-            when (state) {
-                NOT_STARTED ->
-                    EducationAnimation(
-                        config.animations.educationResId,
-                        config.colors.animationColors,
-                    )
-                IN_PROGRESS ->
-                    FrozenSuccessAnimation(
-                        config.animations.successResId,
-                        config.colors.animationColors,
-                    )
-                FINISHED ->
-                    SuccessAnimation(config.animations.successResId, config.colors.animationColors)
-            }
-        }
-    }
-}
-
-@Composable
-private fun FrozenSuccessAnimation(
-    @RawRes successAnimationId: Int,
-    animationProperties: LottieDynamicProperties,
-) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(successAnimationId))
-    LottieAnimation(
-        composition = composition,
-        progress = { 0f }, // animation should freeze on 1st frame
-        dynamicProperties = animationProperties,
-    )
-}
-
-@Composable
-private fun EducationAnimation(
-    @RawRes educationAnimationId: Int,
-    animationProperties: LottieDynamicProperties,
-) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(educationAnimationId))
-    val progress by
-        animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
-    LottieAnimation(
-        composition = composition,
-        progress = { progress },
-        dynamicProperties = animationProperties,
-    )
-}
-
-@Composable
-private fun SuccessAnimation(
-    @RawRes successAnimationId: Int,
-    animationProperties: LottieDynamicProperties,
-) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(successAnimationId))
-    val progress by animateLottieCompositionAsState(composition, iterations = 1)
-    LottieAnimation(
-        composition = composition,
-        progress = { progress },
-        dynamicProperties = animationProperties,
-    )
-}
-
-@Composable
-fun rememberColorFilterProperty(
-    layerName: String,
-    color: Color,
-): LottieDynamicProperty<ColorFilter> {
-    return rememberLottieDynamicProperty(
-        LottieProperty.COLOR_FILTER,
-        value = PorterDuffColorFilter(color.toArgb(), PorterDuff.Mode.SRC_ATOP),
-        // "**" below means match zero or more layers, so ** layerName ** means find layer with that
-        // name at any depth
-        keyPath = arrayOf("**", layerName, "**"),
-    )
 }

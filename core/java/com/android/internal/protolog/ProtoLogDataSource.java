@@ -46,36 +46,30 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         ProtoLogDataSource.TlsState,
         ProtoLogDataSource.IncrementalState> {
     private static final String DATASOURCE_NAME = "android.protolog";
 
-    @NonNull
-    private final Instance.TracingInstanceStartCallback mOnStart;
-    @NonNull
-    private final Runnable mOnFlush;
-    @NonNull
-    private final Instance.TracingInstanceStopCallback mOnStop;
+    private final Map<Integer, ProtoLogConfig> mRunningInstances = new TreeMap<>();
 
-    public ProtoLogDataSource(
-            @NonNull Instance.TracingInstanceStartCallback onStart,
-            @NonNull Runnable onFlush,
-            @NonNull Instance.TracingInstanceStopCallback onStop) {
-        this(onStart, onFlush, onStop, DATASOURCE_NAME);
+    @NonNull
+    private final Set<Instance.TracingInstanceStartCallback> mOnStartCallbacks = new HashSet<>();
+    @NonNull
+    private final Set<Runnable> mOnFlushCallbacks = new HashSet<>();
+    @NonNull
+    private final Set<Instance.TracingInstanceStopCallback> mOnStopCallbacks = new HashSet<>();
+
+    public ProtoLogDataSource() {
+        this(DATASOURCE_NAME);
     }
 
     @VisibleForTesting
     public ProtoLogDataSource(
-            @NonNull Instance.TracingInstanceStartCallback onStart,
-            @NonNull Runnable onFlush,
-            @NonNull Instance.TracingInstanceStopCallback onStop,
             @NonNull String dataSourceName) {
         super(dataSourceName);
-        this.mOnStart = onStart;
-        this.mOnFlush = onFlush;
-        this.mOnStop = onStop;
     }
 
     @Override
@@ -106,7 +100,8 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         }
 
         return new Instance(
-                this, instanceIndex, config, mOnStart, mOnFlush, mOnStop);
+                this, instanceIndex, config, this::executeOnStartCallbacks,
+                this::executeOnFlushCallbacks, this::executeOnStopCallbacks);
     }
 
     @Override
@@ -126,6 +121,84 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
     public IncrementalState createIncrementalState(
             @NonNull CreateIncrementalStateArgs<Instance> args) {
         return new IncrementalState();
+    }
+
+    /**
+     * Register an onStart callback that will be called when a tracing instance is started.
+     * The callback will be called immediately for all currently running tracing instances on
+     * registration.
+     * @param onStartCallback The callback to call on starting a tracing instance.
+     */
+    public synchronized void registerOnStartCallback(
+            Instance.TracingInstanceStartCallback onStartCallback) {
+        mOnStartCallbacks.add(onStartCallback);
+
+        for (var instanceIndex : mRunningInstances.keySet()) {
+            var config = mRunningInstances.get(instanceIndex);
+            onStartCallback.run(instanceIndex, config);
+        }
+    }
+
+    /**
+     * Register an onFlush callback that will be called when a tracing instance is about to flush.
+     * @param onFlushCallback The callback to call on flushing a tracing instance
+     */
+    public void registerOnFlushCallback(Runnable onFlushCallback) {
+        mOnFlushCallbacks.add(onFlushCallback);
+    }
+
+    /**
+     * Register an onStop callback that will be called when a tracing instance is being stopped.
+     * @param onStopCallback The callback to call on stopping a tracing instance.
+     */
+    public void registerOnStopCallback(Instance.TracingInstanceStopCallback onStopCallback) {
+        mOnStopCallbacks.add(onStopCallback);
+    }
+
+    /**
+     * Unregister an onStart callback.
+     * @param onStartCallback The callback object to unregister.
+     */
+    public void unregisterOnStartCallback(Instance.TracingInstanceStartCallback onStartCallback) {
+        mOnStartCallbacks.add(onStartCallback);
+    }
+
+    /**
+     * Unregister an onFlush callback.
+     * @param onFlushCallback The callback object to unregister.
+     */
+    public void unregisterOnFlushCallback(Runnable onFlushCallback) {
+        mOnFlushCallbacks.add(onFlushCallback);
+    }
+
+    /**
+     * Unregister an onStop callback.
+     * @param onStopCallback The callback object to unregister.
+     */
+    public void unregisterOnStopCallback(Instance.TracingInstanceStopCallback onStopCallback) {
+        mOnStopCallbacks.add(onStopCallback);
+    }
+
+    private synchronized void executeOnStartCallbacks(int instanceIdx, ProtoLogConfig config) {
+        mRunningInstances.put(instanceIdx, config);
+
+        for (var onStart : mOnStartCallbacks) {
+            onStart.run(instanceIdx, config);
+        }
+    }
+
+    private void executeOnFlushCallbacks() {
+        for (var onFlush : mOnFlushCallbacks) {
+            onFlush.run();
+        }
+    }
+
+    private synchronized void executeOnStopCallbacks(int instanceIdx, ProtoLogConfig config) {
+        mRunningInstances.remove(instanceIdx, config);
+
+        for (var onStop : mOnStopCallbacks) {
+            onStop.run(instanceIdx, config);
+        }
     }
 
     public static class TlsState {

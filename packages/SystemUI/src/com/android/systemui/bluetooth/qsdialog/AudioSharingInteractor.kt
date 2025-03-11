@@ -16,82 +16,172 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
-import androidx.annotation.StringRes
+import android.content.Context
+import androidx.annotation.WorkerThread
 import com.android.settingslib.bluetooth.BluetoothUtils
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.bluetooth.onBroadcastMetadataChanged
+import com.android.settingslib.flags.Flags.audioSharingQsDialogImprovement
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
-
-internal sealed class AudioSharingButtonState {
-    object Gone : AudioSharingButtonState()
-
-    data class Visible(@StringRes val resId: Int, val isActive: Boolean) :
-        AudioSharingButtonState()
-}
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.withContext
 
 /** Holds business logic for the audio sharing state. */
+interface AudioSharingInteractor {
+    val isAudioSharingOn: Flow<Boolean>
+
+    val audioSourceStateUpdate: Flow<Unit>
+
+    suspend fun handleAudioSourceWhenReady()
+
+    suspend fun isAvailableAudioSharingMediaBluetoothDevice(
+        cachedBluetoothDevice: CachedBluetoothDevice
+    ): Boolean
+
+    suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice)
+
+    suspend fun startAudioSharing()
+
+    suspend fun audioSharingAvailable(): Boolean
+
+    suspend fun qsDialogImprovementAvailable(): Boolean
+}
+
 @SysUISingleton
-internal class AudioSharingInteractor
+@OptIn(ExperimentalCoroutinesApi::class)
+class AudioSharingInteractorImpl
 @Inject
 constructor(
+    private val context: Context,
     private val localBluetoothManager: LocalBluetoothManager?,
-    bluetoothStateInteractor: BluetoothStateInteractor,
-    deviceItemInteractor: DeviceItemInteractor,
-    @Application private val coroutineScope: CoroutineScope,
+    private val audioSharingRepository: AudioSharingRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
-) {
-    /** Flow representing the update of AudioSharingButtonState. */
-    internal val audioSharingButtonStateUpdate: Flow<AudioSharingButtonState> =
-        combine(
-                bluetoothStateInteractor.bluetoothStateUpdate,
-                deviceItemInteractor.deviceItemUpdate
-            ) { bluetoothState, deviceItem ->
-                getButtonState(bluetoothState, deviceItem)
+) : AudioSharingInteractor {
+
+    private var previewEnabled: Boolean? = null
+
+    override val isAudioSharingOn: Flow<Boolean> =
+        flow { emit(audioSharingAvailable()) }
+            .flatMapLatest { isEnabled ->
+                if (isEnabled) {
+                    audioSharingRepository.inAudioSharing
+                } else {
+                    flowOf(false)
+                }
             }
             .flowOn(backgroundDispatcher)
-            .stateIn(
-                coroutineScope,
-                SharingStarted.WhileSubscribed(replayExpirationMillis = 0),
-                initialValue = AudioSharingButtonState.Gone
-            )
 
-    private fun getButtonState(
-        bluetoothState: Boolean,
-        deviceItem: List<DeviceItem>
-    ): AudioSharingButtonState {
-        return when {
-            // Don't show button when bluetooth is off
-            !bluetoothState -> AudioSharingButtonState.Gone
-            // Show sharing audio when broadcasting
-            BluetoothUtils.isBroadcasting(localBluetoothManager) ->
-                AudioSharingButtonState.Visible(
-                    R.string.quick_settings_bluetooth_audio_sharing_button_sharing,
-                    isActive = true
-                )
-            // When not broadcasting, don't show button if there's connected source in any device
-            deviceItem.any {
-                BluetoothUtils.hasConnectedBroadcastSource(
-                    it.cachedBluetoothDevice,
-                    localBluetoothManager
-                )
-            } -> AudioSharingButtonState.Gone
-            // Show audio sharing when there's a connected LE audio device
-            deviceItem.any { BluetoothUtils.isActiveLeAudioDevice(it.cachedBluetoothDevice) } ->
-                AudioSharingButtonState.Visible(
-                    R.string.quick_settings_bluetooth_audio_sharing_button,
-                    isActive = false
-                )
-            else -> AudioSharingButtonState.Gone
+    override val audioSourceStateUpdate =
+        isAudioSharingOn
+            .flatMapLatest {
+                if (it) {
+                    audioSharingRepository.audioSourceStateUpdate
+                } else {
+                    emptyFlow()
+                }
+            }
+            .flowOn(backgroundDispatcher)
+
+    override suspend fun handleAudioSourceWhenReady() {
+        withContext(backgroundDispatcher) {
+            if (audioSharingAvailable()) {
+                audioSharingRepository.leAudioBroadcastProfile?.let { profile ->
+                    isAudioSharingOn
+                        .mapNotNull { audioSharingOn ->
+                            if (audioSharingOn) {
+                                // onBroadcastMetadataChanged could emit multiple times during one
+                                // audio sharing session, we only perform add source on the first
+                                // time
+                                profile.onBroadcastMetadataChanged.firstOrNull()
+                            } else {
+                                null
+                            }
+                        }
+                        .flowOn(backgroundDispatcher)
+                        .collect { audioSharingRepository.addSource() }
+                }
+            }
         }
     }
+
+    override suspend fun isAvailableAudioSharingMediaBluetoothDevice(
+        cachedBluetoothDevice: CachedBluetoothDevice
+    ): Boolean {
+        return withContext(backgroundDispatcher) {
+            if (audioSharingAvailable()) {
+                BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice(
+                    cachedBluetoothDevice,
+                    localBluetoothManager,
+                )
+            } else {
+                false
+            }
+        }
+    }
+
+    override suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice) {
+        if (!audioSharingAvailable()) {
+            return
+        }
+        audioSharingRepository.setActive(cachedBluetoothDevice)
+    }
+
+    override suspend fun startAudioSharing() {
+        if (!audioSharingAvailable()) {
+            return
+        }
+        audioSharingRepository.startAudioSharing()
+    }
+
+    // TODO(b/367965193): Move this after flags rollout
+    override suspend fun audioSharingAvailable(): Boolean {
+        return audioSharingRepository.audioSharingAvailable()
+    }
+
+    override suspend fun qsDialogImprovementAvailable(): Boolean {
+        return withContext(backgroundDispatcher) {
+            audioSharingQsDialogImprovement() || isAudioSharingPreviewEnabled()
+        }
+    }
+
+    @WorkerThread
+    private fun isAudioSharingPreviewEnabled(): Boolean {
+        if (previewEnabled == null) {
+            previewEnabled = BluetoothUtils.isAudioSharingPreviewEnabled(context.contentResolver)
+        }
+        return previewEnabled ?: false
+    }
+}
+
+@SysUISingleton
+class AudioSharingInteractorEmptyImpl @Inject constructor() : AudioSharingInteractor {
+    override val isAudioSharingOn: Flow<Boolean> = flowOf(false)
+
+    override val audioSourceStateUpdate: Flow<Unit> = emptyFlow()
+
+    override suspend fun handleAudioSourceWhenReady() {}
+
+    override suspend fun isAvailableAudioSharingMediaBluetoothDevice(
+        cachedBluetoothDevice: CachedBluetoothDevice
+    ) = false
+
+    override suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice) {}
+
+    override suspend fun startAudioSharing() {}
+
+    override suspend fun audioSharingAvailable(): Boolean = false
+
+    override suspend fun qsDialogImprovementAvailable(): Boolean = false
 }

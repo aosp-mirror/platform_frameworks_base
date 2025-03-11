@@ -20,11 +20,9 @@
     <!-- keyguard-->
     <dimen name="keyguard_indication_margin_bottom">25dp</dimen>
     <dimen name="ambient_indication_margin_bottom">115dp</dimen>
-    <dimen name="lock_icon_margin_bottom">60dp</dimen>
     <!-- margin from keyguard status bar to clock. For split shade it should be
          keyguard_split_shade_top_margin - status_bar_header_height_keyguard = 8dp -->
     <dimen name="keyguard_clock_top_margin">8dp</dimen>
-    <dimen name="keyguard_smartspace_top_offset">0dp</dimen>
 
     <!-- QS-->
     <dimen name="qs_panel_padding_top">16dp</dimen>
@@ -46,8 +44,6 @@
     <dimen name="controls_task_view_right_margin">8dp</dimen>
 
     <dimen name="lockscreen_shade_max_over_scroll_amount">32dp</dimen>
-
-    <dimen name="status_view_margin_horizontal">8dp</dimen>
 
     <!-- Lockscreen shade transition values -->
     <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>

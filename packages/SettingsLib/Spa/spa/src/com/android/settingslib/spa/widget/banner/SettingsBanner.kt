@@ -57,6 +57,7 @@ import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraLarg
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraSmall
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
+import com.android.settingslib.spa.framework.theme.toSemiBoldWeight
 import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsTitle
 
@@ -159,7 +160,9 @@ fun BannerHeader(imageVector: ImageVector?, iconColor: Color, onDismiss: (() -> 
 @Composable
 fun BannerTitleHeader(title: String, onDismiss: (() -> Unit)? = null) {
     Row(Modifier.fillMaxWidth()) {
-        Box(modifier = Modifier.weight(1f)) { SettingsTitle(title) }
+        Box(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium.toSemiBoldWeight())
+        }
         Spacer(modifier = Modifier.padding(SettingsDimension.paddingSmall))
         DismissButton(onDismiss)
     }

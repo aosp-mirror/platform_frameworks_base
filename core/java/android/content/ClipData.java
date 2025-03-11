@@ -398,6 +398,7 @@ public class ClipData implements Parcelable {
          * Retrieve the raw Intent contained in this Item.
          */
         public Intent getIntent() {
+            Intent.maybeMarkAsMissingCreatorToken(mIntent);
             return mIntent;
         }
 
@@ -945,6 +946,34 @@ public class ClipData implements Parcelable {
     }
 
     /**
+     * Make a clone of ClipData that only contains URIs. This reduces the size of data transfer over
+     * IPC and only retains important information for the purpose of verifying creator token of an
+     * Intent.
+     * @return a copy of ClipData with only URIs remained.
+     * @hide
+     */
+    public ClipData cloneOnlyUriItems() {
+        ArrayList<Item> items = null;
+        final int N = mItems.size();
+        for (int i = 0; i < N; i++) {
+            Item item = mItems.get(i);
+            if (item.getUri() != null) {
+                if (items == null) {
+                    items = new ArrayList<>(N);
+                }
+                items.add(new Item(item.getUri()));
+            } else if (item.getIntent() != null) {
+                if (items == null) {
+                    items = new ArrayList<>(N);
+                }
+                items.add(new Item(item.getIntent().cloneForCreatorToken()));
+            }
+        }
+        if (items == null || items.isEmpty()) return null;
+        return new ClipData(new ClipDescription("", new String[0]), items);
+    }
+
+    /**
      * Create a new ClipData holding data of the type
      * {@link ClipDescription#MIMETYPE_TEXT_PLAIN}.
      *
@@ -1149,7 +1178,7 @@ public class ClipData implements Parcelable {
         for (int i = 0; i < size; i++) {
             final Item item = mItems.get(i);
             if (item.mIntent != null) {
-                item.mIntent.prepareToLeaveProcess(leavingPackage);
+                item.mIntent.prepareToLeaveProcess(leavingPackage, false);
             }
             if (item.mUri != null && leavingPackage) {
                 if (StrictMode.vmFileUriExposureEnabled()) {

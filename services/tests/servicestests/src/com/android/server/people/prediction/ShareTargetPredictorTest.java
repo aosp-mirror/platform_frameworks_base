@@ -40,11 +40,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager.ShareShortcutInfo;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.Range;
 
+import com.android.internal.R;
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.server.people.data.ConversationInfo;
@@ -87,6 +89,7 @@ public final class ShareTargetPredictorTest {
     private static final IntentFilter INTENT_FILTER = IntentFilter.create("SEND", "text/plain");
 
     @Mock private Context mContext;
+    @Mock private Resources mResources;
     @Mock private DataManager mDataManager;
     @Mock private Consumer<List<AppTarget>> mUpdatePredictionsMethod;
     @Mock private PackageData mPackageData1;
@@ -116,11 +119,14 @@ public final class ShareTargetPredictorTest {
         when(mDataManager.getShareShortcuts(any(), anyInt())).thenReturn(mShareShortcuts);
         when(mDataManager.getPackage(PACKAGE_1, USER_ID)).thenReturn(mPackageData1);
         when(mDataManager.getPackage(PACKAGE_2, USER_ID)).thenReturn(mPackageData2);
-        when(mContext.createContextAsUser(any(), any())).thenReturn(mContext);
+        when(mContext.createContextAsUser(any(), anyInt())).thenReturn(mContext);
         when(mContext.getSystemServiceName(AppPredictionManager.class)).thenReturn(
                 Context.APP_PREDICTION_SERVICE);
         when(mContext.getSystemService(AppPredictionManager.class))
                 .thenReturn(new AppPredictionManager(mContext));
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mResources.getString(R.string.config_chooserActivity))
+                .thenReturn("com.android.intentresolver/.ChooserActivity");
 
         Bundle bundle = new Bundle();
         bundle.putObject(ChooserActivity.APP_PREDICTION_INTENT_FILTER_KEY, INTENT_FILTER);
@@ -277,6 +283,25 @@ public final class ShareTargetPredictorTest {
         verify(mUpdatePredictionsMethod).accept(mAppTargetCaptor.capture());
         assertThat(mAppTargetCaptor.getValue()).isEmpty();
         verify(mDataManager, never()).getShareShortcuts(any(), anyInt());
+    }
+
+    @Test
+    public void testPredictTargets_emptyIntentFilter() {
+        Bundle bundle = new Bundle();
+        IntentFilter filter = new IntentFilter();
+        bundle.putObject(ChooserActivity.APP_PREDICTION_INTENT_FILTER_KEY, filter);
+        AppPredictionContext predictionContext = new AppPredictionContext.Builder(mContext)
+                .setUiSurface(UI_SURFACE_SHARE)
+                .setPredictedTargetCount(NUM_PREDICTED_TARGETS)
+                .setExtras(bundle)
+                .build();
+        mPredictor = new ShareTargetPredictor(
+                predictionContext, mUpdatePredictionsMethod, mDataManager, USER_ID, mContext);
+
+        mPredictor.predictTargets();
+
+        verify(mUpdatePredictionsMethod).accept(mAppTargetCaptor.capture());
+        assertThat(mAppTargetCaptor.getValue()).isEmpty();
     }
 
     @Test

@@ -19,6 +19,7 @@ android_test {
         "platform-test-annotations",
         "services.core",
         "truth",
+        "ApplicationSharedMemoryTestRule",
     ],
     libs: ["android.test.runner.stubs.system"],
     platform_apis: true,

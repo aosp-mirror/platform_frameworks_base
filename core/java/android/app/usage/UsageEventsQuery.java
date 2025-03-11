@@ -75,7 +75,7 @@ public final class UsageEventsQuery implements Parcelable {
     }
 
     /**
-     * Returns the exclusive timpstamp to indicate the end of the range of events.
+     * Returns the exclusive timestamp to indicate the end of the range of events.
      * Defined in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
      */
     public @CurrentTimeMillisLong long getEndTimeMillis() {

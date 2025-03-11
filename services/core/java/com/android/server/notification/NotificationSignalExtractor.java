@@ -55,4 +55,9 @@ public interface NotificationSignalExtractor {
     void setZenHelper(ZenModeHelper helper);
 
     default void setCompatChangeLogger(IPlatformCompat platformCompat){};
+
+    /**
+     * @param groupHelper Helper for auto-grouping notifications
+     */
+    default void setGroupHelper(GroupHelper groupHelper){};
 }

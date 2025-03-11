@@ -32,11 +32,7 @@ import com.android.systemui.common.shared.model.Icon
  * Note: You can use [Color.Unspecified] to disable the tint and keep the original icon colors.
  */
 @Composable
-fun Icon(
-    icon: Icon,
-    modifier: Modifier = Modifier,
-    tint: Color = LocalContentColor.current,
-) {
+fun Icon(icon: Icon, modifier: Modifier = Modifier, tint: Color = LocalContentColor.current) {
     val contentDescription = icon.contentDescription?.load()
     when (icon) {
         is Icon.Loaded -> {

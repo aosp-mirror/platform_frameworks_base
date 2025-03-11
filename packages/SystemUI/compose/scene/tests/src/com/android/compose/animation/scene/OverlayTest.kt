@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
@@ -205,7 +206,8 @@ class OverlayTest {
         val key = MovableElementKey("MovableBar", contents = setOf(SceneA, OverlayA, OverlayB))
         val elementChildTag = "elementChildTag"
 
-        fun elementChild(content: ContentKey) = hasTestTag(elementChildTag) and inContent(content)
+        fun elementChild(content: ContentKey) =
+            hasTestTag(elementChildTag) and SemanticsMatcher.inContent(content)
 
         @Composable
         fun ContentScope.MovableBar() {
@@ -773,7 +775,7 @@ class OverlayTest {
         // Overscroll on Overlay A.
         scope.launch { state.startTransition(transition(SceneA, OverlayA, progress = { 1.5f })) }
         rule
-            .onNode(hasTestTag(movableElementChildTag) and inContent(SceneA))
+            .onNode(hasTestTag(movableElementChildTag) and SemanticsMatcher.inContent(SceneA))
             .assertPositionInRootIsEqualTo(0.dp, 0.dp)
             .assertSizeIsEqualTo(100.dp)
             .assertIsDisplayed()

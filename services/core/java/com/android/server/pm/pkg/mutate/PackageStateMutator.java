@@ -257,6 +257,16 @@ public class PackageStateMutator {
 
         @NonNull
         @Override
+        public PackageStateWrite setPageSizeAppCompatFlags(
+                @ApplicationInfo.PageSizeAppCompatFlags int mode) {
+            if (mState != null) {
+                mState.setPageSizeAppCompatFlags(mode);
+            }
+            return this;
+        }
+
+        @NonNull
+        @Override
         public PackageStateWrite setUpdateAvailable(boolean updateAvailable) {
             if (mState != null) {
                 mState.setUpdateAvailable(updateAvailable);

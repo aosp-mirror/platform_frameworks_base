@@ -33,7 +33,7 @@ import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.NotificationFadeAware.FadeOptimizedNotification;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.policy.HeadsUpUtil;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpUtil;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Field;

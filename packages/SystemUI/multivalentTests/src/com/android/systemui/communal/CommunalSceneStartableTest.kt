@@ -16,15 +16,16 @@
 
 package com.android.systemui.communal
 
+import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.internal.logging.uiEventLogger
 import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_COMMUNAL_SCENE_KTF_REFACTOR
+import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
@@ -37,6 +38,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dock.dockManager
 import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -46,6 +48,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.phone.centralSurfaces
 import com.android.systemui.statusbar.phone.centralSurfacesOptional
@@ -64,12 +68,29 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @EnableFlags(FLAG_COMMUNAL_HUB)
-class CommunalSceneStartableTest : SysuiTestCase() {
+class CommunalSceneStartableTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    companion object {
+        private const val SCREEN_TIMEOUT = 1000
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     private val kosmos = testKosmos()
 
     private lateinit var underTest: CommunalSceneStartable
@@ -77,7 +98,11 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     @Before
     fun setUp() {
         with(kosmos) {
-            fakeSettings.putInt(Settings.System.SCREEN_OFF_TIMEOUT, SCREEN_TIMEOUT)
+            fakeSettings.putIntForUser(
+                Settings.System.SCREEN_OFF_TIMEOUT,
+                SCREEN_TIMEOUT,
+                UserHandle.USER_CURRENT,
+            )
             kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
 
             underTest =
@@ -90,7 +115,6 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                         keyguardInteractor = keyguardInteractor,
                         systemSettings = fakeSettings,
                         notificationShadeWindowController = notificationShadeWindowController,
-                        featureFlagsClassic = kosmos.fakeFeatureFlagsClassic,
                         applicationScope = applicationCoroutineScope,
                         bgScope = applicationCoroutineScope,
                         mainDispatcher = testDispatcher,
@@ -109,7 +133,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun keyguardGoesAway_whenLaunchingEditMode_doNotForceBlankScene() =
         with(kosmos) {
             testScope.runTest {
@@ -130,7 +154,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun keyguardGoesAway_whenLaunchingWidget_doNotForceBlankScene() =
         with(kosmos) {
             testScope.runTest {
@@ -151,7 +175,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun keyguardGoesAway_whenNotLaunchingWidget_forceBlankScene() =
         with(kosmos) {
             testScope.runTest {
@@ -172,7 +196,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun keyguardGoesAway_whenInEditMode_doesNotChangeScene() =
         with(kosmos) {
             testScope.runTest {
@@ -193,6 +217,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
 
     @Ignore("Ignored until custom animations are implemented in b/322787129")
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun deviceDocked_forceCommunalScene() =
         with(kosmos) {
             testScope.runTest {
@@ -210,7 +235,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun occluded_forceBlankScene() =
         with(kosmos) {
             testScope.runTest {
@@ -230,7 +255,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun occluded_doesNotForceBlankSceneIfLaunchingActivityOverLockscreen() =
         with(kosmos) {
             testScope.runTest {
@@ -250,7 +275,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun deviceDocked_doesNotForceCommunalIfTransitioningFromCommunal() =
         with(kosmos) {
             testScope.runTest {
@@ -268,7 +293,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun deviceAsleep_forceBlankSceneAfterTimeout() =
         with(kosmos) {
             testScope.runTest {
@@ -290,7 +315,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun deviceAsleep_wakesUpBeforeTimeout_noChangeInScene() =
         with(kosmos) {
             testScope.runTest {
@@ -320,6 +345,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
 
     @Ignore("Ignored until custom animations are implemented in b/322787129")
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun dockingOnLockscreen_forcesCommunal() =
         with(kosmos) {
             testScope.runTest {
@@ -342,6 +368,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
 
     @Ignore("Ignored until custom animations are implemented in b/322787129")
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun dockingOnLockscreen_doesNotForceCommunalIfDreamStarts() =
         with(kosmos) {
             testScope.runTest {
@@ -372,6 +399,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun hubTimeout_whenDreaming_goesToBlank() =
         with(kosmos) {
             testScope.runTest {
@@ -389,6 +417,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun hubTimeout_notDreaming_staysOnCommunal() =
         with(kosmos) {
             testScope.runTest {
@@ -404,6 +433,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun hubTimeout_dreamStopped_staysOnCommunal() =
         with(kosmos) {
             testScope.runTest {
@@ -427,6 +457,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun hubTimeout_dreamStartedHalfway_goesToCommunal() =
         with(kosmos) {
             testScope.runTest {
@@ -449,6 +480,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun hubTimeout_dreamAfterInitialTimeout_goesToBlank() =
         with(kosmos) {
             testScope.runTest {
@@ -469,6 +501,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun hubTimeout_userActivityTriggered_resetsTimeout() =
         with(kosmos) {
             testScope.runTest {
@@ -496,6 +529,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun hubTimeout_screenTimeoutChanged() =
         with(kosmos) {
             testScope.runTest {
@@ -521,7 +555,163 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    fun hubTimeout_withSceneContainer_whenDreaming_goesToBlank() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is dreaming and on communal.
+                updateDreaming(true)
+                sceneInteractor.changeScene(Scenes.Communal, "test")
+
+                val scene by collectLastValue(sceneInteractor.currentScene)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                // Scene times out back to blank after the screen timeout.
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
+                assertThat(scene).isEqualTo(Scenes.Dream)
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    fun hubTimeout_withSceneContainer_notDreaming_staysOnCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is not dreaming and on communal.
+                updateDreaming(false)
+                sceneInteractor.changeScene(Scenes.Communal, "test")
+
+                // Scene stays as Communal
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
+                val scene by collectLastValue(sceneInteractor.currentScene)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    fun hubTimeout_withSceneContainer_dreamStopped_staysOnCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is dreaming and on communal.
+                updateDreaming(true)
+                sceneInteractor.changeScene(Scenes.Communal, "test")
+
+                val scene by collectLastValue(sceneInteractor.currentScene)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                // Wait a bit, but not long enough to timeout.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                // Dream stops, timeout is cancelled and device stays on hub, because the regular
+                // screen timeout will take effect at this point.
+                updateDreaming(false)
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    fun hubTimeout_withSceneContainer_dreamStartedHalfway_goesToCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is on communal, but not dreaming.
+                updateDreaming(false)
+                sceneInteractor.changeScene(Scenes.Communal, "test")
+
+                val scene by collectLastValue(sceneInteractor.currentScene)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                // Wait a bit, but not long enough to timeout, then start dreaming.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                updateDreaming(true)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                // Device times out after one screen timeout interval, dream doesn't reset timeout.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(Scenes.Dream)
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    fun hubTimeout_withSceneContainer_dreamAfterInitialTimeout_goesToBlank() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is on communal.
+                sceneInteractor.changeScene(Scenes.Communal, "test")
+
+                // Device stays on the hub after the timeout since we're not dreaming.
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds * 2)
+                val scene by collectLastValue(sceneInteractor.currentScene)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                // Start dreaming.
+                updateDreaming(true)
+
+                // Hub times out immediately.
+                assertThat(scene).isEqualTo(Scenes.Dream)
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    fun hubTimeout_withSceneContainer_userActivityTriggered_resetsTimeout() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is dreaming and on communal.
+                updateDreaming(true)
+                sceneInteractor.changeScene(Scenes.Communal, "test")
+
+                val scene by collectLastValue(sceneInteractor.currentScene)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                // Wait a bit, but not long enough to timeout.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+
+                // Send user interaction to reset timeout.
+                communalInteractor.signalUserInteraction()
+
+                // If user activity didn't reset timeout, we would have gone back to Blank by now.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                // Timeout happens one interval after the user interaction.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(Scenes.Dream)
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    fun hubTimeout_withSceneContainer_screenTimeoutChanged() =
+        with(kosmos) {
+            testScope.runTest {
+                fakeSettings.putInt(Settings.System.SCREEN_OFF_TIMEOUT, SCREEN_TIMEOUT * 2)
+
+                // Device is dreaming and on communal.
+                updateDreaming(true)
+                sceneInteractor.changeScene(Scenes.Communal, "test")
+
+                val scene by collectLastValue(sceneInteractor.currentScene)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                // Scene times out back to blank after the screen timeout.
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
+                assertThat(scene).isEqualTo(Scenes.Communal)
+
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
+                assertThat(scene).isEqualTo(Scenes.Dream)
+                assertThat(uiEventLoggerFake.logs.first().eventId)
+                    .isEqualTo(CommunalUiEvent.COMMUNAL_HUB_TIMEOUT.id)
+                assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+            }
+        }
+
+    @Test
+    @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR, FLAG_SCENE_CONTAINER)
     fun transitionFromDozingToGlanceableHub_forcesCommunal() =
         with(kosmos) {
             testScope.runTest {
@@ -553,8 +743,4 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             fakeKeyguardRepository.setDreaming(dreaming)
             runCurrent()
         }
-
-    companion object {
-        private const val SCREEN_TIMEOUT = 1000
-    }
 }

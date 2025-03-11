@@ -19,11 +19,9 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.Surface.ROTATION_0;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -206,13 +204,13 @@ class TestDisplayContent extends DisplayContent {
             final DisplayPolicy displayPolicy = newDisplay.getDisplayPolicy();
             spyOn(displayPolicy);
             if (mSystemDecorations) {
-                doReturn(true).when(newDisplay).supportsSystemDecorations();
+                doReturn(true).when(newDisplay).isSystemDecorationsSupported();
                 doReturn(true).when(displayPolicy).hasNavigationBar();
-                doReturn(NAV_BAR_BOTTOM).when(displayPolicy).navigationBarPosition(anyInt());
+                doReturn(true).when(displayPolicy).hasBottomNavigationBar();
             } else {
                 doReturn(false).when(displayPolicy).hasNavigationBar();
                 doReturn(false).when(displayPolicy).hasStatusBar();
-                doReturn(false).when(newDisplay).supportsSystemDecorations();
+                doReturn(false).when(newDisplay).isSystemDecorationsSupported();
             }
             // Update the display policy to make the screen fully turned on so animation is allowed
             displayPolicy.screenTurningOn(null /* screenOnListener */);

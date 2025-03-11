@@ -30,6 +30,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.format.WifiPowerStatsLayout;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -151,6 +152,9 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        Arrays.fill(mDeviceStats, 0);
+        mPowerStats.uidStats.clear();
+
         WifiActivityEnergyInfo activityInfo = null;
         if (mPowerReportingSupported) {
             activityInfo = collectWifiActivityInfo();
@@ -224,8 +228,6 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     }
 
     private List<BatteryStatsImpl.NetworkStatsDelta> collectNetworkStats() {
-        mPowerStats.uidStats.clear();
-
         NetworkStats networkStats = mNetworkStatsSupplier.get();
         if (networkStats == null) {
             return null;

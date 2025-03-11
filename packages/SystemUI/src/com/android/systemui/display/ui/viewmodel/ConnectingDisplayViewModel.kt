@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Shows/hides a dialog to allow the user to decide whether to use the external display for
@@ -93,11 +93,11 @@ constructor(
             bottomSheetFactory
                 .createDialog(
                     onStartMirroringClickListener = {
-                        scope.launch(bgDispatcher) { pendingDisplay.enable() }
+                        scope.launch(context = bgDispatcher) { pendingDisplay.enable() }
                         dismissDialog()
                     },
                     onCancelMirroring = {
-                        scope.launch(bgDispatcher) { pendingDisplay.ignore() }
+                        scope.launch(context = bgDispatcher) { pendingDisplay.ignore() }
                         dismissDialog()
                     },
                     navbarBottomInsetsProvider = { Utils.getNavbarInsets(context).bottom },

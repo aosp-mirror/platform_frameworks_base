@@ -25,6 +25,7 @@ interface KeyValueStore : KeyedObservable<String> {
     fun contains(key: String): Boolean
 
     /** Gets default value of given key. */
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> getDefaultValue(key: String, valueType: Class<T>): T? =
         when (valueType) {
             Boolean::class.javaObjectType -> false
@@ -46,6 +47,37 @@ interface KeyValueStore : KeyedObservable<String> {
      * @param value value to set, null means remove
      */
     fun <T : Any> setValue(key: String, valueType: Class<T>, value: T?)
+
+    /** Gets the boolean value of given key. */
+    fun getBoolean(key: String): Boolean? = getValue(key, Boolean::class.javaObjectType)
+
+    /** Sets boolean value for given key, null value means delete the key from data store. */
+    fun setBoolean(key: String, value: Boolean?) =
+        setValue(key, Boolean::class.javaObjectType, value)
+
+    /** Gets the float value of given key. */
+    fun getFloat(key: String): Float? = getValue(key, Float::class.javaObjectType)
+
+    /** Sets float value for given key, null value means delete the key from data store. */
+    fun setFloat(key: String, value: Float?) = setValue(key, Float::class.javaObjectType, value)
+
+    /** Gets the int value of given key. */
+    fun getInt(key: String): Int? = getValue(key, Int::class.javaObjectType)
+
+    /** Sets int value for given key, null value means delete the key from data store. */
+    fun setInt(key: String, value: Int?) = setValue(key, Int::class.javaObjectType, value)
+
+    /** Gets the long value of given key. */
+    fun getLong(key: String): Long? = getValue(key, Long::class.javaObjectType)
+
+    /** Sets long value for given key, null value means delete the key from data store. */
+    fun setLong(key: String, value: Long?) = setValue(key, Long::class.javaObjectType, value)
+
+    /** Gets the string value of given key. */
+    fun getString(key: String): String? = getValue(key, String::class.javaObjectType)
+
+    /** Sets string value for given key, null value means delete the key from data store. */
+    fun setString(key: String, value: String?) = setValue(key, String::class.javaObjectType, value)
 }
 
 /** [SharedPreferences] based [KeyValueStore]. */
@@ -56,6 +88,7 @@ interface SharedPreferencesKeyValueStore : KeyValueStore {
 
     override fun contains(key: String): Boolean = sharedPreferences.contains(key)
 
+    @Suppress("IMPLICIT_CAST_TO_ANY", "UNCHECKED_CAST")
     override fun <T : Any> getValue(key: String, valueType: Class<T>): T? =
         when (valueType) {
             Boolean::class.javaObjectType -> sharedPreferences.getBoolean(key, false)
@@ -68,6 +101,7 @@ interface SharedPreferencesKeyValueStore : KeyValueStore {
         }
             as T?
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : Any> setValue(key: String, valueType: Class<T>, value: T?) {
         if (value == null) {
             sharedPreferences.edit().remove(key).apply()

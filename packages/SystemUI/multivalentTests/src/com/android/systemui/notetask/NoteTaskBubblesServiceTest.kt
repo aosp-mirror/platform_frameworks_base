@@ -21,9 +21,9 @@ import android.graphics.drawable.Icon
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskBubblesController.NoteTaskBubblesService
+import com.android.systemui.res.R
 import com.android.wm.shell.bubbles.Bubbles
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
@@ -33,6 +33,9 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.whenever
 
 /** atest SystemUITests:NoteTaskBubblesServiceTest */
 @SmallTest
@@ -61,12 +64,40 @@ internal class NoteTaskBubblesServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun showOrHideAppBubble() {
+    fun showOrHideAppBubble_defaultExpandBehavior_shouldCallBubblesApi() {
         val intent = Intent()
         val user = UserHandle.SYSTEM
         val icon = Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
+        val bubbleExpandBehavior = NoteTaskBubbleExpandBehavior.DEFAULT
+        whenever(bubbles.isBubbleExpanded(any())).thenReturn(false)
 
-        createServiceBinder().showOrHideAppBubble(intent, user, icon)
+        createServiceBinder().showOrHideAppBubble(intent, user, icon, bubbleExpandBehavior)
+
+        verify(bubbles).showOrHideAppBubble(intent, user, icon)
+    }
+
+    @Test
+    fun showOrHideAppBubble_keepIfExpanded_bubbleShown_shouldNotCallBubblesApi() {
+        val intent = Intent().apply { setPackage("test") }
+        val user = UserHandle.SYSTEM
+        val icon = Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
+        val bubbleExpandBehavior = NoteTaskBubbleExpandBehavior.KEEP_IF_EXPANDED
+        whenever(bubbles.isBubbleExpanded(any())).thenReturn(true)
+
+        createServiceBinder().showOrHideAppBubble(intent, user, icon, bubbleExpandBehavior)
+
+        verify(bubbles, never()).showOrHideAppBubble(intent, user, icon)
+    }
+
+    @Test
+    fun showOrHideAppBubble_keepIfExpanded_bubbleNotShown_shouldCallBubblesApi() {
+        val intent = Intent().apply { setPackage("test") }
+        val user = UserHandle.SYSTEM
+        val icon = Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
+        val bubbleExpandBehavior = NoteTaskBubbleExpandBehavior.KEEP_IF_EXPANDED
+        whenever(bubbles.isBubbleExpanded(any())).thenReturn(false)
+
+        createServiceBinder().showOrHideAppBubble(intent, user, icon, bubbleExpandBehavior)
 
         verify(bubbles).showOrHideAppBubble(intent, user, icon)
     }

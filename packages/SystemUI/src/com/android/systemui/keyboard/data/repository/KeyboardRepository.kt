@@ -61,6 +61,9 @@ interface KeyboardRepository {
      */
     val newlyConnectedKeyboard: Flow<Keyboard>
 
+    /** Emits set of currently connected keyboards */
+    val connectedKeyboards: Flow<Set<Keyboard>>
+
     /**
      * Emits [BacklightModel] whenever user changes backlight level from keyboard press. Can only
      * happen when physical keyboard is connected
@@ -74,7 +77,7 @@ class KeyboardRepositoryImpl
 constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val inputManager: InputManager,
-    inputDeviceRepository: InputDeviceRepository
+    inputDeviceRepository: InputDeviceRepository,
 ) : KeyboardRepository {
 
     @FlowPreview
@@ -92,6 +95,13 @@ constructor(
             }
             .mapNotNull { deviceIdToKeyboard(it) }
             .flowOn(backgroundDispatcher)
+
+    override val connectedKeyboards: Flow<Set<Keyboard>> =
+        inputDeviceRepository.deviceChange
+            .map { (deviceIds, _) -> deviceIds }
+            .map { deviceIds -> deviceIds.filter { isPhysicalFullKeyboard(it) } }
+            .distinctUntilChanged()
+            .map { deviceIds -> deviceIds.mapNotNull { deviceIdToKeyboard(it) }.toSet() }
 
     override val isAnyKeyboardConnected: Flow<Boolean> =
         inputDeviceRepository.deviceChange

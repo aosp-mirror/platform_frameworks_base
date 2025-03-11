@@ -267,6 +267,34 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     }
 
     @Override
+    public void getGestureTargetActivityPendingIntent(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull GesturePendingIntentCallback gesturePendingIntentCallback) {
+        BaseCallbacks callbacks =
+                new BaseCallbacks() {
+                    @Override
+                    public void onGestureTargetActivityPendingIntentReceived(
+                            PendingIntent pendingIntent) {
+                        if (!Flags.launchWalletOptionOnPowerDoubleTap()) {
+                            return;
+                        }
+                        executor.execute(
+                                () ->
+                                        gesturePendingIntentCallback
+                                                .onGesturePendingIntentRetrieved(pendingIntent));
+                    }
+                };
+
+        executeApiCall(
+                new ApiCaller("getGestureTargetActivityPendingIntent") {
+                    @Override
+                    void performApiCall(IQuickAccessWalletService service) throws RemoteException {
+                        service.onGestureTargetActivityIntentRequested(callbacks);
+                    }
+                });
+    }
+
+    @Override
     @Nullable
     public Intent createWalletSettingsIntent() {
         if (mServiceInfo == null) {
@@ -504,6 +532,10 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
         }
 
         public void onTargetActivityPendingIntentReceived(PendingIntent pendingIntent) {
+            throw new IllegalStateException();
+        }
+
+        public void onGestureTargetActivityPendingIntentReceived(PendingIntent pendingIntent) {
             throw new IllegalStateException();
         }
     }

@@ -16,7 +16,9 @@
 
 package com.android.systemui.communal
 
+import android.os.UserHandle
 import android.provider.Settings
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.internal.logging.UiEventLogger
@@ -27,6 +29,7 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalScenes.isCommunal
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
@@ -34,7 +37,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dock.DockManager
-import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -61,7 +63,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -82,7 +83,6 @@ constructor(
     private val systemSettings: SystemSettings,
     centralSurfacesOpt: Optional<CentralSurfaces>,
     private val notificationShadeWindowController: NotificationShadeWindowController,
-    private val featureFlagsClassic: FeatureFlagsClassic,
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
@@ -147,9 +147,10 @@ constructor(
             .emitOnStart()
             .onEach {
                 screenTimeout =
-                    systemSettings.getInt(
+                    systemSettings.getIntForUser(
                         Settings.System.SCREEN_OFF_TIMEOUT,
                         DEFAULT_SCREEN_TIMEOUT,
+                        UserHandle.USER_CURRENT,
                     )
             }
             .launchIn(bgScope)
@@ -166,7 +167,7 @@ constructor(
                     communalInteractor.userActivity.emitOnStart(),
                 ) { scene, _ ->
                     // Only timeout if we're on the hub is open.
-                    scene == CommunalScenes.Communal
+                    scene.isCommunal()
                 }
                 .collectLatest { shouldTimeout ->
                     cancelHubTimeout()
@@ -180,7 +181,7 @@ constructor(
                 .sample(communalSceneInteractor.currentScene, ::Pair)
                 .collectLatest { (isDreaming, scene) ->
                     this@CommunalSceneStartable.isDreaming = isDreaming
-                    if (scene == CommunalScenes.Communal && isDreaming && timeoutJob == null) {
+                    if (scene.isCommunal() && isDreaming && timeoutJob == null) {
                         // If dreaming starts after timeout has expired, ex. if dream restarts under
                         // the hub, just close the hub immediately.
                         communalSceneInteractor.changeScene(
@@ -215,6 +216,10 @@ constructor(
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Blank,
                             loggingReason = "hub timeout",
+                            transitionKey =
+                                if (communalSettingsInteractor.isV2FlagEnabled())
+                                    CommunalTransitionKeys.SimpleFade
+                                else null,
                         )
                         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_TIMEOUT)
                     }

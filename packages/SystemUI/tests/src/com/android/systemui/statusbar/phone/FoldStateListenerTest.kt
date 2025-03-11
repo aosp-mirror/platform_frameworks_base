@@ -15,12 +15,15 @@
  */
 package com.android.systemui.statusbar.phone
 
-import android.hardware.devicestate.DeviceState
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.foldedDeviceStateList
+import com.android.systemui.halfFoldedDeviceState
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.phone.FoldStateListener.OnFoldStateChangeListener
+import com.android.systemui.unfoldedDeviceState
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,8 +37,7 @@ import org.mockito.MockitoAnnotations.initMocks
 @SmallTest
 class FoldStateListenerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var listener: OnFoldStateChangeListener
+    @Mock private lateinit var listener: OnFoldStateChangeListener
     private lateinit var sut: FoldStateListener
 
     @Before
@@ -111,25 +113,13 @@ class FoldStateListenerTest : SysuiTestCase() {
     }
 
     private fun setFoldedStates(vararg states: Int) {
-        mContext.orCreateTestableResources.addOverride(
-            R.array.config_foldedDeviceStates,
-            states
-        )
+        mContext.orCreateTestableResources.addOverride(R.array.config_foldedDeviceStates, states)
     }
 
     companion object {
-        private val DEVICE_STATE_FOLDED = DeviceState(
-            DeviceState.Configuration.Builder(123 /* id */, "FOLDED" /* name */)
-                    .build()
-        )
-        private val DEVICE_STATE_HALF_FOLDED = DeviceState(
-            DeviceState.Configuration.Builder(456 /* id */, "HALF_FOLDED" /* name */)
-                    .build()
-        )
-        private val DEVICE_STATE_UNFOLDED = DeviceState(
-            DeviceState.Configuration.Builder(789 /* id */, "UNFOLDED" /* name */)
-                    .build()
-        )
+        private val DEVICE_STATE_FOLDED = Kosmos().foldedDeviceStateList.first()
+        private val DEVICE_STATE_HALF_FOLDED = Kosmos().halfFoldedDeviceState
+        private val DEVICE_STATE_UNFOLDED = Kosmos().unfoldedDeviceState
 
         private const val FOLDED = true
         private const val NOT_FOLDED = false

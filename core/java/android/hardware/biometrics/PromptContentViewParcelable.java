@@ -16,15 +16,11 @@
 
 package android.hardware.biometrics;
 
-import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
-
-import android.annotation.FlaggedApi;
 import android.os.Parcelable;
 
 /**
  * A parcelable {@link PromptContentView}.
  */
-@FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 sealed interface PromptContentViewParcelable extends PromptContentView, Parcelable
         permits PromptVerticalListContentView, PromptContentViewWithMoreOptionsButton {
 }

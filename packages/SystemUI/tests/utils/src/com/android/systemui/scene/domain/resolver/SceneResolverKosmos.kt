@@ -21,6 +21,7 @@ package com.android.systemui.scene.domain.resolver
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.shared.model.SceneFamilies
@@ -34,6 +35,7 @@ val Kosmos.homeSceneFamilyResolver by
         HomeSceneFamilyResolver(
             applicationScope = applicationCoroutineScope,
             deviceEntryInteractor = deviceEntryInteractor,
+            keyguardInteractor = keyguardInteractor,
             keyguardEnabledInteractor = keyguardEnabledInteractor,
         )
     }

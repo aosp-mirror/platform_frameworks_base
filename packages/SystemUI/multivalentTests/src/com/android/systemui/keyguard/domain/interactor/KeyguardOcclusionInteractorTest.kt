@@ -34,6 +34,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -43,6 +44,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -60,10 +62,13 @@ import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -96,7 +101,7 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.AOD,
                 testScope = testScope,
-                throughTransitionState = TransitionState.RUNNING
+                throughTransitionState = TransitionState.RUNNING,
             )
 
             powerInteractor.onCameraLaunchGestureDetected()
@@ -134,7 +139,7 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
                 from = KeyguardState.AOD,
                 to = KeyguardState.LOCKSCREEN,
                 testScope = testScope,
-                throughTransitionState = TransitionState.RUNNING
+                throughTransitionState = TransitionState.RUNNING,
             )
 
             powerInteractor.onCameraLaunchGestureDetected()
@@ -182,21 +187,12 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true)
             runCurrent()
 
-            assertThat(values)
-                .containsExactly(
-                    false,
-                    true,
-                )
+            assertThat(values).containsExactly(false, true)
 
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(false)
             runCurrent()
 
-            assertThat(values)
-                .containsExactly(
-                    false,
-                    true,
-                    false,
-                )
+            assertThat(values).containsExactly(false, true, false)
 
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true)
             runCurrent()
@@ -228,7 +224,7 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
                 from = KeyguardState.GONE,
                 to = KeyguardState.AOD,
                 testScope = testScope,
-                throughTransitionState = TransitionState.RUNNING
+                throughTransitionState = TransitionState.RUNNING,
             )
 
             powerInteractor.onCameraLaunchGestureDetected()
@@ -242,10 +238,7 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
                 testScope = testScope,
             )
 
-            assertThat(values)
-                .containsExactly(
-                    false,
-                )
+            assertThat(values).containsExactly(false)
         }
 
     @Test
@@ -263,7 +256,7 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
                 from = KeyguardState.UNDEFINED,
                 to = KeyguardState.AOD,
                 testScope = testScope,
-                throughTransitionState = TransitionState.RUNNING
+                throughTransitionState = TransitionState.RUNNING,
             )
 
             powerInteractor.onCameraLaunchGestureDetected()
@@ -278,10 +271,7 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
                 testScope = testScope,
             )
 
-            assertThat(values)
-                .containsExactly(
-                    false,
-                )
+            assertThat(values).containsExactly(false)
         }
 
     @Test
@@ -304,8 +294,19 @@ class KeyguardOcclusionInteractorTest : SysuiTestCase() {
             assertThat(occludingActivityWillDismissKeyguard).isTrue()
 
             // Re-lock device:
-            kosmos.powerInteractor.setAsleepForTest()
-            runCurrent()
+            lockDevice()
             assertThat(occludingActivityWillDismissKeyguard).isFalse()
         }
+
+    private suspend fun TestScope.lockDevice() {
+        kosmos.powerInteractor.setAsleepForTest()
+        advanceTimeBy(
+            kosmos.userAwareSecureSettingsRepository
+                .getInt(
+                    Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                    KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT,
+                )
+                .toLong()
+        )
+    }
 }

@@ -34,7 +34,9 @@ import com.android.settingslib.widget.TwoTargetPreference;
  * Preference class that supports being disabled by a user restriction
  * set by a device admin.
  */
-public class RestrictedPreference extends TwoTargetPreference {
+public class RestrictedPreference extends TwoTargetPreference implements
+        RestrictedPreferenceHelperProvider {
+
     RestrictedPreferenceHelper mHelper;
 
     public RestrictedPreference(Context context, AttributeSet attrs,
@@ -64,6 +66,11 @@ public class RestrictedPreference extends TwoTargetPreference {
     public RestrictedPreference(Context context, String packageName, int uid) {
         this(context, null, TypedArrayUtils.getAttr(context, R.attr.preferenceStyle,
                 android.R.attr.preferenceStyle), 0, packageName, uid);
+    }
+
+    @Override
+    public @NonNull RestrictedPreferenceHelper getRestrictedPreferenceHelper() {
+        return mHelper;
     }
 
     @Override

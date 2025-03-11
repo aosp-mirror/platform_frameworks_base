@@ -1248,7 +1248,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             app.mServices.updateBoundClientUids();
             app.mServices.updateHostingComonentTypeForBindingsLocked();
         }
-        app = proc;
+        ams.mProcessStateController.setHostProcess(this, proc);
         updateProcessStateOnRequest();
         if (pendingConnectionGroup > 0 && proc != null) {
             final ProcessServiceRecord psr = proc.mServices;

@@ -29,8 +29,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
+import android.hardware.input.AppLaunchData;
+import android.hardware.input.InputGestureData;
 import android.hardware.input.KeyGestureEvent;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -48,6 +51,7 @@ import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.XmlUtils;
@@ -62,7 +66,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -80,6 +86,7 @@ public class ModifierShortcutManager {
     private static final String ATTRIBUTE_PACKAGE = "package";
     private static final String ATTRIBUTE_CLASS = "class";
     private static final String ATTRIBUTE_SHORTCUT = "shortcut";
+    private static final String ATTRIBUTE_KEYCODE = "keycode";
     private static final String ATTRIBUTE_CATEGORY = "category";
     private static final String ATTRIBUTE_SHIFT = "shift";
     private static final String ATTRIBUTE_ROLE = "role";
@@ -131,7 +138,10 @@ public class ModifierShortcutManager {
     private boolean mConsumeSearchKeyUp = true;
     private UserHandle mCurrentUser;
     private final Map<Pair<Character, Boolean>, Bookmark> mBookmarks = new HashMap<>();
+    @GuardedBy("mAppIntentCache")
+    private final Map<AppLaunchData, Intent> mAppIntentCache = new HashMap<>();
 
+    @SuppressLint("MissingPermission")
     ModifierShortcutManager(Context context, Handler handler, UserHandle currentUser) {
         mContext = context;
         mHandler = handler;
@@ -146,9 +156,23 @@ public class ModifierShortcutManager {
                     } else {
                         mRoleIntents.remove(roleName);
                     }
+                    synchronized (mAppIntentCache) {
+                        mAppIntentCache.entrySet().removeIf(
+                                entry -> {
+                                    if (entry.getKey() instanceof AppLaunchData.RoleData) {
+                                        return Objects.equals(
+                                                ((AppLaunchData.RoleData) entry.getKey()).getRole(),
+                                                roleName);
+                                    }
+                                    return false;
+                                });
+                    }
                 }, UserHandle.ALL);
         mCurrentUser = currentUser;
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
+    }
+
+    void onSystemReady() {
         loadShortcuts();
     }
 
@@ -159,6 +183,10 @@ public class ModifierShortcutManager {
         // so clear the cache.
         clearRoleIntents();
         clearComponentIntents();
+
+        synchronized (mAppIntentCache) {
+            mAppIntentCache.clear();
+        }
     }
 
     void clearRoleIntents() {
@@ -313,6 +341,7 @@ public class ModifierShortcutManager {
         try {
             XmlResourceParser parser = mContext.getResources().getXml(R.xml.bookmarks);
             XmlUtils.beginDocument(parser, TAG_BOOKMARKS);
+            KeyCharacterMap virtualKcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
 
             while (true) {
                 XmlUtils.nextElement(parser);
@@ -331,15 +360,36 @@ public class ModifierShortcutManager {
                 String categoryName = parser.getAttributeValue(null, ATTRIBUTE_CATEGORY);
                 String shiftName = parser.getAttributeValue(null, ATTRIBUTE_SHIFT);
                 String roleName = parser.getAttributeValue(null, ATTRIBUTE_ROLE);
+                final int keycode;
+                final int modifierState;
+                TypedArray a = mContext.getResources().obtainAttributes(parser,
+                        R.styleable.Bookmark);
+                try {
+                    keycode = a.getInt(R.styleable.Bookmark_keycode, KeyEvent.KEYCODE_UNKNOWN);
+                    modifierState = a.getInt(R.styleable.Bookmark_modifierState, 0);
+                } finally {
+                    a.recycle();
+                }
 
+                if (TextUtils.isEmpty(shortcutName) && keycode != KeyEvent.KEYCODE_UNKNOWN) {
+                    // Try to find shortcutChar using keycode
+                    shortcutName = String.valueOf(virtualKcm.getDisplayLabel(keycode)).toLowerCase(
+                            Locale.ROOT);
+                }
                 if (TextUtils.isEmpty(shortcutName)) {
                     Log.w(TAG, "Shortcut required for bookmark with category=" + categoryName
                             + " packageName=" + packageName + " className=" + className
-                            + " role=" + roleName + "shiftName=" + shiftName);
+                            + " role=" + roleName + " shiftName=" + shiftName + " keycode= "
+                            + keycode + " modifierState= " + modifierState);
                     continue;
                 }
 
-                final boolean isShiftShortcut = (shiftName != null && shiftName.equals("true"));
+                final boolean isShiftShortcut;
+                if (!TextUtils.isEmpty(shiftName)) {
+                    isShiftShortcut = shiftName.equals("true");
+                } else {
+                    isShiftShortcut = (modifierState & KeyEvent.META_SHIFT_ON) != 0;
+                }
 
                 if (modifierShortcutManagerRefactor()) {
                     final char shortcutChar = shortcutName.charAt(0);
@@ -354,7 +404,7 @@ public class ModifierShortcutManager {
                         bookmark = new RoleBookmark(shortcutChar, isShiftShortcut, roleName);
                     }
                     if (bookmark != null) {
-                        Log.d(TAG, "adding shortcut " + bookmark + "shift="
+                        Log.d(TAG, "adding shortcut " + bookmark + " shift="
                                 + isShiftShortcut + " char=" + shortcutChar);
                         mBookmarks.put(new Pair<>(shortcutChar, isShiftShortcut), bookmark);
                     }
@@ -667,9 +717,11 @@ public class ModifierShortcutManager {
     public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
         List<KeyboardShortcutInfo> shortcuts = new ArrayList();
         if (modifierShortcutManagerRefactor()) {
+            Context context = modifierShortcutManagerMultiuser()
+                    ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
             for (Bookmark b : mBookmarks.values()) {
                 KeyboardShortcutInfo info = shortcutInfoFromIntent(
-                        b.getShortcutChar(), b.getIntent(mContext), b.isShift());
+                        b.getShortcutChar(), b.getIntent(context), b.isShift());
                 if (info != null) {
                     shortcuts.add(info);
                 }
@@ -744,6 +796,70 @@ public class ModifierShortcutManager {
         return new KeyboardShortcutGroup(
                 mContext.getString(R.string.keyboard_shortcut_group_applications),
                 shortcuts);
+    }
+
+    /**
+     * @return a {@link KeyboardShortcutGroup} containing the application launch keyboard
+     *         shortcuts based on provided list of shortcut data.
+     */
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId,
+            List<InputGestureData> shortcutData) {
+        List<KeyboardShortcutInfo> shortcuts = new ArrayList<>();
+        KeyCharacterMap kcm = KeyCharacterMap.load(deviceId);
+        for (InputGestureData data : shortcutData) {
+            if (data.getTrigger() instanceof InputGestureData.KeyTrigger trigger) {
+                KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                        kcm.getDisplayLabel(trigger.getKeycode()),
+                        getIntentFromAppLaunchData(data.getAction().appLaunchData()),
+                        (trigger.getModifierState() & KeyEvent.META_SHIFT_ON) != 0);
+                if (info != null) {
+                    shortcuts.add(info);
+                }
+            }
+        }
+        return new KeyboardShortcutGroup(
+                mContext.getString(R.string.keyboard_shortcut_group_applications),
+                shortcuts);
+    }
+
+    private Intent getIntentFromAppLaunchData(@NonNull AppLaunchData data) {
+        Context context = mContext.createContextAsUser(mCurrentUser, 0);
+        synchronized (mAppIntentCache) {
+            Intent intent = mAppIntentCache.get(data);
+            if (intent != null) {
+                return intent;
+            }
+            if (data instanceof AppLaunchData.CategoryData) {
+                intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                        ((AppLaunchData.CategoryData) data).getCategory());
+            } else if (data instanceof AppLaunchData.RoleData) {
+                intent = getRoleLaunchIntent(context, ((AppLaunchData.RoleData) data).getRole());
+            } else if (data instanceof AppLaunchData.ComponentData) {
+                AppLaunchData.ComponentData componentData = (AppLaunchData.ComponentData) data;
+                intent = resolveComponentNameIntent(context, componentData.getPackageName(),
+                        componentData.getClassName());
+            }
+            if (intent != null) {
+                mAppIntentCache.put(data, intent);
+            }
+            return intent;
+        }
+    }
+
+    boolean launchApplication(@NonNull AppLaunchData data) {
+        Intent intent  = getIntentFromAppLaunchData(data);
+        if (intent == null) {
+            return false;
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            mContext.startActivityAsUser(intent, mCurrentUser);
+            return true;
+        } catch (ActivityNotFoundException ex) {
+            Slog.w(TAG, "Not launching app because "
+                    + "the activity to which it refers to was not found: " + data);
+        }
+        return false;
     }
 
     /**
@@ -867,7 +983,7 @@ public class ModifierShortcutManager {
 
         // TODO(b/280423320): Add new field package name associated in the
         //  KeyboardShortcutEvent atom and log it accordingly.
-        return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME;
+        return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION;
     }
 
     @KeyGestureEvent.KeyGestureType

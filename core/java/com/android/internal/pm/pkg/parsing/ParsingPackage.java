@@ -31,7 +31,6 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
-import com.android.internal.R;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedApexSystemService;
@@ -122,6 +121,9 @@ public interface ParsingPackage {
     ParsingPackage addQueriesPackage(String packageName);
 
     ParsingPackage addQueriesProvider(String authority);
+
+    /** Adds a feature flag (`android:featureFlag` attribute) encountered in the manifest. */
+    ParsingPackage addFeatureFlag(@NonNull String flagPackageAndName, @Nullable Boolean flagValue);
 
     /** Sets a process name -> {@link ParsedProcess} map coming from the <processes> tag. */
     ParsingPackage setProcesses(@NonNull Map<String, ParsedProcess> processes);
@@ -277,6 +279,9 @@ public interface ParsingPackage {
     ParsingPackage setNativeHeapZeroInitialized(
             @ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized);
 
+    /** Manifest option pageSizeCompat will populate this field */
+    ParsingPackage setPageSizeAppCompatFlags(@ApplicationInfo.PageSizeAppCompatFlags int value);
+
     ParsingPackage setRequestRawExternalStorageAccess(
             @Nullable Boolean requestRawExternalStorageAccess);
 
@@ -409,6 +414,18 @@ public interface ParsingPackage {
     ParsingPackage setKnownActivityEmbeddingCerts(Set<String> knownActivityEmbeddingCerts);
 
     ParsingPackage setOnBackInvokedCallbackEnabled(boolean enableOnBackInvokedCallback);
+
+    /**
+     * Set the drawable resources id array of the alternate icons that are parsing from the
+     * AndroidManifest file
+     */
+    ParsingPackage setAlternateLauncherIconResIds(int[] alternateLauncherIconResIds);
+
+    /**
+     * Set the string resources id array of the alternate labels that are parsing from the
+     * AndroidManifest file
+     */
+    ParsingPackage setAlternateLauncherLabelResIds(int[] alternateLauncherLabelResIds);
 
     @CallSuper
     ParsedPackage hideAsParsed();
@@ -550,4 +567,15 @@ public interface ParsingPackage {
     boolean isNormalScreensSupported();
 
     boolean isSmallScreensSupported();
+
+    /**
+     * Sets the intent matching flags. This value is intended to be set from the "application" tag.
+     * @see android.R.styleable#AndroidManifestApplication_intentMatchingFlags
+     */
+    ParsingPackage setIntentMatchingFlags(int intentMatchingFlags);
+
+    /**
+     * Returns the intent matching flags.
+     */
+    int getIntentMatchingFlags();
 }

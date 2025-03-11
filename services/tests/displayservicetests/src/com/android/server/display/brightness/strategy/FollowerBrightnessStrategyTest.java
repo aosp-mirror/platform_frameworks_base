@@ -61,7 +61,8 @@ public class FollowerBrightnessStrategyTest {
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mFollowerBrightnessStrategy.updateBrightness(
                         new StrategyExecutionRequest(displayPowerRequest, 0.2f,
-                                /* userSetBrightnessChanged= */ false));
+                                /* userSetBrightnessChanged= */ false,
+                                /* isStylusBeingUsed */ false));
         assertEquals(expectedDisplayBrightnessState, updatedDisplayBrightnessState);
     }
 

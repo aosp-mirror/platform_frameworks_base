@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"क्यामेरासम्बन्धी समस्या देखियो?\nसमस्या हल गर्न ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"समस्या हल भएन?\nपहिलेको जस्तै बनाउन ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्यामेरासम्बन्धी कुनै पनि समस्या छैन? खारेज गर्न ट्याप गर्नुहोस्।"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"एपको मेनु यहाँ भेट्टाउन सकिन्छ"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"एकभन्दा बढी एपहरू सँगै देखाउन डेस्कटप भ्यू हाल्नुहोस्"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"जुनसुकै बेला एपको मेनुबाट फुल स्क्रिनमा फर्कनुहोस्"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"थप कुरा हेर्नुहोस् र गर्नुहोस्"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"स्प्लिट स्क्रिन मोड प्रयोग गर्न अर्को एप ड्रयाग एन्ड ड्रप गर्नुहोस्"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"तपाईं जुन एपको स्थिति मिलाउन चाहनुहुन्छ सोही एपको बाहिर डबल ट्याप गर्नुहोस्"</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"चयन गर्नुहोस्"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"स्क्रिनसट"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ब्राउजरमा खोल्नुहोस्"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"एपमा खोल्नुहोस्"</string>
     <string name="new_window_text" msgid="6318648868380652280">"नयाँ विन्डो"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"विन्डोहरू व्यवस्थापन गर्नुहोस्"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"एस्पेक्ट रेसियो परिवर्तन गर्नुहोस्"</string>
     <string name="close_text" msgid="4986518933445178928">"बन्द गर्नुहोस्"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"मेनु बन्द गर्नुहोस्"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"मेनु खोल्नुहोस्"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"स्क्रिन ठुलो बनाउनुहोस्"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"स्क्रिन स्न्याप गर्नुहोस्"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"यो एपको आकार बदल्न मिल्दैन"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"आकार बदल्नुहोस्"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"एप सारेर यहाँ ल्याउन सकिएन"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"इमर्सिभ"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"रिस्टोर गर्नुहोस्"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"ठुलो बनाउनुहोस्"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"रिस्टोर गर्नुहोस्"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"बायाँतिर स्न्याप गर्नुहोस्"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"दायाँतिर स्न्याप गर्नुहोस्"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"डिफल्ट सेटिङअनुसार खोल्नुहोस्"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"यो एपका वेब लिंकहरू खोल्ने तरिका छनौट गर्नुहोस्"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"एपमा"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"तपाईंको ब्राउजरमा"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"ठिक छ"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"आफ्नो ब्राउजरबाट यहाँ तुरुन्तै एपहरू खोल्नुहोस्"</string>
 </resources>

@@ -15,19 +15,23 @@
  */
 package com.android.internal.widget.remotecompose.core.types;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.BYTE;
+
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Used to represent a boolean
- */
-public class BooleanConstant implements Operation {
-    boolean mValue = false;
+/** Used to represent a boolean */
+public class BooleanConstant extends Operation {
+    private static final int OP_CODE = Operations.DATA_BOOLEAN;
+    private boolean mValue = false;
     private int mId;
 
     public BooleanConstant(int id, boolean value) {
@@ -35,62 +39,89 @@ public class BooleanConstant implements Operation {
         mValue = value;
     }
 
-    @Override
-    public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mId, mValue);
+    /**
+     * Get the value of the boolean constant
+     *
+     * @return the value of the boolean
+     */
+    public boolean getValue() {
+        return mValue;
     }
 
     @Override
-    public void apply(RemoteContext context) {
-
+    public void write(@NonNull WireBuffer buffer) {
+        apply(buffer, mId, mValue);
     }
 
     @Override
-    public String deepToString(String indent) {
+    public void apply(@NonNull RemoteContext context) {}
+
+    @NonNull
+    @Override
+    public String deepToString(@NonNull String indent) {
         return toString();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BooleanConstant[" + mId + "] = " + mValue + "";
     }
 
-    public static final Companion COMPANION = new Companion();
-
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
-
-        @Override
-        public String name() {
-            return "OrigamiBoolean";
-        }
-
-        @Override
-        public int id() {
-            return Operations.DATA_BOOLEAN;
-        }
-
-        /**
-         * Writes out the operation to the buffer
-         *
-         * @param buffer
-         * @param id
-         * @param value
-         */
-        public void apply(WireBuffer buffer, int id, boolean value) {
-            buffer.start(Operations.DATA_BOOLEAN);
-            buffer.writeInt(id);
-            buffer.writeBoolean(value);
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int id = buffer.readInt();
-
-            boolean value = buffer.readBoolean();
-            operations.add(new BooleanConstant(id, value));
-        }
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
+    public static String name() {
+        return "OrigamiBoolean";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
+    public static int id() {
+        return Operations.DATA_BOOLEAN;
+    }
+
+    /**
+     * Writes out the operation to the buffer
+     *
+     * @param buffer
+     * @param id
+     * @param value
+     */
+    public static void apply(@NonNull WireBuffer buffer, int id, boolean value) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(id);
+        buffer.writeBoolean(value);
+    }
+
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
+        int id = buffer.readInt();
+
+        boolean value = buffer.readBoolean();
+        operations.add(new BooleanConstant(id, value));
+    }
+
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Expressions Operations", OP_CODE, "BooleanConstant")
+                .description("A boolean and its associated id")
+                .field(DocumentedOperation.INT, "id", "id of Int")
+                .field(BYTE, "value", "8-bit 0 or 1");
+    }
 }

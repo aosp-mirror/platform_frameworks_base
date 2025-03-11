@@ -157,10 +157,10 @@ public class WindowLayout {
             // which prevents overlap with the DisplayCutout.
             if (!attachedInParent && !floatingInScreenWindow) {
                 mTempRect.set(outParentFrame);
-                outParentFrame.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
+                intersectOrClamp(outParentFrame, displayCutoutSafeExceptMaybeBars);
                 frames.isParentFrameClippedByDisplayCutout = !mTempRect.equals(outParentFrame);
             }
-            outDisplayFrame.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
+            intersectOrClamp(outDisplayFrame, displayCutoutSafeExceptMaybeBars);
         }
 
         final boolean noLimits = (attrs.flags & FLAG_LAYOUT_NO_LIMITS) != 0;
@@ -281,6 +281,19 @@ public class WindowLayout {
                 + " attrs=" + attrs
                 + " state=" + state
                 + " requestedInvisibleTypes=" + WindowInsets.Type.toString(~requestedVisibleTypes));
+    }
+
+    /**
+     * If both rectangles intersect, set inOutRect to that intersection. Otherwise, clamp inOutRect
+     * to the side (or the corner) that the other rectangle is away from.
+     * Unlike {@link Rect#intersectUnchecked(Rect)}, this method guarantees that the new rectangle
+     * is valid and contained in inOutRect if rectangles involved are valid.
+     */
+    private static void intersectOrClamp(Rect inOutRect, Rect other) {
+        inOutRect.left = Math.min(Math.max(inOutRect.left, other.left), inOutRect.right);
+        inOutRect.top = Math.min(Math.max(inOutRect.top, other.top), inOutRect.bottom);
+        inOutRect.right = Math.max(Math.min(inOutRect.right, other.right), inOutRect.left);
+        inOutRect.bottom = Math.max(Math.min(inOutRect.bottom, other.bottom), inOutRect.top);
     }
 
     public static void extendFrameByCutout(Rect displayCutoutSafe,

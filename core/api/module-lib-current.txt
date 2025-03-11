@@ -100,6 +100,7 @@ package android.content {
     method @NonNull public android.content.Context createContextForSdkInSandbox(@NonNull android.content.pm.ApplicationInfo, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.os.IBinder getProcessToken();
     method @NonNull public android.os.UserHandle getUser();
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") public static final int BIND_FOREGROUND_SERVICE = 67108864; // 0x4000000
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
     field @FlaggedApi("android.os.mainline_vcn_platform_api") public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
@@ -145,21 +146,12 @@ package android.hardware.usb {
 
   public class UsbManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getGadgetHalVersion();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbBandwidthMbps();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbHalVersion();
     field public static final int GADGET_HAL_NOT_SUPPORTED = -1; // 0xffffffff
     field public static final int GADGET_HAL_V1_0 = 10; // 0xa
     field public static final int GADGET_HAL_V1_1 = 11; // 0xb
     field public static final int GADGET_HAL_V1_2 = 12; // 0xc
     field public static final int GADGET_HAL_V2_0 = 20; // 0x14
-    field public static final int USB_DATA_TRANSFER_RATE_10G = 10240; // 0x2800
-    field public static final int USB_DATA_TRANSFER_RATE_20G = 20480; // 0x5000
-    field public static final int USB_DATA_TRANSFER_RATE_40G = 40960; // 0xa000
-    field public static final int USB_DATA_TRANSFER_RATE_5G = 5120; // 0x1400
-    field public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12; // 0xc
-    field public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480; // 0x1e0
-    field public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2; // 0x2
-    field public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1; // 0xffffffff
     field public static final int USB_HAL_NOT_SUPPORTED = -1; // 0xffffffff
     field public static final int USB_HAL_RETRY = -2; // 0xfffffffe
     field public static final int USB_HAL_V1_0 = 10; // 0xa
@@ -322,7 +314,7 @@ package android.net.netstats {
 package android.net.wifi {
 
   public final class WifiMigration {
-    method @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static int migrateLegacyKeystoreToWifiBlobstore();
+    method @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static void migrateLegacyKeystoreToWifiBlobstore(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     field @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static final int KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION = 2; // 0x2
     field @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE = 0; // 0x0
     field @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED = 1; // 0x1
@@ -386,6 +378,13 @@ package android.os {
 
   public static class Build.VERSION {
     field public static final int DEVICE_INITIAL_SDK_INT;
+  }
+
+  public final class Bundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
+    method @FlaggedApi("android.os.enable_has_binders") public int hasBinders();
+    field @FlaggedApi("android.os.enable_has_binders") public static final int STATUS_BINDERS_NOT_PRESENT = 0; // 0x0
+    field @FlaggedApi("android.os.enable_has_binders") public static final int STATUS_BINDERS_PRESENT = 1; // 0x1
+    field @FlaggedApi("android.os.enable_has_binders") public static final int STATUS_BINDERS_UNKNOWN = 2; // 0x2
   }
 
   public class Handler {

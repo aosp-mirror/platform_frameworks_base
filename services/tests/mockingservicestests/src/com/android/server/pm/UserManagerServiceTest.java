@@ -195,12 +195,12 @@ public final class UserManagerServiceTest {
         doNothing().when(mSpiedContext).sendBroadcastAsUser(any(), any(), any());
         mockIsLowRamDevice(false);
 
-        // Called when getting boot user. config_bootToHeadlessSystemUser is false by default.
+        // Called when getting boot user. config_bootToHeadlessSystemUser is 0 by default.
         mSpyResources = spy(mSpiedContext.getResources());
         when(mSpiedContext.getResources()).thenReturn(mSpyResources);
-        doReturn(false)
+        doReturn(0)
                 .when(mSpyResources)
-                .getBoolean(com.android.internal.R.bool.config_bootToHeadlessSystemUser);
+                .getInteger(com.android.internal.R.integer.config_hsumBootStrategy);
 
         // Must construct UserManagerService in the UiThread
         mTestDir = new File(mRealContext.getDataDir(), "umstest");
@@ -859,13 +859,48 @@ public final class UserManagerServiceTest {
     }
 
     @Test
-    public void testGetBootUser_enableBootToHeadlessSystemUser() {
+    public void testGetBootUser_Headless_BootToSystemUserWhenDeviceIsProvisioned() {
         setSystemUserHeadless(true);
-        doReturn(true)
+        addUser(USER_ID);
+        addUser(OTHER_USER_ID);
+        mockProvisionedDevice(true);
+        doReturn(1)
                 .when(mSpyResources)
-                .getBoolean(com.android.internal.R.bool.config_bootToHeadlessSystemUser);
+                .getInteger(com.android.internal.R.integer.config_hsumBootStrategy);
 
         assertThat(mUms.getBootUser()).isEqualTo(UserHandle.USER_SYSTEM);
+    }
+
+    @Test
+    public void testGetBootUser_Headless_BootToFirstSwitchableFullUserWhenDeviceNotProvisioned() {
+        setSystemUserHeadless(true);
+        addUser(USER_ID);
+        addUser(OTHER_USER_ID);
+        mockProvisionedDevice(false);
+        doReturn(1)
+                .when(mSpyResources)
+                .getInteger(com.android.internal.R.integer.config_hsumBootStrategy);
+        // Even if the headless system user switchable flag is true, the boot user should be the
+        // first switchable full user.
+        doReturn(true)
+                .when(mSpyResources)
+                .getBoolean(com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser);
+
+        assertThat(mUms.getBootUser()).isEqualTo(USER_ID);
+    }
+
+    @Test
+    public void testGetBootUser_Headless_ThrowsIfBootFailsNoFullUserWhenDeviceNotProvisioned()
+                throws Exception {
+        setSystemUserHeadless(true);
+        removeNonSystemUsers();
+        mockProvisionedDevice(false);
+        doReturn(1)
+                .when(mSpyResources)
+                .getInteger(com.android.internal.R.integer.config_hsumBootStrategy);
+
+        assertThrows(ServiceSpecificException.class,
+                () -> mUms.getBootUser());
     }
 
     /**
@@ -933,6 +968,11 @@ public final class UserManagerServiceTest {
     private void mockUserSwitcherEnabled(boolean enabled) {
         doReturn(enabled ? 1 : 0).when(() -> Settings.Global.getInt(
                 any(), eq(android.provider.Settings.Global.USER_SWITCHER_ENABLED), anyInt()));
+    }
+
+    private void mockProvisionedDevice(boolean isProvisionedDevice) {
+        doReturn(isProvisionedDevice ? 1 : 0).when(() -> Settings.Global.getInt(
+                any(), eq(android.provider.Settings.Global.DEVICE_PROVISIONED), anyInt()));
     }
 
     private void mockIsLowRamDevice(boolean isLowRamDevice) {

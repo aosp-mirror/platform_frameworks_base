@@ -524,8 +524,7 @@ public final class MediaRouter2Manager {
             transferToRoute(
                     sessionInfo, route, transferInitiatorUserHandle, transferInitiatorPackageName);
         } else {
-            requestCreateSession(sessionInfo, route, transferInitiatorUserHandle,
-                    transferInitiatorPackageName);
+            requestCreateSession(sessionInfo, route);
         }
     }
 
@@ -914,9 +913,7 @@ public final class MediaRouter2Manager {
         }
     }
 
-    private void requestCreateSession(RoutingSessionInfo oldSession, MediaRoute2Info route,
-            @NonNull UserHandle transferInitiatorUserHandle,
-            @NonNull String transferInitiationPackageName) {
+    private void requestCreateSession(RoutingSessionInfo oldSession, MediaRoute2Info route) {
         if (TextUtils.isEmpty(oldSession.getClientPackageName())) {
             Log.w(TAG, "requestCreateSession: Can't create a session without package name.");
             notifyTransferFailed(oldSession, route);
@@ -927,8 +924,7 @@ public final class MediaRouter2Manager {
 
         try {
             mMediaRouterService.requestCreateSessionWithManager(
-                    mClient, requestId, oldSession, route, transferInitiatorUserHandle,
-                    transferInitiationPackageName);
+                    mClient, requestId, oldSession, route);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

@@ -55,7 +55,7 @@ import java.io.InputStream;
 /**
  * IllustrationPreference is a preference that can play lottie format animation
  */
-public class IllustrationPreference extends Preference {
+public class IllustrationPreference extends Preference implements GroupSectionDividerMixin {
 
     private static final String TAG = "IllustrationPreference";
 

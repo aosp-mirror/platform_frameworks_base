@@ -25,6 +25,7 @@ import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
+import android.util.Log
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.biometrics.shared.model.toSensorStrength
@@ -91,13 +92,14 @@ constructor(
                                 trySendWithFailureLogging(
                                     DEFAULT_PROPS,
                                     TAG,
-                                    "no registered sensors, use default props"
+                                    "no registered sensors, use default props",
                                 )
                             } else {
+                                Log.d(TAG, "onAllAuthenticatorsRegistered $sensors")
                                 trySendWithFailureLogging(
                                     sensors[0],
                                     TAG,
-                                    "update properties on authenticators registered"
+                                    "update properties on authenticators registered",
                                 )
                             }
                         }
@@ -160,7 +162,7 @@ constructor(
                 FingerprintSensorProperties.TYPE_UNKNOWN,
                 false /* halControlsIllumination */,
                 true /* resetLockoutRequiresHardwareAuthToken */,
-                listOf<SensorLocationInternal>(SensorLocationInternal.DEFAULT)
+                listOf<SensorLocationInternal>(SensorLocationInternal.DEFAULT),
             )
         private val DEFAULT_PROPS =
             FingerprintSensorPropertiesInternal(
@@ -171,7 +173,7 @@ constructor(
                 FingerprintSensorProperties.TYPE_UNKNOWN,
                 false /* halControlsIllumination */,
                 true /* resetLockoutRequiresHardwareAuthToken */,
-                listOf<SensorLocationInternal>(SensorLocationInternal.DEFAULT)
+                listOf<SensorLocationInternal>(SensorLocationInternal.DEFAULT),
             )
     }
 }

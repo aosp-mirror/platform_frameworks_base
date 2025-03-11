@@ -31,7 +31,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fake
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.whenever
@@ -62,7 +63,7 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val clock = FakeSystemClock()
     private val userRepository = FakeUserRepository()
-    private val mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
+    private val mobileConnectionsRepository = kosmos.mobileConnectionsRepository
 
     private lateinit var underTest: AuthenticationRepository
 
@@ -110,7 +111,7 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
                 .isEqualTo(AuthenticationMethodModel.None)
 
             currentSecurityMode = KeyguardSecurityModel.SecurityMode.SimPin
-            mobileConnectionsRepository.isAnySimSecure.value = true
+            mobileConnectionsRepository.fake.isAnySimSecure.value = true
             assertThat(authMethod).isEqualTo(AuthenticationMethodModel.Sim)
             assertThat(underTest.getAuthenticationMethod()).isEqualTo(AuthenticationMethodModel.Sim)
         }
@@ -199,7 +200,7 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
         }
 
     private fun setSecurityModeAndDispatchBroadcast(
-        securityMode: KeyguardSecurityModel.SecurityMode,
+        securityMode: KeyguardSecurityModel.SecurityMode
     ) {
         currentSecurityMode = securityMode
         dispatchBroadcast()
@@ -208,23 +209,15 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
     private fun dispatchBroadcast() {
         fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
             context,
-            Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED)
+            Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
         )
     }
 
     companion object {
         private val USER_INFOS =
             listOf(
-                UserInfo(
-                    /* id= */ 100,
-                    /* name= */ "First user",
-                    /* flags= */ 0,
-                ),
-                UserInfo(
-                    /* id= */ 101,
-                    /* name= */ "Second user",
-                    /* flags= */ 0,
-                ),
+                UserInfo(/* id= */ 100, /* name= */ "First user", /* flags= */ 0),
+                UserInfo(/* id= */ 101, /* name= */ "Second user", /* flags= */ 0),
             )
     }
 }

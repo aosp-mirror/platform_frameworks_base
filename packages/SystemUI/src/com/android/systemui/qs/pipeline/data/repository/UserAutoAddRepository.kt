@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -70,7 +70,7 @@ constructor(
     }
 
     private fun startFlowCollections(autoAdded: StateFlow<Set<TileSpec>>) {
-        applicationScope.launch(bgDispatcher) {
+        applicationScope.launch(context = bgDispatcher) {
             launch { autoAdded.collect { store(it) } }
             launch {
                 // As Settings is not the source of truth, once we started tracking tiles for a

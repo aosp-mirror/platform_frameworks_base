@@ -84,7 +84,10 @@ constructor(
          */
         val EvaluatorByFlag =
             mapOf<Long, (SceneContainerPluginState) -> Boolean>(
-                SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to { it.scene != Scenes.Gone },
+                SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to
+                    {
+                        it.scene != Scenes.Gone || it.overlays.isNotEmpty()
+                    },
                 SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to
                     {
                         when {

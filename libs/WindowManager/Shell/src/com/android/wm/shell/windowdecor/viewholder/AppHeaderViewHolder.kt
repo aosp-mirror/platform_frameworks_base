@@ -16,12 +16,12 @@
 package com.android.wm.shell.windowdecor.viewholder
 
 import android.annotation.ColorInt
+import android.annotation.DrawableRes
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
@@ -46,9 +46,10 @@ import com.android.internal.R.attr.materialColorSecondaryContainer
 import com.android.internal.R.attr.materialColorSurfaceContainerHigh
 import com.android.internal.R.attr.materialColorSurfaceContainerLow
 import com.android.internal.R.attr.materialColorSurfaceDim
+import com.android.window.flags.Flags
 import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
-import android.window.flags.DesktopModeFlags
+import android.window.DesktopModeFlags
 import com.android.wm.shell.windowdecor.MaximizeButtonView
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_100
@@ -69,12 +70,20 @@ class AppHeaderViewHolder(
         rootView: View,
         onCaptionTouchListener: View.OnTouchListener,
         onCaptionButtonClickListener: View.OnClickListener,
-        onLongClickListener: OnLongClickListener,
+        private val onLongClickListener: OnLongClickListener,
         onCaptionGenericMotionListener: View.OnGenericMotionListener,
         appName: CharSequence,
         appIconBitmap: Bitmap,
         onMaximizeHoverAnimationFinishedListener: () -> Unit
-) : WindowDecorationViewHolder(rootView) {
+) : WindowDecorationViewHolder<AppHeaderViewHolder.HeaderData>(rootView) {
+
+    data class HeaderData(
+        val taskInfo: RunningTaskInfo,
+        val isTaskMaximized: Boolean,
+        val inFullImmersiveState: Boolean,
+        val hasGlobalFocus: Boolean,
+        val enableMaximizeLongClick: Boolean,
+    ) : Data()
 
     private val decorThemeUtil = DecorThemeUtil(context)
     private val lightColors = dynamicLightColorScheme(context)
@@ -151,23 +160,39 @@ class AppHeaderViewHolder(
                 onMaximizeHoverAnimationFinishedListener
     }
 
-    override fun bindData(
+    override fun bindData(data: HeaderData) {
+        bindData(
+            data.taskInfo,
+            data.isTaskMaximized,
+            data.inFullImmersiveState,
+            data.hasGlobalFocus,
+            data.enableMaximizeLongClick
+        )
+    }
+
+    private fun bindData(
         taskInfo: RunningTaskInfo,
-        position: Point,
-        width: Int,
-        height: Int,
-        isCaptionVisible: Boolean
+        isTaskMaximized: Boolean,
+        inFullImmersiveState: Boolean,
+        hasGlobalFocus: Boolean,
+        enableMaximizeLongClick: Boolean,
     ) {
         if (DesktopModeFlags.ENABLE_THEMED_APP_HEADERS.isTrue()) {
-            bindDataWithThemedHeaders(taskInfo)
+            bindDataWithThemedHeaders(
+                taskInfo,
+                isTaskMaximized,
+                inFullImmersiveState,
+                hasGlobalFocus,
+                enableMaximizeLongClick,
+            )
         } else {
-            bindDataLegacy(taskInfo)
+            bindDataLegacy(taskInfo, hasGlobalFocus)
         }
     }
 
-    private fun bindDataLegacy(taskInfo: RunningTaskInfo) {
-        captionView.setBackgroundColor(getCaptionBackgroundColor(taskInfo))
-        val color = getAppNameAndButtonColor(taskInfo)
+    private fun bindDataLegacy(taskInfo: RunningTaskInfo, hasGlobalFocus: Boolean) {
+        captionView.setBackgroundColor(getCaptionBackgroundColor(taskInfo, hasGlobalFocus))
+        val color = getAppNameAndButtonColor(taskInfo, hasGlobalFocus)
         val alpha = Color.alpha(color)
         closeWindowButton.imageTintList = ColorStateList.valueOf(color)
         maximizeWindowButton.imageTintList = ColorStateList.valueOf(color)
@@ -198,8 +223,14 @@ class AppHeaderViewHolder(
         minimizeWindowButton.isGone = !enableMinimizeButton()
     }
 
-    private fun bindDataWithThemedHeaders(taskInfo: RunningTaskInfo) {
-        val header = fillHeaderInfo(taskInfo)
+    private fun bindDataWithThemedHeaders(
+        taskInfo: RunningTaskInfo,
+        isTaskMaximized: Boolean,
+        inFullImmersiveState: Boolean,
+        hasGlobalFocus: Boolean,
+        enableMaximizeLongClick: Boolean,
+    ) {
+        val header = fillHeaderInfo(taskInfo, hasGlobalFocus)
         val headerStyle = getHeaderStyle(header)
 
         // Caption Background
@@ -241,16 +272,19 @@ class AppHeaderViewHolder(
         }
         minimizeWindowButton.isGone = !enableMinimizeButton()
         // Maximize button.
-        maximizeButtonView.setAnimationTints(
-            darkMode = header.appTheme == Theme.DARK,
-            iconForegroundColor = colorStateList,
-            baseForegroundColor = foregroundColor,
-            rippleDrawable = createRippleDrawable(
-                color = foregroundColor,
-                cornerRadius = headerButtonsRippleRadius,
-                drawableInsets = maximizeDrawableInsets
+        maximizeButtonView.apply {
+            setAnimationTints(
+                darkMode = header.appTheme == Theme.DARK,
+                iconForegroundColor = colorStateList,
+                baseForegroundColor = foregroundColor,
+                rippleDrawable = createRippleDrawable(
+                    color = foregroundColor,
+                    cornerRadius = headerButtonsRippleRadius,
+                    drawableInsets = maximizeDrawableInsets
+                )
             )
-        )
+            setIcon(getMaximizeButtonIcon(isTaskMaximized, inFullImmersiveState))
+        }
         // Close button.
         closeWindowButton.apply {
             imageTintList = colorStateList
@@ -260,6 +294,16 @@ class AppHeaderViewHolder(
                 drawableInsets = closeDrawableInsets
             )
         }
+        if (!enableMaximizeLongClick) {
+            maximizeButtonView.cancelHoverAnimation()
+        }
+        maximizeButtonView.hoverDisabled = !enableMaximizeLongClick
+        maximizeWindowButton.onLongClickListener = if (enableMaximizeLongClick) {
+            onLongClickListener
+        } else {
+            // Disable long-click to open maximize menu when in immersive.
+            null
+        }
     }
 
     override fun onHandleMenuOpened() {}
@@ -268,14 +312,6 @@ class AppHeaderViewHolder(
         openMenuButton.post {
             openMenuButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
         }
-    }
-
-    fun setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition: Boolean) {
-        // If animating a task resize or reposition, cancel any running hover animations
-        if (animatingTaskResizeOrReposition) {
-            maximizeButtonView.cancelHoverAnimation()
-        }
-        maximizeButtonView.hoverDisabled = animatingTaskResizeOrReposition
     }
 
     fun onMaximizeWindowHoverExit() {
@@ -319,6 +355,22 @@ class AppHeaderViewHolder(
             maximizeWindowButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
         }
     }
+
+    @DrawableRes
+    private fun getMaximizeButtonIcon(
+        isTaskMaximized: Boolean,
+        inFullImmersiveState: Boolean
+    ): Int = when {
+        shouldShowExitFullImmersiveOrMaximizeIcon(isTaskMaximized, inFullImmersiveState) -> {
+            R.drawable.decor_desktop_mode_immersive_or_maximize_exit_button_dark
+        }
+        else -> R.drawable.decor_desktop_mode_maximize_button_dark
+    }
+
+    private fun shouldShowExitFullImmersiveOrMaximizeIcon(
+        isTaskMaximized: Boolean,
+        inFullImmersiveState: Boolean
+    ): Boolean = (Flags.enableFullyImmersiveInDesktop() && inFullImmersiveState) || isTaskMaximized
 
     private fun getHeaderStyle(header: Header): HeaderStyle {
         return HeaderStyle(
@@ -413,7 +465,7 @@ class AppHeaderViewHolder(
         }
     }
 
-    private fun fillHeaderInfo(taskInfo: RunningTaskInfo): Header {
+    private fun fillHeaderInfo(taskInfo: RunningTaskInfo, hasGlobalFocus: Boolean): Header {
         return Header(
             type = if (taskInfo.isTransparentCaptionBarAppearance) {
                 Header.Type.CUSTOM
@@ -421,7 +473,7 @@ class AppHeaderViewHolder(
                 Header.Type.DEFAULT
             },
             appTheme = decorThemeUtil.getAppTheme(taskInfo),
-            isFocused = taskInfo.isFocused,
+            isFocused = hasGlobalFocus,
             isAppearanceCaptionLight = taskInfo.isLightCaptionBarAppearance
         )
     }
@@ -502,19 +554,19 @@ class AppHeaderViewHolder(
     }
 
     @ColorInt
-    private fun getCaptionBackgroundColor(taskInfo: RunningTaskInfo): Int {
+    private fun getCaptionBackgroundColor(taskInfo: RunningTaskInfo, hasGlobalFocus: Boolean): Int {
         if (taskInfo.isTransparentCaptionBarAppearance) {
             return Color.TRANSPARENT
         }
         val materialColorAttr: Int =
             if (isDarkMode()) {
-                if (!taskInfo.isFocused) {
+                if (!hasGlobalFocus) {
                     materialColorSurfaceContainerHigh
                 } else {
                     materialColorSurfaceDim
                 }
             } else {
-                if (!taskInfo.isFocused) {
+                if (!hasGlobalFocus) {
                     materialColorSurfaceContainerLow
                 } else {
                     materialColorSecondaryContainer
@@ -527,7 +579,7 @@ class AppHeaderViewHolder(
     }
 
     @ColorInt
-    private fun getAppNameAndButtonColor(taskInfo: RunningTaskInfo): Int {
+    private fun getAppNameAndButtonColor(taskInfo: RunningTaskInfo, hasGlobalFocus: Boolean): Int {
         val materialColorAttr = when {
             taskInfo.isTransparentCaptionBarAppearance &&
                     taskInfo.isLightCaptionBarAppearance -> materialColorOnSecondaryContainer
@@ -537,8 +589,8 @@ class AppHeaderViewHolder(
             else -> materialColorOnSecondaryContainer
         }
         val appDetailsOpacity = when {
-            isDarkMode() && !taskInfo.isFocused -> DARK_THEME_UNFOCUSED_OPACITY
-            !isDarkMode() && !taskInfo.isFocused -> LIGHT_THEME_UNFOCUSED_OPACITY
+            isDarkMode() && !hasGlobalFocus -> DARK_THEME_UNFOCUSED_OPACITY
+            !isDarkMode() && !hasGlobalFocus -> LIGHT_THEME_UNFOCUSED_OPACITY
             else -> FOCUSED_OPACITY
         }
         context.withStyledAttributes(null, intArrayOf(materialColorAttr), 0, 0) {

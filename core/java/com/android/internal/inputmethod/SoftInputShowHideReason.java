@@ -89,6 +89,9 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT,
         SoftInputShowHideReason.SHOW_SOFT_INPUT_IMM_DEPRECATION,
         SoftInputShowHideReason.CONTROL_WINDOW_INSETS_ANIMATION,
+        SoftInputShowHideReason.SHOW_INPUT_TARGET_CHANGED,
+        SoftInputShowHideReason.HIDE_INPUT_TARGET_CHANGED,
+        SoftInputShowHideReason.HIDE_WINDOW_LOST_FOCUS,
 })
 public @interface SoftInputShowHideReason {
     /** Default, undefined reason. */
@@ -404,4 +407,19 @@ public @interface SoftInputShowHideReason {
      * {@link android.view.InsetsController#controlWindowInsetsAnimation}.
      */
     int CONTROL_WINDOW_INSETS_ANIMATION = ImeProtoEnums.REASON_CONTROL_WINDOW_INSETS_ANIMATION;
+
+    /**
+     * Show soft input because the input target changed
+     * {@link com.android.server.wm.ImeInsetsSourceProvider#onInputTargetChanged}.
+     */
+    int SHOW_INPUT_TARGET_CHANGED = ImeProtoEnums.REASON_SHOW_INPUT_TARGET_CHANGED;
+
+    /**
+     * Hide soft input because the input target changed by
+     * {@link com.android.server.wm.ImeInsetsSourceProvider#onInputTargetChanged}.
+     */
+    int HIDE_INPUT_TARGET_CHANGED = ImeProtoEnums.REASON_HIDE_INPUT_TARGET_CHANGED;
+
+    /** Hide soft input when the window lost focus. */
+    int HIDE_WINDOW_LOST_FOCUS = ImeProtoEnums.REASON_HIDE_WINDOW_LOST_FOCUS;
 }

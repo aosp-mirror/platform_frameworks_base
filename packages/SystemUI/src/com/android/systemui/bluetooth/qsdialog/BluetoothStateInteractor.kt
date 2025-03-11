@@ -39,7 +39,7 @@ import kotlinx.coroutines.withContext
 
 /** Holds business logic for the Bluetooth Dialog's bluetooth and device connection state */
 @SysUISingleton
-internal class BluetoothStateInteractor
+class BluetoothStateInteractor
 @Inject
 constructor(
     private val localBluetoothManager: LocalBluetoothManager?,

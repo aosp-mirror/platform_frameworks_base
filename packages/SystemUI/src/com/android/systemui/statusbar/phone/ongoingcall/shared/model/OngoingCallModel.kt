@@ -25,6 +25,12 @@ sealed interface OngoingCallModel {
     data object NoCall : OngoingCallModel
 
     /**
+     * There is an ongoing call but the call app is currently visible, so we don't need to show
+     * the chip.
+     */
+    data object InCallWithVisibleApp : OngoingCallModel
+
+    /**
      * There *is* an ongoing call.
      *
      * @property startTimeMs the time that the phone call started, based on the notification's
@@ -40,5 +46,6 @@ sealed interface OngoingCallModel {
         val startTimeMs: Long,
         val notificationIconView: StatusBarIconView?,
         val intent: PendingIntent?,
+        val notificationKey: String,
     ) : OngoingCallModel
 }

@@ -34,6 +34,7 @@ import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.format.CpuPowerStatsLayout;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -330,7 +331,9 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        Arrays.fill(mCpuPowerStats.stats, 0);
         mCpuPowerStats.uidStats.clear();
+
         // TODO(b/305120724): additionally retrieve time-in-cluster for each CPU cluster
         long newTimestampNanos = mKernelCpuStatsReader.readCpuStats(this::processUidStats,
                 mLayout.getScalingStepToPowerBracketMap(), mLastUpdateTimestampNanos,

@@ -4,7 +4,6 @@ import android.util.FloatProperty
 import android.view.View
 import androidx.annotation.FloatRange
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import kotlin.math.abs
@@ -39,15 +38,11 @@ interface Roundable {
 
     /** Current top corner in pixel, based on [topRoundness] and [maxRadius] */
     val topCornerRadius: Float
-        get() =
-            if (NotificationsImprovedHunAnimation.isEnabled) roundableState.topCornerRadius
-            else topRoundness * maxRadius
+        get() = roundableState.topCornerRadius
 
     /** Current bottom corner in pixel, based on [bottomRoundness] and [maxRadius] */
     val bottomCornerRadius: Float
-        get() =
-            if (NotificationsImprovedHunAnimation.isEnabled) roundableState.bottomCornerRadius
-            else bottomRoundness * maxRadius
+        get() = roundableState.bottomCornerRadius
 
     /** Get and update the current radii */
     val updatedRadii: FloatArray
@@ -123,7 +118,7 @@ interface Roundable {
         return requestTopRoundness(
             value = value,
             sourceType = sourceType,
-            animate = roundableState.targetView.isShown
+            animate = roundableState.targetView.isShown,
         )
     }
 
@@ -190,7 +185,7 @@ interface Roundable {
         return requestBottomRoundness(
             value = value,
             sourceType = sourceType,
-            animate = roundableState.targetView.isShown
+            animate = roundableState.targetView.isShown,
         )
     }
 
@@ -289,11 +284,7 @@ interface Roundable {
      *
      * This method reuses the previous [radii] for performance reasons.
      */
-    fun updateRadii(
-        topCornerRadius: Float,
-        bottomCornerRadius: Float,
-        radii: FloatArray,
-    ) {
+    fun updateRadii(topCornerRadius: Float, bottomCornerRadius: Float, radii: FloatArray) {
         if (radii.size != 8) error("Unexpected radiiBuffer size ${radii.size}")
 
         if (radii[0] != topCornerRadius || radii[4] != bottomCornerRadius) {
@@ -312,11 +303,7 @@ interface Roundable {
  */
 class RoundableState
 @JvmOverloads
-constructor(
-    internal val targetView: View,
-    private val roundable: Roundable,
-    maxRadius: Float,
-) {
+constructor(internal val targetView: View, private val roundable: Roundable, maxRadius: Float) {
     internal var maxRadius = maxRadius
         private set
 
@@ -387,18 +374,12 @@ constructor(
     internal fun isBottomAnimating() = PropertyAnimator.isAnimating(targetView, bottomAnimatable)
 
     /** Set the current top roundness */
-    internal fun setTopRoundness(
-        value: Float,
-        animated: Boolean,
-    ) {
+    internal fun setTopRoundness(value: Float, animated: Boolean) {
         PropertyAnimator.setProperty(targetView, topAnimatable, value, DURATION, animated)
     }
 
     /** Set the current bottom roundness */
-    internal fun setBottomRoundness(
-        value: Float,
-        animated: Boolean,
-    ) {
+    internal fun setBottomRoundness(value: Float, animated: Boolean) {
         PropertyAnimator.setProperty(targetView, bottomAnimatable, value, DURATION, animated)
     }
 

@@ -35,6 +35,7 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.recordissue.IssueRecordingService.Companion.getStartIntent
 import com.android.systemui.recordissue.IssueRecordingService.Companion.getStopIntent
+import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
 import com.android.systemui.screenrecord.RecordingController
@@ -52,6 +53,7 @@ class IssueRecordingUserActionInteractor
 @Inject
 constructor(
     @Main private val mainCoroutineContext: CoroutineContext,
+    private val state: IssueRecordingState,
     private val keyguardDismissUtil: KeyguardDismissUtil,
     private val keyguardStateController: KeyguardStateController,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
@@ -104,8 +106,15 @@ constructor(
         recordingController.startCountdown(
             DELAY_MS,
             INTERVAL_MS,
-            pendingServiceIntent(getStartIntent(userContextProvider.userContext)),
-            pendingServiceIntent(getStopIntent(userContextProvider.userContext))
+            pendingServiceIntent(
+                getStartIntent(
+                    userContextProvider.userContext,
+                    state.traceConfig,
+                    state.recordScreen,
+                    state.takeBugreport,
+                )
+            ),
+            pendingServiceIntent(getStopIntent(userContextProvider.userContext)),
         )
 
     private fun stopIssueRecordingService() =
@@ -117,6 +126,6 @@ constructor(
             userContextProvider.userContext,
             RecordingService.REQUEST_CODE,
             action,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 }

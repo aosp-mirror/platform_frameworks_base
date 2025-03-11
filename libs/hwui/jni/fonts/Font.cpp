@@ -142,7 +142,7 @@ static jlong Font_Builder_clone(JNIEnv* env, jobject clazz, jlong fontPtr, jlong
     std::shared_ptr<minikin::MinikinFont> newMinikinFont = std::make_shared<MinikinFontSkia>(
             std::move(newTypeface), minikinSkia->GetSourceId(), minikinSkia->GetFontData(),
             minikinSkia->GetFontSize(), minikinSkia->getFilePath(), minikinSkia->GetFontIndex(),
-            builder->axes);
+            minikin::VariationSettings(builder->axes, false));
     std::shared_ptr<minikin::Font> newFont = minikin::Font::Builder(newMinikinFont)
               .setWeight(weight)
               .setSlant(static_cast<minikin::FontStyle::Slant>(italic))
@@ -303,7 +303,7 @@ static jlong Font_getAxisInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr, jint inde
         var = reader.readArray<minikin::FontVariation>().first[index];
     } else {
         const std::shared_ptr<minikin::MinikinFont>& minikinFont = font->font->baseTypeface();
-        var = minikinFont->GetAxes().at(index);
+        var = minikinFont->GetAxes()[index];
     }
     uint32_t floatBinary = *reinterpret_cast<const uint32_t*>(&var.value);
     return (static_cast<uint64_t>(var.axisTag) << 32) | static_cast<uint64_t>(floatBinary);

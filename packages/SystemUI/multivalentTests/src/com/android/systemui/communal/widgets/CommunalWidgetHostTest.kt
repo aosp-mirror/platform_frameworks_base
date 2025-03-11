@@ -26,6 +26,7 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.shared.model.fakeGlanceableHubMultiUserHelper
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -84,7 +85,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
                     any<Int>(),
                     any<UserHandle>(),
                     any<ComponentName>(),
-                    any<Bundle>()
+                    any<Bundle>(),
                 )
             )
             .thenReturn(true)
@@ -96,6 +97,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
                 appWidgetHost,
                 selectedUserInteractor,
                 logcatLogBuffer("CommunalWidgetHostTest"),
+                glanceableHubMultiUserHelper = kosmos.fakeGlanceableHubMultiUserHelper,
             )
     }
 
@@ -162,7 +164,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
                         any<Int>(),
                         any<UserHandle>(),
                         any<ComponentName>(),
-                        any<Bundle>()
+                        any<Bundle>(),
                     )
                 )
                 .thenReturn(false)
@@ -283,12 +285,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
             // all providers are emitted at once
             assertThat(providerInfoValues).hasSize(2)
             assertThat(providerInfoValues[1])
-                .containsExactlyEntriesIn(
-                    mapOf(
-                        Pair(1, providerInfo1),
-                        Pair(2, providerInfo2),
-                    )
-                )
+                .containsExactlyEntriesIn(mapOf(Pair(1, providerInfo1), Pair(2, providerInfo2)))
         }
 
     @Test
@@ -304,12 +301,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
             // Assert that the provider info map is populated
             val providerInfo by collectLastValue(underTest.appWidgetProviders)
             assertThat(providerInfo)
-                .containsExactlyEntriesIn(
-                    mapOf(
-                        Pair(1, providerInfo1),
-                        Pair(2, providerInfo2),
-                    )
-                )
+                .containsExactlyEntriesIn(mapOf(Pair(1, providerInfo1), Pair(2, providerInfo2)))
 
             // Host stop listening
             observer.onHostStopListening()
@@ -332,12 +324,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
 
             // Assert that the provider info map is populated
             assertThat(providerInfo)
-                .containsExactlyEntriesIn(
-                    mapOf(
-                        Pair(1, providerInfo1),
-                        Pair(2, providerInfo2),
-                    )
-                )
+                .containsExactlyEntriesIn(mapOf(Pair(1, providerInfo1), Pair(2, providerInfo2)))
 
             // Provider info for widget 1 updated
             val listener =
@@ -349,12 +336,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
 
             // Assert that the update is reflected in the flow
             assertThat(providerInfo)
-                .containsExactlyEntriesIn(
-                    mapOf(
-                        Pair(1, providerInfo3),
-                        Pair(2, providerInfo2),
-                    )
-                )
+                .containsExactlyEntriesIn(mapOf(Pair(1, providerInfo3), Pair(2, providerInfo2)))
         }
 
     @Test
@@ -371,12 +353,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
 
             // Assert that the provider info map is populated
             assertThat(providerInfo)
-                .containsExactlyEntriesIn(
-                    mapOf(
-                        Pair(1, providerInfo1),
-                        Pair(2, providerInfo2),
-                    )
-                )
+                .containsExactlyEntriesIn(mapOf(Pair(1, providerInfo1), Pair(2, providerInfo2)))
 
             // Bind a new widget
             whenever(appWidgetHost.allocateAppWidgetId()).thenReturn(3)
@@ -388,11 +365,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
             // Assert that the new provider is reflected in the flow
             assertThat(providerInfo)
                 .containsExactlyEntriesIn(
-                    mapOf(
-                        Pair(1, providerInfo1),
-                        Pair(2, providerInfo2),
-                        Pair(3, providerInfo3),
-                    )
+                    mapOf(Pair(1, providerInfo1), Pair(2, providerInfo2), Pair(3, providerInfo3))
                 )
         }
 
@@ -410,31 +383,21 @@ class CommunalWidgetHostTest : SysuiTestCase() {
 
             // Assert that the provider info map is populated
             assertThat(providerInfo)
-                .containsExactlyEntriesIn(
-                    mapOf(
-                        Pair(1, providerInfo1),
-                        Pair(2, providerInfo2),
-                    )
-                )
+                .containsExactlyEntriesIn(mapOf(Pair(1, providerInfo1), Pair(2, providerInfo2)))
 
             // Remove widget 1
             observer.onDeleteAppWidgetId(1)
             runCurrent()
 
             // Assert that provider info for widget 1 is removed
-            assertThat(providerInfo)
-                .containsExactlyEntriesIn(
-                    mapOf(
-                        Pair(2, providerInfo2),
-                    )
-                )
+            assertThat(providerInfo).containsExactlyEntriesIn(mapOf(Pair(2, providerInfo2)))
         }
 
     private fun selectUser() {
         kosmos.fakeUserRepository.selectedUser.value =
             SelectedUserModel(
                 userInfo = UserInfo(0, "Current user", 0),
-                selectionStatus = SelectionStatus.SELECTION_COMPLETE
+                selectionStatus = SelectionStatus.SELECTION_COMPLETE,
             )
     }
 

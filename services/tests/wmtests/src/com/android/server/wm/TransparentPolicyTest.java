@@ -217,6 +217,19 @@ public class TransparentPolicyTest extends WindowTestsBase {
         });
     }
 
+    @Test
+    public void testNotApplyStrategyToTranslucentActivitiesOverNotLetterboxedActivities() {
+        runTestScenario((robot) -> {
+            robot.transparentActivity((ta) -> {
+                ta.activity().setTopActivityHasLetterboxedBounds(false);
+                ta.launchTransparentActivityInTask();
+
+                ta.checkTopActivityTransparentPolicyStartNotInvoked();
+                ta.checkTopActivityTransparentPolicyStateIsRunning(/* running */ false);
+            });
+        });
+    }
+
     @EnableFlags(com.android.window.flags.Flags.FLAG_RESPECT_NON_TOP_VISIBLE_FIXED_ORIENTATION)
     @Test
     public void testNotRunStrategyToTranslucentActivitiesIfRespectOrientation() {
@@ -388,6 +401,7 @@ public class TransparentPolicyTest extends WindowTestsBase {
             mTransparentActivityRobot = new AppCompatTransparentActivityRobot(activity());
             // We always create at least an opaque activity in a Task
             activity().createNewTaskWithBaseActivity();
+            activity().setTopActivityHasLetterboxedBounds(true);
         }
 
         @Override

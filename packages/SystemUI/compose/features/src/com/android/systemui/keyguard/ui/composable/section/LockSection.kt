@@ -30,14 +30,11 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.keyguard.LockIconView
-import com.android.keyguard.LockIconViewController
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
@@ -61,7 +58,6 @@ constructor(
     private val windowManager: WindowManager,
     private val authController: AuthController,
     private val featureFlags: FeatureFlagsClassic,
-    private val lockIconViewController: Lazy<LockIconViewController>,
     private val deviceEntryIconViewModel: Lazy<DeviceEntryIconViewModel>,
     private val deviceEntryForegroundViewModel: Lazy<DeviceEntryForegroundViewModel>,
     private val deviceEntryBackgroundViewModel: Lazy<DeviceEntryBackgroundViewModel>,
@@ -71,42 +67,28 @@ constructor(
 ) {
     @Composable
     fun SceneScope.LockIcon(overrideColor: Color? = null, modifier: Modifier = Modifier) {
-        if (!KeyguardBottomAreaRefactor.isEnabled && !DeviceEntryUdfpsRefactor.isEnabled) {
-            return
-        }
-
         val context = LocalContext.current
 
         AndroidView(
             factory = { context ->
-                val view =
-                    if (DeviceEntryUdfpsRefactor.isEnabled) {
-                        DeviceEntryIconView(
-                                context,
-                                null,
-                                logger = LongPressHandlingViewLogger(logBuffer, tag = TAG)
-                            )
-                            .apply {
-                                id = R.id.device_entry_icon_view
-                                DeviceEntryIconViewBinder.bind(
-                                    applicationScope,
-                                    this,
-                                    deviceEntryIconViewModel.get(),
-                                    deviceEntryForegroundViewModel.get(),
-                                    deviceEntryBackgroundViewModel.get(),
-                                    falsingManager.get(),
-                                    vibratorHelper.get(),
-                                    overrideColor,
-                                )
-                            }
-                    } else {
-                        // KeyguardBottomAreaRefactor.isEnabled
-                        LockIconView(context, null).apply {
-                            id = R.id.lock_icon_view
-                            lockIconViewController.get().setLockIconView(this)
-                        }
+                DeviceEntryIconView(
+                        context,
+                        null,
+                        logger = LongPressHandlingViewLogger(logBuffer, tag = TAG),
+                    )
+                    .apply {
+                        id = R.id.device_entry_icon_view
+                        DeviceEntryIconViewBinder.bind(
+                            applicationScope,
+                            this,
+                            deviceEntryIconViewModel.get(),
+                            deviceEntryForegroundViewModel.get(),
+                            deviceEntryBackgroundViewModel.get(),
+                            falsingManager.get(),
+                            vibratorHelper.get(),
+                            overrideColor,
+                        )
                     }
-                view
             },
             modifier =
                 modifier.element(LockIconElementKey).layout { measurable, _ ->
@@ -141,9 +123,7 @@ constructor(
      * On devices that support UDFPS (under-display fingerprint sensor), the bounds of the icon are
      * the same as the bounds of the sensor.
      */
-    private fun lockIconBounds(
-        context: Context,
-    ): IntRect {
+    private fun lockIconBounds(context: Context): IntRect {
         val windowViewBounds = windowManager.currentWindowMetrics.bounds
         var widthPx = windowViewBounds.right.toFloat()
         if (featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)) {
@@ -162,16 +142,13 @@ constructor(
         val (center, radius) =
             if (authController.isUdfpsSupported && udfpsLocation != null) {
                 Pair(
-                    IntOffset(
-                        x = udfpsLocation.x,
-                        y = udfpsLocation.y,
-                    ),
+                    IntOffset(x = udfpsLocation.x, y = udfpsLocation.y),
                     authController.udfpsRadius.toInt(),
                 )
             } else {
                 val scaleFactor = authController.scaleFactor
                 val bottomPaddingPx =
-                    context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
+                    context.resources.getDimensionPixelSize(customR.dimen.lock_icon_margin_bottom)
                 val heightPx = windowViewBounds.bottom.toFloat()
 
                 Pair(

@@ -19,10 +19,10 @@ package com.android.settingslib.metadata
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.annotation.AnyThread
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.fragment.app.Fragment
 
 /**
  * Interface provides preference metadata (title, summary, icon, etc.).
@@ -31,6 +31,7 @@ import androidx.annotation.StringRes
  * information:
  * - [PreferenceTitleProvider]: provide dynamic title content
  * - [PreferenceSummaryProvider]: provide dynamic summary content (e.g. based on preference value)
+ * - [PreferenceIconProvider]: provide dynamic icon content (e.g. based on flag)
  * - [PreferenceAvailabilityProvider]: provide preference availability (e.g. based on flag)
  * - [PreferenceLifecycleProvider]: provide the lifecycle callbacks and notify state change
  *
@@ -133,9 +134,6 @@ interface PreferenceMetadata {
     /** Returns preference intent. */
     fun intent(context: Context): Intent? = null
 
-    /** Returns preference order. */
-    fun order(context: Context): Int? = null
-
     /**
      * Returns the preference title.
      *
@@ -160,11 +158,29 @@ interface PreferenceMetadata {
             this is PreferenceSummaryProvider -> getSummary(context)
             else -> null
         }
+
+    /**
+     * Returns the preference icon.
+     *
+     * Implement [PreferenceIconProvider] interface if icon is provided dynamically (e.g. icon is
+     * provided based on flag value).
+     */
+    fun getPreferenceIcon(context: Context): Int =
+        when {
+            icon != 0 -> icon
+            this is PreferenceIconProvider -> getIcon(context)
+            else -> 0
+        }
 }
 
 /** Metadata of preference group. */
 @AnyThread
-open class PreferenceGroup(override val key: String, override val title: Int) : PreferenceMetadata
+interface PreferenceGroup : PreferenceMetadata
+
+/** Metadata of preference category. */
+@AnyThread
+open class PreferenceCategory(override val key: String, override val title: Int) :
+    PreferenceGroup
 
 /** Metadata of preference screen. */
 @AnyThread
@@ -201,4 +217,11 @@ interface PreferenceScreenMetadata : PreferenceMetadata {
      * conditions. DO NOT check any condition (except compile time flag) before adding a preference.
      */
     fun getPreferenceHierarchy(context: Context): PreferenceHierarchy
+
+    /**
+     * Returns the [Intent] to show current preference screen.
+     *
+     * @param metadata the preference to locate when show the screen
+     */
+    fun getLaunchIntent(context: Context, metadata: PreferenceMetadata?): Intent? = null
 }

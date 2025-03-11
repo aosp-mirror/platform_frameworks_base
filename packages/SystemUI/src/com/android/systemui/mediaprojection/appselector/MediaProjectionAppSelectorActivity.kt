@@ -54,6 +54,7 @@ import com.android.systemui.mediaprojection.MediaProjectionServiceHelper
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.view.MediaProjectionRecentsViewController
 import com.android.systemui.res.R
+import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.AsyncActivityLauncher
 import java.lang.IllegalArgumentException
@@ -62,9 +63,10 @@ import javax.inject.Inject
 class MediaProjectionAppSelectorActivity(
     private val componentFactory: MediaProjectionAppSelectorComponent.Factory,
     private val activityLauncher: AsyncActivityLauncher,
+    private val activityManager: ActivityManagerWrapper,
     /** This is used to override the dependency in a screenshot test */
     @VisibleForTesting
-    private val listControllerFactory: ((userHandle: UserHandle) -> ResolverListController)?
+    private val listControllerFactory: ((userHandle: UserHandle) -> ResolverListController)?,
 ) :
     ChooserActivity(),
     MediaProjectionAppSelectorView,
@@ -74,8 +76,9 @@ class MediaProjectionAppSelectorActivity(
     @Inject
     constructor(
         componentFactory: MediaProjectionAppSelectorComponent.Factory,
-        activityLauncher: AsyncActivityLauncher
-    ) : this(componentFactory, activityLauncher, listControllerFactory = null)
+        activityLauncher: AsyncActivityLauncher,
+        activityManager: ActivityManagerWrapper,
+    ) : this(componentFactory, activityLauncher, activityManager, listControllerFactory = null)
 
     private val lifecycleRegistry = LifecycleRegistry(this)
     override val lifecycle = lifecycleRegistry
@@ -100,7 +103,7 @@ class MediaProjectionAppSelectorActivity(
                 callingPackage = callingPackage,
                 view = this,
                 resultHandler = this,
-                isFirstStart = savedInstanceState == null
+                isFirstStart = savedInstanceState == null,
             )
         component.lifecycleObservers.forEach { lifecycle.addObserver(it) }
 
@@ -113,7 +116,7 @@ class MediaProjectionAppSelectorActivity(
         intent.configureChooserIntent(
             resources,
             component.hostUserHandle,
-            component.personalProfileUserHandle
+            component.personalProfileUserHandle,
         )
 
         reviewGrantedConsentRequired =
@@ -180,7 +183,13 @@ class MediaProjectionAppSelectorActivity(
         // is created and ready to be captured.
         val activityStarted =
             activityLauncher.startActivityAsUser(intent, userHandle, activityOptions.toBundle()) {
-                returnSelectedApp(launchCookie, taskId = -1)
+                if (targetInfo.resolvedComponentName == callingActivity) {
+                    // If attempting to launch the app used to launch the MediaProjection, then
+                    // provide the task id since the launch cookie won't match the existing task
+                    returnSelectedApp(launchCookie, taskId = activityManager.runningTask.taskId)
+                } else {
+                    returnSelectedApp(launchCookie, taskId = -1)
+                }
             }
 
         // Rely on the ActivityManager to pop up a dialog regarding app suspension
@@ -213,7 +222,7 @@ class MediaProjectionAppSelectorActivity(
             MediaProjectionServiceHelper.setReviewedConsentIfNeeded(
                 RECORD_CANCEL,
                 reviewGrantedConsentRequired,
-                /* projection= */ null
+                /* projection= */ null,
             )
             if (isFinishing) {
                 // Only log dismissed when actually finishing, and not when changing configuration.
@@ -246,7 +255,7 @@ class MediaProjectionAppSelectorActivity(
             val resultReceiver =
                 intent.getParcelableExtra(
                     EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
-                    ResultReceiver::class.java
+                    ResultReceiver::class.java,
                 ) as ResultReceiver
             val captureRegion = MediaProjectionCaptureTarget(launchCookie, taskId)
             val data = Bundle().apply { putParcelable(KEY_CAPTURE_TARGET, captureRegion) }
@@ -260,8 +269,8 @@ class MediaProjectionAppSelectorActivity(
             val mediaProjectionBinder = intent.getIBinderExtra(EXTRA_MEDIA_PROJECTION)
             val projection = IMediaProjection.Stub.asInterface(mediaProjectionBinder)
 
-            projection.setLaunchCookie(launchCookie)
-            projection.setTaskId(taskId)
+            projection.launchCookie = launchCookie
+            projection.taskId = taskId
 
             val intent = Intent()
             intent.putExtra(EXTRA_MEDIA_PROJECTION, projection.asBinder())
@@ -270,7 +279,7 @@ class MediaProjectionAppSelectorActivity(
             MediaProjectionServiceHelper.setReviewedConsentIfNeeded(
                 RECORD_CONTENT_TASK,
                 reviewGrantedConsentRequired,
-                projection
+                projection,
             )
         }
 
@@ -457,7 +466,7 @@ class MediaProjectionAppSelectorActivity(
      */
     private class RecyclerViewExpandingAccessibilityDelegate(
         rdl: ResolverDrawerLayout,
-        view: RecyclerView
+        view: RecyclerView,
     ) : RecyclerViewAccessibilityDelegate(view) {
 
         private val delegate = AppListAccessibilityDelegate(rdl)
@@ -465,7 +474,7 @@ class MediaProjectionAppSelectorActivity(
         override fun onRequestSendAccessibilityEvent(
             host: ViewGroup,
             child: View,
-            event: AccessibilityEvent
+            event: AccessibilityEvent,
         ): Boolean {
             super.onRequestSendAccessibilityEvent(host, child, event)
             return delegate.onRequestSendAccessibilityEvent(host, child, event)

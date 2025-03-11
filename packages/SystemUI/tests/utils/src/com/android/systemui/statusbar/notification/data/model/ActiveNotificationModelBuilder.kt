@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.data.model
 import android.app.PendingIntent
 import android.graphics.drawable.Icon
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.notification.stack.BUCKET_UNKNOWN
@@ -45,6 +46,7 @@ fun activeNotificationModel(
     contentIntent: PendingIntent? = null,
     bucket: Int = BUCKET_UNKNOWN,
     callType: CallType = CallType.None,
+    promotedContent: PromotedNotificationContentModel? = null,
 ) =
     ActiveNotificationModel(
         key = key,
@@ -67,4 +69,5 @@ fun activeNotificationModel(
         isGroupSummary = isGroupSummary,
         bucket = bucket,
         callType = callType,
+        promotedContent = promotedContent,
     )

@@ -16,17 +16,23 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 /**
  * A {@link CellInfo} representing a CDMA cell that provides identity and measurement info.
+ *
+ * @deprecated Legacy CDMA is unsupported.
  */
+@FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+@Deprecated
 public final class CellInfoCdma extends CellInfo implements Parcelable {
 
     private static final String LOG_TAG = "CellInfoCdma";
@@ -61,7 +67,10 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
 
     /**
      * @return a {@link CellIdentityCdma} instance.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @Override
     public @NonNull CellIdentityCdma getCellIdentity() {
         return mCellIdentityCdma;
@@ -75,7 +84,10 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
 
     /**
      * @return a {@link CellSignalStrengthCdma} instance.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @Override
     public @NonNull CellSignalStrengthCdma getCellSignalStrength() {
         return mCellSignalStrengthCdma;
@@ -135,7 +147,12 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
         return 0;
     }
 
-    /** Implement the Parcelable interface */
+    /**
+     * Implement the Parcelable interface
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags, TYPE_CDMA);
@@ -154,7 +171,12 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
         if (DBG) log("CellInfoCdma(Parcel): " + toString());
     }
 
-    /** Implement the Parcelable interface */
+    /**
+     * Implement the Parcelable interface
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final @android.annotation.NonNull Creator<CellInfoCdma> CREATOR = new Creator<CellInfoCdma>() {
         @Override
         public CellInfoCdma createFromParcel(Parcel in) {

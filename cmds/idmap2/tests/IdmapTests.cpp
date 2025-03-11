@@ -68,7 +68,7 @@ TEST(IdmapTests, CreateIdmapHeaderFromBinaryStream) {
   std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(stream);
   ASSERT_THAT(header, NotNull());
   ASSERT_EQ(header->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(header->GetVersion(), 0x09U);
+  ASSERT_EQ(header->GetVersion(), 10);
   ASSERT_EQ(header->GetTargetCrc(), 0x1234U);
   ASSERT_EQ(header->GetOverlayCrc(), 0x5678U);
   ASSERT_EQ(header->GetFulfilledPolicies(), 0x11);
@@ -143,7 +143,7 @@ TEST(IdmapTests, CreateIdmapFromBinaryStream) {
 
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x09U);
+  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 10);
   ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0x1234U);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0x5678U);
   ASSERT_EQ(idmap->GetHeader()->GetFulfilledPolicies(), kIdmapRawDataPolicies);
@@ -204,7 +204,7 @@ TEST(IdmapTests, CreateIdmapHeaderFromApkAssets) {
 
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x09U);
+  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 10);
   ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), android::idmap2::TestConstants::TARGET_CRC);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), android::idmap2::TestConstants::OVERLAY_CRC);
   ASSERT_EQ(idmap->GetHeader()->GetFulfilledPolicies(), PolicyFlags::PUBLIC);
@@ -212,6 +212,20 @@ TEST(IdmapTests, CreateIdmapHeaderFromApkAssets) {
   ASSERT_EQ(idmap->GetHeader()->GetTargetPath(), target_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayName(), TestConstants::OVERLAY_NAME_ALL_POLICIES);
+}
+
+TEST(IdmapTests, TargetContainerWorksAfterError) {
+  auto target = TargetResourceContainer::FromPath(GetTestDataPath() + "/target/target-bad.apk");
+  ASSERT_TRUE(target);
+
+  auto crc = target->get()->GetCrc();
+  ASSERT_TRUE(crc);
+
+  // This call tries to construct the full ApkAssets state, and fails.
+  ASSERT_FALSE(target->get()->DefinesOverlayable());
+  auto crc2 = target->get()->GetCrc();
+  ASSERT_TRUE(crc2);
+  EXPECT_EQ(*crc, *crc2);
 }
 
 TEST(IdmapTests, CreateIdmapDataFromApkAssets) {

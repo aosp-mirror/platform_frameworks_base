@@ -29,7 +29,6 @@ import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
 import static android.view.InsetsSourceConsumerProto.TYPE_NUMBER;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
-import static com.android.window.flags.Flags.insetsControlSeq;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -123,7 +122,7 @@ public class InsetsSourceConsumer {
 
     /**
      * Updates the control delivered from the server.
-
+     *
      * @param showTypes An integer array with a single entry that determines which types a show
      *                  animation should be run after setting the control.
      * @param hideTypes An integer array with a single entry that determines which types a hide
@@ -131,7 +130,7 @@ public class InsetsSourceConsumer {
      * @return Whether the control has changed from the server
      */
     public boolean setControl(@Nullable InsetsSourceControl control,
-            @InsetsType int[] showTypes, @InsetsType int[] hideTypes) {
+            @InsetsType int[] showTypes, @InsetsType int[] hideTypes, int[] cancelTypes) {
         if (Objects.equals(mSourceControl, control)) {
             if (mSourceControl != null && mSourceControl != control) {
                 mSourceControl.release(SurfaceControl::release);
@@ -166,6 +165,12 @@ public class InsetsSourceConsumer {
             // Reset the applier to the default one which has the most lightweight implementation.
             setSurfaceParamsApplier(InsetsAnimationControlRunner.SurfaceParamsApplier.DEFAULT);
         } else {
+            if (lastControl != null && InsetsSource.getInsetSide(lastControl.getInsetsHint())
+                    != InsetsSource.getInsetSide(control.getInsetsHint())) {
+                // The source has been moved to a different side. The coordinates are stale.
+                // Canceling existing animation if there is any.
+                cancelTypes[0] |= mType;
+            }
             final boolean requestedVisible = isRequestedVisibleAwaitingControl();
             final SurfaceControl oldLeash = lastControl != null ? lastControl.getLeash() : null;
             final SurfaceControl newLeash = control.getLeash();
@@ -431,9 +436,6 @@ public class InsetsSourceConsumer {
 
         // Frame is changing while animating. Keep note of the new frame but keep existing frame
         // until animation is finished.
-        if (!insetsControlSeq()) {
-            newSource = new InsetsSource(newSource);
-        }
         mPendingFrame = new Rect(newSource.getFrame());
         mPendingVisibleFrame = newSource.getVisibleFrame() != null
                 ? new Rect(newSource.getVisibleFrame())

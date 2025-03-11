@@ -257,7 +257,6 @@ public final class AssociationState {
                         if (VALIDATE_TIMES) {
                             if (mActiveDuration > mAssociationState.mTotalActiveDuration) {
                                 RuntimeException ex = new RuntimeException();
-                                ex.fillInStackTrace();
                                 Slog.w(TAG, "Source act duration " + mActiveDurations
                                         + " exceeds total " + mAssociationState.mTotalActiveDuration
                                         + " in procstate " + mActiveProcState + " in source "
@@ -650,7 +649,6 @@ public final class AssociationState {
                         + mySrc.mKey.mProcess + " to assoc " + mName);
                 if ((mySrc.mDuration + otherSrc.mDuration) > mTotalDuration) {
                     RuntimeException ex = new RuntimeException();
-                    ex.fillInStackTrace();
                     Slog.w(TAG, "Source tot duration " + mySrc.mDuration + "+"
                             + otherSrc.mDuration
                             + (newSrc ? " (new)" : " (old)") + " exceeds total "
@@ -665,7 +663,6 @@ public final class AssociationState {
                             + mySrc.mKey.mProcess + " to assoc " + mName);
                     if ((mySrc.mActiveDuration + otherSrc.mActiveDuration) > mTotalDuration) {
                         RuntimeException ex = new RuntimeException();
-                        ex.fillInStackTrace();
                         Slog.w(TAG, "Source act duration " + mySrc.mActiveDuration + "+"
                                 + otherSrc.mActiveDuration
                                 + (newSrc ? " (new)" : " (old)") + " exceeds total "
@@ -746,14 +743,12 @@ public final class AssociationState {
             if (VALIDATE_TIMES) {
                 if (src.mDuration > mTotalDuration) {
                     RuntimeException ex = new RuntimeException();
-                    ex.fillInStackTrace();
                     Slog.w(TAG, "Reading tot duration " + src.mDuration
                             + " exceeds total " + mTotalDuration + " in source "
                             + src.mKey.mProcess + " to assoc " + mName, ex);
                 }
                 if (src.mActiveDurations == null && src.mActiveDuration > mTotalDuration) {
                     RuntimeException ex = new RuntimeException();
-                    ex.fillInStackTrace();
                     Slog.w(TAG, "Reading act duration " + src.mActiveDuration
                             + " exceeds total " + mTotalDuration + " in source "
                             + src.mKey.mProcess + " to assoc " + mName, ex);

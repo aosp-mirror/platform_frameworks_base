@@ -23,7 +23,7 @@ import com.android.systemui.screenshot.resources.Messages
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Logic for determining the announcement that a screenshot has been taken (for accessibility). */
 class AnnouncementResolver

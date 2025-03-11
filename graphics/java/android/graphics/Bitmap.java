@@ -102,6 +102,8 @@ public final class Bitmap implements Parcelable {
 
     private static volatile int sDefaultDensity = -1;
 
+    private long mId;
+
     /**
      * For backwards compatibility, allows the app layer to change the default
      * density when running old apps.
@@ -128,6 +130,22 @@ public final class Bitmap implements Parcelable {
     private static final WeakHashMap<Bitmap, Void> sAllBitmaps = new WeakHashMap<>();
 
     /**
+     * @hide
+     */
+    private static NativeAllocationRegistry getRegistry(boolean malloc, long size) {
+        final long free = nativeGetNativeFinalizer();
+        if (com.android.libcore.readonly.Flags.nativeMetrics()) {
+            Class cls = Bitmap.class;
+            return malloc ? NativeAllocationRegistry.createMalloced(cls, free, size)
+                          : NativeAllocationRegistry.createNonmalloced(cls, free, size);
+        } else {
+            ClassLoader loader = Bitmap.class.getClassLoader();
+            return malloc ? NativeAllocationRegistry.createMalloced(loader, free, size)
+                          : NativeAllocationRegistry.createNonmalloced(loader, free, size);
+        }
+    }
+
+    /**
      * Private constructor that must receive an already allocated native bitmap
      * int (pointer).
      */
@@ -136,22 +154,22 @@ public final class Bitmap implements Parcelable {
     Bitmap(long nativeBitmap, int width, int height, int density,
             boolean requestPremultiplied, byte[] ninePatchChunk,
             NinePatch.InsetStruct ninePatchInsets) {
-        this(nativeBitmap, width, height, density, requestPremultiplied, ninePatchChunk,
+        this(0, nativeBitmap, width, height, density, requestPremultiplied, ninePatchChunk,
                 ninePatchInsets, true);
     }
 
     // called from JNI and Bitmap_Delegate.
-    Bitmap(long nativeBitmap, int width, int height, int density,
+    Bitmap(long id, long nativeBitmap, int width, int height, int density,
             boolean requestPremultiplied, byte[] ninePatchChunk,
             NinePatch.InsetStruct ninePatchInsets, boolean fromMalloc) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
         }
 
+        mId = id;
         mWidth = width;
         mHeight = height;
         mRequestPremultiplied = requestPremultiplied;
-
         mNinePatchChunk = ninePatchChunk;
         mNinePatchInsets = ninePatchInsets;
         if (density >= 0) {
@@ -159,17 +177,9 @@ public final class Bitmap implements Parcelable {
         }
 
         mNativePtr = nativeBitmap;
-
         final int allocationByteCount = getAllocationByteCount();
-        NativeAllocationRegistry registry;
-        if (fromMalloc) {
-            registry = NativeAllocationRegistry.createMalloced(
-                    Bitmap.class.getClassLoader(), nativeGetNativeFinalizer(), allocationByteCount);
-        } else {
-            registry = NativeAllocationRegistry.createNonmalloced(
-                    Bitmap.class.getClassLoader(), nativeGetNativeFinalizer(), allocationByteCount);
-        }
-        registry.registerNativeAllocation(this, nativeBitmap);
+        getRegistry(fromMalloc, allocationByteCount).registerNativeAllocation(this, mNativePtr);
+
         synchronized (Bitmap.class) {
           sAllBitmaps.put(this, null);
         }

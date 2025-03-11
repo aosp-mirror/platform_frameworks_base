@@ -172,6 +172,23 @@ public final class DeviceState {
      */
     public static final int PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT = 17;
 
+    /**
+     * Property that indicates that this state corresponds to the device state for rear display
+     * mode, where both the inner and outer displays are on. In this state, the outer display
+     * is the default display where the app is shown, and the inner display is used by the system to
+     * show a UI affordance for exiting the mode.
+     *
+     * Note that this value should generally not be used, and may be removed in the future (e.g.
+     * if or when it becomes the only type of rear display mode when
+     * {@link android.hardware.devicestate.feature.flags.Flags#deviceStateRdmV2} is removed).
+     *
+     * As such, clients should strongly consider relying on {@link #PROPERTY_FEATURE_REAR_DISPLAY}
+     * instead.
+     *
+     * @hide
+     */
+    public static final int PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT = 1001;
+
     /** @hide */
     @IntDef(prefix = {"PROPERTY_"}, flag = false, value = {
             PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED,
@@ -190,7 +207,8 @@ public final class DeviceState {
             PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE,
             PROPERTY_EXTENDED_DEVICE_STATE_EXTERNAL_DISPLAY,
             PROPERTY_FEATURE_REAR_DISPLAY,
-            PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT
+            PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT,
+            PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT
     })
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})

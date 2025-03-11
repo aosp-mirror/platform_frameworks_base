@@ -25,7 +25,7 @@ import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Utility for binding tiles to kotlin flows. Similar to [JavaAdapter] and usable for QS tiles. We

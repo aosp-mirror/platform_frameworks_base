@@ -16,6 +16,7 @@
 
 package com.android.server.wallpaper;
 
+import static android.app.Flags.liveWallpaperContentHandling;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
 
@@ -25,10 +26,12 @@ import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_CROP;
 import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_ORIG;
 import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
 
+import android.annotation.NonNull;
 import android.app.IWallpaperManagerCallback;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager.ScreenOrientation;
 import android.app.WallpaperManager.SetWallpaperFlags;
+import android.app.wallpaper.WallpaperDescription;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
@@ -77,6 +80,8 @@ class WallpaperData {
 
     /**
      * The component name of the currently set live wallpaper.
+     *
+     * @deprecated
      */
     private ComponentName mWallpaperComponent;
 
@@ -146,6 +151,7 @@ class WallpaperData {
         UNKNOWN,
         CONNECT_LOCKED,
         CONNECTION_TRY_TO_REBIND,
+        FALLBACK_DEFAULT_MISSING,
         INITIALIZE_FALLBACK,
         PACKAGE_UPDATE_FINISHED,
         RESTORE_SETTINGS_LIVE_FAILURE,
@@ -179,6 +185,9 @@ class WallpaperData {
      */
     int mOrientationWhenSet = ORIENTATION_UNKNOWN;
 
+    /** Description of the current wallpaper */
+    private WallpaperDescription mDescription = new WallpaperDescription.Builder().build();
+
     WallpaperData(int userId, @SetWallpaperFlags int wallpaperType) {
         this.userId = userId;
         this.mWhich = wallpaperType;
@@ -206,6 +215,9 @@ class WallpaperData {
         this.primaryColors = source.primaryColors;
         this.mWallpaperDimAmount = source.mWallpaperDimAmount;
         this.connection = source.connection;
+        if (liveWallpaperContentHandling()) {
+            this.setDescription(source.getDescription());
+        }
         if (this.connection != null) {
             this.connection.mWallpaper = this;
         }
@@ -230,12 +242,38 @@ class WallpaperData {
         return result;
     }
 
-    ComponentName getComponent() {
-        return mWallpaperComponent;
+    @NonNull ComponentName getComponent() {
+        if (liveWallpaperContentHandling()) {
+            return mDescription.getComponent();
+        } else {
+            return mWallpaperComponent;
+        }
     }
 
-    void setComponent(ComponentName componentName) {
+    void setComponent(@NonNull ComponentName componentName) {
+        if (liveWallpaperContentHandling()) {
+            throw new IllegalStateException(
+                    "Use \"setDescription\" when content handling is enabled");
+        }
         this.mWallpaperComponent = componentName;
+    }
+
+    @NonNull WallpaperDescription getDescription() {
+        return mDescription;
+    }
+
+    void setDescription(@NonNull WallpaperDescription description) {
+        if (!liveWallpaperContentHandling()) {
+            throw new IllegalStateException(
+                    "Use \"setContent\" when content handling is disabled");
+        }
+        if (description == null) {
+            throw new IllegalArgumentException("WallpaperDescription must not be null");
+        }
+        if (description.getComponent() == null) {
+            throw new IllegalArgumentException("WallpaperDescription component must not be null");
+        }
+        this.mDescription = description;
     }
 
     @Override

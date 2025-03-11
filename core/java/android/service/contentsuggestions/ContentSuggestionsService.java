@@ -39,6 +39,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
+import android.window.TaskSnapshot;
 
 /**
  * @hide
@@ -62,10 +63,10 @@ public abstract class ContentSuggestionsService extends Service {
 
     private final IContentSuggestionsService mInterface = new IContentSuggestionsService.Stub() {
         @Override
-        public void provideContextImage(int taskId, HardwareBuffer contextImage,
-                int colorSpaceId, Bundle imageContextRequestExtras) {
+        public void provideContextImage(int taskId, TaskSnapshot snapshot,
+                Bundle imageContextRequestExtras) {
             if (imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)
-                    && contextImage != null) {
+                    && snapshot != null) {
                 throw new IllegalArgumentException("Two bitmaps provided; expected one.");
             }
 
@@ -74,13 +75,18 @@ public abstract class ContentSuggestionsService extends Service {
                 wrappedBuffer = imageContextRequestExtras.getParcelable(
                         ContentSuggestionsManager.EXTRA_BITMAP, android.graphics.Bitmap.class);
             } else {
-                if (contextImage != null) {
-                    ColorSpace colorSpace = null;
+                if (snapshot != null) {
+                    final HardwareBuffer snapshotBuffer = snapshot.getHardwareBuffer();
+                    ColorSpace colorSpace = snapshot.getColorSpace();
+                    int colorSpaceId = 0;
+                    if (colorSpace != null) {
+                        colorSpaceId = colorSpace.getId();
+                    }
                     if (colorSpaceId >= 0 && colorSpaceId < ColorSpace.Named.values().length) {
                         colorSpace = ColorSpace.get(ColorSpace.Named.values()[colorSpaceId]);
                     }
-                    wrappedBuffer = Bitmap.wrapHardwareBuffer(contextImage, colorSpace);
-                    contextImage.close();
+                    wrappedBuffer = Bitmap.wrapHardwareBuffer(snapshotBuffer, colorSpace);
+                    snapshotBuffer.close();
                 }
             }
 

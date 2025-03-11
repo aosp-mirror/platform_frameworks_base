@@ -25,8 +25,16 @@ import static com.android.systemui.shared.Flags.shadeAllowBackGesture;
 import android.annotation.LongDef;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.IInterface;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicyConstants;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 
@@ -39,10 +47,7 @@ import java.util.StringJoiner;
  */
 public class QuickStepContract {
 
-    public static final String KEY_EXTRA_SYSUI_PROXY = "extra_sysui_proxy";
-    public static final String KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER = "extra_unfold_animation";
-    // See ISysuiUnlockAnimationController.aidl
-    public static final String KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER = "unlock_animation";
+    private static final String TAG = "QuickStepContract";
 
     public static final String NAV_BAR_MODE_3BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
@@ -411,5 +416,21 @@ public class QuickStepContract {
      */
     public static boolean supportsRoundedCornersOnWindows(Resources resources) {
         return ScreenDecorationsUtils.supportsRoundedCornersOnWindows(resources);
+    }
+
+    /**
+     * Adds the provided interface to the bundle using the interface descriptor as the key
+     */
+    public static void addInterface(@Nullable IInterface iInterface, @NonNull Bundle out) {
+        if (iInterface != null) {
+            IBinder binder = iInterface.asBinder();
+            if (binder != null) {
+                try {
+                    out.putIBinder(binder.getInterfaceDescriptor(), binder);
+                } catch (RemoteException e) {
+                    Log.d(TAG, "Invalid interface description " + binder, e);
+                }
+            }
+        }
     }
 }

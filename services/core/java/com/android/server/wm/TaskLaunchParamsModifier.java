@@ -449,7 +449,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
         // If the source activity is a no-display activity, pass on the launch display area token
         // from source activity as currently preferred.
-        if (taskDisplayArea == null && source != null && source.noDisplay) {
+        if (taskDisplayArea == null && source != null && source.isNoDisplay()) {
             taskDisplayArea = source.mHandoverTaskDisplayArea;
             if (taskDisplayArea != null) {
                 if (DEBUG) appendLog("display-area-from-no-display-source=" + taskDisplayArea);

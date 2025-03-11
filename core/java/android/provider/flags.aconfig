@@ -63,3 +63,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "system_regional_preferences_api_enabled"
+    is_exported: true
+    namespace: "globalintl"
+    description: "Feature flag for regional preferences APIs"
+    bug: "370379000"
+}

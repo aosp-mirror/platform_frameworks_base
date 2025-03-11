@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ಕ್ಯಾಮರಾ ಸಮಸ್ಯೆಗಳಿವೆಯೇ?\nಮರುಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ಅದನ್ನು ಸರಿಪಡಿಸಲಿಲ್ಲವೇ?\nಹಿಂತಿರುಗಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ಕ್ಯಾಮರಾ ಸಮಸ್ಯೆಗಳಿಲ್ಲವೇ? ವಜಾಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"ಆ್ಯಪ್ ಮೆನುವನ್ನು ಇಲ್ಲಿ ಕಾಣಬಹುದು"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"ಹಲವು ಆ್ಯಪ್‌ಗಳನ್ನು ಒಟ್ಟಿಗೆ ತೆರೆಯಲು ಡೆಸ್ಕ್‌ಟಾಪ್ ವೀಕ್ಷಣೆಯನ್ನು ನಮೂದಿಸಿ"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"ಆ್ಯಪ್ ಮೆನುವಿನಿಂದ ಯಾವಾಗ ಬೇಕಾದರೂ ಫುಲ್‌ಸ್ಕ್ರೀನ್‌ಗೆ ಹಿಂತಿರುಗಿ"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ನೋಡಿ ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ಮಾಡಿ"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ಗಾಗಿ ಮತ್ತೊಂದು ಆ್ಯಪ್‌ನಲ್ಲಿ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ಆ್ಯಪ್ ಒಂದರ ಸ್ಥಾನವನ್ನು ಬದಲಾಯಿಸಲು ಅದರ ಹೊರಗೆ ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ಬ್ರೌಸರ್‌ನಲ್ಲಿ ತೆರೆಯಿರಿ"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"ಆ್ಯಪ್‌ನಲ್ಲಿ ತೆರೆಯಿರಿ"</string>
     <string name="new_window_text" msgid="6318648868380652280">"ಹೊಸ ವಿಂಡೋ"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"ವಿಂಡೋಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"ದೃಶ್ಯಾನುಪಾತವನ್ನು ಬದಲಾಯಿಸಿ"</string>
     <string name="close_text" msgid="4986518933445178928">"ಮುಚ್ಚಿ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ಮೆನು ಮುಚ್ಚಿ"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"ಮೆನು ತೆರೆಯಿರಿ"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಮ್ಯಾಕ್ಸಿಮೈಸ್ ಮಾಡಿ"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"ಸ್ನ್ಯಾಪ್ ಸ್ಕ್ರೀನ್"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"ಮರುಗಾತ್ರಗೊಳಿಸಿ"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"ಆ್ಯಪ್ ಅನ್ನು ಇಲ್ಲಿಗೆ ಸರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"ಇಮ್ಮರ್ಸಿವ್"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"ಮರುಸ್ಥಾಪಿಸಿ"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"ಮ್ಯಾಕ್ಸಿಮೈಸ್ ಮಾಡಿ"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"ಮರುಸ್ಥಾಪಿಸಿ"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"ಎಡಕ್ಕೆ ಸ್ನ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"ಬಲಕ್ಕೆ ಸ್ನ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"ಡೀಫಾಲ್ಟ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ತೆರೆಯಿರಿ"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"ಈ ಆ್ಯಪ್‌ಗೆ ವೆಬ್ ಲಿಂಕ್‌ಗಳನ್ನು ಹೇಗೆ ತೆರೆಯಬೇಕು ಎಂಬುದನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"ಆ್ಯಪ್‌ನಲ್ಲಿ"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಲ್ಲಿ"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"ಸರಿ"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"ಇಲ್ಲಿಂದ ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಆ್ಯಪ್‌ಗಳನ್ನು ತ್ವರಿತವಾಗಿ ತೆರೆಯಿರಿ"</string>
 </resources>

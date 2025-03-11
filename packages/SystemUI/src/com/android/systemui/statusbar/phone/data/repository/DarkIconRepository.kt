@@ -16,7 +16,7 @@
 package com.android.systemui.statusbar.phone.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher
+import com.android.systemui.statusbar.data.repository.SysuiDarkIconDispatcherStore
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange
 import dagger.Binds
 import dagger.Module
@@ -25,16 +25,16 @@ import kotlinx.coroutines.flow.StateFlow
 
 /** Dark-mode state for tinting icons. */
 interface DarkIconRepository {
-    val darkState: StateFlow<DarkChange>
+    fun darkState(displayId: Int): StateFlow<DarkChange>
 }
 
 @SysUISingleton
 class DarkIconRepositoryImpl
 @Inject
-constructor(
-    darkIconDispatcher: SysuiDarkIconDispatcher,
-) : DarkIconRepository {
-    override val darkState: StateFlow<DarkChange> = darkIconDispatcher.darkChangeFlow()
+constructor(private val darkIconDispatcherStore: SysuiDarkIconDispatcherStore) :
+    DarkIconRepository {
+    override fun darkState(displayId: Int): StateFlow<DarkChange> =
+        darkIconDispatcherStore.forDisplay(displayId).darkChangeFlow()
 }
 
 @Module

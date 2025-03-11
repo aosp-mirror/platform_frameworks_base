@@ -22,19 +22,23 @@ import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.InputEvent
 import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags
 import com.android.systemui.ambient.touch.TouchHandler.TouchSession
 import com.android.systemui.ambient.touch.dagger.ShadeModule
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * [ShadeTouchHandler] is responsible for handling swipe down gestures over dream to bring down the
@@ -49,8 +53,10 @@ constructor(
     private val dreamManager: DreamManager,
     private val communalViewModel: CommunalViewModel,
     private val communalSettingsInteractor: CommunalSettingsInteractor,
+    private val sceneInteractor: SceneInteractor,
+    private val windowRootViewProvider: Optional<Provider<WindowRootView>>,
     @param:Named(ShadeModule.NOTIFICATION_SHADE_GESTURE_INITIATION_HEIGHT)
-    private val initiationHeight: Int
+    private val initiationHeight: Int,
 ) : TouchHandler {
     /**
      * Tracks whether or not we are capturing a given touch. Will be null before and after a touch.
@@ -59,6 +65,8 @@ constructor(
 
     /** Determines whether the touch handler should process touches in fullscreen swiping mode */
     private var touchAvailable = false
+
+    private val windowRootView by lazy { windowRootViewProvider.get().get() }
 
     init {
         if (Flags.hubmodeFullscreenVerticalSwipeFix()) {
@@ -100,7 +108,7 @@ constructor(
                     e1: MotionEvent?,
                     e2: MotionEvent,
                     distanceX: Float,
-                    distanceY: Float
+                    distanceY: Float,
                 ): Boolean {
                     if (capture == null) {
                         // Only capture swipes that are going downwards.
@@ -110,6 +118,10 @@ constructor(
                                 if (Flags.hubmodeFullscreenVerticalSwipeFix()) touchAvailable
                                 else true
                         if (capture == true) {
+                            if (SceneContainerFlag.isEnabled) {
+                                sceneInteractor.onRemoteUserInputStarted("shade touch handler")
+                            }
+
                             // Send the initial touches over, as the input listener has already
                             // processed these touches.
                             e1?.apply { sendTouchEvent(this) }
@@ -123,7 +135,7 @@ constructor(
                     e1: MotionEvent?,
                     e2: MotionEvent,
                     velocityX: Float,
-                    velocityY: Float
+                    velocityY: Float,
                 ): Boolean {
                     return capture == true
                 }
@@ -132,6 +144,11 @@ constructor(
     }
 
     private fun sendTouchEvent(event: MotionEvent) {
+        if (SceneContainerFlag.isEnabled) {
+            windowRootView.dispatchTouchEvent(event)
+            return
+        }
+
         if (communalSettingsInteractor.isCommunalFlagEnabled() && !dreamManager.isDreaming) {
             // Send touches to central surfaces only when on the glanceable hub while not dreaming.
             // While sending touches where while dreaming will open the shade, the shade

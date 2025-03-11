@@ -65,10 +65,21 @@ class Value {
     return translatable_;
   }
 
+  void SetFlag(std::optional<FeatureFlagAttribute> val) {
+    flag_ = val;
+  }
+
+  std::optional<FeatureFlagAttribute> GetFlag() const {
+    return flag_;
+  }
+
   void SetFlagStatus(FlagStatus val) {
     flag_status_ = val;
   }
 
+  // If the value is behind a flag this returns whether that flag was enabled when the value was
+  // parsed by comparing it to the flags passed on the command line to aapt2 (taking into account
+  // negation if necessary). If there was no flag, FlagStatus::NoFlag is returned instead.
   FlagStatus GetFlagStatus() const {
     return flag_status_;
   }
@@ -128,6 +139,7 @@ class Value {
   std::string comment_;
   bool weak_ = false;
   bool translatable_ = true;
+  std::optional<FeatureFlagAttribute> flag_;
   FlagStatus flag_status_ = FlagStatus::NoFlag;
 
  private:

@@ -45,8 +45,9 @@ import androidx.preference.SwitchPreferenceCompat;
  * Version of SwitchPreferenceCompat that can be disabled by a device admin
  * using a user restriction.
  */
-public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
-    RestrictedPreferenceHelper mHelper;
+public class RestrictedSwitchPreference extends SwitchPreferenceCompat implements
+        RestrictedPreferenceHelperProvider {
+    private final RestrictedPreferenceHelper mHelper;
     AppOpsManager mAppOpsManager;
     boolean mUseAdditionalSummary = false;
     CharSequence mRestrictedSwitchSummary;
@@ -98,6 +99,11 @@ public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
         this(context, null);
     }
 
+    @Override
+    public @NonNull RestrictedPreferenceHelper getRestrictedPreferenceHelper() {
+        return mHelper;
+    }
+
     @VisibleForTesting
     public void setAppOps(AppOpsManager appOps) {
         mAppOpsManager = appOps;
@@ -120,13 +126,7 @@ public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
 
         CharSequence switchSummary;
         if (mRestrictedSwitchSummary == null) {
-            switchSummary = isChecked()
-                    ? getUpdatableEnterpriseString(
-                            getContext(), ENABLED_BY_ADMIN_SWITCH_SUMMARY,
-                            com.android.settingslib.widget.restricted.R.string.enabled_by_admin)
-                    : getUpdatableEnterpriseString(
-                            getContext(), DISABLED_BY_ADMIN_SWITCH_SUMMARY,
-                            com.android.settingslib.widget.restricted.R.string.disabled_by_admin);
+            switchSummary = getRestrictedSwitchSummary();
         } else {
             switchSummary = mRestrictedSwitchSummary;
         }
@@ -169,6 +169,25 @@ public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
         return context.getSystemService(DevicePolicyManager.class).getResources().getString(
                 updatableStringId,
                 () -> context.getString(resId));
+    }
+
+    private String getRestrictedSwitchSummary() {
+        if (mHelper.isRestrictionEnforcedByAdvancedProtection()) {
+            final int apmResId = isChecked()
+                    ? com.android.settingslib.widget.restricted.R.string
+                            .enabled_by_advanced_protection
+                    : com.android.settingslib.widget.restricted.R.string
+                            .disabled_by_advanced_protection;
+            return getContext().getString(apmResId);
+        }
+
+        return isChecked()
+                ? getUpdatableEnterpriseString(
+                        getContext(), ENABLED_BY_ADMIN_SWITCH_SUMMARY,
+                        com.android.settingslib.widget.restricted.R.string.enabled_by_admin)
+                : getUpdatableEnterpriseString(
+                        getContext(), DISABLED_BY_ADMIN_SWITCH_SUMMARY,
+                        com.android.settingslib.widget.restricted.R.string.disabled_by_admin);
     }
 
     @Override

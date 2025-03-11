@@ -37,6 +37,9 @@ public class FallbackBrightnessStrategy implements DisplayBrightnessStrategy{
             StrategyExecutionRequest strategyExecutionRequest) {
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_MANUAL);
+        if (strategyExecutionRequest.isStylusBeingUsed()) {
+            brightnessReason.setModifier(BrightnessReason.MODIFIER_STYLUS_UNDER_USE);
+        }
         return new DisplayBrightnessState.Builder()
                 .setBrightness(strategyExecutionRequest.getCurrentScreenBrightness())
                 .setBrightnessReason(brightnessReason)

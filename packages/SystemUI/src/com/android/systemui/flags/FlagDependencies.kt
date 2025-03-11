@@ -35,9 +35,11 @@ import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import javax.inject.Inject
@@ -55,7 +57,9 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         // Internal notification frontend dependencies
         NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
         PriorityPeopleSection.token dependsOn SortBySectionTimeFlag.token
-        NotificationMinimalismPrototype.token dependsOn NotificationThrottleHun.token
+        NotificationMinimalism.token dependsOn NotificationThrottleHun.token
+        ModesEmptyShadeFix.token dependsOn FooterViewRefactor.token
+        ModesEmptyShadeFix.token dependsOn modesUi
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }

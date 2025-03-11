@@ -45,7 +45,12 @@
     <integer name="config_powerStatsAggregationPeriod">14400000</integer>
 
     <!-- PowerStats aggregation span duration in milliseconds. This is the length of battery
-    history time for every aggregated power stats span that is stored stored in PowerStatsStore.
+    history time for every aggregated power stats span that is stored in PowerStatsStore.
     It should not be larger than config_powerStatsAggregationPeriod (but it can be the same) -->
     <integer name="config_aggregatedPowerStatsSpanDuration">3600000</integer>
+
+    <!-- BatteryUsageStats accumulation period as determined by the size of accumulated
+    battery history, in bytes. -->
+    <integer name="config_accumulatedBatteryUsageStatsSpanSize">32768</integer>
+
 </resources>

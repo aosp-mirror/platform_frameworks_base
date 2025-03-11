@@ -19,8 +19,6 @@ package com.android.internal.accessibility.dialog;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
-import static com.android.internal.accessibility.util.ShortcutUtils.optInValueToSettings;
-import static com.android.internal.accessibility.util.ShortcutUtils.optOutValueFromSettings;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,7 +29,6 @@ import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.Flags;
 
 import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
@@ -118,18 +115,9 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
     @Override
     public void onCheckedChanged(boolean isChecked) {
         setShortcutEnabled(isChecked);
-        if (Flags.migrateEnableShortcuts()) {
-            final AccessibilityManager am =
-                    getContext().getSystemService(AccessibilityManager.class);
-            am.enableShortcutsForTargets(
-                    isChecked, getShortcutType(), Set.of(mId), UserHandle.myUserId());
-        } else {
-            if (isChecked) {
-                optInValueToSettings(getContext(), getShortcutType(), getId());
-            } else {
-                optOutValueFromSettings(getContext(), getShortcutType(), getId());
-            }
-        }
+        final AccessibilityManager am = getContext().getSystemService(AccessibilityManager.class);
+        am.enableShortcutsForTargets(
+                isChecked, getShortcutType(), Set.of(mId), UserHandle.myUserId());
     }
 
     public void setStateDescription(CharSequence stateDescription) {
