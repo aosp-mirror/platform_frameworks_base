@@ -16,16 +16,19 @@
 
 package android.hardware.camera2.impl;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
+import android.annotation.FlaggedApi;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CameraOfflineSession.CameraOfflineSessionCallback;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.CameraMetadataInfo;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraOfflineSession;
 import android.hardware.camera2.TotalCaptureResult;
@@ -40,15 +43,15 @@ import android.util.Range;
 import android.util.SparseArray;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Executor;
-
-import static com.android.internal.util.Preconditions.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CameraOfflineSessionImpl extends CameraOfflineSession
         implements IBinder.DeathRecipient {
@@ -176,6 +179,12 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
         }
 
         @Override
+        @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+        public void onClientSharedAccessPriorityChanged(boolean primaryClient) {
+            Log.v(TAG, "onClientSharedAccessPriorityChanged primaryClient = " + primaryClient);
+        }
+
+        @Override
         public void onDeviceIdle() {
             synchronized(mInterfaceLock) {
                 if (mRemoteSession == null) {
@@ -283,10 +292,10 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
         }
 
         @Override
-        public void onResultReceived(CameraMetadataNative result,
+        public void onResultReceived(CameraMetadataInfo resultInfo,
                 CaptureResultExtras resultExtras, PhysicalCaptureResultInfo physicalResults[])
                 throws RemoteException {
-
+            CameraMetadataNative result = resultInfo.getMetadata();
             int requestId = resultExtras.getRequestId();
             long frameNumber = resultExtras.getFrameNumber();
 

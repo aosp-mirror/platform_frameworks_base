@@ -354,6 +354,13 @@ final class AutofillInlineSuggestionsRequestSession {
         }
     }
 
+    private void handleOnInputMethodStartInputView() {
+        synchronized (mLock) {
+            mUiCallback.onInputMethodStartInputView();
+            handleOnReceiveImeStatusUpdated(true, true);
+        }
+    }
+
     /**
      * Handles the IME session status received from the IME.
      *
@@ -437,8 +444,8 @@ final class AutofillInlineSuggestionsRequestSession {
             final AutofillInlineSuggestionsRequestSession session = mSession.get();
             if (session != null) {
                 session.mHandler.sendMessage(obtainMessage(
-                        AutofillInlineSuggestionsRequestSession::handleOnReceiveImeStatusUpdated,
-                        session, true, true));
+                        AutofillInlineSuggestionsRequestSession::handleOnInputMethodStartInputView,
+                        session));
             }
         }
 

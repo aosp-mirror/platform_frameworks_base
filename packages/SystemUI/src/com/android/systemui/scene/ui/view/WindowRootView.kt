@@ -25,6 +25,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.core.view.updateMargins
+import com.android.systemui.Flags
 import com.android.systemui.compose.ComposeInitializer
 import com.android.systemui.res.R
 
@@ -103,6 +104,8 @@ open class WindowRootView(
 
     private fun applyMargins() {
         val count = childCount
+        val hasFlagsEnabled = Flags.checkLockscreenGoneTransition()
+        var hasChildMarginUpdated = false
         for (i in 0 until count) {
             val child = getChildAt(i)
             if (child.layoutParams is LayoutParams) {
@@ -113,9 +116,16 @@ open class WindowRootView(
                             layoutParams.leftMargin != leftInset)
                 ) {
                     layoutParams.updateMargins(left = leftInset, right = rightInset)
-                    child.requestLayout()
+                    hasChildMarginUpdated = true
+                    if (!hasFlagsEnabled) {
+                        child.requestLayout()
+                    }
                 }
             }
+        }
+        if (hasFlagsEnabled && hasChildMarginUpdated) {
+            // Request layout at once after all children's margins has updated
+            requestLayout()
         }
     }
 

@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.RingerModeTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,14 +45,14 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
 class MuteQuickAffordanceConfig
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val userTracker: UserTracker,
     private val userFileManager: UserFileManager,
     private val ringerModeTracker: RingerModeTracker,
@@ -103,7 +104,7 @@ constructor(
     override fun onTriggered(
         expandable: Expandable?
     ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
-        coroutineScope.launch(backgroundDispatcher) {
+        coroutineScope.launch(context = backgroundDispatcher) {
             val newRingerMode: Int
             val currentRingerMode = audioManager.ringerModeInternal
             if (currentRingerMode == AudioManager.RINGER_MODE_SILENT) {

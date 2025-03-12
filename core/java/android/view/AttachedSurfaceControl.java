@@ -15,9 +15,11 @@
  */
 package android.view;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.UiThread;
 import android.content.Context;
 import android.graphics.Rect;
@@ -28,6 +30,8 @@ import android.window.InputTransferToken;
 import android.window.SurfaceSyncGroup;
 
 import com.android.window.flags.Flags;
+
+import java.util.concurrent.Executor;
 
 /**
  * Provides an interface to the root-Surface of a View Hierarchy or Window. This
@@ -201,5 +205,25 @@ public interface AttachedSurfaceControl {
     default InputTransferToken getInputTransferToken() {
         throw new UnsupportedOperationException("The getInputTransferToken needs to be "
                 + "implemented before making this call.");
+    }
+
+    /**
+     * Registers a {@link OnJankDataListener} to receive jank classification data about rendered
+     * frames.
+     * <p>
+     * Use {@link SurfaceControl.OnJankDataListenerRegistration#removeAfter} to unregister the
+     * listener.
+     *
+     * @param executor The executor on which the listener will be invoked.
+     * @param listener The listener to add.
+     * @return The {@link OnJankDataListenerRegistration} for the listener.
+     */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_JANK_API)
+    @SuppressLint("PairedRegistration")
+    default SurfaceControl.OnJankDataListenerRegistration registerOnJankDataListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SurfaceControl.OnJankDataListener listener) {
+        return SurfaceControl.OnJankDataListenerRegistration.NONE;
     }
 }

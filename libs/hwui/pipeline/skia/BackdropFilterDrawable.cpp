@@ -29,37 +29,6 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-BackdropFilterDrawable::~BackdropFilterDrawable() {}
-
-bool BackdropFilterDrawable::prepareToDraw(SkCanvas* canvas, const RenderProperties& properties,
-                                           int backdropImageWidth, int backdropImageHeight) {
-    // the drawing bounds for blurred content.
-    mDstBounds.setWH(properties.getWidth(), properties.getHeight());
-
-    float alphaMultiplier = 1.0f;
-    RenderNodeDrawable::setViewProperties(properties, canvas, &alphaMultiplier, true);
-
-    // get proper subset for previous content.
-    canvas->getTotalMatrix().mapRect(&mImageSubset, mDstBounds);
-    SkRect imageSubset(mImageSubset);
-    // ensure the subset is inside bounds of previous content.
-    if (!mImageSubset.intersect(SkRect::MakeWH(backdropImageWidth, backdropImageHeight))) {
-        return false;
-    }
-
-    // correct the drawing bounds if subset was changed.
-    if (mImageSubset != imageSubset) {
-        SkMatrix inverse;
-        if (canvas->getTotalMatrix().invert(&inverse)) {
-            inverse.mapRect(&mDstBounds, mImageSubset);
-        }
-    }
-
-    // follow the alpha from the target RenderNode.
-    mPaint.setAlpha(properties.layerProperties().alpha() * alphaMultiplier);
-    return true;
-}
-
 void BackdropFilterDrawable::onDraw(SkCanvas* canvas) {
     const RenderProperties& properties = mTargetRenderNode->properties();
     auto* backdropFilter = properties.layerProperties().getBackdropImageFilter();
@@ -68,27 +37,43 @@ void BackdropFilterDrawable::onDraw(SkCanvas* canvas) {
         return;
     }
 
-    auto backdropImage = surface->makeImageSnapshot();
-    // sync necessary properties from target RenderNode.
-    if (!prepareToDraw(canvas, properties, backdropImage->width(), backdropImage->height())) {
+    SkRect srcBounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
+
+    float alphaMultiplier = 1.0f;
+    RenderNodeDrawable::setViewProperties(properties, canvas, &alphaMultiplier, true);
+    SkPaint paint;
+    paint.setAlpha(properties.layerProperties().alpha() * alphaMultiplier);
+
+    SkRect surfaceSubset;
+    canvas->getTotalMatrix().mapRect(&surfaceSubset, srcBounds);
+    if (!surfaceSubset.intersect(SkRect::MakeWH(surface->width(), surface->height()))) {
         return;
     }
 
-    auto imageSubset = mImageSubset.roundOut();
+    auto backdropImage = surface->makeImageSnapshot(surfaceSubset.roundOut());
+
+    SkIRect imageBounds = SkIRect::MakeWH(backdropImage->width(), backdropImage->height());
+    SkIPoint offset;
+    SkIRect imageSubset;
+
 #ifdef __ANDROID__
     if (canvas->recordingContext()) {
         backdropImage =
                 SkImages::MakeWithFilter(canvas->recordingContext(), backdropImage, backdropFilter,
-                                         imageSubset, imageSubset, &mOutSubset, &mOutOffset);
+                                         imageBounds, imageBounds, &imageSubset, &offset);
     } else
 #endif
     {
-        backdropImage = SkImages::MakeWithFilter(backdropImage, backdropFilter, imageSubset,
-                                                 imageSubset, &mOutSubset, &mOutOffset);
+        backdropImage = SkImages::MakeWithFilter(backdropImage, backdropFilter, imageBounds,
+                                                 imageBounds, &imageSubset, &offset);
     }
-    canvas->drawImageRect(backdropImage, SkRect::Make(mOutSubset), mDstBounds,
-                          SkSamplingOptions(SkFilterMode::kLinear), &mPaint,
-                          SkCanvas::kStrict_SrcRectConstraint);
+
+    canvas->save();
+    canvas->resetMatrix();
+    canvas->drawImageRect(backdropImage, SkRect::Make(imageSubset), surfaceSubset,
+                          SkSamplingOptions(SkFilterMode::kLinear), &paint,
+                          SkCanvas::kFast_SrcRectConstraint);
+    canvas->restore();
 }
 
 }  // namespace skiapipeline

@@ -15,6 +15,7 @@
  */
 #include "Bitmap.h"
 
+#include <android-base/file.h>
 #include "HardwareBitmapUploader.h"
 #include "Properties.h"
 #ifdef __ANDROID__  // Layoutlib does not support render thread
@@ -46,15 +47,26 @@
 #include <SkImage.h>
 #include <SkImageAndroid.h>
 #include <SkImagePriv.h>
+#include <SkJpegEncoder.h>
 #include <SkJpegGainmapEncoder.h>
 #include <SkPixmap.h>
+#include <SkPngEncoder.h>
 #include <SkRect.h>
 #include <SkStream.h>
-#include <SkJpegEncoder.h>
-#include <SkPngEncoder.h>
 #include <SkWebpEncoder.h>
 
+#include <atomic>
+#include <format>
 #include <limits>
+
+#ifdef __ANDROID__
+#include <com_android_graphics_hwui_flags.h>
+namespace hwui_flags = com::android::graphics::hwui::flags;
+#else
+namespace hwui_flags {
+constexpr bool bitmap_ashmem_long_name() { return false; }
+}
+#endif
 
 namespace android {
 
@@ -85,6 +97,28 @@ static uint64_t AHardwareBuffer_getAllocationSize(AHardwareBuffer* aHardwareBuff
     return size;
 }
 #endif
+
+// generate an ID for this Bitmap, id is a 64-bit integer of 3 parts:
+//   0000xxxxxx - the lower 6 decimal digits is a monotonically increasing number
+//   000x000000 - the 7th decimal digit is the storage type (see PixelStorageType)
+//   xxx0000000 - the 8th decimal digit and above is the current pid
+//
+//   e.g. 43231000076 - means this bitmap is the 76th bitmap created, has the
+//   storage type of 'Heap', and is created in a process with pid 4323.
+//
+//   NOTE:
+//   1) the monotonic number could increase beyond 1000,000 and wrap around, which
+//   only happens when more than 1,000,000 bitmaps have been created over time.
+//   This could result in two IDs being the same despite being really rare.
+//   2) the IDs are intentionally represented in decimal to make it easier to
+//   reason and associate with numbers shown in heap dump (mostly in decimal)
+//   and PIDs shown in different tools (mostly in decimal as well).
+uint64_t Bitmap::getId(PixelStorageType type) {
+    static std::atomic<uint64_t> idCounter{0};
+    return (idCounter.fetch_add(1) % 1000000)
+        + static_cast<uint64_t>(type) * 1000000
+        + static_cast<uint64_t>(getpid()) * 10000000;
+}
 
 bool Bitmap::computeAllocationSize(size_t rowBytes, int height, size_t* size) {
     return 0 <= height && height <= std::numeric_limits<size_t>::max() &&
@@ -117,6 +151,20 @@ static sk_sp<Bitmap> allocateBitmap(SkBitmap* bitmap, AllocPixelRef alloc) {
     return wrapper;
 }
 
+std::string Bitmap::getAshmemId(const char* tag, uint64_t bitmapId,
+                                int width, int height, size_t size) {
+    if (!hwui_flags::bitmap_ashmem_long_name()) {
+        return "bitmap";
+    }
+    static std::string sCmdline = [] {
+        std::string temp;
+        android::base::ReadFileToString("/proc/self/cmdline", &temp);
+        return temp;
+    }();
+    return std::format("bitmap/{}-id_{}-{}x{}-size_{}-{}",
+                       tag, bitmapId, width, height, size, sCmdline);
+}
+
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap) {
     return allocateBitmap(bitmap, &Bitmap::allocateAshmemBitmap);
 }
@@ -124,7 +172,9 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap) {
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info, size_t rowBytes) {
 #ifdef __ANDROID__
     // Create new ashmem region with read/write priv
-    int fd = ashmem_create_region("bitmap", size);
+    uint64_t id = getId(PixelStorageType::Ashmem);
+    auto ashmemId = getAshmemId("allocate", id, info.width(), info.height(), size);
+    int fd = ashmem_create_region(ashmemId.c_str(), size);
     if (fd < 0) {
         return nullptr;
     }
@@ -140,7 +190,7 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
         close(fd);
         return nullptr;
     }
-    return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes));
+    return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes, id));
 #else
     return Bitmap::allocateHeapBitmap(size, info, rowBytes);
 #endif
@@ -261,7 +311,8 @@ void Bitmap::reconfigure(const SkImageInfo& newInfo, size_t rowBytes) {
 Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBytes)
         : SkPixelRef(info.width(), info.height(), address, rowBytes)
         , mInfo(validateAlpha(info))
-        , mPixelStorageType(PixelStorageType::Heap) {
+        , mPixelStorageType(PixelStorageType::Heap)
+        , mId(getId(mPixelStorageType)) {
     mPixelStorage.heap.address = address;
     mPixelStorage.heap.size = size;
     traceBitmapCreate();
@@ -270,16 +321,19 @@ Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBy
 Bitmap::Bitmap(SkPixelRef& pixelRef, const SkImageInfo& info)
         : SkPixelRef(info.width(), info.height(), pixelRef.pixels(), pixelRef.rowBytes())
         , mInfo(validateAlpha(info))
-        , mPixelStorageType(PixelStorageType::WrappedPixelRef) {
+        , mPixelStorageType(PixelStorageType::WrappedPixelRef)
+        , mId(getId(mPixelStorageType)) {
     pixelRef.ref();
     mPixelStorage.wrapped.pixelRef = &pixelRef;
     traceBitmapCreate();
 }
 
-Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes)
+Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
+               size_t rowBytes, uint64_t id)
         : SkPixelRef(info.width(), info.height(), address, rowBytes)
         , mInfo(validateAlpha(info))
-        , mPixelStorageType(PixelStorageType::Ashmem) {
+        , mPixelStorageType(PixelStorageType::Ashmem)
+        , mId(id != INVALID_BITMAP_ID ? id : getId(mPixelStorageType)) {
     mPixelStorage.ashmem.address = address;
     mPixelStorage.ashmem.fd = fd;
     mPixelStorage.ashmem.size = mappedSize;
@@ -293,7 +347,8 @@ Bitmap::Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes
         , mInfo(validateAlpha(info))
         , mPixelStorageType(PixelStorageType::Hardware)
         , mPalette(palette)
-        , mPaletteGenerationId(getGenerationID()) {
+        , mPaletteGenerationId(getGenerationID())
+        , mId(getId(mPixelStorageType)) {
     mPixelStorage.hardware.buffer = buffer;
     mPixelStorage.hardware.size = AHardwareBuffer_getAllocationSize(buffer);
     AHardwareBuffer_acquire(buffer);
@@ -578,24 +633,27 @@ void Bitmap::setGainmap(sp<uirenderer::Gainmap>&& gainmap) {
 }
 
 std::mutex Bitmap::mLock{};
+
 size_t Bitmap::mTotalBitmapBytes = 0;
 size_t Bitmap::mTotalBitmapCount = 0;
 
 void Bitmap::traceBitmapCreate() {
+    size_t bytes = getAllocationByteCount();
+    std::lock_guard lock{mLock};
+    mTotalBitmapBytes += bytes;
+    mTotalBitmapCount++;
     if (ATRACE_ENABLED()) {
-        std::lock_guard lock{mLock};
-        mTotalBitmapBytes += getAllocationByteCount();
-        mTotalBitmapCount++;
         ATRACE_INT64("Bitmap Memory", mTotalBitmapBytes);
         ATRACE_INT64("Bitmap Count", mTotalBitmapCount);
     }
 }
 
 void Bitmap::traceBitmapDelete() {
+    size_t bytes = getAllocationByteCount();
+    std::lock_guard lock{mLock};
+    mTotalBitmapBytes -= getAllocationByteCount();
+    mTotalBitmapCount--;
     if (ATRACE_ENABLED()) {
-        std::lock_guard lock{mLock};
-        mTotalBitmapBytes -= getAllocationByteCount();
-        mTotalBitmapCount--;
         ATRACE_INT64("Bitmap Memory", mTotalBitmapBytes);
         ATRACE_INT64("Bitmap Count", mTotalBitmapCount);
     }

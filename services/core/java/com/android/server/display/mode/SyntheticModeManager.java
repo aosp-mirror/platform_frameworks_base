@@ -37,17 +37,22 @@ public class SyntheticModeManager {
             SYNTHETIC_MODE_REFRESH_RATE + FLOAT_TOLERANCE;
 
     private final boolean mSynthetic60HzModesEnabled;
+    private final boolean mHasArrSupportEnabled;
 
     public SyntheticModeManager(DisplayManagerFlags flags) {
         mSynthetic60HzModesEnabled = flags.isSynthetic60HzModesEnabled();
+        mHasArrSupportEnabled = flags.hasArrSupportFlag();
     }
 
     /**
      * creates display supportedModes array, exposed to applications
      */
     public Display.Mode[] createAppSupportedModes(DisplayDeviceConfig config,
-            Display.Mode[] modes) {
-        if (!config.isVrrSupportEnabled() || !mSynthetic60HzModesEnabled) {
+            Display.Mode[] modes, boolean hasArrSupport) {
+        // TODO(b/361433651) Remove config.isVrrSupportEnabled once hasArrSupport is rolled out
+        boolean isArrSupported =
+                mHasArrSupportEnabled ? hasArrSupport : config.isVrrSupportEnabled();
+        if (!isArrSupported || !mSynthetic60HzModesEnabled) {
             return modes;
         }
         List<Display.Mode> appSupportedModes = new ArrayList<>();

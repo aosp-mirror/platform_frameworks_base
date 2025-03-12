@@ -18,7 +18,9 @@
 #include "ColorFilter.h"
 
 #include "GraphicsJNI.h"
+#include "RuntimeEffectUtils.h"
 #include "SkBlendMode.h"
+#include "include/effects/SkRuntimeEffect.h"
 
 namespace android {
 
@@ -89,6 +91,92 @@ public:
             filter->setMatrix(getMatrixFromJFloatArray(env, jarray));
         }
     }
+
+    static jlong RuntimeColorFilter_createColorFilter(JNIEnv* env, jobject, jstring agsl) {
+        ScopedUtfChars strSksl(env, agsl);
+        auto result = SkRuntimeEffect::MakeForColorFilter(SkString(strSksl.c_str()),
+                                                          SkRuntimeEffect::Options{});
+        if (result.effect.get() == nullptr) {
+            doThrowIAE(env, result.errorText.c_str());
+            return 0;
+        }
+        auto builder = new SkRuntimeEffectBuilder(std::move(result.effect));
+        auto* runtimeColorFilter = new RuntimeColorFilter(builder);
+        runtimeColorFilter->incStrong(nullptr);
+        return static_cast<jlong>(reinterpret_cast<uintptr_t>(runtimeColorFilter));
+    }
+
+    static void RuntimeColorFilter_updateUniformsFloatArray(JNIEnv* env, jobject,
+                                                            jlong colorFilterPtr,
+                                                            jstring uniformName,
+                                                            jfloatArray uniforms,
+                                                            jboolean isColor) {
+        auto* filter = reinterpret_cast<RuntimeColorFilter*>(colorFilterPtr);
+        ScopedUtfChars name(env, uniformName);
+        AutoJavaFloatArray autoValues(env, uniforms, 0, kRO_JNIAccess);
+        if (filter) {
+            filter->updateUniforms(env, name.c_str(), autoValues.ptr(), autoValues.length(),
+                                   isColor);
+        }
+    }
+
+    static void RuntimeColorFilter_updateUniformsFloats(JNIEnv* env, jobject, jlong colorFilterPtr,
+                                                        jstring uniformName, jfloat value1,
+                                                        jfloat value2, jfloat value3, jfloat value4,
+                                                        jint count) {
+        auto* filter = reinterpret_cast<RuntimeColorFilter*>(colorFilterPtr);
+        ScopedUtfChars name(env, uniformName);
+        const float values[4] = {value1, value2, value3, value4};
+        if (filter) {
+            filter->updateUniforms(env, name.c_str(), values, count, false);
+        }
+    }
+
+    static void RuntimeColorFilter_updateUniformsIntArray(JNIEnv* env, jobject,
+                                                          jlong colorFilterPtr, jstring uniformName,
+                                                          jintArray uniforms) {
+        auto* filter = reinterpret_cast<RuntimeColorFilter*>(colorFilterPtr);
+        ScopedUtfChars name(env, uniformName);
+        AutoJavaIntArray autoValues(env, uniforms, 0);
+        if (filter) {
+            filter->updateUniforms(env, name.c_str(), autoValues.ptr(), autoValues.length());
+        }
+    }
+
+    static void RuntimeColorFilter_updateUniformsInts(JNIEnv* env, jobject, jlong colorFilterPtr,
+                                                      jstring uniformName, jint value1, jint value2,
+                                                      jint value3, jint value4, jint count) {
+        auto* filter = reinterpret_cast<RuntimeColorFilter*>(colorFilterPtr);
+        ScopedUtfChars name(env, uniformName);
+        const int values[4] = {value1, value2, value3, value4};
+        if (filter) {
+            filter->updateUniforms(env, name.c_str(), values, count);
+        }
+    }
+
+    static void RuntimeColorFilter_updateChild(JNIEnv* env, jobject, jlong colorFilterPtr,
+                                               jstring childName, jlong childPtr) {
+        auto* filter = reinterpret_cast<RuntimeColorFilter*>(colorFilterPtr);
+        ScopedUtfChars name(env, childName);
+        auto* child = reinterpret_cast<SkFlattenable*>(childPtr);
+        if (filter && child) {
+            filter->updateChild(env, name.c_str(), child);
+        }
+    }
+
+    static void RuntimeColorFilter_updateInputColorFilter(JNIEnv* env, jobject,
+                                                          jlong colorFilterPtr, jstring childName,
+                                                          jlong childFilterPtr) {
+        auto* filter = reinterpret_cast<RuntimeColorFilter*>(colorFilterPtr);
+        ScopedUtfChars name(env, childName);
+        auto* child = reinterpret_cast<ColorFilter*>(childFilterPtr);
+        if (filter && child) {
+            auto childInput = child->getInstance();
+            if (childInput) {
+                filter->updateChild(env, name.c_str(), childInput.release());
+            }
+        }
+    }
 };
 
 static const JNINativeMethod colorfilter_methods[] = {
@@ -107,6 +195,22 @@ static const JNINativeMethod colormatrix_methods[] = {
         {"nativeColorMatrixFilter", "([F)J", (void*)ColorFilterGlue::CreateColorMatrixFilter},
         {"nativeSetColorMatrix", "(J[F)V", (void*)ColorFilterGlue::SetColorMatrix}};
 
+static const JNINativeMethod runtime_color_filter_methods[] = {
+        {"nativeCreateRuntimeColorFilter", "(Ljava/lang/String;)J",
+         (void*)ColorFilterGlue::RuntimeColorFilter_createColorFilter},
+        {"nativeUpdateUniforms", "(JLjava/lang/String;[FZ)V",
+         (void*)ColorFilterGlue::RuntimeColorFilter_updateUniformsFloatArray},
+        {"nativeUpdateUniforms", "(JLjava/lang/String;FFFFI)V",
+         (void*)ColorFilterGlue::RuntimeColorFilter_updateUniformsFloats},
+        {"nativeUpdateUniforms", "(JLjava/lang/String;[I)V",
+         (void*)ColorFilterGlue::RuntimeColorFilter_updateUniformsIntArray},
+        {"nativeUpdateUniforms", "(JLjava/lang/String;IIIII)V",
+         (void*)ColorFilterGlue::RuntimeColorFilter_updateUniformsInts},
+        {"nativeUpdateChild", "(JLjava/lang/String;J)V",
+         (void*)ColorFilterGlue::RuntimeColorFilter_updateChild},
+        {"nativeUpdateInputColorFilter", "(JLjava/lang/String;J)V",
+         (void*)ColorFilterGlue::RuntimeColorFilter_updateInputColorFilter}};
+
 int register_android_graphics_ColorFilter(JNIEnv* env) {
     android::RegisterMethodsOrDie(env, "android/graphics/ColorFilter", colorfilter_methods,
                                   NELEM(colorfilter_methods));
@@ -118,7 +222,10 @@ int register_android_graphics_ColorFilter(JNIEnv* env) {
                                   NELEM(lighting_methods));
     android::RegisterMethodsOrDie(env, "android/graphics/ColorMatrixColorFilter",
                                   colormatrix_methods, NELEM(colormatrix_methods));
-    
+    android::RegisterMethodsOrDie(env, "android/graphics/RuntimeColorFilter",
+                                  runtime_color_filter_methods,
+                                  NELEM(runtime_color_filter_methods));
+
     return 0;
 }
 

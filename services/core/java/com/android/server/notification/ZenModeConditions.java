@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Process;
+import android.os.UserHandle;
 import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
@@ -102,16 +103,6 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     }
 
     @Override
-    public void onBootComplete() {
-        // noop
-    }
-
-    @Override
-    public void onUserSwitched() {
-        // noop
-    }
-
-    @Override
     public void onServiceAdded(ComponentName component) {
         if (DEBUG) Log.d(TAG, "onServiceAdded " + component);
         final int callingUid = Binder.getCallingUid();
@@ -127,7 +118,10 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         ZenModeConfig config = mHelper.getConfig();
         if (config == null) return;
         final int callingUid = Binder.getCallingUid();
-        mHelper.setAutomaticZenRuleState(id, condition,
+
+        // This change is known to be for UserHandle.CURRENT because ConditionProviders for
+        // background users are not bound.
+        mHelper.setAutomaticZenRuleState(UserHandle.CURRENT, id, condition,
                 callingUid == Process.SYSTEM_UID ? ZenModeConfig.ORIGIN_SYSTEM
                         : ZenModeConfig.ORIGIN_APP,
                 callingUid);

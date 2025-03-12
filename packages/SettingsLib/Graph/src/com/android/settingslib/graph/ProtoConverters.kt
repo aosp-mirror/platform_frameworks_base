@@ -16,8 +16,10 @@
 
 package com.android.settingslib.graph
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import com.android.settingslib.graph.proto.BundleProto
 import com.android.settingslib.graph.proto.BundleProto.BundleValue
@@ -42,6 +44,20 @@ fun Intent.toProto(): IntentProto = intentProto {
     this@toProto.type?.let { mimeType = it }
 }
 
+fun IntentProto.toIntent(): Intent? {
+    if (!hasComponent()) return null
+    val componentName = ComponentName.unflattenFromString(component) ?: return null
+    val intent = Intent()
+    intent.component = componentName
+    if (hasAction()) intent.action = action
+    if (hasData()) intent.data = Uri.parse(data)
+    if (hasPkg()) intent.`package` = pkg
+    if (hasFlags()) intent.flags = flags
+    if (hasExtras()) intent.putExtras(extras.toBundle())
+    if (hasMimeType()) intent.setType(mimeType)
+    return intent
+}
+
 fun Bundle.toProto(): BundleProto = bundleProto {
     fun toProto(value: Any): BundleValue = bundleValueProto {
         when (value) {
@@ -61,14 +77,18 @@ fun Bundle.toProto(): BundleProto = bundleProto {
     }
 }
 
-fun BundleValue.stringify(): String =
-    when {
-        hasBooleanValue() -> "$valueCase"
-        hasBytesValue() -> "$bytesValue"
-        hasIntValue() -> "$intValue"
-        hasLongValue() -> "$longValue"
-        hasStringValue() -> stringValue
-        hasDoubleValue() -> "$doubleValue"
-        hasBundleValue() -> "$bundleValue"
-        else -> "Unknown"
+fun BundleProto.toBundle(): Bundle =
+    Bundle().apply {
+        for ((key, value) in valuesMap) {
+            when {
+                value.hasBooleanValue() -> putBoolean(key, value.booleanValue)
+                value.hasBytesValue() -> putByteArray(key, value.bytesValue.toByteArray())
+                value.hasIntValue() -> putInt(key, value.intValue)
+                value.hasLongValue() -> putLong(key, value.longValue)
+                value.hasStringValue() -> putString(key, value.stringValue)
+                value.hasDoubleValue() -> putDouble(key, value.doubleValue)
+                value.hasBundleValue() -> putBundle(key, value.bundleValue.toBundle())
+                else -> throw IllegalArgumentException("Unknown type: ${value.javaClass} $value")
+            }
+        }
     }

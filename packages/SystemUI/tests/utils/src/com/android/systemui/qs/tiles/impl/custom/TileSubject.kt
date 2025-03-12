@@ -59,7 +59,7 @@ class TileSubject private constructor(failureMetadata: FailureMetadata, subject:
     companion object {
 
         /** Returns a factory to be used with [Truth.assertAbout]. */
-        fun tiles(): Factory<TileSubject, Tile?> {
+        fun tiles(): Factory<TileSubject, Tile> {
             return Factory { failureMetadata: FailureMetadata, subject: Tile? ->
                 TileSubject(failureMetadata, subject)
             }

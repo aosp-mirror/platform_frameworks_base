@@ -435,9 +435,11 @@ public class LatencyTracker {
     public void startListeningForLatencyTrackerConfigChanges() {
         final Context context = ActivityThread.currentApplication();
         if (context == null) {
-            if (DEBUG) {
-                Log.d(TAG, "No application for package: " + ActivityThread.currentPackageName());
-            }
+            Log.e(
+                    TAG,
+                    String.format(
+                            "No application for package: %s. Latency Tracker Disabled",
+                            ActivityThread.currentPackageName()));
             return;
         }
         if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) != PERMISSION_GRANTED) {

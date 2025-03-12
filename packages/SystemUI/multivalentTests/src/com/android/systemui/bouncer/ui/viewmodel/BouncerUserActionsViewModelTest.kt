@@ -20,7 +20,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -71,7 +70,7 @@ class BouncerUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions)
                 .containsEntriesExactly(
                     Back to UserActionResult(Scenes.QuickSettings),
-                    Swipe(SwipeDirection.Down) to UserActionResult(Scenes.QuickSettings),
+                    Swipe.Down to UserActionResult(Scenes.QuickSettings),
                 )
         }
 }

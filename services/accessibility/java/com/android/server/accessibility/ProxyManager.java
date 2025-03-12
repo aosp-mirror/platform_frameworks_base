@@ -183,14 +183,12 @@ public class ProxyManager {
 
         synchronized (mLock) {
             mProxyA11yServiceConnections.put(displayId, connection);
-            if (Flags.proxyUseAppsOnVirtualDeviceListener()) {
-                if (mAppsOnVirtualDeviceListener == null) {
-                    mAppsOnVirtualDeviceListener = allRunningUids ->
-                            notifyProxyOfRunningAppsChange(allRunningUids);
-                    final VirtualDeviceManagerInternal localVdm = getLocalVdm();
-                    if (localVdm != null) {
-                        localVdm.registerAppsOnVirtualDeviceListener(mAppsOnVirtualDeviceListener);
-                    }
+            if (mAppsOnVirtualDeviceListener == null) {
+                mAppsOnVirtualDeviceListener = allRunningUids ->
+                        notifyProxyOfRunningAppsChange(allRunningUids);
+                final VirtualDeviceManagerInternal localVdm = getLocalVdm();
+                if (localVdm != null) {
+                    localVdm.registerAppsOnVirtualDeviceListener(mAppsOnVirtualDeviceListener);
                 }
             }
             if (mProxyA11yServiceConnections.size() == 1) {
@@ -214,7 +212,7 @@ public class ProxyManager {
                 mA11yInputFilter.disableFeaturesForDisplayIfInstalled(displayId);
             }
         });
-        connection.initializeServiceInterface(client);
+        connection.initializeClient(client);
     }
 
     private void registerVirtualDeviceListener() {
@@ -331,14 +329,12 @@ public class ProxyManager {
         // device.
         if (!isProxyedDeviceId(deviceId)) {
             synchronized (mLock) {
-                if (Flags.proxyUseAppsOnVirtualDeviceListener()) {
-                    if (mProxyA11yServiceConnections.size() == 0) {
-                        final VirtualDeviceManagerInternal localVdm = getLocalVdm();
-                        if (localVdm != null && mAppsOnVirtualDeviceListener != null) {
-                            localVdm.unregisterAppsOnVirtualDeviceListener(
-                                    mAppsOnVirtualDeviceListener);
-                            mAppsOnVirtualDeviceListener = null;
-                        }
+                if (mProxyA11yServiceConnections.size() == 0) {
+                    final VirtualDeviceManagerInternal localVdm = getLocalVdm();
+                    if (localVdm != null && mAppsOnVirtualDeviceListener != null) {
+                        localVdm.unregisterAppsOnVirtualDeviceListener(
+                                mAppsOnVirtualDeviceListener);
+                        mAppsOnVirtualDeviceListener = null;
                     }
                 }
                 mSystemSupport.removeDeviceIdLocked(deviceId);
@@ -561,8 +557,8 @@ public class ProxyManager {
             final ProxyAccessibilityServiceConnection proxy =
                     mProxyA11yServiceConnections.valueAt(i);
             if (proxy != null && proxy.getDeviceId() == deviceId) {
-                final IBinder proxyBinder = proxy.mService;
-                final IAccessibilityServiceClient proxyInterface = proxy.mServiceInterface;
+                final IBinder proxyBinder = proxy.mClientBinder;
+                final IAccessibilityServiceClient proxyInterface = proxy.mClient;
                 if ((proxyBinder != null) && (proxyInterface != null)) {
                     interfaces.add(proxyInterface);
                 }
@@ -671,8 +667,7 @@ public class ProxyManager {
                     + getLastSentStateLocked(deviceId));
             Slog.v(LOG_TAG, "force update: " + forceUpdate);
         }
-        if ((getLastSentStateLocked(deviceId)) != proxyState
-                || (Flags.proxyUseAppsOnVirtualDeviceListener() && forceUpdate)) {
+        if ((getLastSentStateLocked(deviceId)) != proxyState || forceUpdate) {
             setLastStateLocked(deviceId, proxyState);
             mMainHandler.post(() -> {
                 synchronized (mLock) {
@@ -873,33 +868,22 @@ public class ProxyManager {
         for (int i = 0; i < clients.getRegisteredCallbackCount(); i++) {
             final AccessibilityManagerService.Client client =
                     ((AccessibilityManagerService.Client) clients.getRegisteredCallbackCookie(i));
-            if (Flags.proxyUseAppsOnVirtualDeviceListener()) {
-                if (deviceId == DEVICE_ID_DEFAULT || deviceId == DEVICE_ID_INVALID) {
-                    continue;
+            if (deviceId == DEVICE_ID_DEFAULT || deviceId == DEVICE_ID_INVALID) {
+                continue;
+            }
+            boolean uidBelongsToDevice =
+                    localVdm.getDeviceIdsForUid(client.mUid).contains(deviceId);
+            if (client.mDeviceId != deviceId && uidBelongsToDevice) {
+                if (DEBUG) {
+                    Slog.v(LOG_TAG, "Packages moved to device id " + deviceId + " are "
+                            + Arrays.toString(client.mPackageNames));
                 }
-                boolean uidBelongsToDevice =
-                        localVdm.getDeviceIdsForUid(client.mUid).contains(deviceId);
-                if (client.mDeviceId != deviceId && uidBelongsToDevice) {
-                    if (DEBUG) {
-                        Slog.v(LOG_TAG, "Packages moved to device id " + deviceId + " are "
-                                + Arrays.toString(client.mPackageNames));
-                    }
-                    client.mDeviceId = deviceId;
-                } else if (client.mDeviceId == deviceId && !uidBelongsToDevice) {
-                    client.mDeviceId = DEVICE_ID_DEFAULT;
-                    if (DEBUG) {
-                        Slog.v(LOG_TAG, "Packages moved to the default device from device id "
-                                + deviceId + " are " + Arrays.toString(client.mPackageNames));
-                    }
-                }
-            } else {
-                if (deviceId != DEVICE_ID_DEFAULT && deviceId != DEVICE_ID_INVALID
-                    && localVdm.getDeviceIdsForUid(client.mUid).contains(deviceId)) {
-                    if (DEBUG) {
-                        Slog.v(LOG_TAG, "Packages moved to device id " + deviceId + " are "
-                                + Arrays.toString(client.mPackageNames));
-                    }
-                    client.mDeviceId = deviceId;
+                client.mDeviceId = deviceId;
+            } else if (client.mDeviceId == deviceId && !uidBelongsToDevice) {
+                client.mDeviceId = DEVICE_ID_DEFAULT;
+                if (DEBUG) {
+                    Slog.v(LOG_TAG, "Packages moved to the default device from device id "
+                            + deviceId + " are " + Arrays.toString(client.mPackageNames));
                 }
             }
         }

@@ -16,6 +16,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
@@ -28,9 +29,12 @@ import android.annotation.Nullable;
 import android.gui.StalledTransactionInfo;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.Trace;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.InputApplicationHandle;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -63,6 +67,12 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     // Initially false, so that input does not get dispatched until boot is finished at
     // which point the ActivityManager will enable dispatching.
     private boolean mInputDispatchEnabled;
+
+    /**
+     * The last input devices info which may affect display configuration. This is a quick lookup
+     * to detect interested changes without entering WM lock.
+     */
+    private SparseIntArray mLastInputConfigurationSources;
 
     public InputManagerCallback(WindowManagerService service) {
         mService = service;
@@ -117,8 +127,18 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     /** Notifies that the input device configuration has changed. */
     @Override
     public void notifyConfigurationChanged() {
-        synchronized (mService.mGlobalLock) {
-            mService.mRoot.forAllDisplays(DisplayContent::sendNewConfiguration);
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "notifyConfigurationChanged");
+        final boolean changed = !com.android.window.flags.Flags.filterIrrelevantInputDeviceChange()
+                || updateLastInputConfigurationSources();
+
+        // Even if the input devices are not changed, there could be other pending changes
+        // during booting. It's fine to apply earlier.
+        if (changed || !mService.mDisplayEnabled) {
+            synchronized (mService.mGlobalLock) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "inputDeviceConfigChanged");
+                mService.mRoot.forAllDisplays(DisplayContent::sendNewConfiguration);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
         }
 
         synchronized (mInputDevicesReadyMonitor) {
@@ -127,6 +147,40 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                 mInputDevicesReadyMonitor.notifyAll();
             }
         }
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    /** Returns {@code true} if the change of input devices may affect display configuration. */
+    private boolean updateLastInputConfigurationSources() {
+        final InputDevice[] devices = mService.mInputManager.getInputDevices();
+        final SparseIntArray newSources = new SparseIntArray(8);
+        final SparseIntArray lastSources = mLastInputConfigurationSources;
+        boolean changed = lastSources == null;
+        for (InputDevice device : devices) {
+            final String descriptor = device.getDescriptor();
+            if (descriptor == null || device.isVirtual()) {
+                continue;
+            }
+            final int key = descriptor.hashCode();
+            // The interested attributes from DisplayContent#computeScreenConfiguration.
+            int newSourceHash = device.getSources();
+            newSourceHash = newSourceHash * 31 + device.getKeyboardType();
+            newSourceHash = newSourceHash * 31 + device.getAssociatedDisplayId();
+            newSourceHash = newSourceHash * 31 + (device.isExternal() ? 1 : 0);
+            newSourceHash = newSourceHash * 31 + (device.isEnabled() ? 1 : 0);
+            newSources.put(key, newSourceHash);
+            if (lastSources != null && !changed) {
+                final int lastSource = lastSources.get(key, 0 /* valueIfKeyNotFound */);
+                if (lastSource != newSourceHash) {
+                    changed = true;
+                }
+            }
+        }
+        if (lastSources != null && lastSources.size() != newSources.size()) {
+            changed = true;
+        }
+        mLastInputConfigurationSources = newSources;
+        return changed;
     }
 
     /** Notifies that the pointer location configuration has changed. */
@@ -188,9 +242,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      * the application did not handle.
      */
     @Override
-    public KeyEvent dispatchUnhandledKey(
-            IBinder focusedToken, KeyEvent event, int policyFlags) {
-        return mService.mPolicy.dispatchUnhandledKey(focusedToken, event, policyFlags);
+    public boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken) {
+        return mService.mPolicy.interceptUnhandledKey(event, focusedToken);
     }
 
     /** Callback to get pointer layer. */

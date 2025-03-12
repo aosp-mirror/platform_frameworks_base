@@ -47,6 +47,9 @@ import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.MediaQualityStatus;
+import android.telephony.satellite.NtnSignalStrength;
+import android.telephony.satellite.SatelliteStateChangeListener;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -55,12 +58,14 @@ import com.android.internal.listeners.ListenerExecutor;
 import com.android.internal.telephony.ICarrierConfigChangeListener;
 import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
+import com.android.internal.telephony.ISatelliteStateChangeListener;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.server.telecom.flags.Flags;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -114,7 +119,6 @@ public class TelephonyRegistryManager {
     private final ConcurrentHashMap<CarrierConfigManager.CarrierConfigChangeListener,
                 ICarrierConfigChangeListener>
             mCarrierConfigChangeListenerMap = new ConcurrentHashMap<>();
-
 
     /** @hide **/
     public TelephonyRegistryManager(@NonNull Context context) {
@@ -1119,6 +1123,72 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Notify external listeners that carrier roaming non-terrestrial available services changed.
+     * @param availableServices The list of the supported services.
+     * @hide
+     */
+    public void notifyCarrierRoamingNtnAvailableServicesChanged(
+            int subId, @NetworkRegistrationInfo.ServiceType int[] availableServices) {
+        try {
+            sRegistry.notifyCarrierRoamingNtnAvailableServicesChanged(subId, availableServices);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify external listeners that carrier roaming non-terrestrial network
+     * signal strength changed.
+     * @param subId subscription ID.
+     * @param ntnSignalStrength non-terrestrial network signal strength.
+     * @hide
+     */
+    public final void notifyCarrierRoamingNtnSignalStrengthChanged(int subId,
+            @NonNull NtnSignalStrength ntnSignalStrength) {
+        try {
+            sRegistry.notifyCarrierRoamingNtnSignalStrengthChanged(subId, ntnSignalStrength);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+   /**
+     * Notify external listeners that the radio security algorithms have changed.
+     * @param slotIndex for the phone object that got updated
+     * @param subId for which the security algorithm changed
+     * @param update details of the security algorithm update
+     * @hide
+     */
+    public void notifySecurityAlgorithmsChanged(
+            int slotIndex, int subId, SecurityAlgorithmUpdate update) {
+        try {
+            sRegistry.notifySecurityAlgorithmsChanged(slotIndex, subId, update);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify external listeners of a new cellular identifier disclosure change.
+     * @param slotIndex for the phone object that the disclosure applies to
+     * @param subId for which the disclosure applies to
+     * @param disclosure details of the identifier disclosure
+     * @hide
+     */
+    public void notifyCellularIdentifierDisclosedChanged(
+            int slotIndex, int subId, CellularIdentifierDisclosure disclosure) {
+        try {
+            sRegistry.notifyCellularIdentifierDisclosedChanged(slotIndex, subId, disclosure);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Processes potential event changes from the provided {@link TelephonyCallback}.
      *
      * @param telephonyCallback callback for monitoring callback changes to the telephony state.
@@ -1273,10 +1343,17 @@ public class TelephonyRegistryManager {
 
         if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED);
+            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED);
+            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED);
+            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED);
         }
 
-        if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
-            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED);
+        if (telephonyCallback instanceof TelephonyCallback.CellularIdentifierDisclosedListener) {
+            eventList.add(TelephonyCallback.EVENT_CELLULAR_IDENTIFIER_DISCLOSED_CHANGED);
+        }
+
+        if (telephonyCallback instanceof TelephonyCallback.SecurityAlgorithmsListener) {
+            eventList.add(TelephonyCallback.EVENT_SECURITY_ALGORITHMS_CHANGED);
         }
 
         return eventList;
@@ -1469,6 +1546,111 @@ public class TelephonyRegistryManager {
             @NonNull TelephonyCallback callback, boolean notifyNow) {
         listenFromCallback(false, false, subId,
                 pkgName, attributionTag, callback, new int[0], notifyNow);
+    }
+
+    @NonNull
+    @GuardedBy("sSatelliteStateChangeListeners")
+    private static final Map<SatelliteStateChangeListener,
+                WeakReference<SatelliteStateChangeListenerWrapper>>
+            sSatelliteStateChangeListeners = new ArrayMap<>();
+
+    /**
+     * Register a {@link SatelliteStateChangeListener} to receive notification when Satellite state
+     * has changed.
+     *
+     * @param executor The {@link Executor} where the {@code listener} will be invoked
+     * @param listener The listener to monitor the satellite state change
+     * @hide
+     */
+    public void addSatelliteStateChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull SatelliteStateChangeListener listener) {
+        if (listener == null || executor == null) {
+            throw new IllegalArgumentException("Listener and executor must be non-null");
+        }
+
+        synchronized (sSatelliteStateChangeListeners) {
+            WeakReference<SatelliteStateChangeListenerWrapper> existing =
+                    sSatelliteStateChangeListeners.get(listener);
+            if (existing != null && existing.get() != null) {
+                Log.d(TAG, "addSatelliteStateChangeListener: listener already registered");
+                return;
+            }
+            SatelliteStateChangeListenerWrapper wrapper =
+                    new SatelliteStateChangeListenerWrapper(executor, listener);
+            try {
+                sRegistry.addSatelliteStateChangeListener(
+                        wrapper,
+                        mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
+                sSatelliteStateChangeListeners.put(listener, new WeakReference<>(wrapper));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Unregister a {@link SatelliteStateChangeListener} to stop receiving notification when
+     * satellite state has changed.
+     *
+     * @param listener The listener previously registered with addSatelliteStateChangeListener.
+     * @hide
+     */
+    public void removeSatelliteStateChangeListener(@NonNull SatelliteStateChangeListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must be non-null");
+        }
+
+        synchronized (sSatelliteStateChangeListeners) {
+            WeakReference<SatelliteStateChangeListenerWrapper> ref =
+                    sSatelliteStateChangeListeners.get(listener);
+            if (ref == null) return;
+            SatelliteStateChangeListenerWrapper wrapper = ref.get();
+            if (wrapper == null) return;
+            try {
+                sRegistry.removeSatelliteStateChangeListener(wrapper, mContext.getOpPackageName());
+                sSatelliteStateChangeListeners.remove(listener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Notify the registrants that the satellite state has changed.
+     *
+     * @param isEnabled True if the satellite modem is enabled, false otherwise
+     * @hide
+     */
+    public void notifySatelliteStateChanged(boolean isEnabled) {
+        try {
+            sRegistry.notifySatelliteStateChanged(isEnabled);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    private static class SatelliteStateChangeListenerWrapper extends
+            ISatelliteStateChangeListener.Stub implements ListenerExecutor {
+        @NonNull private final WeakReference<SatelliteStateChangeListener> mListener;
+        @NonNull private final Executor mExecutor;
+
+        SatelliteStateChangeListenerWrapper(@NonNull Executor executor,
+                @NonNull SatelliteStateChangeListener listener) {
+            mExecutor = executor;
+            mListener = new WeakReference<>(listener);
+        }
+
+        @Override
+        public void onSatelliteEnabledStateChanged(boolean isEnabled) {
+            Binder.withCleanCallingIdentity(
+                    () ->
+                            executeSafely(
+                                    mExecutor,
+                                    mListener::get,
+                                    sscl -> sscl.onEnabledStateChanged(isEnabled)));
+        }
     }
 
     private static class CarrierPrivilegesCallbackWrapper extends ICarrierPrivilegesCallback.Stub
@@ -1721,13 +1903,36 @@ public class TelephonyRegistryManager {
      * @param subId Sender subscription ID.
      * @param type for callback mode entry.
      *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     * @param durationMillis is the number of milliseconds remaining in the emergency callback
+     *                        mode.
      * @hide
      */
-    public void notifyCallBackModeStarted(int phoneId, int subId,
-            @TelephonyManager.EmergencyCallbackModeType int type) {
+    public void notifyCallbackModeStarted(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis) {
         try {
-            Log.d(TAG, "notifyCallBackModeStarted:type=" + type);
-            sRegistry.notifyCallbackModeStarted(phoneId, subId, type);
+            Log.d(TAG, "notifyCallbackModeStarted:type=" + type);
+            sRegistry.notifyCallbackModeStarted(phoneId, subId, type, durationMillis);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify Callback Mode has been restarted.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param type for callback mode entry.
+     *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     * @param durationMillis is the number of milliseconds remaining in the emergency callback
+     *                        mode.
+     * @hide
+     */
+    public void notifyCallbackModeRestarted(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis) {
+        try {
+            Log.d(TAG, "notifyCallbackModeRestarted:type=" + type);
+            sRegistry.notifyCallbackModeRestarted(phoneId, subId, type, durationMillis);
         } catch (RemoteException ex) {
             // system process is dead
             throw ex.rethrowFromSystemServer();

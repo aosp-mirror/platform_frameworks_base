@@ -843,6 +843,13 @@ public class ContextWrapper extends Context {
         mBase.unregisterReceiver(receiver);
     }
 
+    /** @hide */
+    @Override
+    @NonNull
+    public List<IntentFilter> getRegisteredIntentFilters(@NonNull BroadcastReceiver receiver) {
+        return mBase.getRegisteredIntentFilters(receiver);
+    }
+
     @Override
     public @Nullable ComponentName startService(Intent service) {
         return mBase.startService(service);

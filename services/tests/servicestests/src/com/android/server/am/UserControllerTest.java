@@ -181,12 +181,14 @@ public class UserControllerTest {
             Intent.ACTION_USER_STARTING);
 
     private static final Set<Integer> START_FOREGROUND_USER_MESSAGE_CODES = newHashSet(
+            0, // for startUserInternalOnHandler
             REPORT_USER_SWITCH_MSG,
             USER_SWITCH_TIMEOUT_MSG,
             USER_START_MSG,
             USER_CURRENT_MSG);
 
     private static final Set<Integer> START_BACKGROUND_USER_MESSAGE_CODES = newHashSet(
+            0, // for startUserInternalOnHandler
             USER_START_MSG,
             REPORT_LOCKED_BOOT_COMPLETE_MSG);
 
@@ -374,7 +376,7 @@ public class UserControllerTest {
         // and the cascade effect goes on...). In fact, a better approach would to not assert the
         // binder calls, but their side effects (in this case, that the user is stopped right away)
         assertWithMessage("wrong binder message calls").that(mInjector.mHandler.getMessageCodes())
-                .containsExactly(USER_START_MSG);
+                .containsExactly(/* for startUserInternalOnHandler */ 0, USER_START_MSG);
     }
 
     private void startUserAssertions(

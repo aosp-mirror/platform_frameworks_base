@@ -199,7 +199,7 @@ public class PromptInfo implements Parcelable {
         } else if (mContentView != null && isContentViewMoreOptionsButtonUsed()) {
             return true;
         } else if (Flags.mandatoryBiometrics()
-                && (mAuthenticators & BiometricManager.Authenticators.MANDATORY_BIOMETRICS)
+                && (mAuthenticators & BiometricManager.Authenticators.IDENTITY_CHECK)
                 != 0) {
             return true;
         }
@@ -217,7 +217,7 @@ public class PromptInfo implements Parcelable {
      * Returns if the PromptContentViewWithMoreOptionsButton is set.
      */
     public boolean isContentViewMoreOptionsButtonUsed() {
-        return Flags.customBiometricPrompt() && mContentView != null
+        return mContentView != null
                 && mContentView instanceof PromptContentViewWithMoreOptionsButton;
     }
 

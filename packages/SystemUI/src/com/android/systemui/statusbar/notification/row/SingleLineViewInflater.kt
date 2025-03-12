@@ -412,10 +412,7 @@ internal object SingleLineViewInflater {
 
         traceSection("SingleLineViewInflater#inflateSingleLineView") {
             val inflater = LayoutInflater.from(context)
-            val layoutRes: Int =
-                if (isConversation)
-                    com.android.systemui.res.R.layout.hybrid_conversation_notification
-                else com.android.systemui.res.R.layout.hybrid_notification
+            val layoutRes: Int = HybridNotificationView.getLayoutResource(isConversation)
             view = inflater.inflate(layoutRes, /* root= */ null) as HybridNotificationView
             if (view == null) {
                 Log.wtf(TAG, "Single-line view inflation result is null for entry: ${entry.logKey}")

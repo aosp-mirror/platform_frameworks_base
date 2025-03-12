@@ -18,6 +18,7 @@ package com.android.internal.pm.pkg.component;
 
 import static com.android.internal.pm.pkg.parsing.ParsingUtils.NOT_SET;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IntentFilter;
@@ -39,7 +40,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /** @hide */
-class ParsedMainComponentUtils {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public class ParsedMainComponentUtils {
 
     private static final String TAG = ParsingUtils.TAG;
 
@@ -47,10 +49,11 @@ class ParsedMainComponentUtils {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     static <Component extends ParsedMainComponentImpl> ParseResult<Component> parseMainComponent(
             Component component, String tag, String[] separateProcesses, ParsingPackage pkg,
-            TypedArray array, int flags, boolean useRoundIcon,  @Nullable String defaultSplitName,
+            TypedArray array, int flags, boolean useRoundIcon, @Nullable String defaultSplitName,
             @NonNull ParseInput input, int bannerAttr, int descriptionAttr, int directBootAwareAttr,
             int enabledAttr, int iconAttr, int labelAttr, int logoAttr, int nameAttr,
-            int processAttr, int roundIconAttr, int splitNameAttr, int attributionTagsAttr) {
+            int processAttr, int roundIconAttr, int splitNameAttr, int attributionTagsAttr,
+            int intentMatchingFlagsAttr) {
         ParseResult<Component> result = ParsedComponentUtils.parseComponent(component, tag, pkg,
                 array, useRoundIcon, input, bannerAttr, descriptionAttr, iconAttr, labelAttr,
                 logoAttr, nameAttr, roundIconAttr);
@@ -107,6 +110,12 @@ class ParsedMainComponentUtils {
             }
         }
 
+        if (android.security.Flags.enableIntentMatchingFlags()) {
+            int resolvedFlags = resolveIntentMatchingFlags(
+                        pkg.getIntentMatchingFlags(), array.getInt(intentMatchingFlagsAttr, 0));
+            component.setIntentMatchingFlags(resolvedFlags);
+        }
+
         return input.success(component);
     }
 
@@ -147,4 +156,21 @@ class ParsedMainComponentUtils {
         return input.success(intentResult.getResult());
     }
 
+    /**
+     * Resolves intent matching flags from the application and a component, prioritizing the
+     * component's flags.
+     *
+     * @param applicationFlags The flag value from the "application" tag.
+     * @param componentFlags   The flag value from the "component" tags.
+     * @return The resolved intent matching flags.
+     */
+    @FlaggedApi(android.security.Flags.FLAG_ENABLE_INTENT_MATCHING_FLAGS)
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static int resolveIntentMatchingFlags(int applicationFlags, int componentFlags) {
+        if (componentFlags == 0) {
+            return applicationFlags;
+        } else {
+            return componentFlags;
+        }
+    }
 }

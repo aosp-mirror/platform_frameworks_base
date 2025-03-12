@@ -32,6 +32,27 @@ android_test {
     test_suites: ["device-tests"],
 }
 
+// Run just ApplicationSharedMemoryTest with ABI override for 32 bits.
+// This is to test that on systems that support multi-ABI,
+// ApplicationSharedMemory works in app processes launched with a different ABI
+// than that of the system processes.
+android_test {
+    name: "ApplicationSharedMemoryTest32",
+    team: "trendy_team_system_performance",
+    srcs: ["src/com/android/internal/os/ApplicationSharedMemoryTest.java"],
+    libs: ["android.test.runner.stubs.system"],
+    static_libs: [
+        "junit",
+        "androidx.test.rules",
+        "platform-test-annotations",
+    ],
+    manifest: "ApplicationSharedMemoryTest32/AndroidManifest.xml",
+    test_config: "ApplicationSharedMemoryTest32/AndroidTest.xml",
+    certificate: "platform",
+    platform_apis: true,
+    test_suites: ["device-tests"],
+}
+
 android_ravenwood_test {
     name: "InternalTestsRavenwood",
     static_libs: [
@@ -44,4 +65,10 @@ android_ravenwood_test {
         "src/com/android/internal/util/ParcellingTests.java",
     ],
     auto_gen_config: true,
+}
+
+java_test_helper_library {
+    name: "ApplicationSharedMemoryTestRule",
+    srcs: ["src/com/android/internal/os/ApplicationSharedMemoryTestRule.java"],
+    static_libs: ["junit"],
 }

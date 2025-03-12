@@ -16,7 +16,7 @@
 
 package com.android.server.companion.association;
 
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 
 import static com.android.internal.util.CollectionUtils.any;
@@ -107,7 +107,7 @@ public class DisassociationProcessor {
                     it -> deviceProfile.equals(it.getDeviceProfile()) && id != it.getId());
 
         final int packageProcessImportance = getPackageProcessImportance(userId, packageName);
-        if (packageProcessImportance <= IMPORTANCE_VISIBLE && deviceProfile != null
+        if (packageProcessImportance <= IMPORTANCE_FOREGROUND && deviceProfile != null
                 && !isRoleInUseByOtherAssociations) {
             // Need to remove the app from the list of role holders, but the process is visible
             // to the user at the moment, so we'll need to do it later.
@@ -238,12 +238,16 @@ public class DisassociationProcessor {
      */
     private class OnPackageVisibilityChangeListener implements
             ActivityManager.OnUidImportanceListener {
-
+        // This method is called when the importance of a uid (app) changes.
+        // We only care about changes where the app is moving to the background.
+        // (e.g., the app currently is not at the top of the screen that the user
+        // is interacting with.)
         @Override
         public void onUidImportance(int uid, int importance) {
-            if (importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE) {
-                // The lower the importance value the more "important" the process is.
-                // We are only interested when the process ceases to be visible.
+            // Higher importance values indicate the app is less important.
+            // We are only interested when the process importance level
+            // is greater than IMPORTANCE_FOREGROUND.
+            if (importance <= IMPORTANCE_FOREGROUND) {
                 return;
             }
 

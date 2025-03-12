@@ -28,7 +28,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.SparseArray;
@@ -217,19 +216,7 @@ public final class WebViewDelegate {
      * Returns whether WebView should run in multiprocess mode.
      */
     public boolean isMultiProcessEnabled() {
-        if (Flags.updateServiceV2()) {
-            return true;
-        } else if (Flags.updateServiceIpcWrapper()) {
-            // We don't want to support this method in the new wrapper because updateServiceV2 is
-            // intended to ship in the same release (or sooner). It's only possible to disable it
-            // with an obscure adb command, so just return true here too.
-            return true;
-        }
-        try {
-            return WebViewFactory.getUpdateService().isMultiProcessEnabled();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return true;
     }
 
     /**

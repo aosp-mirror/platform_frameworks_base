@@ -23,4 +23,6 @@ interface BcSmartspaceConfigPlugin {
     val isDefaultDateWeatherDisabled: Boolean
     /** Gets if Smartspace should use ViewPager2 */
     val isViewPager2Enabled: Boolean
+    /** Gets if card swipe event should be logged */
+    val isSwipeEventLoggingEnabled: Boolean
 }

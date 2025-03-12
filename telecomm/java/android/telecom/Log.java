@@ -68,7 +68,7 @@ public class Log {
     // Used to synchronize singleton logging lazy initialization
     private static final Object sSingletonSync = new Object();
     private static EventManager sEventManager;
-    private static SessionManager sSessionManager;
+    private static volatile SessionManager sSessionManager;
     private static Object sLock = null;
 
     /**
@@ -372,6 +372,23 @@ public class Log {
             synchronized (sSingletonSync) {
                 if (sSessionManager == null) {
                     sSessionManager = new SessionManager();
+                    return sSessionManager;
+                }
+            }
+        }
+        return sSessionManager;
+    }
+
+    @VisibleForTesting
+    public static SessionManager setSessionManager(Context context,
+            java.lang.Runnable cleanSessionRunnable) {
+        // Checking for null again outside of synchronization because we only need to synchronize
+        // during the lazy loading of the session logger. We don't need to synchronize elsewhere.
+        if (sSessionManager == null) {
+            synchronized (sSingletonSync) {
+                if (sSessionManager == null) {
+                    sSessionManager = new SessionManager(cleanSessionRunnable);
+                    sSessionManager.setContext(context);
                     return sSessionManager;
                 }
             }

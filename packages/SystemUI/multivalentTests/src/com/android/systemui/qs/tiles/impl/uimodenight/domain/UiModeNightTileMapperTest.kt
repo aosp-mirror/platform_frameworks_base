@@ -49,7 +49,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                     addOverride(R.drawable.qs_light_dark_theme_icon_on, TestStubDrawable())
                 }
                 .resources,
-            context.theme
+            context.theme,
         )
     }
 
@@ -69,7 +69,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
         expandedAccessibilityClass: KClass<out View>? = Switch::class,
     ): QSTileState {
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -79,7 +79,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
             stateDescription,
             sideViewIcon,
             enabledState,
-            expandedAccessibilityClass?.qualifiedName
+            expandedAccessibilityClass?.qualifiedName,
         )
     }
 
@@ -98,7 +98,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
             createUiNightModeTileState(
                 activationState = QSTileState.ActivationState.UNAVAILABLE,
                 secondaryLabel = expectedSecondaryLabel,
-                contentDescription = expectedContentDescription
+                contentDescription = expectedContentDescription,
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -118,7 +118,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
             createUiNightModeTileState(
                 activationState = QSTileState.ActivationState.UNAVAILABLE,
                 secondaryLabel = expectedSecondaryLabel,
-                contentDescription = expectedContentDescription
+                contentDescription = expectedContentDescription,
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -136,7 +136,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 activationState = QSTileState.ActivationState.INACTIVE,
                 label = expectedLabel,
                 secondaryLabel = expectedSecondaryLabel,
-                contentDescription = expectedLabel
+                contentDescription = expectedLabel,
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -155,7 +155,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 label = expectedLabel,
                 secondaryLabel = expectedSecondaryLabel,
                 activationState = QSTileState.ActivationState.ACTIVE,
-                contentDescription = expectedLabel
+                contentDescription = expectedLabel,
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -174,7 +174,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 label = expectedLabel,
                 secondaryLabel = expectedSecondaryLabel,
                 activationState = QSTileState.ActivationState.ACTIVE,
-                contentDescription = expectedLabel
+                contentDescription = expectedLabel,
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -193,7 +193,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 label = expectedLabel,
                 secondaryLabel = expectedSecondaryLabel,
                 activationState = QSTileState.ActivationState.INACTIVE,
-                contentDescription = expectedLabel
+                contentDescription = expectedLabel,
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -214,7 +214,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 activationState = QSTileState.ActivationState.ACTIVE,
                 contentDescription = expectedLabel,
                 supportedActions =
-                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -237,7 +237,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 secondaryLabel = expectedSecondaryLabel,
                 activationState = QSTileState.ActivationState.UNAVAILABLE,
                 contentDescription = expectedContentDescription,
-                supportedActions = setOf(QSTileState.UserAction.LONG_CLICK)
+                supportedActions = setOf(QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -258,7 +258,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 activationState = QSTileState.ActivationState.INACTIVE,
                 contentDescription = expectedLabel,
                 supportedActions =
-                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -279,7 +279,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 secondaryLabel = expectedSecondaryLabel,
                 activationState = QSTileState.ActivationState.UNAVAILABLE,
                 contentDescription = TextUtils.concat(expectedLabel, ", ", expectedSecondaryLabel),
-                supportedActions = setOf(QSTileState.UserAction.LONG_CLICK)
+                supportedActions = setOf(QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -300,7 +300,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 secondaryLabel = expectedSecondaryLabel,
                 activationState = QSTileState.ActivationState.UNAVAILABLE,
                 contentDescription = TextUtils.concat(expectedLabel, ", ", expectedSecondaryLabel),
-                supportedActions = setOf(QSTileState.UserAction.LONG_CLICK)
+                supportedActions = setOf(QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -312,7 +312,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 nightMode = true,
                 powerSave = false,
                 isLocationEnabled = true,
-                uiMode = UiModeManager.MODE_NIGHT_AUTO
+                uiMode = UiModeManager.MODE_NIGHT_AUTO,
             )
 
         val actualState: QSTileState = mapper.map(qsTileConfig, inputModel)
@@ -328,7 +328,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 activationState = QSTileState.ActivationState.ACTIVE,
                 contentDescription = TextUtils.concat(expectedLabel, ", ", expectedSecondaryLabel),
                 supportedActions =
-                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -340,7 +340,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 nightMode = false,
                 powerSave = false,
                 isLocationEnabled = true,
-                uiMode = UiModeManager.MODE_NIGHT_AUTO
+                uiMode = UiModeManager.MODE_NIGHT_AUTO,
             )
 
         val actualState: QSTileState = mapper.map(qsTileConfig, inputModel)
@@ -356,7 +356,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 activationState = QSTileState.ActivationState.INACTIVE,
                 contentDescription = TextUtils.concat(expectedLabel, ", ", expectedSecondaryLabel),
                 supportedActions =
-                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -379,7 +379,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 activationState = QSTileState.ActivationState.ACTIVE,
                 contentDescription = expectedLabel,
                 supportedActions =
-                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -401,7 +401,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 activationState = QSTileState.ActivationState.INACTIVE,
                 contentDescription = expectedLabel,
                 supportedActions =
-                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -413,7 +413,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 nightMode = false,
                 powerSave = false,
                 uiMode = UiModeManager.MODE_NIGHT_CUSTOM,
-                nighModeCustomType = UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN
+                nighModeCustomType = UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN,
             )
 
         val actualState: QSTileState = mapper.map(qsTileConfig, inputModel)
@@ -428,7 +428,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 activationState = QSTileState.ActivationState.INACTIVE,
                 contentDescription = expectedLabel,
                 supportedActions =
-                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -440,7 +440,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 nightMode = true,
                 powerSave = false,
                 uiMode = UiModeManager.MODE_NIGHT_CUSTOM,
-                nighModeCustomType = UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN
+                nighModeCustomType = UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN,
             )
 
         val actualState: QSTileState = mapper.map(qsTileConfig, inputModel)
@@ -455,7 +455,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 activationState = QSTileState.ActivationState.ACTIVE,
                 contentDescription = expectedLabel,
                 supportedActions =
-                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                    setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }
@@ -467,7 +467,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 nightMode = false,
                 powerSave = true,
                 uiMode = UiModeManager.MODE_NIGHT_CUSTOM,
-                nighModeCustomType = UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN
+                nighModeCustomType = UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN,
             )
 
         val actualState: QSTileState = mapper.map(qsTileConfig, inputModel)
@@ -484,7 +484,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
                 secondaryLabel = expectedSecondaryLabel,
                 activationState = QSTileState.ActivationState.UNAVAILABLE,
                 contentDescription = expectedContentDescription,
-                supportedActions = setOf(QSTileState.UserAction.LONG_CLICK)
+                supportedActions = setOf(QSTileState.UserAction.LONG_CLICK),
             )
         QSTileStateSubject.assertThat(actualState).isEqualTo(expectedState)
     }

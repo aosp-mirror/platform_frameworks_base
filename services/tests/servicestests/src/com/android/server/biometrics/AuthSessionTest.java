@@ -69,6 +69,7 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.security.KeyStoreAuthorization;
 import android.testing.TestableContext;
@@ -119,6 +120,7 @@ public class AuthSessionTest {
     @Mock private AuthSession.ClientDeathReceiver mClientDeathReceiver;
     @Mock private BiometricFrameworkStatsLogger mBiometricFrameworkStatsLogger;
     @Mock private BiometricCameraManager mBiometricCameraManager;
+    @Mock private UserManager mUserManager;
     @Mock private BiometricManager mBiometricManager;
 
     private Random mRandom;
@@ -846,7 +848,8 @@ public class AuthSessionTest {
                 TEST_PACKAGE,
                 checkDevicePolicyManager,
                 mContext,
-                mBiometricCameraManager);
+                mBiometricCameraManager,
+                mUserManager);
     }
 
     private AuthSession createAuthSession(List<BiometricSensor> sensors,

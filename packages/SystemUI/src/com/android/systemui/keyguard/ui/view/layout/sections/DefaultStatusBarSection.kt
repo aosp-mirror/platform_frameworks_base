@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.ShadeViewStateProvider
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView
 import com.android.systemui.util.Utils
@@ -40,7 +41,7 @@ import javax.inject.Inject
 class DefaultStatusBarSection
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val notificationPanelView: NotificationPanelView,
     private val keyguardStatusBarViewComponentFactory: KeyguardStatusBarViewComponent.Factory,
 ) : KeyguardSection() {

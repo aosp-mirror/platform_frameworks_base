@@ -18,10 +18,15 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE;
 import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
 import static android.provider.Settings.Global.HEADS_UP_ON;
 
-import static com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR;
 import static com.android.systemui.Flags.FLAG_KEYBOARD_SHORTCUT_HELPER_REWRITE;
 import static com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION;
 import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
@@ -30,8 +35,6 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU;
 
 import static com.google.common.truth.Truth.assertThat;
-
-import static kotlinx.coroutines.flow.FlowKt.flowOf;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -50,6 +53,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import static java.util.Collections.emptySet;
+
+import static kotlinx.coroutines.flow.FlowKt.flowOf;
 
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
@@ -124,7 +129,6 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.notetask.NoteTaskController;
@@ -134,6 +138,7 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scene.domain.startable.ScrimStartable;
@@ -151,6 +156,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
+import com.android.systemui.shade.StatusBarLongPressGestureDetector;
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyboardShortcutListSearch;
@@ -168,12 +174,15 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
+import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.AvalancheProvider;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
@@ -185,14 +194,16 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent;
+import com.android.systemui.statusbar.pipeline.shared.ui.composable.StatusBarRootFactory;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.WallpaperController;
@@ -207,10 +218,6 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
-import dagger.Lazy;
-
-import kotlinx.coroutines.test.TestScope;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -221,9 +228,14 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Provider;
+
+import dagger.Lazy;
+import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -231,8 +243,22 @@ import javax.inject.Provider;
 @EnableFlags(FLAG_LIGHT_REVEAL_MIGRATION)
 public class CentralSurfacesImplTest extends SysuiTestCase {
 
-    private static final int FOLD_STATE_FOLDED = 0;
-    private static final int FOLD_STATE_UNFOLDED = 1;
+    private static final DeviceState FOLD_STATE_FOLDED = new DeviceState(
+            new DeviceState.Configuration.Builder(0 /* identifier */, "FOLDED" /* name */)
+                    .setSystemProperties(
+                            Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                                    PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP))
+                    .setPhysicalProperties(
+                            Set.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED))
+                    .build());
+    private static final DeviceState FOLD_STATE_UNFOLDED = new DeviceState(
+            new DeviceState.Configuration.Builder(1 /* identifier */, "UNFOLDED" /* name */)
+                    .setSystemProperties(
+                            Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+                                    PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE))
+                    .setPhysicalProperties(
+                            Set.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN))
+                    .build());
 
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
 
@@ -257,7 +283,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private IStatusBarService mBarService;
     @Mock private IDreamManager mDreamManager;
-    @Mock private LightRevealScrimViewModel mLightRevealScrimViewModel;
     @Mock private LightRevealScrim mLightRevealScrim;
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
@@ -291,6 +316,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private AutoHideController mAutoHideController;
     @Mock private StatusBarWindowController mStatusBarWindowController;
+    @Mock private StatusBarWindowControllerStore mStatusBarWindowControllerStore;
     @Mock private Provider<CollapsedStatusBarFragment> mCollapsedStatusBarFragmentProvider;
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock private Bubbles mBubbles;
@@ -308,7 +334,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private CentralSurfacesCommandQueueCallbacks mCentralSurfacesCommandQueueCallbacks;
     @Mock private PluginManager mPluginManager;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
-    @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock private ShadeTouchableRegionManager mShadeTouchableRegionManager;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
@@ -346,6 +372,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
     @Mock private NotificationSettingsInteractor mNotificationSettingsInteractor;
     @Mock private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
+    @Mock private StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
@@ -361,6 +388,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor =
             mKosmos.getBrightnessMirrorShowingInteractor();
+
+    private final StatusBarModePerDisplayRepository mStatusBarModePerDisplayRepository =
+            mKosmos.getStatusBarModePerDisplayRepository();
     private ScrimController mScrimController;
 
     @Before
@@ -380,6 +410,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFakeGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
 
         when(mBubbles.canShowBubbleNotification()).thenReturn(true);
+
+        when(mStatusBarWindowControllerStore.getDefaultDisplay())
+                .thenReturn(mStatusBarWindowController);
 
         mVisualInterruptionDecisionProvider =
                 VisualInterruptionDecisionProviderTestUtil.INSTANCE.createProviderByFlag(
@@ -422,6 +455,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         when(mPowerManagerService.isInteractive()).thenReturn(true);
+        when(mDeviceStateManager.getSupportedDeviceStates())
+                .thenReturn(List.of(FOLD_STATE_FOLDED, FOLD_STATE_UNFOLDED));
 
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
@@ -463,7 +498,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                     mKeyguardStateController,
                     mStatusBarStateController,
                     mStatusBarKeyguardViewManager,
-                    mStatusBarWindowController,
+                    mStatusBarWindowControllerStore,
                     mDeviceProvisionedController,
                     mNotificationShadeWindowController,
                     0,
@@ -475,7 +510,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         }
         mShadeController.setNotificationPresenter(mNotificationPresenter);
 
-        when(mOperatorNameViewControllerFactory.create(any()))
+        when(mOperatorNameViewControllerFactory.create(any(), any()))
                 .thenReturn(mOperatorNameViewController);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mUserTracker.getUserHandle()).thenReturn(
@@ -506,9 +541,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mAutoHideController,
                 new StatusBarInitializerImpl(
                         mStatusBarWindowController,
+                        mStatusBarModePerDisplayRepository,
                         mCollapsedStatusBarFragmentProvider,
+                        mock(StatusBarRootFactory.class),
+                        mock(HomeStatusBarComponent.Factory.class),
                         emptySet()),
-                mStatusBarWindowController,
+                mStatusBarWindowControllerStore,
                 mStatusBarWindowStateController,
                 new FakeStatusBarModeRepository(),
                 mKeyguardUpdateMonitor,
@@ -579,7 +617,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mKeyguardIndicationController,
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
-                mStatusBarTouchableRegionManager,
+                mShadeTouchableRegionManager,
                 mBrightnessSliderFactory,
                 mScreenOffAnimationController,
                 mWallpaperController,
@@ -596,7 +634,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mWiredChargingRippleController,
                 mDreamManager,
                 mCameraLauncherLazy,
-                () -> mLightRevealScrimViewModel,
                 mLightRevealScrim,
                 mAlternateBouncerInteractor,
                 mUserTracker,
@@ -630,6 +667,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.startKeyguard();
         mInitController.executePostInitTasks();
         mCentralSurfaces.registerCallbacks();
+        // Clear first invocations caused by registering flows with JavaAdapter
+        mTestScope.getTestScheduler().runCurrent();
+        clearInvocations(mScrimController);
     }
 
     @Test
@@ -850,34 +890,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void testSetDozingNotUnlocking_transitionToAuthScrimmed_cancelKeyguardFadingAway() {
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
-
-        mCentralSurfaces.updateScrimController();
-
-        verify(mScrimController).legacyTransitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
-        verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
-    }
-
-    @Test
-    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void testOccludingQSNotExpanded_flagOff_transitionToAuthScrimmed() {
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-
-        // GIVEN device occluded and panel is NOT expanded
-        mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
-
-        mCentralSurfaces.updateScrimController();
-
-        verify(mScrimController).legacyTransitionTo(eq(ScrimState.AUTH_SCRIMMED));
-    }
-
-    @Test
-    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     public void testNotOccluding_QSNotExpanded_flagOn_doesNotTransitionScrimState() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
@@ -893,7 +905,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     public void testNotOccluding_QSExpanded_flagOn_doesTransitionScrimStateToKeyguard() {
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
@@ -906,21 +917,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         // Tests the safeguard to reset the scrimstate
         verify(mScrimController, never()).legacyTransitionTo(eq(ScrimState.KEYGUARD));
-    }
-
-    @Test
-    @DisableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-    public void testOccludingQSExpanded_transitionToAuthScrimmedShade() {
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
-
-        // GIVEN device occluded and qs IS expanded
-        mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
-
-        mCentralSurfaces.updateScrimController();
-
-        verify(mScrimController).legacyTransitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
     }
 
     @Test
@@ -1032,8 +1028,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeOpen_setsLeaveOpenOnKeyguardHide() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(SHADE);
         when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(true);
 
@@ -1044,8 +1040,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeOpen_onKeyguard_doesNotSetLeaveOpenOnKeyguardHide() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(KEYGUARD);
         when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(true);
 
@@ -1057,8 +1053,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeClose_doesNotSetLeaveOpenOnKeyguardHide() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(SHADE);
         when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(false);
 
@@ -1069,8 +1065,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeExpanding_onKeyguard_closesQS() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(KEYGUARD);
         when(mNotificationPanelViewController.isExpandingOrCollapsing()).thenReturn(true);
 
@@ -1082,8 +1078,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     public void deviceStateChange_unfolded_shadeExpanded_onKeyguard_closesQS() {
-        setFoldedStates(FOLD_STATE_FOLDED);
-        setGoToSleepStates(FOLD_STATE_FOLDED);
+        setFoldedStates(FOLD_STATE_FOLDED.getIdentifier());
+        setGoToSleepStates(FOLD_STATE_FOLDED.getIdentifier());
         mCentralSurfaces.setBarStateForTest(KEYGUARD);
         when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(true);
 
@@ -1147,6 +1143,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
     public void bubbleBarVisibility() {
         createCentralSurfaces();
         mCentralSurfaces.onStatusBarWindowStateChanged(WINDOW_STATE_HIDDEN);
@@ -1165,8 +1162,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     @EnableSceneContainer
-    public void brightnesShowingChanged_flagEnabled_ScrimControllerNotified() {
-        mCentralSurfaces.registerCallbacks();
+    public void brightnesShowingChanged_sceneContainerFlagEnabled_ScrimControllerNotified() {
         final ScrimStartable scrimStartable = mKosmos.getScrimStartable();
         scrimStartable.start();
 
@@ -1184,9 +1180,25 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     @DisableSceneContainer
-    public void brightnesShowingChanged_flagDisabled_ScrimControllerNotified() {
-        mCentralSurfaces.registerCallbacks();
+    @EnableFlags(QSComposeFragment.FLAG_NAME)
+    public void brightnesShowingChanged_qsUiRefactorFlagEnabled_ScrimControllerNotified() {
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
+        mTestScope.getTestScheduler().runCurrent();
+        verify(mScrimController, atLeastOnce()).legacyTransitionTo(ScrimState.BRIGHTNESS_MIRROR);
+        clearInvocations(mScrimController);
 
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(false);
+        mTestScope.getTestScheduler().runCurrent();
+        ArgumentCaptor<ScrimState> captor = ArgumentCaptor.forClass(ScrimState.class);
+        // The default is to call the one with the callback argument
+        verify(mScrimController, atLeastOnce()).legacyTransitionTo(captor.capture(), any());
+        assertThat(captor.getValue()).isNotEqualTo(ScrimState.BRIGHTNESS_MIRROR);
+    }
+
+    @Test
+    @DisableSceneContainer
+    @DisableFlags(QSComposeFragment.FLAG_NAME)
+    public void brightnesShowingChanged_flagsDisabled_ScrimControllerNotified() {
         mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
         mTestScope.getTestScheduler().runCurrent();
         verify(mScrimController, never()).legacyTransitionTo(ScrimState.BRIGHTNESS_MIRROR);
@@ -1399,9 +1411,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.updateIsKeyguard(false /* forceStateChange */);
     }
 
-    private void setDeviceState(int state) {
-        DeviceState deviceState = new DeviceState(
-                new DeviceState.Configuration.Builder(state, "TEST").build());
+    private void setDeviceState(DeviceState deviceState) {
         ArgumentCaptor<DeviceStateManager.DeviceStateCallback> callbackCaptor =
                 ArgumentCaptor.forClass(DeviceStateManager.DeviceStateCallback.class);
         verify(mDeviceStateManager).registerCallback(any(), callbackCaptor.capture());

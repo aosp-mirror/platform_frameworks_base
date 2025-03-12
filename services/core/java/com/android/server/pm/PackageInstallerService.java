@@ -50,6 +50,7 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -201,6 +202,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             Manifest.permission.USE_FULL_SCREEN_INTENT
     );
 
+    private static final String ROLE_SYSTEM_APP_PROTECTION_SERVICE =
+            "android.app.role.SYSTEM_APP_PROTECTION_SERVICE";
+
     final PackageArchiver mPackageArchiver;
 
     private final Context mContext;
@@ -209,6 +213,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private final StagingManager mStagingManager;
 
     private AppOpsManager mAppOps;
+    private final InstallDependencyHelper mInstallDependencyHelper;
 
     private final HandlerThread mInstallThread;
     private final Handler mInstallHandler;
@@ -321,6 +326,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mGentleUpdateHelper = new GentleUpdateHelper(
                 context, mInstallThread.getLooper(), new AppStateHelper(context));
         mPackageArchiver = new PackageArchiver(mContext, mPm);
+        mInstallDependencyHelper = new InstallDependencyHelper(mContext,
+                mPm.mInjector.getSharedLibrariesImpl(), this);
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
@@ -328,6 +335,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     StagingManager getStagingManager() {
         return mStagingManager;
+    }
+
+    InstallDependencyHelper getInstallDependencyHelper() {
+        return mInstallDependencyHelper;
     }
 
     boolean okToSendBroadcasts()  {
@@ -517,7 +528,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         try {
                             session = PackageInstallerSession.readFromXml(in, mInternalCallback,
                                     mContext, mPm, mInstallThread.getLooper(), mStagingManager,
-                                    mSessionsDir, this, mSilentUpdatePolicy);
+                                    mSessionsDir, this, mSilentUpdatePolicy,
+                                    mInstallDependencyHelper);
                         } catch (Exception e) {
                             Slog.e(TAG, "Could not read session", e);
                             continue;
@@ -1033,7 +1045,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 mSilentUpdatePolicy, mInstallThread.getLooper(), mStagingManager, sessionId,
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,
                 null, null, false, false, false, false, null, SessionInfo.INVALID_ID,
-                false, false, false, PackageManager.INSTALL_UNKNOWN, "", null);
+                false, false, false, PackageManager.INSTALL_UNKNOWN, "", null,
+                mInstallDependencyHelper);
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
@@ -1454,6 +1467,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     .createEvent(DevicePolicyEnums.UNINSTALL_PACKAGE)
                     .setAdmin(callerPackageName)
                     .write();
+        } else if (isSystemAppProtectionRoleHolder(snapshot, userId, callingUid)) {
+            // Allow the SYSTEM_APP_PROTECTION_SERVICE role holder to silently uninstall, with a
+            // clean calling identity to get DELETE_PACKAGES permission
+            Binder.withCleanCallingIdentity(() ->
+                    mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags)
+            );
         } else {
             ApplicationInfo appInfo = snapshot.getApplicationInfo(callerPackageName, 0, userId);
             if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
@@ -1473,6 +1492,29 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
             adapter.onUserActionRequired(intent);
         }
+    }
+
+    private Boolean isSystemAppProtectionRoleHolder(
+            @NonNull Computer snapshot, int userId, int callingUid) {
+        if (!Flags.deletePackagesSilentlyBackport()) {
+            return false;
+        }
+        String holderPackageName = Binder.withCleanCallingIdentity(() -> {
+            RoleManager roleManager = mPm.mContext.getSystemService(RoleManager.class);
+            if (roleManager == null) {
+                return null;
+            }
+            List<String> holders = roleManager.getRoleHoldersAsUser(
+                    ROLE_SYSTEM_APP_PROTECTION_SERVICE, UserHandle.of(userId));
+            if (holders.isEmpty()) {
+                return null;
+            }
+            return holders.get(0);
+        });
+        if (holderPackageName == null) {
+            return false;
+        }
+        return snapshot.getPackageUid(holderPackageName, /* flags= */ 0, userId) == callingUid;
     }
 
     @Override
@@ -2285,6 +2327,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                             if (shouldRemove) {
                                 removeActiveSession(session);
                             }
+                        }
+
+                        if (Flags.sdkDependencyInstaller()) {
+                            mInstallDependencyHelper.notifySessionComplete(session.sessionId);
                         }
 
                         final File appIconFile = buildAppIconFile(session.sessionId);

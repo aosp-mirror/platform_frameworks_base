@@ -27,7 +27,7 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MutableSelectionStateTest : SysuiTestCase() {
-    private val underTest = MutableSelectionState({}, {})
+    private val underTest = MutableSelectionState()
 
     @Test
     fun selectTile_isCorrectlySelected() {
@@ -45,120 +45,6 @@ class MutableSelectionStateTest : SysuiTestCase() {
         underTest.select(newSpec, manual = false)
         assertThat(underTest.selection?.tileSpec).isNotEqualTo(TEST_SPEC)
         assertThat(underTest.selection?.tileSpec).isEqualTo(newSpec)
-        assertThat(underTest.selection?.manual).isFalse()
-    }
-
-    @Test
-    fun startResize_createsResizingState() {
-        assertThat(underTest.resizingState).isNull()
-
-        // Resizing starts but no tile is selected
-        underTest.onResizingDragStart(TileWidths(0, 0, 1))
-        assertThat(underTest.resizingState).isNull()
-
-        // Resizing starts with a selected tile
-        underTest.select(TEST_SPEC, manual = true)
-        underTest.onResizingDragStart(TileWidths(0, 0, 1))
-
-        assertThat(underTest.resizingState).isNotNull()
-    }
-
-    @Test
-    fun endResize_clearsResizingState() {
-        val spec = TileSpec.create("testSpec")
-
-        // Resizing starts with a selected tile
-        underTest.select(spec, manual = true)
-        underTest.onResizingDragStart(TileWidths(base = 0, min = 0, max = 10))
-        assertThat(underTest.resizingState).isNotNull()
-
-        underTest.onResizingDragEnd()
-        assertThat(underTest.resizingState).isNull()
-    }
-
-    @Test
-    fun unselect_clearsResizingState() {
-        // Resizing starts with a selected tile
-        underTest.select(TEST_SPEC, manual = true)
-        underTest.onResizingDragStart(TileWidths(base = 0, min = 0, max = 10))
-        assertThat(underTest.resizingState).isNotNull()
-
-        underTest.unSelect()
-        assertThat(underTest.resizingState).isNull()
-    }
-
-    @Test
-    fun onResizingDrag_updatesResizingState() {
-        // Resizing starts with a selected tile
-        underTest.select(TEST_SPEC, manual = true)
-        underTest.onResizingDragStart(TileWidths(base = 0, min = 0, max = 10))
-        assertThat(underTest.resizingState).isNotNull()
-
-        underTest.onResizingDrag(5f)
-        assertThat(underTest.resizingState?.width).isEqualTo(5)
-
-        underTest.onResizingDrag(2f)
-        assertThat(underTest.resizingState?.width).isEqualTo(7)
-
-        underTest.onResizingDrag(-6f)
-        assertThat(underTest.resizingState?.width).isEqualTo(1)
-    }
-
-    @Test
-    fun onResizingDrag_receivesResizeCallback() {
-        var resized = false
-        val onResize: (TileSpec) -> Unit = {
-            assertThat(it).isEqualTo(TEST_SPEC)
-            resized = !resized
-        }
-        val underTest = MutableSelectionState(onResize = onResize, {})
-
-        // Resizing starts with a selected tile
-        underTest.select(TEST_SPEC, true)
-        underTest.onResizingDragStart(TileWidths(base = 0, min = 0, max = 10))
-        assertThat(underTest.resizingState).isNotNull()
-
-        // Drag under the threshold
-        underTest.onResizingDrag(1f)
-        assertThat(resized).isFalse()
-
-        // Drag over the threshold
-        underTest.onResizingDrag(5f)
-        assertThat(resized).isTrue()
-
-        // Drag back under the threshold
-        underTest.onResizingDrag(-5f)
-        assertThat(resized).isFalse()
-    }
-
-    @Test
-    fun onResizingEnded_receivesResizeEndCallback() {
-        var resizeEnded = false
-        val onResizeEnd: (TileSpec) -> Unit = { resizeEnded = true }
-        val underTest = MutableSelectionState({}, onResizeEnd = onResizeEnd)
-
-        // Resizing starts with a selected tile
-        underTest.select(TEST_SPEC, true)
-        underTest.onResizingDragStart(TileWidths(base = 0, min = 0, max = 10))
-
-        underTest.onResizingDragEnd()
-        assertThat(resizeEnded).isTrue()
-    }
-
-    @Test
-    fun onResizingEnded_setsSelectionAutomatically() {
-        val underTest = MutableSelectionState({}, {})
-
-        // Resizing starts with a selected tile
-        underTest.select(TEST_SPEC, manual = true)
-        underTest.onResizingDragStart(TileWidths(base = 0, min = 0, max = 10))
-
-        // Assert the selection was manual
-        assertThat(underTest.selection?.manual).isTrue()
-
-        underTest.onResizingDragEnd()
-
-        // Assert the selection is no longer manual due to the resizing
         assertThat(underTest.selection?.manual).isFalse()
     }
 

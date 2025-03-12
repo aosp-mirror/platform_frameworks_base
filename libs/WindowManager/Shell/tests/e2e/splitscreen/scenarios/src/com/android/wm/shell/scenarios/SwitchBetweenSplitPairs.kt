@@ -68,5 +68,6 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
         secondaryApp.exit(wmHelper)
         thirdApp.exit(wmHelper)
         fourthApp.exit(wmHelper)
+        Utils.resetFreezeRecentTaskList()
     }
 }

@@ -19,7 +19,6 @@ package com.android.systemui.accessibility;
 import static com.android.systemui.accessibility.MagnificationImpl.DELAY_SHOW_MAGNIFICATION_TIMEOUT_MS;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -190,8 +189,7 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
 
     @Test
     public void showMagnificationButton_delayedShowButton() throws RemoteException {
-        // magnification settings panel should not be showing
-        assertFalse(mMagnification.isMagnificationSettingsPanelShowing(TEST_DISPLAY));
+        when(mMagnificationSettingsController.isMagnificationSettingsShowing()).thenReturn(false);
 
         mIMagnificationConnection.showMagnificationButton(TEST_DISPLAY,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
@@ -237,8 +235,7 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
     @Test
     public void removeMagnificationButton_delayingShowButton_doNotShowButtonAfterTimeout()
             throws RemoteException {
-        // magnification settings panel should not be showing
-        assertFalse(mMagnification.isMagnificationSettingsPanelShowing(TEST_DISPLAY));
+        when(mMagnificationSettingsController.isMagnificationSettingsShowing()).thenReturn(false);
 
         mIMagnificationConnection.showMagnificationButton(TEST_DISPLAY,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);

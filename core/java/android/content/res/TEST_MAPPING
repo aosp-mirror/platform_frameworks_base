@@ -5,6 +5,9 @@
     },
     {
       "path": "frameworks/base/core/tests/coretests/src/com/android/internal/content/res"
+    },
+    {
+      "path": "platform_testing/libraries/screenshot"
     }
   ],
   "presubmit": [

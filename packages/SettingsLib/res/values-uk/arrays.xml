@@ -257,12 +257,12 @@
     <item msgid="1212561935004167943">"Тест. команди малювання зеленим"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="634406443901014984">"Вимк."</item>
+    <item msgid="634406443901014984">"Вимкнено"</item>
     <item msgid="1288760936356000927">"На екрані у вигляді смужок"</item>
     <item msgid="5023908510820531131">"У команді \"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>\""</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="1968128556747588800">"Вимк."</item>
+    <item msgid="1968128556747588800">"Вимкнено"</item>
     <item msgid="3033215374382962216">"Показувати області накладання"</item>
     <item msgid="3474333938380896988">"Показувати області дейтераномалії"</item>
   </string-array>

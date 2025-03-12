@@ -47,8 +47,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -538,7 +536,13 @@ public final class SmsApplication {
     }
 
     private static String getDefaultSmsPackage(Context context, int userId) {
-        return context.getSystemService(RoleManager.class).getSmsRoleHolder(userId);
+        // RoleManager might be null in unit tests running older mockito versions that do not
+        // support mocking final classes.
+        RoleManager roleManager = context.getSystemService(RoleManager.class);
+        if (roleManager == null) {
+            return "";
+        }
+        return roleManager.getSmsRoleHolder(userId);
     }
 
     /**

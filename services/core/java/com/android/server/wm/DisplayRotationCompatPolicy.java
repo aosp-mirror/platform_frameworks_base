@@ -29,7 +29,8 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.Display.TYPE_INTERNAL;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.DisplayRotationReversionController.REVERSION_TYPE_CAMERA_COMPAT;
 
 import android.annotation.NonNull;
@@ -70,6 +71,9 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     @NonNull
     private final ActivityRefresher mActivityRefresher;
 
+    // TODO(b/380840084): Consider moving this to the CameraStateMonitor, and keeping track of
+    // all current camera activities, especially when the camera access is switching from one app to
+    // another.
     @Nullable
     private Task mCameraTask;
 
@@ -131,6 +135,11 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
             restoreOverriddenOrientationIfNeeded();
         }
         return mLastReportedOrientation;
+    }
+
+    float getCameraCompatAspectRatio(@NonNull ActivityRecord unusedActivity) {
+        // This policy does not apply camera compat aspect ratio by default, only via overrides.
+        return MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
     }
 
     @ScreenOrientation
@@ -271,7 +280,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
 
     boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
         return isTreatmentEnabledForDisplay()
-                && isCameraActive(activity, /* mustBeFullscreen */ true)
+                && isCameraRunningAndWindowingModeEligible(activity, /* mustBeFullscreen */ true)
                 && activity.mAppCompatController.getAppCompatCameraOverrides()
                     .shouldForceRotateForCameraCompat();
     }
@@ -290,7 +299,17 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         return isTreatmentEnabledForActivity(activity, /* mustBeFullscreen */ true);
     }
 
-    boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
+    boolean shouldCameraCompatControlOrientation(@NonNull ActivityRecord activity) {
+        return isCameraRunningAndWindowingModeEligible(activity, /* mustBeFullscreen= */ true);
+    }
+
+    boolean shouldCameraCompatControlAspectRatio(@NonNull ActivityRecord unusedActivity) {
+        // This policy does not apply camera compat aspect ratio by default, only via overrides.
+        return false;
+    }
+
+    boolean isCameraRunningAndWindowingModeEligible(@NonNull ActivityRecord activity,
+            boolean mustBeFullscreen) {
         // Checking windowing mode on activity level because we don't want to
         // apply treatment in case of activity embedding.
         return (!mustBeFullscreen || !activity.inMultiWindowMode())
@@ -299,7 +318,8 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
 
     private boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity,
             boolean mustBeFullscreen) {
-        return activity != null && isCameraActive(activity, mustBeFullscreen)
+        return activity != null
+                && isCameraRunningAndWindowingModeEligible(activity, mustBeFullscreen)
                 && activity.getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED
                 // "locked" and "nosensor" values are often used by camera apps that can't
                 // handle dynamic changes so we shouldn't force rotate them.
@@ -310,8 +330,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     }
 
     @Override
-    public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
-            @NonNull String cameraId) {
+    public void onCameraOpened(@NonNull ActivityRecord cameraActivity) {
         mCameraTask = cameraActivity.getTask();
         // Checking whether an activity in fullscreen rather than the task as this camera
         // compat treatment doesn't cover activity embedding.
@@ -357,16 +376,9 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     }
 
     @Override
-    public boolean onCameraClosed(@NonNull String cameraId) {
-        final ActivityRecord topActivity;
-        if (Flags.cameraCompatFullscreenPickSameTaskActivity()) {
-            topActivity = mCameraTask != null ? mCameraTask.getTopActivity(
-                    /* includeFinishing= */ true, /* includeOverlays= */ false) : null;
-        } else {
-            topActivity = mDisplayContent.topRunningActivity(/* considerKeyguardState= */ true);
-        }
+    public boolean canCameraBeClosed(@NonNull String cameraId) {
+        final ActivityRecord topActivity = getTopActivity();
 
-        mCameraTask = null;
         if (topActivity == null) {
             return true;
         }
@@ -382,6 +394,23 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 return false;
             }
         }
+        return true;
+    }
+
+    @Override
+    public void onCameraClosed() {
+        final ActivityRecord topActivity = getTopActivity();
+
+        // Only clean up if the camera is not running - this close signal could be from switching
+        // cameras (e.g. back to front camera, and vice versa).
+        if (topActivity == null || !mCameraStateMonitor.isCameraRunningForActivity(topActivity)) {
+            // Call after getTopActivity(), as that method might use the activity from mCameraTask.
+            mCameraTask = null;
+        }
+
+        if (topActivity == null) {
+            return;
+        }
 
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d is notified that Camera is closed, updating rotation.",
@@ -389,11 +418,10 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         // Checking whether an activity in fullscreen rather than the task as this camera compat
         // treatment doesn't cover activity embedding.
         if (topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
-            return true;
+            return;
         }
         recomputeConfigurationForCameraCompatIfNeeded(topActivity);
         mDisplayContent.updateOrientation();
-        return true;
     }
 
     // TODO(b/336474959): Do we need cameraId here?
@@ -413,6 +441,16 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         }
     }
 
+    @Nullable
+    private ActivityRecord getTopActivity() {
+        if (Flags.cameraCompatFullscreenPickSameTaskActivity()) {
+            return mCameraTask != null ? mCameraTask.getTopActivity(
+                    /* includeFinishing= */ true, /* includeOverlays= */ false) : null;
+        } else {
+            return mDisplayContent.topRunningActivity(/* considerKeyguardState= */ true);
+        }
+    }
+
     /**
      * @return {@code true} if the configuration needs to be recomputed after a camera state update.
      */
@@ -428,6 +466,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     private boolean shouldOverrideMinAspectRatio(@NonNull ActivityRecord activityRecord) {
         return activityRecord.mAppCompatController.getAppCompatCameraOverrides()
                 .isOverrideMinAspectRatioForCameraEnabled()
-                        && isCameraActive(activityRecord, /* mustBeFullscreen= */ true);
+                        && isCameraRunningAndWindowingModeEligible(activityRecord,
+                                /* mustBeFullscreen= */ true);
     }
 }

@@ -20,6 +20,8 @@ import android.view.View
 import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 
 /** Model representing the display of an ongoing activity as a chip in the status bar. */
 sealed class OngoingActivityChipModel {
@@ -79,6 +81,24 @@ sealed class OngoingActivityChipModel {
         }
 
         /**
+         * The chip shows the time delta between now and [time] in a short format, e.g. "15min" or
+         * "1hr ago".
+         */
+        data class ShortTimeDelta(
+            override val icon: ChipIcon,
+            override val colors: ColorsModel,
+            /** The time of the event that this chip represents. */
+            val time: Long,
+            override val onClickListener: View.OnClickListener?,
+        ) : Shown(icon, colors, onClickListener) {
+            init {
+                StatusBarNotifChips.assertInNewMode()
+            }
+
+            override val logName = "Shown.ShortTimeDelta"
+        }
+
+        /**
          * This chip shows a countdown using [secondsUntilStarted]. Used to inform users that an
          * event is about to start. Typically, a [Countdown] chip will turn into a [Timer] chip.
          */
@@ -113,6 +133,17 @@ sealed class OngoingActivityChipModel {
                     "OngoingActivityChipModel.ChipIcon.StatusBarView created even though " +
                         "Flags.statusBarCallChipNotificationIcon is not enabled"
                 }
+                StatusBarConnectedDisplays.assertInLegacyMode()
+            }
+        }
+
+        /**
+         * The icon is a custom icon, which is set on a notification, and can be looked up using the
+         * provided [notificationKey]. The icon was likely created by an external app.
+         */
+        data class StatusBarNotificationIcon(val notificationKey: String) : ChipIcon {
+            init {
+                StatusBarConnectedDisplays.assertInNewMode()
             }
         }
 

@@ -40,6 +40,8 @@ enum TestCursorType {
     CURSOR_TYPE_CUSTOM = -1,
 };
 
+static constexpr float EPSILON = MotionEvent::ROUNDING_PRECISION;
+
 using ::testing::AllOf;
 using ::testing::Field;
 using ::testing::NiceMock;
@@ -398,6 +400,135 @@ INSTANTIATE_TEST_SUITE_P(PointerControllerSkipScreenshotFlagTest,
                          PointerControllerSkipScreenshotFlagTest,
                          testing::Values(PointerControllerInterface::ControllerType::MOUSE,
                                          PointerControllerInterface::ControllerType::STYLUS));
+
+class MousePointerControllerTest : public PointerControllerTest {
+protected:
+    MousePointerControllerTest() {
+        sp<MockSprite> testPointerSprite(new NiceMock<MockSprite>);
+        EXPECT_CALL(*mSpriteController, createSprite).WillOnce(Return(testPointerSprite));
+
+        // create a mouse pointer controller
+        mPointerController =
+                PointerController::create(mPolicy, mLooper, *mSpriteController,
+                                          PointerControllerInterface::ControllerType::MOUSE);
+
+        // set display viewport
+        DisplayViewport viewport;
+        viewport.displayId = ui::LogicalDisplayId::DEFAULT;
+        viewport.logicalRight = 5;
+        viewport.logicalBottom = 5;
+        viewport.physicalRight = 5;
+        viewport.physicalBottom = 5;
+        viewport.deviceWidth = 5;
+        viewport.deviceHeight = 5;
+        mPointerController->setDisplayViewport(viewport);
+    }
+};
+
+struct MousePointerControllerTestParam {
+    vec2 startPosition;
+    vec2 delta;
+    vec2 endPosition;
+    vec2 unconsumedDelta;
+};
+
+class PointerControllerViewportTransitionTest
+      : public MousePointerControllerTest,
+        public testing::WithParamInterface<MousePointerControllerTestParam> {};
+
+TEST_P(PointerControllerViewportTransitionTest, testPointerViewportTransition) {
+    const auto& params = GetParam();
+
+    mPointerController->setPosition(params.startPosition.x, params.startPosition.y);
+    auto unconsumedDelta = mPointerController->move(params.delta.x, params.delta.y);
+
+    auto position = mPointerController->getPosition();
+    EXPECT_NEAR(position.x, params.endPosition.x, EPSILON);
+    EXPECT_NEAR(position.y, params.endPosition.y, EPSILON);
+    EXPECT_NEAR(unconsumedDelta.x, params.unconsumedDelta.x, EPSILON);
+    EXPECT_NEAR(unconsumedDelta.y, params.unconsumedDelta.y, EPSILON);
+}
+
+INSTANTIATE_TEST_SUITE_P(PointerControllerViewportTransitionTest,
+                         PointerControllerViewportTransitionTest,
+                         testing::Values(
+                                 // no transition
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {2.0f, 2.0f},
+                                                                 {4.0f, 4.0f},
+                                                                 {0.0f, 0.0f}},
+                                 // right boundary
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {3.0f, 0.0f},
+                                                                 {4.0f, 2.0f},
+                                                                 {1.0f, 0.0f}},
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {3.0f, -1.0f},
+                                                                 {4.0f, 1.0f},
+                                                                 {1.0f, 0.0f}},
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {3.0f, 1.0f},
+                                                                 {4.0f, 3.0f},
+                                                                 {1.0f, 0.0f}},
+                                 // left boundary
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {-3.0f, 0.0f},
+                                                                 {0.0f, 2.0f},
+                                                                 {-1.0f, 0.0f}},
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {-3.0f, -1.0f},
+                                                                 {0.0f, 1.0f},
+                                                                 {-1.0f, 0.0f}},
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {-3.0f, 1.0f},
+                                                                 {0.0f, 3.0f},
+                                                                 {-1.0f, 0.0f}},
+                                 // bottom boundary
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {0.0f, 3.0f},
+                                                                 {2.0f, 4.0f},
+                                                                 {0.0f, 1.0f}},
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {-1.0f, 3.0f},
+                                                                 {1.0f, 4.0f},
+                                                                 {0.0f, 1.0f}},
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {1.0f, 3.0f},
+                                                                 {3.0f, 4.0f},
+                                                                 {0.0f, 1.0f}},
+                                 // top boundary
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {0.0f, -3.0f},
+                                                                 {2.0f, 0.0f},
+                                                                 {0.0f, -1.0f}},
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {-1.0f, -3.0f},
+                                                                 {1.0f, 0.0f},
+                                                                 {0.0f, -1.0f}},
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {1.0f, -3.0f},
+                                                                 {3.0f, 0.0f},
+                                                                 {0.0f, -1.0f}},
+                                 // top-left corner
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {-3.0f, -3.0f},
+                                                                 {0.0f, 0.0f},
+                                                                 {-1.0f, -1.0f}},
+                                 // top-right corner
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {3.0f, -3.0f},
+                                                                 {4.0f, 0.0f},
+                                                                 {1.0f, -1.0f}},
+                                 // bottom-right corner
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {3.0f, 3.0f},
+                                                                 {4.0f, 4.0f},
+                                                                 {1.0f, 1.0f}},
+                                 // bottom-left corner
+                                 MousePointerControllerTestParam{{2.0f, 2.0f},
+                                                                 {-3.0f, 3.0f},
+                                                                 {0.0f, 4.0f},
+                                                                 {-1.0f, 1.0f}}));
 
 class PointerControllerWindowInfoListenerTest : public Test {};
 

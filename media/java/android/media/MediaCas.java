@@ -16,9 +16,15 @@
 
 package android.media;
 
+import static android.media.tv.flags.Flags.FLAG_MEDIACAS_UPDATE_CLIENT_PROFILE_PRIORITY;
+import static android.media.tv.flags.Flags.FLAG_SET_RESOURCE_HOLDER_RETAIN;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.hardware.cas.AidlCasPluginDescriptor;
@@ -131,7 +137,7 @@ public final class MediaCas implements AutoCloseable {
     private int mCasSystemId;
     private int mUserId;
     private TunerResourceManager mTunerResourceManager = null;
-    private final Map<Session, Integer> mSessionMap = new HashMap<>();
+    private final Map<Session, Long> mSessionMap = new HashMap<>();
 
     /**
      * Scrambling modes used to open cas sessions.
@@ -508,18 +514,20 @@ public final class MediaCas implements AutoCloseable {
 
     private final TunerResourceManager.ResourcesReclaimListener mResourceListener =
             new TunerResourceManager.ResourcesReclaimListener() {
-            @Override
-            public void onReclaimResources() {
-                synchronized (mSessionMap) {
-                    List<Session> sessionList = new ArrayList<>(mSessionMap.keySet());
-                    for (Session casSession: sessionList) {
-                        casSession.close();
+                @Override
+                public void onReclaimResources() {
+                    synchronized (mSessionMap) {
+                        List<Session> sessionList = new ArrayList<>(mSessionMap.keySet());
+                        for (Session casSession : sessionList) {
+                            casSession.close();
+                        }
+                    }
+                    if (mEventHandler != null) {
+                        mEventHandler.sendMessage(
+                                mEventHandler.obtainMessage(EventHandler.MSG_CAS_RESOURCE_LOST));
                     }
                 }
-                mEventHandler.sendMessage(mEventHandler.obtainMessage(
-                        EventHandler.MSG_CAS_RESOURCE_LOST));
-            }
-        };
+            };
 
     /**
      * Describe a CAS plugin with its CA_system_ID and string name.
@@ -970,6 +978,52 @@ public final class MediaCas implements AutoCloseable {
         registerClient(context, tvInputServiceSessionId, priorityHint);
     }
 
+    /**
+     * Updates client priority with an arbitrary value along with a nice value.
+     *
+     * <p>Tuner resource manager (TRM) uses the client priority value to decide whether it is able
+     * to reclaim insufficient resources from another client.
+     *
+     * <p>The nice value represents how much the client intends to give up the resource when an
+     * insufficient resource situation happens.
+     *
+     * @see <a
+     *     href="https://source.android.com/docs/devices/tv/tuner-framework#priority-nice-value">
+     *     Priority value and nice value</a>
+     * @param priority the new priority. Any negative value would cause no-op on priority setting
+     *     and the API would only process nice value setting in that case.
+     * @param niceValue the nice value.
+     * @hide
+     */
+    @FlaggedApi(FLAG_MEDIACAS_UPDATE_CLIENT_PROFILE_PRIORITY)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public boolean updateResourcePriority(int priority, int niceValue) {
+        if (mTunerResourceManager != null) {
+            return mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
+        }
+        return false;
+    }
+
+    /**
+     * Determines whether the resource holder retains ownership of the resource during a challenge
+     * scenario, when both resource holder and resource challenger have same processId and same
+     * priority.
+     *
+     *@param enabled Set to {@code true} to allow the resource holder to retain ownership,
+     *     or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
+     * @hide
+     */
+    @FlaggedApi(FLAG_SET_RESOURCE_HOLDER_RETAIN)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public void setResourceOwnershipRetention(boolean enabled) {
+        if (mTunerResourceManager != null) {
+            mTunerResourceManager.setResourceOwnershipRetention(mClientId, enabled);
+        }
+    }
+
     IHwBinder getBinder() {
         if (mICas != null) {
             return null; // Return IHwBinder only for HIDL
@@ -1126,10 +1180,10 @@ public final class MediaCas implements AutoCloseable {
         }
     }
 
-    private int getSessionResourceHandle() throws MediaCasException {
+    private long getSessionResourceHandle() throws MediaCasException {
         validateInternalStates();
 
-        int[] sessionResourceHandle = new int[1];
+        long[] sessionResourceHandle = new long[1];
         sessionResourceHandle[0] = -1;
         if (mTunerResourceManager != null) {
             CasSessionRequest casSessionRequest = new CasSessionRequest();
@@ -1144,8 +1198,7 @@ public final class MediaCas implements AutoCloseable {
         return sessionResourceHandle[0];
     }
 
-    private void addSessionToResourceMap(Session session, int sessionResourceHandle) {
-
+    private void addSessionToResourceMap(Session session, long sessionResourceHandle) {
         if (sessionResourceHandle != TunerResourceManager.INVALID_RESOURCE_HANDLE) {
             synchronized (mSessionMap) {
                 mSessionMap.put(session, sessionResourceHandle);
@@ -1178,13 +1231,14 @@ public final class MediaCas implements AutoCloseable {
      * @throws MediaCasStateException for CAS-specific state exceptions.
      */
     public Session openSession() throws MediaCasException {
-        int sessionResourceHandle = getSessionResourceHandle();
+        long sessionResourceHandle = getSessionResourceHandle();
 
         try {
             if (mICas != null) {
                 try {
                     byte[] sessionId = mICas.openSessionDefault();
                     Session session = createFromSessionId(sessionId);
+                    addSessionToResourceMap(session, sessionResourceHandle);
                     Log.d(TAG, "Write Stats Log for succeed to Open Session.");
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS,
@@ -1238,7 +1292,7 @@ public final class MediaCas implements AutoCloseable {
     @Nullable
     public Session openSession(@SessionUsage int sessionUsage, @ScramblingMode int scramblingMode)
             throws MediaCasException {
-        int sessionResourceHandle = getSessionResourceHandle();
+        long sessionResourceHandle = getSessionResourceHandle();
 
         if (mICas != null) {
             try {

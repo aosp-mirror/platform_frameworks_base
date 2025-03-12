@@ -33,4 +33,10 @@ interface IDesktopTaskListener {
      * [hasTasksRequiringTaskbarRounding] is true.
      */
     oneway void onTaskbarCornerRoundingUpdate(boolean hasTasksRequiringTaskbarRounding);
+
+    /** Entering desktop mode transition is started, send the signal with transition duration. */
+    oneway void onEnterDesktopModeTransitionStarted(int transitionDuration);
+
+    /** Exiting desktop mode transition is started, send the signal with transition duration. */
+    oneway void onExitDesktopModeTransitionStarted(int transitionDuration);
 }

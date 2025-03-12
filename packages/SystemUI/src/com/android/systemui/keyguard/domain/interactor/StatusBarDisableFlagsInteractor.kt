@@ -40,6 +40,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessModel
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -48,7 +49,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -62,7 +63,7 @@ class StatusBarDisableFlagsInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
-    @Application private val applicationContext: Context,
+    @ShadeDisplayAware private val context: Context,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val deviceEntryFaceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val statusBarService: IStatusBarService,
@@ -142,7 +143,7 @@ constructor(
 
         scope.launch {
             disableFlagsForUserId.collect { (selectedUserId, flags) ->
-                if (applicationContext.getSystemService(Context.STATUS_BAR_SERVICE) == null) {
+                if (context.getSystemService(Context.STATUS_BAR_SERVICE) == null) {
                     return@collect
                 }
 
@@ -151,7 +152,7 @@ constructor(
                         statusBarService.disableForUser(
                             flags,
                             disableToken,
-                            applicationContext.packageName,
+                            context.packageName,
                             selectedUserId,
                         )
                     } catch (e: RemoteException) {

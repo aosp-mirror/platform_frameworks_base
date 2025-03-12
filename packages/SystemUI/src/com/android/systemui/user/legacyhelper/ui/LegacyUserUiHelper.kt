@@ -18,6 +18,7 @@
 package com.android.systemui.user.legacyhelper.ui
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.android.systemui.res.R
@@ -31,6 +32,8 @@ import com.android.systemui.user.data.source.UserRecord
  * simplify UserSwitcherController (or delete it), the code here could be moved into its call-sites.
  */
 object LegacyUserUiHelper {
+
+    private const val TAG = "LegacyUserUiHelper"
 
     @JvmStatic
     @DrawableRes
@@ -67,7 +70,9 @@ object LegacyUserUiHelper {
         val resourceId: Int? = getGuestUserRecordNameResourceId(record)
         return when {
             resourceId != null -> context.getString(resourceId)
-            record.info != null -> checkNotNull(record.info.name)
+            record.info != null ->
+                record.info.name
+                    ?: "".also { Log.i(TAG, "Expected display name for: ${record.info}") }
             else ->
                 context.getString(
                     getUserSwitcherActionTextResourceId(

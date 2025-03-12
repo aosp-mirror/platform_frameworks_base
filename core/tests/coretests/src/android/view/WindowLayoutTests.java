@@ -413,4 +413,19 @@ public class WindowLayoutTests {
         assertInsetByTopBottom(0, 0, mFrames.parentFrame);
         assertInsetByTopBottom(0, 0, mFrames.frame);
     }
+
+    @Test
+    public void windowBoundsOutsideDisplayCutoutSafe() {
+        addDisplayCutout();
+        mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
+        mWindowBounds.set(0, -1000, DISPLAY_WIDTH, 0);
+        computeFrames();
+
+        assertRect(WATERFALL_INSETS.left, 0, DISPLAY_WIDTH - WATERFALL_INSETS.right, 0,
+                mFrames.displayFrame);
+        assertRect(WATERFALL_INSETS.left, 0, DISPLAY_WIDTH - WATERFALL_INSETS.right, 0,
+                mFrames.parentFrame);
+        assertRect(WATERFALL_INSETS.left, 0, DISPLAY_WIDTH - WATERFALL_INSETS.right, 0,
+                mFrames.frame);
+    }
 }

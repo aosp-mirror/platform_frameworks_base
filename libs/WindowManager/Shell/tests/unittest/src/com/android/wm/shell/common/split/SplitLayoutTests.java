@@ -19,7 +19,7 @@ package com.android.wm.shell.common.split;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -66,6 +66,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock WindowContainerTransaction mWct;
+    @Mock SplitState mSplitState;
     @Mock Handler mHandler;
     @Captor ArgumentCaptor<Runnable> mRunnableCaptor;
     private SplitLayout mSplitLayout;
@@ -83,6 +84,7 @@ public class SplitLayoutTests extends ShellTestCase {
                 mDisplayImeController,
                 mTaskOrganizer,
                 SplitLayout.PARALLAX_NONE,
+                mSplitState,
                 mHandler));
     }
 
@@ -136,7 +138,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Test
     public void testSetDivideRatio() {
         mSplitLayout.setDividerPosition(200, false /* applyLayoutChange */);
-        mSplitLayout.setDivideRatio(SNAP_TO_50_50);
+        mSplitLayout.setDivideRatio(SNAP_TO_2_50_50);
         assertThat(mSplitLayout.getDividerPosition()).isEqualTo(
                 mSplitLayout.mDividerSnapAlgorithm.getMiddleTarget().position);
     }
@@ -190,7 +192,7 @@ public class SplitLayoutTests extends ShellTestCase {
     }
 
     private void waitDividerFlingFinished() {
-        verify(mSplitLayout).flingDividerPosition(anyInt(), anyInt(), anyInt(),
+        verify(mSplitLayout).flingDividerPosition(anyInt(), anyInt(), anyInt(), any(),
                 mRunnableCaptor.capture());
         mRunnableCaptor.getValue().run();
     }

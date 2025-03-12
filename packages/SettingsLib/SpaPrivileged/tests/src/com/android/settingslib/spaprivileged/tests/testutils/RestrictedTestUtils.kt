@@ -16,6 +16,10 @@
 
 package com.android.settingslib.spaprivileged.tests.testutils
 
+import android.app.admin.EnforcingAdmin
+import android.app.admin.UnknownAuthority
+import android.os.UserHandle
+import android.security.advancedprotection.AdvancedProtectionManager.ADVANCED_PROTECTION_SYSTEM_ENTITY
 import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdmin
@@ -55,3 +59,10 @@ class FakeRestrictionsProvider : RestrictionsProvider {
     @Composable
     override fun restrictedModeState() = stateOf(restrictedMode)
 }
+
+fun getEnforcingAdminAdvancedProtection(packageName: String, userId: Int): EnforcingAdmin =
+    EnforcingAdmin(packageName, UnknownAuthority(ADVANCED_PROTECTION_SYSTEM_ENTITY),
+        UserHandle.of(userId))
+
+fun getEnforcingAdminNotAdvancedProtection(packageName: String, userId: Int): EnforcingAdmin =
+    EnforcingAdmin(packageName, UnknownAuthority.UNKNOWN_AUTHORITY, UserHandle.of(userId))

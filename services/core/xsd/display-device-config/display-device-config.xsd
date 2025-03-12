@@ -464,7 +464,7 @@
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
-        <xs:element name="customAnimationRateSec" type="nonNegativeDecimal" minOccurs="0" maxOccurs="1">
+        <xs:element name="customAnimationRate" type="nonNegativeDecimal" minOccurs="0" maxOccurs="1">
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
@@ -512,8 +512,6 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
-        <!-- valid value of interpolation if specified: linear -->
-        <xs:attribute name="interpolation" type="xs:string" use="optional"/>
     </xs:complexType>
 
     <xs:complexType name="brightnessPoint">
@@ -712,6 +710,12 @@
             lux for the current display -->
             <xs:element name="luxToBrightnessMapping" type="luxToBrightnessMapping"
                         minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- The time after which the stylus is to be assumed to be not under use. This will
+             enable the logic of changing the brightness with ambient light changes -->
+            <xs:element name="idleStylusTimeoutMillis" type="xs:nonNegativeInteger"
+                minOccurs="0" maxOccurs="1">
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
@@ -951,6 +955,7 @@
             <xs:enumeration value="default"/>
             <xs:enumeration value="idle"/>
             <xs:enumeration value="doze"/>
+            <xs:enumeration value="bedtime_wear"/>
         </xs:restriction>
     </xs:simpleType>
 

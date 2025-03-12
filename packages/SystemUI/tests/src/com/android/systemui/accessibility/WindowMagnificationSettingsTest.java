@@ -59,6 +59,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -81,6 +82,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -544,9 +546,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         OnSeekBarWithIconButtonsChangeListener onChangeListener =
                 mZoomSeekbar.getOnSeekBarWithIconButtonsChangeListener();
 
-        mZoomSeekbar.setProgress(30);
+        SeekBar mockSeekBar = Mockito.mock(SeekBar.class);
+        when(mockSeekBar.getProgress()).thenReturn(30);
         onChangeListener.onUserInteractionFinalized(
-                mZoomSeekbar.getSeekbar(),
+                mockSeekBar,
                 OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER);
 
         // should trigger callback to update magnifier scale and persist the scale

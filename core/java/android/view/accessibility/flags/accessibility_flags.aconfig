@@ -4,6 +4,22 @@ container: "system"
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
 flag {
+    name: "a11y_expansion_state_api"
+    namespace: "accessibility"
+    description: "Enables new APIs for an app to convey if a node is expanded or collapsed."
+    bug: "362782536"
+    is_exported: true
+}
+
+flag {
+    name: "a11y_is_required_api"
+    namespace: "accessibility"
+    description: "Adds an API to indicate whether a form field (or similar element) is required."
+    bug: "362784403"
+    is_exported: true
+}
+
+flag {
     name: "a11y_overlay_callbacks"
     is_exported: true
     namespace: "accessibility"
@@ -23,6 +39,14 @@ flag {
     namespace: "accessibility"
     description: "Enables new APIs for an AccessibilityService to control selection across nodes."
     bug: "362782866"
+}
+
+flag {
+    name: "a11y_character_in_window_api"
+    namespace: "accessibility"
+    description: "Enables new extra data key for an AccessibilityService to request character bounds in unmagnified window coordinates."
+    bug: "375429616"
+    is_exported: true
 }
 
 flag {
@@ -64,12 +88,18 @@ flag {
 
 flag {
     namespace: "accessibility"
-    name: "fix_merged_content_change_event_v2"
-    description: "Fixes event type and source of content change event merged in ViewRootImpl"
-    bug: "277305460"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
+    name: "deprecate_accessibility_announcement_apis"
+    description: "Controls the deprecation of platform APIs related to disruptive accessibility announcements"
+    bug: "376727542"
+    is_exported: true
+}
+
+flag {
+    namespace: "accessibility"
+    name: "deprecate_ani_label_for_apis"
+    description: "Controls the deprecation of AccessibilityNodeInfo labelFor apis"
+    bug: "333783827"
+    is_exported: true
 }
 
 flag {
@@ -78,6 +108,16 @@ flag {
     is_exported: true
     description: "Makes flash notification APIs as system APIs for calling from mainline module"
     bug: "303131332"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "focus_rect_min_size"
+    description: "Ensures the a11y focus rect is big enough to be drawn as visible"
+    bug: "368667566"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -110,6 +150,7 @@ flag {
     name: "global_action_menu"
     description: "Allow AccessibilityService to perform GLOBAL_ACTION_MENU"
     bug: "334954140"
+    is_exported: true
 }
 
 flag {
@@ -117,6 +158,7 @@ flag {
     name: "global_action_media_play_pause"
     description: "Allow AccessibilityService to perform GLOBAL_ACTION_MEDIA_PLAY_PAUSE"
     bug: "334954140"
+    is_exported: true
 }
 
 flag {
@@ -191,10 +233,19 @@ flag {
 }
 
 flag {
+    name: "supplemental_description"
+    namespace: "accessibility"
+    description: "Feature flag for supplemental description api"
+    bug: "375266174"
+    is_exported: true
+}
+
+flag {
     name: "support_multiple_labeledby"
     namespace: "accessibility"
     description: "Feature flag for supporting multiple labels in AccessibilityNodeInfo labeledby api"
     bug: "333780959"
+    is_exported: true
 }
 
 flag {
@@ -202,4 +253,30 @@ flag {
     namespace: "accessibility"
     description: "Feature flag for declaring system pinch zoom opt-out apis"
     bug: "315089687"
+}
+
+flag {
+    name: "tri_state_checked"
+    namespace: "accessibility"
+    description: "Feature flag for adding tri-state checked api"
+    bug: "333784774"
+    is_exported: true
+}
+
+flag {
+    name: "warning_use_default_dialog_type"
+    namespace: "accessibility"
+    description: "Uses the default type for the A11yService warning dialog, instead of SYSTEM_ALERT_DIALOG"
+    bug: "336719951"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "indeterminate_range_info"
+    namespace: "accessibility"
+    description: "Creates a way to create an INDETERMINATE RangeInfo"
+    bug: "376108874"
+    is_exported: true
 }

@@ -80,9 +80,52 @@ static inline T MakeGlobalRefOrDie(JNIEnv* env, T in) {
     return static_cast<T>(res);
 }
 
+//  Inline variable that specifies the method binding format.
+//  The expected format is 'XX${method}XX', where ${method} represents the original method name.
+//  This variable is shared across all translation units. This is treated as a global variable as
+//  per C++ 17.
+inline std::string jniMethodFormat;
+
+inline static void setJniMethodFormat(std::string value) {
+    jniMethodFormat = value;
+}
+
+// Register the native methods, potenially applying the jniMethodFormat if it has been set.
+static inline int jniRegisterMaybeRenamedNativeMethods(JNIEnv* env, const char* className,
+                                                       const JNINativeMethod* gMethods,
+                                                       int numMethods) {
+    if (jniMethodFormat.empty()) {
+        return jniRegisterNativeMethods(env, className, gMethods, numMethods);
+    }
+
+    // Make a copy of gMethods with reformatted method names.
+    JNINativeMethod* modifiedMethods = new JNINativeMethod[numMethods];
+    LOG_ALWAYS_FATAL_IF(!modifiedMethods, "Failed to allocate a copy of the JNI methods");
+
+    size_t methodNamePos = jniMethodFormat.find("${method}");
+    LOG_ALWAYS_FATAL_IF(methodNamePos == std::string::npos,
+                        "Invalid jniMethodFormat: could not find '${method}' in pattern");
+
+    for (int i = 0; i < numMethods; i++) {
+        modifiedMethods[i] = gMethods[i];
+        std::string modifiedName = jniMethodFormat;
+        modifiedName.replace(methodNamePos, 9, gMethods[i].name);
+        char* modifiedNameChars = new char[modifiedName.length() + 1];
+        LOG_ALWAYS_FATAL_IF(!modifiedNameChars, "Failed to allocate the new method name");
+        std::strcpy(modifiedNameChars, modifiedName.c_str());
+        modifiedMethods[i].name = modifiedNameChars;
+    }
+    int res = jniRegisterNativeMethods(env, className, modifiedMethods, numMethods);
+    for (int i = 0; i < numMethods; i++) {
+        delete[] modifiedMethods[i].name;
+    }
+    delete[] modifiedMethods;
+    return res;
+}
+
 static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
                                        const JNINativeMethod* gMethods, int numMethods) {
-    int res = jniRegisterNativeMethods(env, className, gMethods, numMethods);
+    int res = jniRegisterMaybeRenamedNativeMethods(env, className, gMethods, numMethods);
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
     return res;
 }

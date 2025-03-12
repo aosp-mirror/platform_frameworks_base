@@ -197,7 +197,7 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     private boolean mVibrateOn;
     @GuardedBy("mLock")
-    private int mRingerMode = AudioManager.RINGER_MODE_NORMAL;
+    private int mRingerMode;
     @GuardedBy("mLock")
     private boolean mOnWirelessCharger;
 
@@ -617,11 +617,11 @@ final class VibrationSettings {
 
     private void updateRingerMode() {
         synchronized (mLock) {
-            // If audio manager was not loaded yet then assume normal mode.
-            // This will be loaded again as soon as the audio manager is loaded in onSystemReady.
-            mRingerMode = (mAudioManager == null)
-                    ? AudioManager.RINGER_MODE_NORMAL
-                    : mAudioManager.getRingerModeInternal();
+            if (mAudioManager == null) {
+                // Service not ready yet or audio service not available, skip this update request.
+                return;
+            }
+            mRingerMode = mAudioManager.getRingerModeInternal();
         }
     }
 

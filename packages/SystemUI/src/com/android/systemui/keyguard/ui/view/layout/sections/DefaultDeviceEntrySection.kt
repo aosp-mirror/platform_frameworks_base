@@ -27,11 +27,9 @@ import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.keyguard.LockIconView
-import com.android.keyguard.LockIconViewController
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
@@ -48,6 +46,7 @@ import com.android.systemui.log.dagger.LongPressTouchLog
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.VibratorHelper
 import dagger.Lazy
 import javax.inject.Inject
@@ -63,10 +62,9 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val authController: AuthController,
     private val windowManager: WindowManager,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val notificationPanelView: NotificationPanelView,
     private val featureFlags: FeatureFlags,
-    private val lockIconViewController: Lazy<LockIconViewController>,
     private val deviceEntryIconViewModel: Lazy<DeviceEntryIconViewModel>,
     private val deviceEntryForegroundViewModel: Lazy<DeviceEntryForegroundViewModel>,
     private val deviceEntryBackgroundViewModel: Lazy<DeviceEntryBackgroundViewModel>,
@@ -78,73 +76,47 @@ constructor(
     private var disposableHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (
-            !KeyguardBottomAreaRefactor.isEnabled &&
-                !MigrateClocksToBlueprint.isEnabled &&
-                !DeviceEntryUdfpsRefactor.isEnabled
-        ) {
+        if (!KeyguardBottomAreaRefactor.isEnabled && !MigrateClocksToBlueprint.isEnabled) {
             return
         }
 
-        notificationPanelView.findViewById<View>(R.id.lock_icon_view).let {
-            notificationPanelView.removeView(it)
-        }
-
         val view =
-            if (DeviceEntryUdfpsRefactor.isEnabled) {
-                DeviceEntryIconView(
-                        context,
-                        null,
-                        logger =
-                            LongPressHandlingViewLogger(
-                                logBuffer = logBuffer,
-                                TAG
-                            )
-                    )
-                    .apply { id = deviceEntryIconViewId }
-            } else {
-                // KeyguardBottomAreaRefactor.isEnabled or MigrateClocksToBlueprint.isEnabled
-                LockIconView(context, null).apply { id = R.id.lock_icon_view }
-            }
+            DeviceEntryIconView(
+                    context,
+                    null,
+                    logger = LongPressHandlingViewLogger(logBuffer = logBuffer, TAG),
+                )
+                .apply { id = deviceEntryIconViewId }
+
         constraintLayout.addView(view)
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (DeviceEntryUdfpsRefactor.isEnabled) {
-            constraintLayout.findViewById<DeviceEntryIconView?>(deviceEntryIconViewId)?.let {
-                disposableHandle?.dispose()
-                disposableHandle =
-                    DeviceEntryIconViewBinder.bind(
-                        applicationScope,
-                        it,
-                        deviceEntryIconViewModel.get(),
-                        deviceEntryForegroundViewModel.get(),
-                        deviceEntryBackgroundViewModel.get(),
-                        falsingManager.get(),
-                        vibratorHelper.get(),
-                    )
-            }
-        } else {
-            constraintLayout.findViewById<LockIconView?>(R.id.lock_icon_view)?.let {
-                lockIconViewController.get().setLockIconView(it)
-            }
+        constraintLayout.findViewById<DeviceEntryIconView?>(deviceEntryIconViewId)?.let {
+            disposableHandle?.dispose()
+            disposableHandle =
+                DeviceEntryIconViewBinder.bind(
+                    applicationScope,
+                    it,
+                    deviceEntryIconViewModel.get(),
+                    deviceEntryForegroundViewModel.get(),
+                    deviceEntryBackgroundViewModel.get(),
+                    falsingManager.get(),
+                    vibratorHelper.get(),
+                )
         }
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        val isUdfpsSupported =
-            if (DeviceEntryUdfpsRefactor.isEnabled) {
-                Log.d(
-                    "DefaultDeviceEntrySection",
-                    "isUdfpsSupported=${deviceEntryIconViewModel.get().isUdfpsSupported.value}"
-                )
-                deviceEntryIconViewModel.get().isUdfpsSupported.value
-            } else {
-                authController.isUdfpsSupported
-            }
+        Log.d(
+            "DefaultDeviceEntrySection",
+            "isUdfpsSupported=${deviceEntryIconViewModel.get().isUdfpsSupported.value}",
+        )
+        val isUdfpsSupported = deviceEntryIconViewModel.get().isUdfpsSupported.value
+
         val scaleFactor: Float = authController.scaleFactor
         val mBottomPaddingPx =
-            context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
+            context.resources.getDimensionPixelSize(customR.dimen.lock_icon_margin_bottom)
         val bounds = windowManager.currentWindowMetrics.bounds
         var widthPixels = bounds.right.toFloat()
         if (featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)) {
@@ -160,31 +132,24 @@ constructor(
         val iconRadiusPx = (defaultDensity * 36).toInt()
 
         if (isUdfpsSupported) {
-            if (DeviceEntryUdfpsRefactor.isEnabled) {
-                deviceEntryIconViewModel.get().udfpsLocation.value?.let { udfpsLocation ->
-                    Log.d(
-                        "DeviceEntrySection",
-                        "udfpsLocation=$udfpsLocation, " +
-                            "scaledLocation=(${udfpsLocation.centerX},${udfpsLocation.centerY}), " +
-                            "unusedAuthController=${authController.udfpsLocation}"
-                    )
-                    centerIcon(
-                        Point(udfpsLocation.centerX.toInt(), udfpsLocation.centerY.toInt()),
-                        udfpsLocation.radius,
-                        constraintSet
-                    )
-                }
-            } else {
-                authController.udfpsLocation?.let { udfpsLocation ->
-                    Log.d("DeviceEntrySection", "udfpsLocation=$udfpsLocation")
-                    centerIcon(udfpsLocation, authController.udfpsRadius, constraintSet)
-                }
+            deviceEntryIconViewModel.get().udfpsLocation.value?.let { udfpsLocation ->
+                Log.d(
+                    "DeviceEntrySection",
+                    "udfpsLocation=$udfpsLocation, " +
+                        "scaledLocation=(${udfpsLocation.centerX},${udfpsLocation.centerY}), " +
+                        "unusedAuthController=${authController.udfpsLocation}",
+                )
+                centerIcon(
+                    Point(udfpsLocation.centerX.toInt(), udfpsLocation.centerY.toInt()),
+                    udfpsLocation.radius,
+                    constraintSet,
+                )
             }
         } else {
             centerIcon(
                 Point(
                     (widthPixels / 2).toInt(),
-                    (heightPixels - ((mBottomPaddingPx + iconRadiusPx) * scaleFactor)).toInt()
+                    (heightPixels - ((mBottomPaddingPx + iconRadiusPx) * scaleFactor)).toInt(),
                 ),
                 iconRadiusPx * scaleFactor,
                 constraintSet,
@@ -193,12 +158,8 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (DeviceEntryUdfpsRefactor.isEnabled) {
-            constraintLayout.removeView(deviceEntryIconViewId)
-            disposableHandle?.dispose()
-        } else {
-            constraintLayout.removeView(R.id.lock_icon_view)
-        }
+        constraintLayout.removeView(deviceEntryIconViewId)
+        disposableHandle?.dispose()
     }
 
     @VisibleForTesting
@@ -213,12 +174,7 @@ constructor(
                 )
             }
 
-        val iconId =
-            if (DeviceEntryUdfpsRefactor.isEnabled) {
-                deviceEntryIconViewId
-            } else {
-                R.id.lock_icon_view
-            }
+        val iconId = deviceEntryIconViewId
 
         constraintSet.apply {
             constrainWidth(iconId, sensorRect.right - sensorRect.left)
@@ -228,14 +184,14 @@ constructor(
                 ConstraintSet.TOP,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.TOP,
-                sensorRect.top
+                sensorRect.top,
             )
             connect(
                 iconId,
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,
-                sensorRect.left
+                sensorRect.left,
             )
         }
 
@@ -243,8 +199,8 @@ constructor(
         // Without this logic, the lock icon location changes but the KeyguardBottomAreaView is not
         // updated and visible ui layout jank occurs. This is due to AmbientIndicationContainer
         // being in NPVC and laying out prior to the KeyguardRootView.
-        // Remove when both DeviceEntryUdfpsRefactor and KeyguardBottomAreaRefactor are enabled.
-        if (DeviceEntryUdfpsRefactor.isEnabled && !KeyguardBottomAreaRefactor.isEnabled) {
+        // Remove when KeyguardBottomAreaRefactor is enabled.
+        if (!KeyguardBottomAreaRefactor.isEnabled) {
             with(notificationPanelView) {
                 val isUdfpsSupported = deviceEntryIconViewModel.get().isUdfpsSupported.value
                 val bottomAreaViewRight = findViewById<View>(R.id.keyguard_bottom_area)?.right ?: 0
@@ -256,7 +212,7 @@ constructor(
                             ambientLeft,
                             sensorRect.bottom,
                             bottomAreaViewRight - ambientLeft,
-                            ambientTop + it.measuredHeight
+                            ambientTop + it.measuredHeight,
                         )
                     } else {
                         // make bottom of ambient indication view the top of the lock icon
@@ -264,7 +220,7 @@ constructor(
                             ambientLeft,
                             sensorRect.top - it.measuredHeight,
                             bottomAreaViewRight - ambientLeft,
-                            sensorRect.top
+                            sensorRect.top,
                         )
                     }
                 }

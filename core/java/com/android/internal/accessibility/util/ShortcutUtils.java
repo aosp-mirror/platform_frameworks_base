@@ -27,6 +27,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.SERVIC
 import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.KEY_GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
@@ -187,6 +188,7 @@ public final class ShortcutUtils {
             case TWOFINGER_DOUBLETAP ->
                     Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED;
             case QUICK_SETTINGS -> Settings.Secure.ACCESSIBILITY_QS_TARGETS;
+            case KEY_GESTURE -> Settings.Secure.ACCESSIBILITY_KEY_GESTURE_TARGETS;
             default -> throw new IllegalArgumentException(
                     "Unsupported user shortcut type: " + type);
         };
@@ -209,6 +211,7 @@ public final class ShortcutUtils {
                     TRIPLETAP;
             case Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED ->
                     TWOFINGER_DOUBLETAP;
+            case Settings.Secure.ACCESSIBILITY_KEY_GESTURE_TARGETS -> KEY_GESTURE;
             default -> throw new IllegalArgumentException(
                     "Unsupported user shortcut key: " + key);
         };

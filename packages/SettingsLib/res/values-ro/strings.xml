@@ -586,13 +586,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Acest telefon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Această tabletă"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Acest computer (intern)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Microfon (intern)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Acest televizor"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Difuzorul dispozitivului de andocare"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispozitiv extern"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispozitiv conectat"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Acest telefon"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analogic"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nu se poate reda pe acest dispozitiv"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Fă upgrade contului pentru a comuta"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Aici nu se pot reda descărcări"</string>
@@ -605,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Conectat prin ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Conectat prin eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Prestabilit pentru televizor"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Ieșire HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Difuzoare interne"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Difuzor încorporat"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Audio TV"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problemă la conectare. Oprește și repornește dispozitivul."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispozitiv audio cu fir"</string>
     <string name="help_label" msgid="3528360748637781274">"Ajutor și feedback"</string>
@@ -690,10 +690,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activat"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Pentru ca modificarea să se aplice, trebuie să repornești dispozitivul. Repornește-l acum sau anulează."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Căști cu fir"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Căști"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"Difuzor USB"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Mufă pentru microfon"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"Microfon USB"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Audio cu fir"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Audio USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Microfon cu fir"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Microfon USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Microfon BT"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Activat"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Dezactivat"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Se schimbă rețeaua operatorului"</string>

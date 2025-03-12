@@ -57,6 +57,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
+import com.android.server.companion.CompanionExemptionProcessor;
 import com.android.server.companion.association.AssociationStore;
 
 import java.io.PrintWriter;
@@ -101,6 +102,8 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     private final PowerManagerInternal mPowerManagerInternal;
     @NonNull
     private final UserManager mUserManager;
+    @NonNull
+    private final CompanionExemptionProcessor mCompanionExemptionProcessor;
 
     // NOTE: Same association may appear in more than one of the following sets at the same time.
     // (E.g. self-managed devices that have MAC addresses, could be reported as present by their
@@ -111,7 +114,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
     @NonNull
     private final Set<Integer> mNearbyBleDevices = new HashSet<>();
     @NonNull
-    private final Set<Integer> mReportedSelfManagedDevices = new HashSet<>();
+    private final Set<Integer> mConnectedSelfManagedDevices = new HashSet<>();
     @NonNull
     private final Set<ParcelUuid> mConnectedUuidDevices = new HashSet<>();
     @NonNull
@@ -146,7 +149,8 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
             @NonNull UserManager userManager,
             @NonNull AssociationStore associationStore,
             @NonNull ObservableUuidStore observableUuidStore,
-            @NonNull PowerManagerInternal powerManagerInternal) {
+            @NonNull PowerManagerInternal powerManagerInternal,
+            @NonNull CompanionExemptionProcessor companionExemptionProcessor) {
         mContext = context;
         mCompanionAppBinder = companionAppBinder;
         mAssociationStore = associationStore;
@@ -156,6 +160,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
                 mObservableUuidStore, this);
         mBleDeviceProcessor = new BleDeviceProcessor(associationStore, this);
         mPowerManagerInternal = powerManagerInternal;
+        mCompanionExemptionProcessor = companionExemptionProcessor;
     }
 
     /** Initialize {@link DevicePresenceProcessor} */
@@ -404,7 +409,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      * nearby (for "self-managed" associations).
      */
     public boolean isDevicePresent(int associationId) {
-        return mReportedSelfManagedDevices.contains(associationId)
+        return mConnectedSelfManagedDevices.contains(associationId)
                 || mConnectedBtDevices.contains(associationId)
                 || mNearbyBleDevices.contains(associationId)
                 || mSimulated.contains(associationId);
@@ -451,7 +456,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      * notifyDeviceAppeared()}
      */
     public void onSelfManagedDeviceConnected(int associationId) {
-        onDevicePresenceEvent(mReportedSelfManagedDevices,
+        onDevicePresenceEvent(mConnectedSelfManagedDevices,
                 associationId, EVENT_SELF_MANAGED_APPEARED);
     }
 
@@ -467,7 +472,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      * notifyDeviceDisappeared()}
      */
     public void onSelfManagedDeviceDisconnected(int associationId) {
-        onDevicePresenceEvent(mReportedSelfManagedDevices,
+        onDevicePresenceEvent(mConnectedSelfManagedDevices,
                 associationId, EVENT_SELF_MANAGED_DISAPPEARED);
     }
 
@@ -475,7 +480,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
      * Marks a "self-managed" device as disconnected when binderDied.
      */
     public void onSelfManagedDeviceReporterBinderDied(int associationId) {
-        onDevicePresenceEvent(mReportedSelfManagedDevices,
+        onDevicePresenceEvent(mConnectedSelfManagedDevices,
                 associationId, EVENT_SELF_MANAGED_DISAPPEARED);
     }
 
@@ -683,6 +688,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
 
                 if (association.shouldBindWhenPresent()) {
                     bindApplicationIfNeeded(userId, packageName, association.isSelfManaged());
+                    mCompanionExemptionProcessor.exemptPackage(userId, packageName, true);
                 } else {
                     return;
                 }
@@ -715,6 +721,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
                 // Check if there are other devices associated to the app that are present.
                 if (!shouldBindPackage(userId, packageName)) {
                     mCompanionAppBinder.unbindCompanionApp(userId, packageName);
+                    mCompanionExemptionProcessor.exemptPackage(userId, packageName, false);
                 }
                 break;
             default:
@@ -940,7 +947,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
 
         mConnectedBtDevices.remove(id);
         mNearbyBleDevices.remove(id);
-        mReportedSelfManagedDevices.remove(id);
+        mConnectedSelfManagedDevices.remove(id);
         mSimulated.remove(id);
         synchronized (mBtDisconnectedDevices) {
             mBtDisconnectedDevices.remove(id);
@@ -1100,7 +1107,7 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         out.append("Companion Device Present: ");
         if (mConnectedBtDevices.isEmpty()
                 && mNearbyBleDevices.isEmpty()
-                && mReportedSelfManagedDevices.isEmpty()) {
+                && mConnectedSelfManagedDevices.isEmpty()) {
             out.append("<empty>\n");
             return;
         } else {
@@ -1130,11 +1137,11 @@ public class DevicePresenceProcessor implements AssociationStore.OnChangeListene
         }
 
         out.append("  Self-Reported Devices: ");
-        if (mReportedSelfManagedDevices.isEmpty()) {
+        if (mConnectedSelfManagedDevices.isEmpty()) {
             out.append("<empty>\n");
         } else {
             out.append("\n");
-            for (int associationId : mReportedSelfManagedDevices) {
+            for (int associationId : mConnectedSelfManagedDevices) {
                 AssociationInfo a = mAssociationStore.getAssociationById(associationId);
                 out.append("    ").append(a.toShortString()).append('\n');
             }

@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** Keeps all [IKeyguardStateCallback]s hydrated with the latest state. */
@@ -76,7 +76,7 @@ constructor(
 
         callbacks.add(callback)
 
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             callback.onShowingStateChanged(
                 !deviceEntryInteractor.isDeviceEntered.value,
                 selectedUserInteractor.getSelectedUserId(),

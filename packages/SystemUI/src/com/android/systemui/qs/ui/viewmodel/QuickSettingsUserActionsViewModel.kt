@@ -20,7 +20,6 @@ import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
@@ -44,10 +43,8 @@ import kotlinx.coroutines.flow.map
  */
 class QuickSettingsUserActionsViewModel
 @AssistedInject
-constructor(
-    private val qsSceneAdapter: QSSceneAdapter,
-    sceneBackInteractor: SceneBackInteractor,
-) : UserActionsViewModel() {
+constructor(private val qsSceneAdapter: QSSceneAdapter, sceneBackInteractor: SceneBackInteractor) :
+    UserActionsViewModel() {
 
     private val backScene: Flow<SceneKey> =
         sceneBackInteractor.backScene
@@ -55,10 +52,7 @@ constructor(
             .map { it ?: Scenes.Shade }
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
-        combine(
-                qsSceneAdapter.isCustomizerShowing,
-                backScene,
-            ) { isCustomizing, backScene ->
+        combine(qsSceneAdapter.isCustomizerShowing, backScene) { isCustomizing, backScene ->
                 buildMap<UserAction, UserActionResult> {
                     if (isCustomizing) {
                         // TODO(b/332749288) Empty map so there are no back handlers and back can
@@ -69,9 +63,9 @@ constructor(
                         // while customizing
                     } else {
                         put(Back, UserActionResult(backScene))
-                        put(Swipe(SwipeDirection.Up), UserActionResult(backScene))
+                        put(Swipe.Up, UserActionResult(backScene))
                         put(
-                            Swipe(fromSource = Edge.Bottom, direction = SwipeDirection.Up),
+                            Swipe.Up(fromSource = Edge.Bottom),
                             UserActionResult(SceneFamilies.Home),
                         )
                     }

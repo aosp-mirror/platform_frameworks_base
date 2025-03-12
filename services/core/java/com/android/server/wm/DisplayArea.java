@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -24,7 +23,7 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.wm.DisplayAreaProto.FEATURE_ID;
 import static com.android.server.wm.DisplayAreaProto.IS_IGNORING_ORIENTATION_REQUEST;
@@ -47,6 +46,7 @@ import android.window.IDisplayAreaOrganizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.Comparator;
@@ -54,6 +54,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
 /**
  * Container for grouping WindowContainer below DisplayContent.
  *
@@ -100,8 +101,6 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     DisplayArea(WindowManagerService wms, Type type, String name, int featureId) {
         super(wms);
-        // TODO(display-area): move this up to ConfigurationContainer
-        setOverrideOrientation(SCREEN_ORIENTATION_UNSET);
         mType = type;
         mName = name;
         mFeatureId = featureId;
@@ -260,15 +259,14 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         if (mDisplayContent == null) {
             return false;
         }
-        ActivityRecord activity = mDisplayContent.topRunningActivity(
-                /* considerKeyguardState= */ true);
-        return activity != null && activity.getTaskFragment() != null
-                // Checking TaskFragment rather than ActivityRecord to ensure that transition
-                // between fullscreen and PiP would work well. Checking TaskFragment rather than
-                // Task to ensure that Activity Embedding is excluded.
-                && activity.getTaskFragment().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && activity.mAppCompatController.getAppCompatOrientationOverrides()
-                    .isOverrideRespectRequestedOrientationEnabled();
+
+        // Top running activity can be freeform and ignore orientation request from bottom activity
+        // that should be respected, Check all activities in display to make sure any eligible
+        // activity should be respected.
+        final ActivityRecord activity = mDisplayContent.getActivity((r) ->
+                r.mAppCompatController.getAppCompatOrientationOverrides()
+                    .shouldRespectRequestedOrientationDueToOverride());
+        return activity != null;
     }
 
     boolean getIgnoreOrientationRequest() {
@@ -833,11 +831,14 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         void prepareSurfaces() {
             mDimmer.resetDimStates();
             super.prepareSurfaces();
-            final Rect dimBounds = mDimmer.getDimBounds();
-            if (dimBounds != null) {
-                // Bounds need to be relative, as the dim layer is a child.
-                getBounds(dimBounds);
-                dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+            Rect dimBounds = null;
+            if (!Flags.useTasksDimOnly()) {
+                dimBounds = mDimmer.getDimBounds();
+                if (dimBounds != null) {
+                    // Bounds need to be relative, as the dim layer is a child.
+                    getBounds(dimBounds);
+                    dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+                }
             }
 
             // If SystemUI is dragging for recents, we want to reset the dim state so any dim layer
@@ -847,7 +848,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 mDimmer.resetDimStates();
             }
 
-            if (dimBounds != null) {
+            if (mDimmer.hasDimState()) {
                 if (mDimmer.updateDims(getSyncTransaction())) {
                     scheduleAnimation();
                 }

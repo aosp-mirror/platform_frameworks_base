@@ -22,6 +22,7 @@
 #include <memory>
 
 #include "GraphicsJNI.h"
+#include "RuntimeEffectUtils.h"
 #include "SkColorFilter.h"
 
 namespace android {
@@ -111,6 +112,36 @@ private:
 
 private:
     std::vector<float> mMatrix;
+};
+
+class RuntimeColorFilter : public ColorFilter {
+public:
+    RuntimeColorFilter(SkRuntimeEffectBuilder* builder) : mBuilder(builder) {}
+
+    void updateUniforms(JNIEnv* env, const char* name, const float vals[], int count,
+                        bool isColor) {
+        UpdateFloatUniforms(env, mBuilder, name, vals, count, isColor);
+        discardInstance();
+    }
+
+    void updateUniforms(JNIEnv* env, const char* name, const int vals[], int count) {
+        UpdateIntUniforms(env, mBuilder, name, vals, count);
+        discardInstance();
+    }
+
+    void updateChild(JNIEnv* env, const char* name, SkFlattenable* childEffect) {
+        UpdateChild(env, mBuilder, name, childEffect);
+        discardInstance();
+    }
+
+private:
+    sk_sp<SkColorFilter> createInstance() override {
+        // TODO: throw error if null
+        return mBuilder->makeColorFilter();
+    }
+
+private:
+    SkRuntimeEffectBuilder* mBuilder;
 };
 
 }  // namespace uirenderer

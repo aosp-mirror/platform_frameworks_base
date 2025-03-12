@@ -22,14 +22,18 @@ import android.text.TextUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.devicesettings.ActionSwitchPreference
 import com.android.settingslib.bluetooth.devicesettings.DeviceSetting
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingAction
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingContract
-import com.android.settingslib.bluetooth.devicesettings.DeviceSettingId
-import com.android.settingslib.bluetooth.devicesettings.DeviceSettingItem
-import com.android.settingslib.bluetooth.devicesettings.DeviceSettingsConfig
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingFooterPreference
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingHelpPreference
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingId
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingIntentAction
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingItem
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingPendingIntentAction
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingsConfig
 import com.android.settingslib.bluetooth.devicesettings.MultiTogglePreference
 import com.android.settingslib.bluetooth.devicesettings.ToggleInfo
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingActionModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel.AppProvidedItem
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel.BuiltinItem.BluetoothProfilesItem
@@ -58,7 +62,7 @@ interface DeviceSettingRepository {
     /** Gets device setting for the bluetooth device. */
     fun getDeviceSetting(
         cachedDevice: CachedBluetoothDevice,
-        @DeviceSettingId settingId: Int
+        @DeviceSettingId settingId: Int,
     ): Flow<DeviceSettingModel?>
 }
 
@@ -84,7 +88,8 @@ class DeviceSettingRepositoryImpl(
                             coroutineScope,
                             backgroundCoroutineContext,
                         )
-                })
+                }
+            )
 
     override suspend fun getDeviceSettingsConfig(
         cachedDevice: CachedBluetoothDevice
@@ -93,7 +98,7 @@ class DeviceSettingRepositoryImpl(
 
     override fun getDeviceSetting(
         cachedDevice: CachedBluetoothDevice,
-        settingId: Int
+        settingId: Int,
     ): Flow<DeviceSettingModel?> =
         connectionCache.get(cachedDevice).let { connection ->
             connection.getDeviceSetting(settingId).map { it?.toModel(cachedDevice, connection) }
@@ -101,31 +106,55 @@ class DeviceSettingRepositoryImpl(
 
     private fun DeviceSettingsConfig.toModel(): DeviceSettingConfigModel =
         DeviceSettingConfigModel(
-            mainItems = mainContentItems.map { it.toModel() },
-            moreSettingsItems = moreSettingsItems.map { it.toModel() },
-            moreSettingsHelpItem = moreSettingsHelpItem?.toModel(), )
+            mainItems = mainContentItems.toModel(),
+            moreSettingsItems = moreSettingsItems.toModel(),
+            moreSettingsHelpItem = moreSettingsHelpItem?.toModel(),
+        )
 
-    private fun DeviceSettingItem.toModel(): DeviceSettingConfigItemModel {
-        return if (!TextUtils.isEmpty(preferenceKey)) {
-            if (settingId == DeviceSettingId.DEVICE_SETTING_ID_BLUETOOTH_PROFILES) {
-                BluetoothProfilesItem(
-                    settingId,
-                    highlighted,
-                    preferenceKey!!,
-                    extras.getStringArrayList(DeviceSettingContract.INVISIBLE_PROFILES)
-                        ?: emptyList()
-                )
+    private fun List<DeviceSettingItem>.toModel(): List<DeviceSettingConfigItemModel> {
+        return this.flatMap { item ->
+            if (item.settingId in EXPANDABLE_SETTING_IDS) {
+                IntRange(item.settingId, item.settingId + SETTING_ID_EXPAND_LIMIT - 1).map {
+                    item.toModel(overrideSettingId = it)
+                }
             } else {
-                CommonBuiltinItem(settingId, highlighted, preferenceKey!!)
+                listOf(item.toModel())
             }
-        } else {
-            AppProvidedItem(settingId, highlighted)
         }
     }
 
+    private fun DeviceSettingItem.toModel(
+        overrideSettingId: Int? = null
+    ): DeviceSettingConfigItemModel {
+        return if (!TextUtils.isEmpty(preferenceKey)) {
+            if (settingId == DeviceSettingId.DEVICE_SETTING_ID_BLUETOOTH_PROFILES) {
+                BluetoothProfilesItem(
+                    overrideSettingId ?: settingId,
+                    highlighted,
+                    preferenceKey!!,
+                    extras.getStringArrayList(DeviceSettingContract.INVISIBLE_PROFILES)
+                        ?: emptyList(),
+                )
+            } else {
+                CommonBuiltinItem(overrideSettingId ?: settingId, highlighted, preferenceKey!!)
+            }
+        } else {
+            AppProvidedItem(overrideSettingId ?: settingId, highlighted)
+        }
+    }
+
+    private fun DeviceSettingAction.toModel(): DeviceSettingActionModel? =
+        when (this) {
+            is DeviceSettingIntentAction -> DeviceSettingActionModel.IntentAction(this.intent)
+            is DeviceSettingPendingIntentAction ->
+                DeviceSettingActionModel.PendingIntentAction(this.pendingIntent)
+
+            else -> null
+        }
+
     private fun DeviceSetting.toModel(
         cachedDevice: CachedBluetoothDevice,
-        connection: DeviceSettingServiceConnection
+        connection: DeviceSettingServiceConnection,
     ): DeviceSettingModel =
         when (val pref = preference) {
             is ActionSwitchPreference ->
@@ -136,7 +165,7 @@ class DeviceSettingRepositoryImpl(
                     summary = pref.summary,
                     icon = pref.icon?.let { DeviceSettingIcon.BitmapIcon(it) },
                     isAllowedChangingState = pref.isAllowedChangingState,
-                    intent = pref.intent,
+                    action = pref.action.toModel(),
                     switchState =
                         if (pref.hasSwitch()) {
                             DeviceSettingStateModel.ActionSwitchPreferenceState(pref.checked)
@@ -145,13 +174,11 @@ class DeviceSettingRepositoryImpl(
                         },
                     updateState = { newState ->
                         coroutineScope.launch(backgroundCoroutineContext) {
-                            connection.updateDeviceSettings(
-                                settingId,
-                                newState.toParcelable(),
-                            )
+                            connection.updateDeviceSettings(settingId, newState.toParcelable())
                         }
                     },
                 )
+
             is MultiTogglePreference ->
                 DeviceSettingModel.MultiTogglePreference(
                     cachedDevice = cachedDevice,
@@ -167,15 +194,33 @@ class DeviceSettingRepositoryImpl(
                         }
                     },
                 )
-            is DeviceSettingFooterPreference -> DeviceSettingModel.FooterPreference(
-                cachedDevice = cachedDevice,
-                id = settingId, footerText = pref.footerText)
-            is DeviceSettingHelpPreference -> DeviceSettingModel.HelpPreference(
-                cachedDevice = cachedDevice,
-                id = settingId, intent = pref.intent)
+
+            is DeviceSettingFooterPreference ->
+                DeviceSettingModel.FooterPreference(
+                    cachedDevice = cachedDevice,
+                    id = settingId,
+                    footerText = pref.footerText,
+                )
+
+            is DeviceSettingHelpPreference ->
+                DeviceSettingModel.HelpPreference(
+                    cachedDevice = cachedDevice,
+                    id = settingId,
+                    intent = pref.intent,
+                )
+
             else -> DeviceSettingModel.Unknown(cachedDevice, settingId)
         }
 
     private fun ToggleInfo.toModel(): ToggleModel =
         ToggleModel(label, DeviceSettingIcon.BitmapIcon(icon))
+
+    companion object {
+        private val EXPANDABLE_SETTING_IDS =
+            listOf(
+                DeviceSettingId.DEVICE_SETTING_ID_EXPANDABLE_1,
+                DeviceSettingId.DEVICE_SETTING_ID_EXPANDABLE_2,
+            )
+        private const val SETTING_ID_EXPAND_LIMIT = 15
+    }
 }

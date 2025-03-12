@@ -62,26 +62,29 @@ interface PreferenceBinding {
     fun bind(preference: Preference, metadata: PreferenceMetadata) {
         metadata.apply {
             preference.key = key
-            if (icon != 0) {
-                preference.setIcon(icon)
+            val context = preference.context
+            val preferenceIcon = metadata.getPreferenceIcon(context)
+            if (preferenceIcon != 0) {
+                preference.setIcon(preferenceIcon)
             } else {
                 preference.icon = null
             }
-            val context = preference.context
+            val isPreferenceScreen = preference is PreferenceScreen
             preference.peekExtras()?.clear()
             extras(context)?.let { preference.extras.putAll(it) }
             preference.title = getPreferenceTitle(context)
-            preference.summary = getPreferenceSummary(context)
+            if (!isPreferenceScreen) {
+                preference.summary = getPreferenceSummary(context)
+            }
             preference.isEnabled = isEnabled(context)
             preference.isVisible =
                 (this as? PreferenceAvailabilityProvider)?.isAvailable(context) != false
             preference.isPersistent = isPersistent(context)
-            metadata.order(context)?.let { preference.order = it }
             // PreferenceRegistry will notify dependency change, so we do not need to set
             // dependency here. This simplifies dependency management and avoid the
             // IllegalStateException when call Preference.setDependency
             preference.dependency = null
-            if (preference !is PreferenceScreen) { // avoid recursive loop when build graph
+            if (!isPreferenceScreen) { // avoid recursive loop when build graph
                 preference.fragment = (this as? PreferenceScreenCreator)?.fragmentClass()?.name
                 preference.intent = intent(context)
             }
@@ -97,13 +100,16 @@ interface PreferenceBinding {
                     preference.setEntryValues(values)
                 }
             } else if (preference is SeekBarPreference && this is RangeValue) {
-                preference.min = minValue
-                preference.max = maxValue
-                preference.seekBarIncrement = incrementStep
+                preference.min = getMinValue(context)
+                preference.max = getMaxValue(context)
+                preference.seekBarIncrement = getIncrementStep(context)
             }
         }
     }
 }
+
+/** Interface indicates that a virtual [Preference] should be created for binding. */
+interface PreferenceBindingPlaceholder
 
 /** Abstract preference screen to provide preference hierarchy and binding factory. */
 interface PreferenceScreenCreator : PreferenceScreenMetadata, PreferenceScreenProvider {
@@ -112,7 +118,7 @@ interface PreferenceScreenCreator : PreferenceScreenMetadata, PreferenceScreenPr
     fun isFlagEnabled(context: Context): Boolean = true
 
     val preferenceBindingFactory: PreferenceBindingFactory
-        get() = DefaultPreferenceBindingFactory
+        get() = PreferenceBindingFactory.defaultFactory
 
     override fun createPreferenceScreen(factory: PreferenceScreenFactory) =
         factory.getOrCreatePreferenceScreen().apply {

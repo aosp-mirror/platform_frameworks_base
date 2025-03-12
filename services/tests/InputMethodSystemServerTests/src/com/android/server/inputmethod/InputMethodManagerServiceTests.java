@@ -35,6 +35,7 @@ import java.io.StringWriter;
 public final class InputMethodManagerServiceTests {
     static final int SYSTEM_DECORATION_SUPPORT_DISPLAY_ID = 2;
     static final int NO_SYSTEM_DECORATION_SUPPORT_DISPLAY_ID = 3;
+    private static final int TEST_IME_USER_ID = 1;
 
     static InputMethodManagerService.ImeDisplayValidator sChecker =
             (displayId) -> {
@@ -102,7 +103,8 @@ public final class InputMethodManagerServiceTests {
                 null,
                 null,
                 null,
-                null));
+                null,
+                TEST_IME_USER_ID));
 
         history.dump(new PrintWriter(writer), "" /* prefix */);
 

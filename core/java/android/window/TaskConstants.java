@@ -53,25 +53,30 @@ public class TaskConstants {
      */
     public static final int TASK_CHILD_LAYER_COMPAT_UI = TASK_CHILD_LAYER_REGION_SIZE;
 
+    /**
+     * Settings dialogs belonging to the task (e.g. Open by default settings dialog)
+     * @hide
+     */
+    public static final int TASK_CHILD_LAYER_SETTINGS_DIALOG = 2 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
      * Captions, window frames and resize handlers around task windows.
      * @hide
      */
-    public static final int TASK_CHILD_LAYER_WINDOW_DECORATIONS = 2 * TASK_CHILD_LAYER_REGION_SIZE;
+    public static final int TASK_CHILD_LAYER_WINDOW_DECORATIONS = 3 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
      * Overlays the task when going into PIP w/ gesture navigation.
      * @hide
      */
     public static final int TASK_CHILD_LAYER_RECENTS_ANIMATION_PIP_OVERLAY =
-            3 * TASK_CHILD_LAYER_REGION_SIZE;
+            4 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
      * Allows other apps to add overlays on the task (i.e. game dashboard)
      * @hide
      */
-    public static final int TASK_CHILD_LAYER_TASK_OVERLAY = 4 * TASK_CHILD_LAYER_REGION_SIZE;
+    public static final int TASK_CHILD_LAYER_TASK_OVERLAY = 5 * TASK_CHILD_LAYER_REGION_SIZE;
 
 
     /**
@@ -95,6 +100,7 @@ public class TaskConstants {
             TASK_CHILD_LAYER_TASK_BACKGROUND,
             TASK_CHILD_LAYER_LETTERBOX_BACKGROUND,
             TASK_CHILD_LAYER_COMPAT_UI,
+            TASK_CHILD_LAYER_SETTINGS_DIALOG,
             TASK_CHILD_LAYER_WINDOW_DECORATIONS,
             TASK_CHILD_LAYER_RECENTS_ANIMATION_PIP_OVERLAY,
             TASK_CHILD_LAYER_TASK_OVERLAY,

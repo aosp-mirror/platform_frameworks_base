@@ -96,11 +96,9 @@ class ActivityEmbeddingAnimationSpec {
     @NonNull
     Animation createChangeBoundsOpenAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect parentBounds) {
-        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-            final Animation customAnimation = loadCustomAnimation(info, change, TRANSIT_CHANGE);
-            if (customAnimation != null) {
-                return customAnimation;
-            }
+        final Animation customAnimation = loadCustomAnimation(info, change, TRANSIT_CHANGE);
+        if (customAnimation != null) {
+            return customAnimation;
         }
         // Use end bounds for opening.
         final Rect bounds = change.getEndAbsBounds();
@@ -130,11 +128,9 @@ class ActivityEmbeddingAnimationSpec {
     @NonNull
     Animation createChangeBoundsCloseAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect parentBounds) {
-        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-            final Animation customAnimation = loadCustomAnimation(info, change, TRANSIT_CHANGE);
-            if (customAnimation != null) {
-                return customAnimation;
-            }
+        final Animation customAnimation = loadCustomAnimation(info, change, TRANSIT_CHANGE);
+        if (customAnimation != null) {
+            return customAnimation;
         }
         // Use start bounds for closing.
         final Rect bounds = change.getStartAbsBounds();
@@ -168,14 +164,12 @@ class ActivityEmbeddingAnimationSpec {
     @NonNull
     Animation[] createChangeBoundsChangeAnimations(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect parentBounds) {
-        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-            // TODO(b/293658614): Support more complicated animations that may need more than a noop
-            // animation as the start leash.
-            final Animation noopAnimation = createNoopAnimation(change);
-            final Animation customAnimation = loadCustomAnimation(info, change, TRANSIT_CHANGE);
-            if (customAnimation != null) {
-                return new Animation[]{noopAnimation, customAnimation};
-            }
+        // TODO(b/293658614): Support more complicated animations that may need more than a noop
+        // animation as the start leash.
+        final Animation noopAnimation = createNoopAnimation(change);
+        final Animation customAnimation = loadCustomAnimation(info, change, TRANSIT_CHANGE);
+        if (customAnimation != null) {
+            return new Animation[]{noopAnimation, customAnimation};
         }
         // Both start bounds and end bounds are in screen coordinates. We will post translate
         // to the local coordinates in ActivityEmbeddingAnimationAdapter#onAnimationUpdate
@@ -320,13 +314,9 @@ class ActivityEmbeddingAnimationSpec {
         }
 
         final Animation anim;
-        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-            // TODO(b/293658614): Consider allowing custom animations from non-default packages.
-            // Enforce limiting to animations from the default "android" package for now.
-            anim = mTransitionAnimation.loadDefaultAnimationRes(resId);
-        } else {
-            anim = mTransitionAnimation.loadAnimationRes(options.getPackageName(), resId);
-        }
+        // TODO(b/293658614): Consider allowing custom animations from non-default packages.
+        // Enforce limiting to animations from the default "android" package for now.
+        anim = mTransitionAnimation.loadDefaultAnimationRes(resId);
         if (anim != null) {
             return anim;
         }

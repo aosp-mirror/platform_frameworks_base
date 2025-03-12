@@ -506,12 +506,16 @@ final class LogicalDisplay {
             mBaseDisplayInfo.rotation = Surface.ROTATION_0;
             mBaseDisplayInfo.modeId = deviceInfo.modeId;
             mBaseDisplayInfo.renderFrameRate = deviceInfo.renderFrameRate;
+            mBaseDisplayInfo.hasArrSupport = deviceInfo.hasArrSupport;
+            mBaseDisplayInfo.frameRateCategoryRate = deviceInfo.frameRateCategoryRate;
+            mBaseDisplayInfo.supportedRefreshRates = Arrays.copyOf(
+                    deviceInfo.supportedRefreshRates, deviceInfo.supportedRefreshRates.length);
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
             mBaseDisplayInfo.userPreferredModeId = deviceInfo.userPreferredModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
             mBaseDisplayInfo.appsSupportedModes = syntheticModeManager.createAppSupportedModes(
-                    config, mBaseDisplayInfo.supportedModes
+                    config, mBaseDisplayInfo.supportedModes, mBaseDisplayInfo.hasArrSupport
             );
             mBaseDisplayInfo.colorMode = deviceInfo.colorMode;
             mBaseDisplayInfo.supportedColorModes = Arrays.copyOf(
@@ -544,6 +548,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.brightnessMinimum = deviceInfo.brightnessMinimum;
             mBaseDisplayInfo.brightnessMaximum = deviceInfo.brightnessMaximum;
             mBaseDisplayInfo.brightnessDefault = deviceInfo.brightnessDefault;
+            mBaseDisplayInfo.brightnessDim = deviceInfo.brightnessDim;
             mBaseDisplayInfo.hdrSdrRatio = deviceInfo.hdrSdrRatio;
             mBaseDisplayInfo.roundedCorners = deviceInfo.roundedCorners;
             mBaseDisplayInfo.installOrientation = deviceInfo.installOrientation;

@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -171,8 +172,10 @@ class AodToLockscreenTransitionViewModelTest(flags: FlagsParameterization) : Sys
             // WHEN transition is cancelled
             repository.sendTransitionStep(step(.1f, TransitionState.CANCELED))
 
-            // THEN alpha is immediately set to 1f (expected lockscreen alpha state)
-            assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(1f)
+            // THEN alpha updates according to whether the scene framework is enabled (CANCELED is
+            // ignored when the scene framework is enabled).
+            assertThat(deviceEntryBackgroundViewAlpha)
+                .isEqualTo(if (SceneContainerFlag.isEnabled) 0f else 1f)
         }
 
     @Test
@@ -195,14 +198,14 @@ class AodToLockscreenTransitionViewModelTest(flags: FlagsParameterization) : Sys
 
     private fun step(
         value: Float,
-        state: TransitionState = TransitionState.RUNNING
+        state: TransitionState = TransitionState.RUNNING,
     ): TransitionStep {
         return TransitionStep(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
             value = value,
             transitionState = state,
-            ownerName = "AodToLockscreenTransitionViewModelTest"
+            ownerName = "AodToLockscreenTransitionViewModelTest",
         )
     }
 }

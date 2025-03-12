@@ -66,43 +66,57 @@ void BinaryStreamVisitor::visit(const IdmapHeader& header) {
 void BinaryStreamVisitor::visit(const IdmapData& data) {
   for (const auto& target_entry : data.GetTargetEntries()) {
     Write32(target_entry.target_id);
+  }
+  for (const auto& target_entry : data.GetTargetEntries()) {
     Write32(target_entry.overlay_id);
   }
 
-  static constexpr uint16_t kValueSize = 8U;
-  std::vector<std::pair<ConfigDescription, TargetValue>> target_values;
-  target_values.reserve(data.GetHeader()->GetTargetInlineEntryValueCount());
-  for (const auto& target_entry : data.GetTargetInlineEntries()) {
-    Write32(target_entry.target_id);
-    Write32(target_values.size());
-    Write32(target_entry.values.size());
-    target_values.insert(
-        target_values.end(), target_entry.values.begin(), target_entry.values.end());
+  uint32_t current_inline_entry_values_count = 0;
+  for (const auto& target_inline_entry : data.GetTargetInlineEntries()) {
+    Write32(target_inline_entry.target_id);
+  }
+  for (const auto& target_inline_entry : data.GetTargetInlineEntries()) {
+    Write32(current_inline_entry_values_count);
+    Write32(target_inline_entry.values.size());
+    current_inline_entry_values_count += target_inline_entry.values.size();
   }
 
   std::vector<ConfigDescription> configs;
   configs.reserve(data.GetHeader()->GetConfigCount());
-  for (const auto& target_entry_value : target_values) {
-    auto config_it = find(configs.begin(), configs.end(), target_entry_value.first);
-    if (config_it != configs.end()) {
-      Write32(config_it - configs.begin());
-    } else {
-      Write32(configs.size());
-      configs.push_back(target_entry_value.first);
+  for (const auto& target_entry : data.GetTargetInlineEntries()) {
+    for (const auto& target_entry_value : target_entry.values) {
+      auto config_it = std::find(configs.begin(), configs.end(), target_entry_value.first);
+      if (config_it != configs.end()) {
+        Write32(config_it - configs.begin());
+      } else {
+        Write32(configs.size());
+        configs.push_back(target_entry_value.first);
+      }
+      // We're writing a Res_value entry here, and the first 3 bytes of that are
+      // sizeof() + a padding 0 byte
+      static constexpr decltype(android::Res_value::size) kSize = sizeof(android::Res_value);
+      Write16(kSize);
+      Write8(0U);
+      Write8(target_entry_value.second.data_type);
+      Write32(target_entry_value.second.data_value);
     }
-    Write16(kValueSize);
-    Write8(0U);  // padding
-    Write8(target_entry_value.second.data_type);
-    Write32(target_entry_value.second.data_value);
   }
 
-  for( auto& cd : configs) {
-    cd.swapHtoD();
-    stream_.write(reinterpret_cast<char*>(&cd), sizeof(cd));
+  if (!configs.empty()) {
+    stream_.write(reinterpret_cast<const char*>(&configs.front()),
+                  sizeof(configs.front()) * configs.size());
+    if (configs.size() >= 100) {
+      // Let's write a message to future us so that they know when to replace the linear search
+      // in `configs` vector with something more efficient.
+      LOG(WARNING) << "Idmap got " << configs.size()
+                   << " configurations, time to fix the bruteforce search";
+    }
   }
 
   for (const auto& overlay_entry : data.GetOverlayEntries()) {
     Write32(overlay_entry.overlay_id);
+  }
+  for (const auto& overlay_entry : data.GetOverlayEntries()) {
     Write32(overlay_entry.target_id);
   }
 

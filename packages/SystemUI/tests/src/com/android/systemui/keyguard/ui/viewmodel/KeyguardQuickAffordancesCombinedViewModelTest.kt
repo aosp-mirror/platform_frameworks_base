@@ -114,9 +114,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     private lateinit var dozingToLockscreenTransitionViewModel:
         DozingToLockscreenTransitionViewModel
     @Mock
-    private lateinit var dreamingHostedToLockscreenTransitionViewModel:
-        DreamingHostedToLockscreenTransitionViewModel
-    @Mock
     private lateinit var dreamingToLockscreenTransitionViewModel:
         DreamingToLockscreenTransitionViewModel
     @Mock
@@ -134,9 +131,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     @Mock
     private lateinit var lockscreenToDozingTransitionViewModel:
         LockscreenToDozingTransitionViewModel
-    @Mock
-    private lateinit var lockscreenToDreamingHostedTransitionViewModel:
-        LockscreenToDreamingHostedTransitionViewModel
     @Mock
     private lateinit var lockscreenToDreamingTransitionViewModel:
         LockscreenToDreamingTransitionViewModel
@@ -182,8 +176,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                     BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
                 KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END +
                     ":" +
-                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
-            )
+                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET,
+            ),
         )
 
         homeControlsQuickAffordanceConfig =
@@ -263,8 +257,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         whenever(aodToLockscreenTransitionViewModel.shortcutsAlpha)
             .thenReturn(intendedAlphaMutableStateFlow)
         whenever(dozingToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
-        whenever(dreamingHostedToLockscreenTransitionViewModel.shortcutsAlpha)
-            .thenReturn(emptyFlow())
         whenever(dreamingToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(goneToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(occludedToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
@@ -274,8 +266,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         whenever(lockscreenToAodTransitionViewModel.shortcutsAlpha)
             .thenReturn(intendedAlphaMutableStateFlow)
         whenever(lockscreenToDozingTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
-        whenever(lockscreenToDreamingHostedTransitionViewModel.shortcutsAlpha)
-            .thenReturn(emptyFlow())
         whenever(lockscreenToDreamingTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(lockscreenToGoneTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(lockscreenToOccludedTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
@@ -314,8 +304,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 shadeInteractor = shadeInteractor,
                 aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
                 dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
-                dreamingHostedToLockscreenTransitionViewModel =
-                    dreamingHostedToLockscreenTransitionViewModel,
                 dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
                 goneToLockscreenTransitionViewModel = goneToLockscreenTransitionViewModel,
                 occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
@@ -326,8 +314,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                     glanceableHubToLockscreenTransitionViewModel,
                 lockscreenToAodTransitionViewModel = lockscreenToAodTransitionViewModel,
                 lockscreenToDozingTransitionViewModel = lockscreenToDozingTransitionViewModel,
-                lockscreenToDreamingHostedTransitionViewModel =
-                    lockscreenToDreamingHostedTransitionViewModel,
                 lockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel,
                 lockscreenToGoneTransitionViewModel = lockscreenToGoneTransitionViewModel,
                 lockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel,
@@ -683,8 +669,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 min(
                     1f,
                     KeyguardQuickAffordancesCombinedViewModel
-                        .AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD + 0.1f
-                ),
+                        .AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD + 0.1f,
+                )
             )
 
             val testConfig =
@@ -779,7 +765,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Lockscreen),
-                stateTransition = TransitionStep(from = AOD, to = LOCKSCREEN)
+                stateTransition = TransitionStep(from = AOD, to = LOCKSCREEN),
             )
             intendedShadeAlphaMutableStateFlow.value = 0.25f
             val underTest = collectLastValue(underTest.transitionAlpha)
@@ -794,7 +780,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Gone),
-                stateTransition = TransitionStep(from = AOD, to = GONE)
+                stateTransition = TransitionStep(from = AOD, to = GONE),
             )
             intendedShadeAlphaMutableStateFlow.value = 0.5f
             val underTest = collectLastValue(underTest.transitionAlpha)
@@ -829,7 +815,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                         when (testConfig.isActivated) {
                             true -> ActivationState.Active
                             false -> ActivationState.Inactive
-                        }
+                        },
                 )
             } else {
                 KeyguardQuickAffordanceConfig.LockScreenState.Hidden
@@ -862,7 +848,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
             if (testConfig.intent != null) {
                 Truth.assertThat(Mockito.mockingDetails(activityStarter).invocations).hasSize(1)
             } else {
-                Mockito.verifyZeroInteractions(activityStarter)
+                Mockito.verifyNoMoreInteractions(activityStarter)
             }
         } else {
             Truth.assertThat(viewModel.isVisible).isFalse()
@@ -878,7 +864,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         val intent: Intent? = null,
         val isSelected: Boolean = false,
         val isDimmed: Boolean = false,
-        val slotId: String = ""
+        val slotId: String = "",
     ) {
         init {
             check(!isVisible || icon != null) { "Must supply non-null icon if visible!" }

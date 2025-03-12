@@ -149,17 +149,17 @@ public final class KeyboardGlyphManager implements InputManager.InputDeviceListe
                 continue;
             }
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
-            KeyGlyphMapData data = getKeyboardGlyphMapsInPackage(pm, activityInfo);
-            if (data == null) {
+            List<KeyGlyphMapData> data = getKeyboardGlyphMapsInPackage(pm, activityInfo);
+            if (data == null || data.isEmpty()) {
                 continue;
             }
-            glyphMaps.add(data);
+            glyphMaps.addAll(data);
         }
         return glyphMaps;
     }
 
     @Nullable
-    private KeyGlyphMapData getKeyboardGlyphMapsInPackage(PackageManager pm,
+    private List<KeyGlyphMapData> getKeyboardGlyphMapsInPackage(PackageManager pm,
             @NonNull ActivityInfo receiver) {
         Bundle metaData = receiver.metaData;
         if (metaData == null) {
@@ -175,6 +175,7 @@ public final class KeyboardGlyphManager implements InputManager.InputDeviceListe
 
         try {
             Resources resources = pm.getResourcesForApplication(receiver.applicationInfo);
+            List<KeyGlyphMapData> glyphMaps = new ArrayList<>();
             try (XmlResourceParser parser = resources.getXml(configResId)) {
                 XmlUtils.beginDocument(parser, TAG_KEYBOARD_GLYPH_MAPS);
 
@@ -193,13 +194,14 @@ public final class KeyboardGlyphManager implements InputManager.InputDeviceListe
                         int vendor = a.getInt(R.styleable.KeyboardGlyphMap_vendorId, -1);
                         int product = a.getInt(R.styleable.KeyboardGlyphMap_productId, -1);
                         if (glyphMapRes != 0 && vendor != -1 && product != -1) {
-                            return new KeyGlyphMapData(receiver.packageName, receiver.name,
-                                    glyphMapRes, vendor, product);
+                            glyphMaps.add(new KeyGlyphMapData(receiver.packageName, receiver.name,
+                                    glyphMapRes, vendor, product));
                         }
                     } finally {
                         a.recycle();
                     }
                 }
+                return glyphMaps;
             }
         } catch (Exception ex) {
             Slog.w(TAG, "Could not parse keyboard glyph map resource from receiver "

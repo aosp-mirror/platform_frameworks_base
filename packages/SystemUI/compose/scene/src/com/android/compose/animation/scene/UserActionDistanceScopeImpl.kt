@@ -18,23 +18,25 @@ package com.android.compose.animation.scene
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
+import com.android.compose.animation.scene.transformation.PropertyTransformationScope
 
 internal class ElementStateScopeImpl(private val layoutImpl: SceneTransitionLayoutImpl) :
     ElementStateScope {
-    override fun ElementKey.targetSize(scene: SceneKey): IntSize? {
-        return layoutImpl.elements[this]?.stateByContent?.get(scene)?.targetSize.takeIf {
+    override fun ElementKey.targetSize(content: ContentKey): IntSize? {
+        return layoutImpl.elements[this]?.stateByContent?.get(content)?.targetSize.takeIf {
             it != Element.SizeUnspecified
         }
     }
 
-    override fun ElementKey.targetOffset(scene: SceneKey): Offset? {
-        return layoutImpl.elements[this]?.stateByContent?.get(scene)?.targetOffset.takeIf {
+    override fun ElementKey.targetOffset(content: ContentKey): Offset? {
+        return layoutImpl.elements[this]?.stateByContent?.get(content)?.targetOffset.takeIf {
             it != Offset.Unspecified
         }
     }
 
-    override fun SceneKey.targetSize(): IntSize? {
-        return layoutImpl.sceneOrNull(this)?.targetSize.takeIf { it != IntSize.Zero }
+    override fun ContentKey.targetSize(): IntSize? {
+        return layoutImpl.contentOrNull(this)?.targetSize.takeIf { it != IntSize.Zero }
     }
 }
 
@@ -45,4 +47,16 @@ internal class UserActionDistanceScopeImpl(private val layoutImpl: SceneTransiti
 
     override val fontScale: Float
         get() = layoutImpl.density.fontScale
+}
+
+internal class PropertyTransformationScopeImpl(private val layoutImpl: SceneTransitionLayoutImpl) :
+    PropertyTransformationScope, ElementStateScope by layoutImpl.elementStateScope {
+    override val density: Float
+        get() = layoutImpl.density.density
+
+    override val fontScale: Float
+        get() = layoutImpl.density.fontScale
+
+    override val layoutDirection: LayoutDirection
+        get() = layoutImpl.layoutDirection
 }

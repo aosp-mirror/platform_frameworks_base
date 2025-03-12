@@ -42,7 +42,7 @@ class FontScalingTileMapperTest : SysuiTestCase() {
             context.orCreateTestableResources
                 .apply { addOverride(R.drawable.ic_qs_font_scaling, TestStubDrawable()) }
                 .resources,
-            context.theme
+            context.theme,
         )
     }
 
@@ -58,14 +58,7 @@ class FontScalingTileMapperTest : SysuiTestCase() {
 
     private fun createFontScalingTileState(): QSTileState =
         QSTileState(
-            {
-                Icon.Loaded(
-                    context.getDrawable(
-                        R.drawable.ic_qs_font_scaling,
-                    )!!,
-                    null
-                )
-            },
+            Icon.Loaded(context.getDrawable(R.drawable.ic_qs_font_scaling)!!, null),
             R.drawable.ic_qs_font_scaling,
             context.getString(R.string.quick_settings_font_scaling_label),
             QSTileState.ActivationState.ACTIVE,
@@ -75,6 +68,6 @@ class FontScalingTileMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.Chevron,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
 }

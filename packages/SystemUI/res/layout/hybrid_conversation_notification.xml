@@ -27,12 +27,13 @@
         android:layout_height="@dimen/conversation_single_line_face_pile_size"
         android:paddingHorizontal="16dp"
     >
-        <ImageView
+        <com.android.internal.widget.CachingIconView
             android:id="@*android:id/conversation_icon"
             android:layout_width="@dimen/conversation_single_line_avatar_size"
             android:layout_height="@dimen/conversation_single_line_avatar_size"
             android:layout_gravity="center_vertical|end"
-        />
+            android:scaleType="centerCrop"
+            />
 
         <ViewStub
             android:id="@*android:id/conversation_face_pile"

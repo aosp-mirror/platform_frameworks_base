@@ -22,6 +22,7 @@ import static android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS;
 import static android.Manifest.permission.MOVE_PACKAGE;
 import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 
+import static com.android.bedstead.multiuser.MultiUserDeviceStateExtensionsKt.secondaryUser;
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -45,7 +46,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.bedstead.harrier.BedsteadJUnit4;
 import com.android.bedstead.harrier.DeviceState;
-import com.android.bedstead.harrier.annotations.EnsureHasSecondaryUser;
+import com.android.bedstead.multiuser.annotations.EnsureHasSecondaryUser;
 import com.android.bedstead.nene.users.UserReference;
 import com.android.compatibility.common.util.PollingCheck;
 import com.android.compatibility.common.util.TestUtils;
@@ -112,9 +113,9 @@ public class CrossUserPackageVisibilityTests {
         final UserReference primaryUser = sDeviceState.primaryUser();
         if (primaryUser.id() == UserHandle.myUserId()) {
             mCurrentUser = primaryUser;
-            mOtherUser = sDeviceState.secondaryUser();
+            mOtherUser = secondaryUser(sDeviceState);
         } else {
-            mCurrentUser = sDeviceState.secondaryUser();
+            mCurrentUser = secondaryUser(sDeviceState);
             mOtherUser = primaryUser;
         }
 

@@ -52,6 +52,7 @@ const val OPACITY_12 = 31
 const val OPACITY_15 = 38
 const val OPACITY_40 = 102
 const val OPACITY_55 = 140
+const val OPACITY_60 = 153
 const val OPACITY_65 = 166
 
 /**

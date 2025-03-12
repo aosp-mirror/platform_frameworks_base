@@ -26,6 +26,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR;
+import static com.android.systemui.Flags.FLAG_RELOCK_WITH_POWER_BUTTON_IMMEDIATELY;
 import static com.android.systemui.Flags.FLAG_SIM_PIN_BOUNCER_RESET;
 import static com.android.systemui.keyguard.KeyguardViewMediator.DELAYED_KEYGUARD_ACTION;
 import static com.android.systemui.keyguard.KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
@@ -63,6 +64,7 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -100,6 +102,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionBootInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -134,6 +137,7 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
 import kotlinx.coroutines.CoroutineDispatcher;
@@ -154,6 +158,10 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 @SmallTest
 public class KeyguardViewMediatorTest extends SysuiTestCase {
+
+    private static final boolean ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS =
+            Flags.ensureKeyguardDoesTransitionStarting();
+
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private KeyguardViewMediator mViewMediator;
 
@@ -199,6 +207,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ShadeWindowLogger mShadeWindowLogger;
     private @Mock SelectedUserInteractor mSelectedUserInteractor;
     private @Mock KeyguardInteractor mKeyguardInteractor;
+    private @Mock KeyguardTransitionBootInteractor mKeyguardTransitionBootInteractor;
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallback;
     private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
@@ -273,7 +282,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mSelectedUserInteractor,
                 mUserTracker,
                 mKosmos.getNotificationShadeWindowModel(),
-                mKosmos::getCommunalInteractor);
+                mSecureSettings,
+                mKosmos::getCommunalInteractor,
+                mKosmos.getShadeLayoutParams());
         mFeatureFlags = new FakeFeatureFlags();
         mSetFlagsRule.disableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR);
 
@@ -839,6 +850,32 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @EnableFlags(FLAG_RELOCK_WITH_POWER_BUTTON_IMMEDIATELY)
+    public void testCancelKeyguardExitAnimationDueToSleep_withPendingLockAndRelockFlag_keyguardWillBeShowing() {
+        startMockKeyguardExitAnimation();
+
+        mViewMediator.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON);
+        mViewMediator.onFinishedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, false);
+
+        cancelMockKeyguardExitAnimation();
+
+        mViewMediator.maybeHandlePendingLock();
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(true);
+
+        // Unlock animators call `exitKeyguardAndFinishSurfaceBehindRemoteAnimation` when canceled
+        mViewMediator.exitKeyguardAndFinishSurfaceBehindRemoteAnimation(false);
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mUpdateMonitor, never()).dispatchKeyguardDismissAnimationFinished();
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @DisableFlags(FLAG_RELOCK_WITH_POWER_BUTTON_IMMEDIATELY)
     public void testCancelKeyguardExitAnimationDueToSleep_withPendingLock_keyguardWillBeShowing() {
         startMockKeyguardExitAnimation();
 
@@ -1132,6 +1169,29 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
      */
     private void assertATMSLockScreenShowing(boolean showing)
             throws RemoteException {
+
+        if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            // ATMS is called via bgExecutor, so make sure to run all of those calls first.
+            processAllMessagesAndBgExecutorMessages();
+
+            final InOrder orderedSetLockScreenShownCalls = inOrder(mKeyguardTransitions);
+            final ArgumentCaptor<Boolean> showingCaptor = ArgumentCaptor.forClass(Boolean.class);
+            orderedSetLockScreenShownCalls
+                    .verify(mKeyguardTransitions, atLeastOnce())
+                    .startKeyguardTransition(showingCaptor.capture(), anyBoolean());
+
+            // The captor will have the most recent startKeyguardTransition call's value.
+            assertEquals(showing, showingCaptor.getValue());
+
+            // We're now just after the last startKeyguardTransition call. If we expect the
+            // lockscreen to be showing, ensure that we didn't subsequently ask for it to go away.
+            if (showing) {
+                orderedSetLockScreenShownCalls.verify(mKeyguardTransitions, never())
+                        .startKeyguardTransition(eq(false), anyBoolean());
+            }
+            return;
+        }
+
         // ATMS is called via bgExecutor, so make sure to run all of those calls first.
         processAllMessagesAndBgExecutorMessages();
 
@@ -1159,6 +1219,20 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private void assertATMSKeyguardGoingAway() throws RemoteException {
         // ATMS is called via bgExecutor, so make sure to run all of those calls first.
         processAllMessagesAndBgExecutorMessages();
+
+        if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            final InOrder orderedGoingAwayCalls = inOrder(mKeyguardTransitions);
+            orderedGoingAwayCalls.verify(mKeyguardTransitions, atLeastOnce())
+                    .startKeyguardTransition(eq(false) /* keyguardShowing */,
+                            eq(false) /* aodShowing */);
+
+            // Advance the inOrder to just past the last goingAway call. Let's make sure we didn't
+            // re-show the lockscreen, which would cancel going away.
+            orderedGoingAwayCalls.verify(mKeyguardTransitions, never())
+                    .startKeyguardTransition(eq(true) /* keyguardShowing */,
+                            anyBoolean() /* aodShowing */);
+            return;
+        }
 
         final InOrder orderedGoingAwayCalls = inOrder(mActivityTaskManagerService);
         orderedGoingAwayCalls.verify(mActivityTaskManagerService, atLeastOnce())
@@ -1294,6 +1368,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mock(WindowManagerLockscreenVisibilityManager.class),
                 mSelectedUserInteractor,
                 mKeyguardInteractor,
+                mKeyguardTransitionBootInteractor,
                 mock(WindowManagerOcclusionManager.class));
         mViewMediator.start();
 

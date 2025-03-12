@@ -309,6 +309,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         newConfig.densityDpi += 100;
         mWpc.onConfigurationChanged(newConfig);
         verify(mClientLifecycleManager, never()).scheduleTransactionItem(eq(thread), any());
+        verify(mClientLifecycleManager, never()).scheduleTransactionItems(eq(thread), any());
         verify(mClientLifecycleManager, never()).scheduleTransactionItemNow(eq(thread), any());
 
         // Cached -> non-cached will send the previous deferred config immediately.

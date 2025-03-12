@@ -17,15 +17,13 @@
 package com.android.systemui.qs.tiles
 
 import android.app.UiModeManager
-import android.content.Context
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.os.Handler
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.testing.TestableLooper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -33,8 +31,12 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QSComposeFragment
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.LocationController
@@ -46,15 +48,19 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class UiModeNightTileTest : SysuiTestCase() {
+class UiModeNightTileTest(flags: FlagsParameterization) : SysuiTestCase() {
 
-    @Mock private lateinit var mockContext: Context
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     @Mock private lateinit var uiModeManager: UiModeManager
-    @Mock private lateinit var resources: Resources
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var qsHost: QSHost
     @Mock private lateinit var metricsLogger: MetricsLogger
@@ -68,19 +74,19 @@ class UiModeNightTileTest : SysuiTestCase() {
     private val falsingManager = FalsingManagerFake()
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: UiModeNightTile
-    private lateinit var configuration: Configuration
+    private val configuration = Configuration()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        val initialConfiguration = mContext.resources.configuration
+        onTeardown { mContext.resources.configuration.updateFrom(initialConfiguration) }
+
         testableLooper = TestableLooper.get(this)
-        configuration = Configuration()
         mContext.addMockSystemService(UiModeManager::class.java, uiModeManager)
 
-        `when`(qsHost.context).thenReturn(mockContext)
+        `when`(qsHost.context).thenReturn(mContext)
         `when`(qsHost.userContext).thenReturn(mContext)
-        `when`(mockContext.resources).thenReturn(resources)
-        `when`(resources.configuration).thenReturn(configuration)
 
         tile =
             UiModeNightTile(
@@ -95,7 +101,7 @@ class UiModeNightTileTest : SysuiTestCase() {
                 qsLogger,
                 configurationController,
                 batteryController,
-                locationController
+                locationController,
             )
     }
 
@@ -112,28 +118,45 @@ class UiModeNightTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_light_dark_theme_icon_on))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_light_dark_theme_icon_on))
     }
 
     @Test
-    fun testIcon_whenNightModeOn_isOffState() {
+    fun testIcon_whenNightModeOff_isOffState() {
         val state = QSTile.BooleanState()
         setNightModeOff()
 
         tile.handleUpdateState(state, /* arg= */ null)
 
         assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_light_dark_theme_icon_off))
+            .isEqualTo(createExpectedIcon(R.drawable.qs_light_dark_theme_icon_off))
     }
 
     private fun setNightModeOn() {
         `when`(uiModeManager.nightMode).thenReturn(UiModeManager.MODE_NIGHT_YES)
         configuration.uiMode = Configuration.UI_MODE_NIGHT_YES
+        mContext.resources.configuration.updateFrom(configuration)
     }
 
     private fun setNightModeOff() {
         `when`(uiModeManager.nightMode).thenReturn(UiModeManager.MODE_NIGHT_NO)
         configuration.uiMode = Configuration.UI_MODE_NIGHT_NO
+        mContext.resources.configuration.updateFrom(configuration)
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return allCombinationsOf(QSComposeFragment.FLAG_NAME)
+        }
     }
 }

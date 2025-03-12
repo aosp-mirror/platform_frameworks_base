@@ -28,16 +28,22 @@ sealed class ProjectionChipModel {
 
     /** Media is currently being projected. */
     data class Projecting(
-        val type: Type,
+        val receiver: Receiver,
+        val contentType: ContentType,
         val projectionState: MediaProjectionState.Projecting,
     ) : ProjectionChipModel()
 
-    enum class Type {
-        /**
-         * This projection is sharing your phone screen content to another app on the same device.
-         */
-        SHARE_TO_APP,
-        /** This projection is sharing your phone screen content to a different device. */
-        CAST_TO_OTHER_DEVICE,
+    enum class Receiver {
+        /** This projection is sharing to another app on the same device. */
+        ShareToApp,
+        /** This projection is sharing to a different device. */
+        CastToOtherDevice,
+    }
+
+    enum class ContentType {
+        /** This projection is sharing your device's screen content. */
+        Screen,
+        /** This projection is sharing your device's audio (but *not* screen). */
+        Audio,
     }
 }

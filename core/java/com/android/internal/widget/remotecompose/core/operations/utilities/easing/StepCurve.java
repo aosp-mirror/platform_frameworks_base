@@ -15,21 +15,23 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
+import android.annotation.NonNull;
 
 /**
- * This class translates a series of floating point values into a continuous
- * curve for use in an easing function including quantize functions
- * it is used with the "spline(0,0.3,0.3,0.5,...0.9,1)" it should start at 0 and end at one 1
+ * This class translates a series of floating point values into a continuous curve for use in an
+ * easing function including quantize functions it is used with the "spline(0,0.3,0.3,0.5,...0.9,1)"
+ * it should start at 0 and end at one 1
  */
 public class StepCurve extends Easing {
-    private static final boolean DEBUG = false;
-    MonotonicCurveFit mCurveFit;
+    //    private static final boolean DEBUG = false;
+    @NonNull private final MonotonicCurveFit mCurveFit;
 
-    public StepCurve(float[] params, int offset, int len) {
+    public StepCurve(@NonNull float[] params, int offset, int len) {
         mCurveFit = genSpline(params, offset, len);
     }
 
-    private static MonotonicCurveFit genSpline(float[] values, int off, int arrayLen) {
+    @NonNull
+    private static MonotonicCurveFit genSpline(@NonNull float[] values, int off, int arrayLen) {
         int length = arrayLen * 3 - 2;
         int len = arrayLen - 1;
         double gap = 1.0 / len;
@@ -55,12 +57,16 @@ public class StepCurve extends Easing {
 
     @Override
     public float getDiff(float x) {
+        if (x < 0f) return 0;
+        if (x > 1f) return 0;
         return (float) mCurveFit.getSlope(x, 0);
     }
 
-
     @Override
     public float get(float x) {
+        if (x < 0f) return 0;
+        if (x > 1f) return 1;
+
         return (float) mCurveFit.getPos(x, 0);
     }
 }

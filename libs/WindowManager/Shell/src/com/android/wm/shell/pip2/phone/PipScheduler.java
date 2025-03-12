@@ -16,106 +16,74 @@
 
 package com.android.wm.shell.pip2.phone;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
+import android.window.DisplayAreaInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
-import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
-import com.android.wm.shell.common.pip.PipUtils;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
+import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Scheduler for Shell initiated PiP transitions and animations.
  */
 public class PipScheduler {
     private static final String TAG = PipScheduler.class.getSimpleName();
-    private static final String BROADCAST_FILTER = PipScheduler.class.getCanonicalName();
 
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
-    private final PhonePipMenuController mPipMenuController;
     private final ShellExecutor mMainExecutor;
     private final PipTransitionState mPipTransitionState;
-    private PipSchedulerReceiver mSchedulerReceiver;
+    private final Optional<DesktopUserRepositories> mDesktopUserRepositoriesOptional;
+    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private PipTransitionController mPipTransitionController;
+    private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
+            mSurfaceControlTransactionFactory;
 
     @Nullable private Runnable mUpdateMovementBoundsRunnable;
 
-    /**
-     * Temporary PiP CUJ codes to schedule PiP related transitions directly from Shell.
-     * This is used for a broadcast receiver to resolve intents. This should be removed once
-     * there is an equivalent of PipTouchHandler and PipResizeGestureHandler for PiP2.
-     */
-    private static final int PIP_EXIT_VIA_EXPAND_CODE = 0;
-    private static final int PIP_DOUBLE_TAP = 1;
-
-    @IntDef(value = {
-            PIP_EXIT_VIA_EXPAND_CODE,
-            PIP_DOUBLE_TAP
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface PipUserJourneyCode {}
-
-    /**
-     * A temporary broadcast receiver to initiate PiP CUJs.
-     */
-    private class PipSchedulerReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int userJourneyCode = intent.getIntExtra("cuj_code_extra", 0);
-            switch (userJourneyCode) {
-                case PIP_EXIT_VIA_EXPAND_CODE:
-                    scheduleExitPipViaExpand();
-                    break;
-                case PIP_DOUBLE_TAP:
-                    scheduleDoubleTapToResize();
-                    break;
-                default:
-                    throw new IllegalStateException("unexpected CUJ code=" + userJourneyCode);
-            }
-        }
-    }
+    private PipAlphaAnimatorSupplier mPipAlphaAnimatorSupplier;
 
     public PipScheduler(Context context,
             PipBoundsState pipBoundsState,
-            PhonePipMenuController pipMenuController,
             ShellExecutor mainExecutor,
-            PipTransitionState pipTransitionState) {
+            PipTransitionState pipTransitionState,
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
-        mPipMenuController = pipMenuController;
         mMainExecutor = mainExecutor;
         mPipTransitionState = pipTransitionState;
+        mDesktopUserRepositoriesOptional = desktopUserRepositoriesOptional;
+        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
 
-        if (PipUtils.isPip2ExperimentEnabled()) {
-            // temporary broadcast receiver to initiate exit PiP via expand
-            mSchedulerReceiver = new PipSchedulerReceiver();
-            ContextCompat.registerReceiver(mContext, mSchedulerReceiver,
-                    new IntentFilter(BROADCAST_FILTER), ContextCompat.RECEIVER_EXPORTED);
-        }
-    }
-
-    ShellExecutor getMainExecutor() {
-        return mMainExecutor;
+        mSurfaceControlTransactionFactory =
+                new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
+        mPipAlphaAnimatorSupplier = PipAlphaAnimator::new;
     }
 
     void setPipTransitionController(PipTransitionController pipTransitionController) {
@@ -124,15 +92,29 @@ public class PipScheduler {
 
     @Nullable
     private WindowContainerTransaction getExitPipViaExpandTransaction() {
-        if (mPipTransitionState.mPipTaskToken == null) {
+        WindowContainerToken pipTaskToken = mPipTransitionState.getPipTaskToken();
+        if (pipTaskToken == null) {
             return null;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         // final expanded bounds to be inherited from the parent
-        wct.setBounds(mPipTransitionState.mPipTaskToken, null);
+        wct.setBounds(pipTaskToken, null);
         // if we are hitting a multi-activity case
         // windowing mode change will reparent to original host task
-        wct.setWindowingMode(mPipTransitionState.mPipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.setWindowingMode(pipTaskToken, getOutPipWindowingMode());
+        return wct;
+    }
+
+    @Nullable
+    private WindowContainerTransaction getRemovePipTransaction() {
+        WindowContainerToken pipTaskToken = mPipTransitionState.getPipTaskToken();
+        if (pipTaskToken == null) {
+            return null;
+        }
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setBounds(pipTaskToken, null);
+        wct.setWindowingMode(pipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.reorder(pipTaskToken, false);
         return wct;
     }
 
@@ -149,10 +131,26 @@ public class PipScheduler {
         }
     }
 
-    /**
-     * Schedules resize PiP via double tap.
-     */
-    public void scheduleDoubleTapToResize() {}
+    // TODO: Optimize this by running the animation as part of the transition
+    /** Runs remove PiP animation and schedules remove PiP transition after the animation ends. */
+    public void removePipAfterAnimation() {
+        SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
+        PipAlphaAnimator animator = mPipAlphaAnimatorSupplier.get(mContext,
+                mPipTransitionState.getPinnedTaskLeash(), tx, PipAlphaAnimator.FADE_OUT);
+        animator.setAnimationEndCallback(this::scheduleRemovePipImmediately);
+        animator.start();
+    }
+
+    /** Schedules remove PiP transition. */
+    private void scheduleRemovePipImmediately() {
+        WindowContainerTransaction wct = getRemovePipTransaction();
+        if (wct != null) {
+            mMainExecutor.execute(() -> {
+                mPipTransitionController.startExitTransition(TRANSIT_REMOVE_PIP, wct,
+                        null /* destinationBounds */);
+            });
+        }
+    }
 
     /**
      * Animates resizing of the pinned stack given the duration.
@@ -179,13 +177,14 @@ public class PipScheduler {
      *                    for running the animator will get this as an extra.
      */
     public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd, int duration) {
-        if (mPipTransitionState.mPipTaskToken == null || !mPipTransitionState.isInPip()) {
+        WindowContainerToken pipTaskToken = mPipTransitionState.getPipTaskToken();
+        if (pipTaskToken == null || !mPipTransitionState.isInPip()) {
             return;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setBounds(mPipTransitionState.mPipTaskToken, toBounds);
+        wct.setBounds(pipTaskToken, toBounds);
         if (configAtEnd) {
-            wct.deferConfigToTransitionEnd(mPipTransitionState.mPipTaskToken);
+            wct.deferConfigToTransitionEnd(pipTaskToken);
         }
         mPipTransitionController.startResizeTransition(wct, duration);
     }
@@ -195,22 +194,12 @@ public class PipScheduler {
      * Note that we do not allow any actual WM Core changes at this point.
      *
      * @param toBounds destination bounds used only for internal state updates - not sent to Core.
-     * @param configAtEnd true if we are waiting for config updates at the end of the transition.
      */
-    public void scheduleFinishResizePip(Rect toBounds, boolean configAtEnd) {
-        // Make updates to the internal state to reflect new bounds
+    public void scheduleFinishResizePip(Rect toBounds) {
+        // Make updates to the internal state to reflect new bounds before updating any transitions
+        // related state; transition state updates can trigger callbacks that use the cached bounds.
         onFinishingPipResize(toBounds);
-
-        SurfaceControl.Transaction tx = null;
-        if (configAtEnd) {
-            tx = new SurfaceControl.Transaction();
-            tx.addTransactionCommittedListener(mMainExecutor, () -> {
-                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
-            });
-        } else {
-            mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
-        }
-        mPipTransitionController.finishTransition(tx);
+        mPipTransitionController.finishTransition();
     }
 
     /**
@@ -233,8 +222,8 @@ public class PipScheduler {
                     "%s: Attempted to user resize PIP to empty bounds, aborting.", TAG);
             return;
         }
-        SurfaceControl leash = mPipTransitionState.mPinnedTaskLeash;
-        final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+        SurfaceControl leash = mPipTransitionState.getPinnedTaskLeash();
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
 
         Matrix transformTensor = new Matrix();
         final float[] mMatrixTmp = new float[9];
@@ -248,7 +237,7 @@ public class PipScheduler {
         tx.apply();
     }
 
-    void setUpdateMovementBoundsRunnable(Runnable updateMovementBoundsRunnable) {
+    void setUpdateMovementBoundsRunnable(@Nullable Runnable updateMovementBoundsRunnable) {
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
     }
 
@@ -263,7 +252,66 @@ public class PipScheduler {
             return;
         }
         mPipBoundsState.setBounds(newBounds);
-        mPipMenuController.updateMenuLayout(newBounds);
         maybeUpdateMovementBounds();
+    }
+
+    /** Returns whether the display is in freeform windowing mode. */
+    private boolean isDisplayInFreeform() {
+        final DisplayAreaInfo tdaInfo = mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(
+                Objects.requireNonNull(mPipTransitionState.getPipTaskInfo()).displayId);
+        if (tdaInfo != null) {
+            return tdaInfo.configuration.windowConfiguration.getWindowingMode()
+                    == WINDOWING_MODE_FREEFORM;
+        }
+        return false;
+    }
+
+    /** Returns whether PiP is exiting while we're in desktop mode. */
+    private boolean isPipExitingToDesktopMode() {
+        return Flags.enableDesktopWindowingPip() && mDesktopUserRepositoriesOptional.isPresent()
+                && (mDesktopUserRepositoriesOptional.get().getCurrent().getVisibleTaskCount(
+                Objects.requireNonNull(mPipTransitionState.getPipTaskInfo()).displayId) > 0
+                || isDisplayInFreeform());
+    }
+
+    /**
+     * The windowing mode to restore to when resizing out of PIP direction. Defaults to undefined
+     * and can be overridden to restore to an alternate windowing mode.
+     */
+    private int getOutPipWindowingMode() {
+        // If we are exiting PiP while the device is in Desktop mode (the task should expand to
+        // freeform windowing mode):
+        // 1) If the display windowing mode is freeform, set windowing mode to undefined so it will
+        //    resolve the windowing mode to the display's windowing mode.
+        // 2) If the display windowing mode is not freeform, set windowing mode to freeform.
+        if (isPipExitingToDesktopMode()) {
+            if (isDisplayInFreeform()) {
+                return WINDOWING_MODE_UNDEFINED;
+            } else {
+                return WINDOWING_MODE_FREEFORM;
+            }
+        }
+
+        // By default, or if the task is going to fullscreen, reset the windowing mode to undefined.
+        return WINDOWING_MODE_UNDEFINED;
+    }
+
+    @VisibleForTesting
+    void setSurfaceControlTransactionFactory(
+            @NonNull PipSurfaceTransactionHelper.SurfaceControlTransactionFactory factory) {
+        mSurfaceControlTransactionFactory = factory;
+    }
+
+    @VisibleForTesting
+    interface PipAlphaAnimatorSupplier {
+        PipAlphaAnimator get(@NonNull Context context,
+                SurfaceControl leash,
+                SurfaceControl.Transaction tx,
+                @PipAlphaAnimator.Fade int direction);
+    }
+
+    @VisibleForTesting
+    void setPipAlphaAnimatorSupplier(@NonNull PipAlphaAnimatorSupplier supplier) {
+        mPipAlphaAnimatorSupplier = supplier;
     }
 }

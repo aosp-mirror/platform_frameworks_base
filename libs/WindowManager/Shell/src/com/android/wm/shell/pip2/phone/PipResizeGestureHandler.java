@@ -531,32 +531,30 @@ public class PipResizeGestureHandler implements
                 // If resize transition was scheduled from this component, handle leash updates.
                 mWaitingForBoundsChangeTransition = false;
 
-                SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+                SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
                 Preconditions.checkState(pipLeash != null,
                         "No leash cached by mPipTransitionState=" + mPipTransitionState);
 
-                SurfaceControl.Transaction startTx = extra.getParcelable(
+                final SurfaceControl.Transaction startTx = extra.getParcelable(
                         PipTransition.PIP_START_TX, SurfaceControl.Transaction.class);
-                SurfaceControl.Transaction finishTx = extra.getParcelable(
+                final SurfaceControl.Transaction finishTx = extra.getParcelable(
                         PipTransition.PIP_FINISH_TX, SurfaceControl.Transaction.class);
+                final Rect destinationBounds = extra.getParcelable(
+                        PipTransition.PIP_DESTINATION_BOUNDS, Rect.class);
                 final int duration = extra.getInt(ANIMATING_BOUNDS_CHANGE_DURATION,
                         PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION);
 
-                startTx.setWindowCrop(pipLeash, mPipBoundsState.getBounds().width(),
-                        mPipBoundsState.getBounds().height());
-
                 PipResizeAnimator animator = new PipResizeAnimator(mContext, pipLeash,
-                        startTx, finishTx, mPipBoundsState.getBounds(), mStartBoundsAfterRelease,
-                        mLastResizeBounds, duration, mAngle);
+                        startTx, finishTx, destinationBounds, mStartBoundsAfterRelease,
+                        destinationBounds, duration, mAngle);
                 animator.setAnimationEndCallback(() -> {
                     // All motion operations have actually finished, so make bounds cache updates.
-                    mUserResizeBounds.set(mLastResizeBounds);
+                    mUserResizeBounds.set(destinationBounds);
                     resetState();
                     cleanUpHighPerfSessionMaybe();
 
                     // Signal that we are done with resize transition
-                    mPipScheduler.scheduleFinishResizePip(
-                            mLastResizeBounds, true /* configAtEnd */);
+                    mPipScheduler.scheduleFinishResizePip(destinationBounds);
                 });
                 animator.start();
                 break;

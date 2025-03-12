@@ -17,9 +17,12 @@
 package com.android.statementservice.domain.worker
 
 import android.content.Context
+import android.content.UriRelativeFilterGroup
+import android.content.pm.verify.domain.DomainVerificationInfo
 import android.content.pm.verify.domain.DomainVerificationManager
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.android.statementservice.database.DomainGroupsDatabase
 import com.android.statementservice.domain.DomainVerifier
 
 abstract class BaseRequestWorker(
@@ -27,8 +30,19 @@ abstract class BaseRequestWorker(
     protected val params: WorkerParameters
 ) : CoroutineWorker(appContext, params) {
 
+    protected val database = DomainGroupsDatabase.getInstance(appContext).domainGroupsDao()
+
     protected val verificationManager =
         appContext.getSystemService(DomainVerificationManager::class.java)!!
 
     protected val verifier = DomainVerifier.getInstance(appContext)
+
+    protected fun updateUriRelativeFilterGroups(packageName: String, domainGroupUpdates: Map<String, List<UriRelativeFilterGroup>>) {
+        val verifiedDomains = verificationManager.getDomainVerificationInfo(packageName)?.hostToStateMap?.filterValues {
+            it == DomainVerificationInfo.STATE_SUCCESS || it == DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED
+        }?.keys?.toList() ?: emptyList()
+        val domainGroups = verificationManager.getUriRelativeFilterGroups(packageName, verifiedDomains)
+        domainGroupUpdates.forEach { (domain, groups) -> domainGroups[domain] = groups }
+        verificationManager.setUriRelativeFilterGroups(packageName, domainGroups)
+    }
 }

@@ -41,7 +41,6 @@ constructor(
                 } else {
                     Scenes.Shade
                 }
-            // TODO(b/336581871): add sceneState?
             sceneInteractor.changeScene(key, "animateCollapseQs")
         }
     }

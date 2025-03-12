@@ -111,8 +111,8 @@ const char* GetToolName();
 // Retrieves the build fingerprint of aapt2.
 std::string GetToolFingerprint();
 
-template <typename T>
-typename std::enable_if<std::is_arithmetic<T>::value, int>::type compare(const T& a, const T& b) {
+template <std::integral T>
+int compare(T a, T b) {
   if (a < b) {
     return -1;
   } else if (a > b) {
@@ -123,10 +123,7 @@ typename std::enable_if<std::is_arithmetic<T>::value, int>::type compare(const T
 
 // Makes a std::unique_ptr<> with the template parameter inferred by the compiler.
 // This will be present in C++14 and can be removed then.
-template <typename T, class... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-  return std::unique_ptr<T>(new T{std::forward<Args>(args)...});
-}
+using std::make_unique;
 
 // Writes a set of items to the std::ostream, joining the times with the provided separator.
 template <typename Container>

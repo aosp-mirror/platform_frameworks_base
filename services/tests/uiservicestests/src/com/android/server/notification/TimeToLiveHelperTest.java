@@ -19,6 +19,7 @@ import static com.android.server.notification.TimeToLiveHelper.EXTRA_KEY;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -105,6 +106,21 @@ public class TimeToLiveHelperTest extends UiServiceTestCase {
         mHelper.mNotificationTimeoutReceiver.onReceive(mContext, captor.getValue().getIntent());
 
         assertThat(mHelper.mKeys).isEmpty();
+    }
+
+    @Test
+    public void testTimeoutExpiresButNotifEntryGone() {
+        NotificationRecord r = getRecord("testTimeoutExpires", 1);
+
+        mHelper.scheduleTimeoutLocked(r, 1);
+        ArgumentCaptor<PendingIntent> captor = ArgumentCaptor.forClass(PendingIntent.class);
+        verify(mAm).setExactAndAllowWhileIdle(anyInt(), eq(2L), captor.capture());
+
+        mHelper.mKeys.clear();
+
+        mHelper.mNotificationTimeoutReceiver.onReceive(mContext, captor.getValue().getIntent());
+
+        verify(mNm, never()).timeoutNotification(anyString());
     }
 
     @Test

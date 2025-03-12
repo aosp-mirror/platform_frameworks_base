@@ -22,6 +22,7 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.LruCache;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 /**
@@ -33,7 +34,7 @@ public class AppIconCacheManager {
     @VisibleForTesting
     static final int MAX_CACHE_SIZE_IN_KB = getMaxCacheInKb();
     private static final String DELIMITER = ":";
-    private static AppIconCacheManager sAppIconCacheManager;
+    private static volatile AppIconCacheManager sAppIconCacheManager;
     private final LruCache<String, Drawable> mDrawableCache;
 
     private AppIconCacheManager() {
@@ -52,11 +53,18 @@ public class AppIconCacheManager {
     /**
      * Get an {@link AppIconCacheManager} instance.
      */
-    public static synchronized AppIconCacheManager getInstance() {
-        if (sAppIconCacheManager == null) {
-            sAppIconCacheManager = new AppIconCacheManager();
+    public static @NonNull AppIconCacheManager getInstance() {
+        AppIconCacheManager result = sAppIconCacheManager;
+        if (result == null) {
+            synchronized (AppIconCacheManager.class) {
+                result = sAppIconCacheManager;
+                if (result == null) {
+                    result = new AppIconCacheManager();
+                    sAppIconCacheManager = result;
+                }
+            }
         }
-        return sAppIconCacheManager;
+        return result;
     }
 
     /**
@@ -118,7 +126,7 @@ public class AppIconCacheManager {
      *
      * @see android.content.ComponentCallbacks2#onTrimMemory(int)
      */
-    public void trimMemory(int level) {
+    public static void trimMemory(int level) {
         if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
             // Time to clear everything
             if (sAppIconCacheManager != null) {

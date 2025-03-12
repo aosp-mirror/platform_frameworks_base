@@ -16,8 +16,6 @@
   -->
 <resources>
     <dimen name="notification_panel_margin_horizontal">48dp</dimen>
-    <dimen name="status_view_margin_horizontal">62dp</dimen>
-
     <!-- qs_tiles_page_horizontal_margin should be margin / 2, otherwise full space between two
          pages is margin * 2, and that makes tiles page not appear immediately after user swipes to
          the side -->

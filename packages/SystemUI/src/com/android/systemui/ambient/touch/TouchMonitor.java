@@ -52,6 +52,8 @@ import com.android.systemui.util.display.DisplayHelper;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import kotlin.Unit;
+
 import kotlinx.coroutines.Job;
 
 import java.util.Collection;
@@ -87,7 +89,7 @@ public class TouchMonitor {
     private final ConfigurationInteractor mConfigurationInteractor;
 
     private final Lifecycle mLifecycle;
-    private Rect mExclusionRect = null;
+    private Rect mExclusionRect = new Rect();
 
     private ISystemGestureExclusionListener mGestureExclusionListener;
 
@@ -298,9 +300,18 @@ public class TouchMonitor {
                         public void onSystemGestureExclusionChanged(int displayId,
                                 Region systemGestureExclusion,
                                 Region systemGestureExclusionUnrestricted) {
-                            mExclusionRect = systemGestureExclusion.getBounds();
+                            final Rect bounds = systemGestureExclusion.getBounds();
+                            if (!mExclusionRect.equals(bounds)) {
+                                mExclusionRect = bounds;
+                                mLogger.i(msg -> "Exclusion rect updated to " + msg.getStr1(),
+                                        msg -> {
+                                            msg.setStr1(bounds.toString());
+                                            return Unit.INSTANCE;
+                                        });
+                            }
                         }
                     };
+                    mLogger.i("Registering system gesture exclusion listener");
                     mWindowManagerService.registerSystemGestureExclusionListener(
                             mGestureExclusionListener, mDisplayId);
                 } catch (RemoteException e) {
@@ -320,11 +331,12 @@ public class TouchMonitor {
      * Destroys any active {@link InputSession}.
      */
     private void stopMonitoring(boolean force) {
-        mExclusionRect = null;
+        mExclusionRect = new Rect();
         if (bouncerAreaExclusion()) {
             mBackgroundExecutor.execute(() -> {
                 try {
                     if (mGestureExclusionListener != null) {
+                        mLogger.i("Unregistering system gesture exclusion listener");
                         mWindowManagerService.unregisterSystemGestureExclusionListener(
                                 mGestureExclusionListener, mDisplayId);
                         mGestureExclusionListener = null;

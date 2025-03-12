@@ -161,7 +161,7 @@ public class ImeBackAnimationControllerTest {
         mBackAnimationController.onBackInvoked();
         // verify that InputMethodManager#notifyImeHidden is called (which is the case whenever
         // getInputMethodManager is called from ImeBackAnimationController)
-        verify(mViewRootInsetsControllerHost, times(1)).getInputMethodManager();
+        verify(mViewRootInsetsControllerHost, times(2)).getInputMethodManager();
         // verify that ImeBackAnimationController does not take control over IME insets
         verify(mInsetsController, never()).controlWindowInsetsAnimation(anyInt(), any(), any(),
                 anyBoolean(), anyLong(), any(), anyInt(), anyBoolean());
@@ -180,7 +180,7 @@ public class ImeBackAnimationControllerTest {
         mBackAnimationController.onBackInvoked();
         // verify that InputMethodManager#notifyImeHidden is called (which is the case whenever
         // getInputMethodManager is called from ImeBackAnimationController)
-        verify(mViewRootInsetsControllerHost, times(1)).getInputMethodManager();
+        verify(mViewRootInsetsControllerHost, times(2)).getInputMethodManager();
         // verify that ImeBackAnimationController does not take control over IME insets
         verify(mInsetsController, never()).controlWindowInsetsAnimation(anyInt(), any(), any(),
                 anyBoolean(), anyLong(), any(), anyInt(), anyBoolean());
@@ -300,7 +300,7 @@ public class ImeBackAnimationControllerTest {
             mBackAnimationController.onBackInvoked();
             // verify that InputMethodManager#notifyImeHidden is called (which is the case whenever
             // getInputMethodManager is called from ImeBackAnimationController)
-            verify(mViewRootInsetsControllerHost, times(1)).getInputMethodManager();
+            verify(mViewRootInsetsControllerHost, times(2)).getInputMethodManager();
         });
     }
 

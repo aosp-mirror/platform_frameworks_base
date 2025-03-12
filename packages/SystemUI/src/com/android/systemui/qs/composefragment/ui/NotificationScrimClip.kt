@@ -31,87 +31,73 @@ import androidx.compose.ui.platform.InspectorInfo
  * ([ClipOp.Difference]) a `RoundRect(-leftInset, top, width + rightInset, bottom, radius, radius)`
  * from the QS container.
  */
-fun Modifier.notificationScrimClip(
-    leftInset: Int,
-    top: Int,
-    rightInset: Int,
-    bottom: Int,
-    radius: Int
-): Modifier {
-    return this then NotificationScrimClipElement(leftInset, top, rightInset, bottom, radius)
+fun Modifier.notificationScrimClip(clipParams: () -> NotificationScrimClipParams): Modifier {
+    return this then NotificationScrimClipElement(clipParams)
 }
 
-private class NotificationScrimClipNode(
-    var leftInset: Float,
-    var top: Float,
-    var rightInset: Float,
-    var bottom: Float,
-    var radius: Float,
-) : DrawModifierNode, Modifier.Node() {
+private class NotificationScrimClipNode(var clipParams: () -> NotificationScrimClipParams) :
+    DrawModifierNode, Modifier.Node() {
     private val path = Path()
 
-    var invalidated = true
+    private var lastClipParams = NotificationScrimClipParams()
 
     override fun ContentDrawScope.draw() {
-        if (invalidated) {
+        val newClipParams = clipParams()
+        if (newClipParams != lastClipParams) {
+            lastClipParams = newClipParams
+            applyClipParams(path, lastClipParams)
+        }
+        clipPath(path, ClipOp.Difference) { this@draw.drawContent() }
+    }
+
+    private fun ContentDrawScope.applyClipParams(
+        path: Path,
+        clipParams: NotificationScrimClipParams,
+    ) {
+        with(clipParams) {
             path.rewind()
             path
                 .asAndroidPath()
                 .addRoundRect(
-                    -leftInset,
-                    top,
+                    -leftInset.toFloat(),
+                    top.toFloat(),
                     size.width + rightInset,
-                    bottom,
-                    radius,
-                    radius,
-                    android.graphics.Path.Direction.CW
+                    bottom.toFloat(),
+                    radius.toFloat(),
+                    radius.toFloat(),
+                    android.graphics.Path.Direction.CW,
                 )
-            invalidated = false
         }
-        clipPath(path, ClipOp.Difference) { this@draw.drawContent() }
     }
 }
 
-private data class NotificationScrimClipElement(
-    val leftInset: Int,
-    val top: Int,
-    val rightInset: Int,
-    val bottom: Int,
-    val radius: Int,
-) : ModifierNodeElement<NotificationScrimClipNode>() {
+private data class NotificationScrimClipElement(val clipParams: () -> NotificationScrimClipParams) :
+    ModifierNodeElement<NotificationScrimClipNode>() {
     override fun create(): NotificationScrimClipNode {
-        return NotificationScrimClipNode(
-            leftInset.toFloat(),
-            top.toFloat(),
-            rightInset.toFloat(),
-            bottom.toFloat(),
-            radius.toFloat(),
-        )
+        return NotificationScrimClipNode(clipParams)
     }
 
     override fun update(node: NotificationScrimClipNode) {
-        val changed =
-            node.leftInset != leftInset.toFloat() ||
-                node.top != top.toFloat() ||
-                node.rightInset != rightInset.toFloat() ||
-                node.bottom != bottom.toFloat() ||
-                node.radius != radius.toFloat()
-        if (changed) {
-            node.leftInset = leftInset.toFloat()
-            node.top = top.toFloat()
-            node.rightInset = rightInset.toFloat()
-            node.bottom = bottom.toFloat()
-            node.radius = radius.toFloat()
-            node.invalidated = true
-        }
+        node.clipParams = clipParams
     }
 
     override fun InspectorInfo.inspectableProperties() {
         name = "notificationScrimClip"
-        properties["leftInset"] = leftInset
-        properties["top"] = top
-        properties["rightInset"] = rightInset
-        properties["bottom"] = bottom
-        properties["radius"] = radius
+        with(clipParams()) {
+            properties["leftInset"] = leftInset
+            properties["top"] = top
+            properties["rightInset"] = rightInset
+            properties["bottom"] = bottom
+            properties["radius"] = radius
+        }
     }
 }
+
+/** Params for [notificationScrimClip]. */
+data class NotificationScrimClipParams(
+    val top: Int = 0,
+    val bottom: Int = 0,
+    val leftInset: Int = 0,
+    val rightInset: Int = 0,
+    val radius: Int = 0,
+)

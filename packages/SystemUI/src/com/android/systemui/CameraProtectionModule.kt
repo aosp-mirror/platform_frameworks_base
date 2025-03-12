@@ -16,11 +16,20 @@
 
 package com.android.systemui
 
-import dagger.Binds
+import android.content.Context
+import com.android.systemui.dagger.SysUISingleton
 import dagger.Module
+import dagger.Provides
 
 @Module
-interface CameraProtectionModule {
+object CameraProtectionModule {
 
-    @Binds fun cameraProtectionLoaderImpl(impl: CameraProtectionLoaderImpl): CameraProtectionLoader
+    @Provides
+    @SysUISingleton
+    fun cameraProtectionLoader(
+        factory: CameraProtectionLoaderImpl.Factory,
+        context: Context,
+    ): CameraProtectionLoader {
+        return factory.create(context)
+    }
 }

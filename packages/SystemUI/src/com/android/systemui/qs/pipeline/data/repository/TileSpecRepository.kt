@@ -20,12 +20,12 @@ import android.annotation.UserIdInt
 import android.content.res.Resources
 import android.util.SparseArray
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.res.R
 import com.android.systemui.retail.data.repository.RetailModeRepository
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -71,6 +71,9 @@ interface TileSpecRepository {
     /** Prepend the default list of tiles to the current set of tiles */
     suspend fun prependDefault(@UserIdInt userId: Int)
 
+    /** Reset the current set of tiles to the default list of tiles */
+    suspend fun resetToDefault(userId: Int)
+
     companion object {
         /** Position to indicate the end of the list */
         const val POSITION_AT_END = -1
@@ -89,7 +92,7 @@ interface TileSpecRepository {
 class TileSpecSettingsRepository
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val logger: QSPipelineLogger,
     private val retailModeRepository: RetailModeRepository,
     private val userTileSpecRepositoryFactory: UserTileSpecRepository.Factory,
@@ -148,20 +151,22 @@ constructor(
 
     override suspend fun reconcileRestore(
         restoreData: RestoreData,
-        currentAutoAdded: Set<TileSpec>
+        currentAutoAdded: Set<TileSpec>,
     ) {
         userTileRepositories
             .get(restoreData.userId)
             ?.reconcileRestore(restoreData, currentAutoAdded)
     }
 
-    override suspend fun prependDefault(
-        userId: Int,
-    ) {
+    override suspend fun prependDefault(userId: Int) {
         if (retailModeRepository.inRetailMode) {
             return
         }
         userTileRepositories.get(userId)?.prependDefault()
+    }
+
+    override suspend fun resetToDefault(userId: Int) {
+        userTileRepositories.get(userId)?.resetToDefault()
     }
 
     companion object {

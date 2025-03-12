@@ -23,7 +23,7 @@ import com.google.common.truth.Correspondence
 object LogMaker {
     val CATEGORY =
         Correspondence.transforming<LogMaker, Int>(
-            { it?.category },
+            { it.category },
             "has a category of",
         )
 }

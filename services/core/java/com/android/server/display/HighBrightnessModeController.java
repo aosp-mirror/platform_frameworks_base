@@ -38,6 +38,7 @@ import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.display.DisplayManagerService.Clock;
 import com.android.server.display.config.HighBrightnessModeData;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
@@ -101,7 +102,8 @@ class HighBrightnessModeController {
         BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
 
     private int mHbmMode = BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
-    private boolean mIsHdrLayerPresent = false;
+    @VisibleForTesting
+    boolean mIsHdrLayerPresent = false;
     // mMaxDesiredHdrSdrRatio should only be applied when there is a valid backlight->nits mapping
     private float mMaxDesiredHdrSdrRatio = DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
     private boolean mForceHbmChangeCallback = false;
@@ -118,6 +120,14 @@ class HighBrightnessModeController {
      */
     @Nullable
     private HighBrightnessModeMetadata mHighBrightnessModeMetadata;
+
+    /**
+     * If {@link DisplayManagerFlags#useNewHdrBrightnessModifier()} is ON, hdr boost is handled by
+     * {@link com.android.server.display.brightness.clamper.HdrBrightnessModifier} and should be
+     * disabled in this class. After flag is cleaned up, this field together with HDR handling
+     * should be cleaned up from this class.
+     */
+    private boolean mHdrBoostDisabled = false;
 
     HighBrightnessModeController(Handler handler, int width, int height, IBinder displayToken,
             String displayUniqueId, float brightnessMin, float brightnessMax,
@@ -323,6 +333,7 @@ class HighBrightnessModeController {
         pw.println("  mIsTimeAvailable= " + mIsTimeAvailable);
         pw.println("  mIsBlockedByLowPowerMode=" + mIsBlockedByLowPowerMode);
         pw.println("  width*height=" + mWidth + "*" + mHeight);
+        pw.println("  mHdrBoostDisabled=" + mHdrBoostDisabled);
 
         if (mHighBrightnessModeMetadata != null) {
             pw.println("  mRunningStartTimeMillis="
@@ -371,6 +382,23 @@ class HighBrightnessModeController {
 
     boolean deviceSupportsHbm() {
         return mHbmData != null && mHighBrightnessModeMetadata != null;
+    }
+
+    void disableHdrBoost() {
+        mHdrBoostDisabled = true;
+        unregisterHdrListener();
+    }
+    /**
+     * Hdr boost can be applied by
+     * {@link com.android.server.display.brightness.clamper.HdrBrightnessModifier}, in this case
+     * HBMController should not consume HBM time budget
+     */
+    void onHdrBoostApplied(boolean applied) {
+        // We need to update mIsHdrLayerPresent flag only if HDR boost is controlled  by other
+        // component and disabled here
+        if (mHdrBoostDisabled) {
+            mIsHdrLayerPresent = applied;
+        }
     }
 
     private long calculateRemainingTime(long currentTime) {
@@ -583,6 +611,9 @@ class HighBrightnessModeController {
     }
 
     private void registerHdrListener(IBinder displayToken) {
+        if (mHdrBoostDisabled) {
+            return;
+        }
         if (mRegisteredDisplayToken == displayToken) {
             return;
         }

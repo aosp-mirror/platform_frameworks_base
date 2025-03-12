@@ -85,7 +85,7 @@ import java.util.function.IntConsumer;
  * @see WindowManagerGlobal
  * @hide
  */
-public final class WindowManagerImpl implements WindowManager {
+public class WindowManagerImpl implements WindowManager {
     private static final String TAG = "WindowManager";
 
     @UnsupportedAppUsage

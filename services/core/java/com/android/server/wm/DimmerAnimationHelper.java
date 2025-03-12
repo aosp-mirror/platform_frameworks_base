@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DIMMER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_DIMMER;
 import static com.android.server.wm.AlphaAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.AlphaAnimationSpecProto.FROM;
 import static com.android.server.wm.AlphaAnimationSpecProto.TO;
@@ -27,11 +27,13 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 
@@ -74,9 +76,11 @@ public class DimmerAnimationHelper {
             return mDimmingContainer != null && mDimmingContainer == other.mDimmingContainer;
         }
 
-        void inheritPropertiesFromAnimation(@NonNull AnimationSpec anim) {
-            mAlpha = anim.mCurrentAlpha;
-            mBlurRadius = anim.mCurrentBlur;
+        void inheritPropertiesFromAnimation(@Nullable AnimationSpec anim) {
+            if (anim != null) {
+                mAlpha = anim.mCurrentAlpha;
+                mBlurRadius = anim.mCurrentBlur;
+            }
         }
 
         @Override
@@ -90,11 +94,13 @@ public class DimmerAnimationHelper {
     private final Change mRequestedProperties = new Change();
     private AnimationSpec mAlphaAnimationSpec;
 
+    private final SurfaceAnimationRunner mSurfaceAnimationRunner;
     private final AnimationAdapterFactory mAnimationAdapterFactory;
     private AnimationAdapter mLocalAnimationAdapter;
 
-    DimmerAnimationHelper(AnimationAdapterFactory animationFactory) {
+    DimmerAnimationHelper(WindowContainer<?> host, AnimationAdapterFactory animationFactory) {
         mAnimationAdapterFactory = animationFactory;
+        mSurfaceAnimationRunner = host.mWmService.mSurfaceAnimationRunner;
     }
 
     void setExitParameters() {
@@ -153,8 +159,12 @@ public class DimmerAnimationHelper {
                         ? mRequestedProperties.mGeometryParent.getSurfaceControl() : null,
                 mRequestedProperties.mDimmingContainer != startProperties.mDimmingContainer
                         ? mRequestedProperties.mDimmingContainer.getSurfaceControl() : null, t);
+        if (Flags.useTasksDimOnly()) {
+            setBounds(dim, mCurrentProperties.mDimmingContainer, t);
+        }
 
         if (!startProperties.hasSameVisualProperties(mRequestedProperties)) {
+            EventLogTags.writeWmDimCancelAnim(dim.mDimSurface.getLayerId(), "new target values");
             stopCurrentAnimation(dim.mDimSurface);
 
             if (dim.mSkipAnimation
@@ -184,13 +194,15 @@ public class DimmerAnimationHelper {
         ProtoLog.v(WM_DEBUG_DIMMER, "Starting animation on %s", dim);
         mAlphaAnimationSpec = getRequestedAnimationSpec(from, to);
         mLocalAnimationAdapter = mAnimationAdapterFactory.get(mAlphaAnimationSpec,
-                dim.mHostContainer.mWmService.mSurfaceAnimationRunner);
+                mSurfaceAnimationRunner);
 
         float targetAlpha = to.mAlpha;
+        EventLogTags.writeWmDimAnimate(dim.mDimSurface.getLayerId(), targetAlpha, to.mBlurRadius);
 
         mLocalAnimationAdapter.startAnimation(dim.mDimSurface, t,
                 ANIMATION_TYPE_DIMMER, /* finishCallback */ (type, animator) -> {
                     synchronized (dim.mHostContainer.mWmService.mGlobalLock) {
+                        EventLogTags.writeWmDimFinishAnim(dim.mDimSurface.getLayerId());
                         SurfaceControl.Transaction finishTransaction =
                                 dim.mHostContainer.getSyncTransaction();
                         setCurrentAlphaBlur(dim, finishTransaction);
@@ -203,18 +215,12 @@ public class DimmerAnimationHelper {
                 });
     }
 
-    private boolean isAnimating() {
-        return mAlphaAnimationSpec != null;
-    }
-
     void stopCurrentAnimation(@NonNull SurfaceControl surface) {
-        if (mLocalAnimationAdapter != null && isAnimating()) {
-            // Save the current animation progress and cancel the animation
-            mCurrentProperties.inheritPropertiesFromAnimation(mAlphaAnimationSpec);
-            mLocalAnimationAdapter.onAnimationCancelled(surface);
-            mLocalAnimationAdapter = null;
-            mAlphaAnimationSpec = null;
-        }
+        // (If animating) save the current animation progress and cancel the animation
+        mCurrentProperties.inheritPropertiesFromAnimation(mAlphaAnimationSpec);
+        mSurfaceAnimationRunner.onAnimationCancelled(surface);
+        mLocalAnimationAdapter = null;
+        mAlphaAnimationSpec = null;
     }
 
     @NonNull
@@ -251,6 +257,32 @@ public class DimmerAnimationHelper {
         } catch (NullPointerException e) {
             Log.w(TAG, "Tried to change parent of dim " + dimLayer + " after remove", e);
         }
+    }
+
+    static void setBounds(@NonNull Dimmer.DimState dim, @NonNull WindowState relativeParent,
+                          @NonNull SurfaceControl.Transaction t) {
+        TaskFragment taskFragment = relativeParent.getTaskFragment();
+        Rect taskFragmentBounds = taskFragment != null ? taskFragment.getBounds() : null;
+        Task task = relativeParent.getTask();
+        Rect taskBounds = task != null ? task.getBounds() : null;
+        Rect hostBounds = dim.mHostContainer.getBounds();
+        boolean isEmbedded = taskFragment != null && taskFragment.isEmbedded();
+
+        Rect relativeBounds = new Rect();
+        if (isEmbedded) {
+            // Embedded activities can be dimmed at task or fragment level
+            dim.mDimBounds.set(taskFragment.isDimmingOnParentTask()
+                    ? taskBounds : taskFragmentBounds);
+            relativeBounds.set(dim.mDimBounds);
+            relativeBounds.offset(-taskBounds.left, -taskBounds.top);
+        } else {
+            dim.mDimBounds.set(hostBounds);
+            relativeBounds.set(dim.mDimBounds);
+            relativeBounds.offsetTo(0, 0);
+        }
+
+        t.setWindowCrop(dim.mDimSurface, relativeBounds.width(), relativeBounds.height());
+        t.setPosition(dim.mDimSurface, relativeBounds.left, relativeBounds.top);
     }
 
     void setCurrentAlphaBlur(@NonNull Dimmer.DimState dim, @NonNull SurfaceControl.Transaction t) {

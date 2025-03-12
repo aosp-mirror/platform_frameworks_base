@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.AudioDeviceInfo.TYPE_BLE_HEADSET;
+import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO;
 import static android.media.AudioDeviceInfo.TYPE_BUILTIN_MIC;
 import static android.media.AudioDeviceInfo.TYPE_USB_ACCESSORY;
 import static android.media.AudioDeviceInfo.TYPE_USB_DEVICE;
@@ -48,19 +50,23 @@ public class InputMediaDevice extends MediaDevice {
 
     private final boolean mIsVolumeFixed;
 
+    private final String mProductName;
+
     private InputMediaDevice(
             @NonNull Context context,
             @NonNull String id,
             @AudioDeviceType int audioDeviceInfoType,
             int maxVolume,
             int currentVolume,
-            boolean isVolumeFixed) {
+            boolean isVolumeFixed,
+            @Nullable String productName) {
         super(context, /* info= */ null, /* item= */ null);
         mId = id;
         mAudioDeviceInfoType = audioDeviceInfoType;
         mMaxVolume = maxVolume;
         mCurrentVolume = currentVolume;
         mIsVolumeFixed = isVolumeFixed;
+        mProductName = productName;
         initDeviceRecord();
     }
 
@@ -71,13 +77,20 @@ public class InputMediaDevice extends MediaDevice {
             @AudioDeviceType int audioDeviceInfoType,
             int maxVolume,
             int currentVolume,
-            boolean isVolumeFixed) {
+            boolean isVolumeFixed,
+            @Nullable String productName) {
         if (!isSupportedInputDevice(audioDeviceInfoType)) {
             return null;
         }
 
         return new InputMediaDevice(
-                context, id, audioDeviceInfoType, maxVolume, currentVolume, isVolumeFixed);
+                context,
+                id,
+                audioDeviceInfoType,
+                maxVolume,
+                currentVolume,
+                isVolumeFixed,
+                productName);
     }
 
     public @AudioDeviceType int getAudioDeviceInfoType() {
@@ -90,23 +103,35 @@ public class InputMediaDevice extends MediaDevice {
                             TYPE_WIRED_HEADSET,
                             TYPE_USB_DEVICE,
                             TYPE_USB_HEADSET,
-                            TYPE_USB_ACCESSORY ->
+                            TYPE_USB_ACCESSORY,
+                            TYPE_BLUETOOTH_SCO,
+                            TYPE_BLE_HEADSET ->
                     true;
             default -> false;
         };
     }
 
+    @Nullable
+    public String getProductName() {
+        return mProductName;
+    }
+
     @Override
     public @NonNull String getName() {
-        CharSequence name =
-                switch (mAudioDeviceInfoType) {
-                    case TYPE_WIRED_HEADSET ->
-                            mContext.getString(R.string.media_transfer_wired_device_mic_name);
-                    case TYPE_USB_DEVICE, TYPE_USB_HEADSET, TYPE_USB_ACCESSORY ->
-                            mContext.getString(R.string.media_transfer_usb_device_mic_name);
-                    default -> mContext.getString(R.string.media_transfer_internal_mic);
-                };
-        return name.toString();
+        return switch (mAudioDeviceInfoType) {
+            case TYPE_WIRED_HEADSET ->
+                    mContext.getString(R.string.media_transfer_wired_device_mic_name);
+            case TYPE_USB_DEVICE, TYPE_USB_HEADSET, TYPE_USB_ACCESSORY ->
+                    // The product name is assumed to be a well-formed string if it's not null.
+                    mProductName != null
+                            ? mProductName
+                            : mContext.getString(R.string.media_transfer_usb_device_mic_name);
+            case TYPE_BLUETOOTH_SCO, TYPE_BLE_HEADSET ->
+                    mProductName != null
+                            ? mProductName
+                            : mContext.getString(R.string.media_transfer_bt_device_mic_name);
+            default -> mContext.getString(R.string.media_transfer_this_device_name_desktop);
+        };
     }
 
     @Override

@@ -130,7 +130,7 @@ public class GnssPowerStatsTest {
                 .thenReturn(new int[0]);
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
-                () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile(), mUidResolver));
+                () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         GnssPowerStatsCollector collector = new GnssPowerStatsCollector(mInjector);
         collector.addConsumer(
@@ -220,7 +220,7 @@ public class GnssPowerStatsTest {
                 .thenReturn(new int[0]);
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
-                () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile(), mUidResolver));
+                () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         stats.noteStateChange(buildHistoryItemInitialStateGpsOn(0));
 
@@ -299,7 +299,7 @@ public class GnssPowerStatsTest {
                 .thenReturn(new int[]{ENERGY_CONSUMER_ID});
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
-                () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile(), mUidResolver));
+                () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         GnssPowerStatsCollector collector = new GnssPowerStatsCollector(mInjector);
         collector.addConsumer(

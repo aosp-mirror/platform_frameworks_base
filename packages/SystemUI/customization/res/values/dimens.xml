@@ -33,4 +33,13 @@
     <dimen name="small_clock_height">114dp</dimen>
     <dimen name="small_clock_padding_top">28dp</dimen>
     <dimen name="clock_padding_start">28dp</dimen>
+    <dimen name="weather_date_icon_padding">28dp</dimen>
+
+    <!-- When large clock is showing, offset the smartspace by this amount -->
+    <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
+    <!--Dimens used in both lockscreen  preview and smartspace -->
+    <dimen name="date_weather_view_height">24dp</dimen>
+    <dimen name="enhanced_smartspace_height">104dp</dimen>
+    <dimen name="status_view_margin_horizontal">0dp</dimen>
+    <dimen name="lock_icon_margin_bottom">74dp</dimen>
 </resources>

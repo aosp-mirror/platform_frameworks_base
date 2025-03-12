@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -562,10 +563,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Represents the event of an application making an announcement.
-     * <p>
-     * In general, follow the practices described in
-     * {@link View#announceForAccessibility(CharSequence)}.
+     *
+     * @deprecated Use one of the semantic alternative methods described in the documentation of
+     *     {@link View#announceForAccessibility(CharSequence)} instead of using this event, as
+     *     accessibility services may choose to ignore dispatch of this event type.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_ACCESSIBILITY_ANNOUNCEMENT_APIS)
+    @Deprecated
     public static final int TYPE_ANNOUNCEMENT = 1 << 14;
 
     /**
@@ -784,6 +788,45 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public static final int CONTENT_CHANGE_TYPE_ENABLED = 1 << 12;
 
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The source node changed its checked state, which is returned by
+     * {@link AccessibilityNodeInfo#getChecked()}.
+     * The view changing its checked state should call
+     * {@link AccessibilityNodeInfo#setChecked(int)} and then send this event.
+     *
+     * @see AccessibilityNodeInfo#getChecked()
+     * @see AccessibilityNodeInfo#setChecked(int)
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public static final int CONTENT_CHANGE_TYPE_CHECKED = 1 << 13;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event: The source node changed its
+     * expanded state which is returned by {@link AccessibilityNodeInfo#getExpandedState()}. The
+     * view changing the node's expanded state should call {@link
+     * AccessibilityNodeInfo#setExpandedState(int)} and then send this event.
+     *
+     * @see AccessibilityNodeInfo#getExpandedState()
+     * @see AccessibilityNodeInfo#setExpandedState(int)
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_EXPANSION_STATE_API)
+    public static final int CONTENT_CHANGE_TYPE_EXPANDED = 1 << 14;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The source node changed its supplemental description, which is returned by
+     * {@link AccessibilityNodeInfo#getSupplementalDescription()}.
+     * The view changing its supplemental description should call
+     * {@link AccessibilityNodeInfo#setSupplementalDescription(CharSequence)} and
+     * then send this event.
+     *
+     * @see AccessibilityNodeInfo#getSupplementalDescription()
+     * @see AccessibilityNodeInfo#setSupplementalDescription(CharSequence)
+     */
+    @FlaggedApi(Flags.FLAG_SUPPLEMENTAL_DESCRIPTION)
+    public static final int CONTENT_CHANGE_TYPE_SUPPLEMENTAL_DESCRIPTION = 1 << 15;
+
     // Speech state change types.
 
     /** Change type for {@link #TYPE_SPEECH_STATE_CHANGE} event: another service is speaking. */
@@ -916,6 +959,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 CONTENT_CHANGE_TYPE_CONTENT_INVALID,
                 CONTENT_CHANGE_TYPE_ERROR,
                 CONTENT_CHANGE_TYPE_ENABLED,
+                CONTENT_CHANGE_TYPE_CHECKED,
+                CONTENT_CHANGE_TYPE_EXPANDED,
+                CONTENT_CHANGE_TYPE_SUPPLEMENTAL_DESCRIPTION,
             })
     public @interface ContentChangeTypes {}
 
@@ -1196,7 +1242,24 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 return "CONTENT_CHANGE_TYPE_CONTENT_INVALID";
             case CONTENT_CHANGE_TYPE_ERROR: return "CONTENT_CHANGE_TYPE_ERROR";
             case CONTENT_CHANGE_TYPE_ENABLED: return "CONTENT_CHANGE_TYPE_ENABLED";
-            default: return Integer.toHexString(type);
+            default: {
+                if (Flags.triStateChecked()) {
+                    if (type == CONTENT_CHANGE_TYPE_CHECKED) {
+                        return "CONTENT_CHANGE_TYPE_CHECKED";
+                    }
+                }
+                if (Flags.a11yExpansionStateApi()) {
+                    if (type == CONTENT_CHANGE_TYPE_EXPANDED) {
+                        return "CONTENT_CHANGE_TYPE_EXPANDED";
+                    }
+                }
+                if (Flags.supplementalDescription()) {
+                    if (type == CONTENT_CHANGE_TYPE_SUPPLEMENTAL_DESCRIPTION) {
+                        return "CONTENT_CHANGE_TYPE_SUPPLEMENTAL_DESCRIPTION";
+                    }
+                }
+                return Integer.toHexString(type);
+            }
         }
     }
 

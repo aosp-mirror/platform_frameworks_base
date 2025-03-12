@@ -1,12 +1,15 @@
 package com.android.systemui.shade.ui.viewmodel
 
 import android.content.Intent
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.provider.AlarmClock
 import android.provider.Settings
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -18,7 +21,9 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.fakeMobileIconsInteractor
 import com.android.systemui.testKosmos
@@ -48,7 +53,7 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
     private val sceneInteractor = kosmos.sceneInteractor
     private val deviceEntryInteractor = kosmos.deviceEntryInteractor
 
-    private val underTest: ShadeHeaderViewModel = kosmos.shadeHeaderViewModel
+    private val underTest by lazy { kosmos.shadeHeaderViewModel }
 
     @Before
     fun setUp() {
@@ -96,6 +101,7 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(DualShade.FLAG_NAME)
     fun onSystemIconContainerClicked_locked_collapsesShadeToLockscreen() =
         testScope.runTest {
             setDeviceEntered(false)
@@ -108,6 +114,25 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun onSystemIconContainerClicked_lockedOnDualShade_collapsesShadeToLockscreen() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            setDeviceEntered(false)
+            setScene(Scenes.Lockscreen)
+            setOverlay(Overlays.NotificationsShade)
+            assertThat(currentOverlays).isNotEmpty()
+
+            underTest.onSystemIconContainerClicked()
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).isEmpty()
+        }
+
+    @Test
+    @DisableFlags(DualShade.FLAG_NAME)
     fun onSystemIconContainerClicked_unlocked_collapsesShadeToGone() =
         testScope.runTest {
             setDeviceEntered(true)
@@ -117,6 +142,24 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun onSystemIconContainerClicked_unlockedOnDualShade_collapsesShadeToGone() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            setDeviceEntered(true)
+            setScene(Scenes.Gone)
+            setOverlay(Overlays.NotificationsShade)
+            assertThat(currentOverlays).isNotEmpty()
+
+            underTest.onSystemIconContainerClicked()
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(currentOverlays).isEmpty()
         }
 
     companion object {
@@ -140,6 +183,17 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         sceneInteractor.changeScene(key, "test")
         sceneInteractor.setTransitionState(
             MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(key))
+        )
+        testScope.runCurrent()
+    }
+
+    private fun setOverlay(key: OverlayKey) {
+        val currentOverlays = sceneInteractor.currentOverlays.value + key
+        sceneInteractor.showOverlay(key, "test")
+        sceneInteractor.setTransitionState(
+            MutableStateFlow<ObservableTransitionState>(
+                ObservableTransitionState.Idle(sceneInteractor.currentScene.value, currentOverlays)
+            )
         )
         testScope.runCurrent()
     }

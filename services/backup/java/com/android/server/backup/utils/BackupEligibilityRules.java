@@ -21,6 +21,7 @@ import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
 import static com.android.server.backup.UserBackupManagerService.SETTINGS_PACKAGE;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.backup.UserBackupManagerService.TELEPHONY_PROVIDER_PACKAGE;
 import static com.android.server.backup.UserBackupManagerService.WALLPAPER_PACKAGE;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
@@ -74,6 +75,12 @@ public class BackupEligibilityRules {
     private static final Set<String> systemPackagesAllowedForNonSystemUsers = SetUtils.union(
             systemPackagesAllowedForProfileUser,
             Sets.newArraySet(WALLPAPER_PACKAGE, SETTINGS_PACKAGE));
+
+    static {
+        if (UserManager.isHeadlessSystemUserMode()) {
+            systemPackagesAllowedForNonSystemUsers.add(TELEPHONY_PROVIDER_PACKAGE);
+        }
+    }
 
     private final PackageManager mPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;

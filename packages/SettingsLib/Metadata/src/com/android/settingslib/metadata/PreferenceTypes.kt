@@ -26,8 +26,7 @@ import androidx.annotation.StringRes
 interface TwoStatePreference : PreferenceMetadata, PersistentPreference<Boolean>, BooleanValue {
 
     override fun shouldDisableDependents(context: Context) =
-        storage(context).getValue(key, Boolean::class.javaObjectType) != true ||
-            super.shouldDisableDependents(context)
+        storage(context).getBoolean(key) != true || super.shouldDisableDependents(context)
 }
 
 /** A preference that provides a two-state toggleable option. */
@@ -38,3 +37,8 @@ constructor(
     @StringRes override val title: Int = 0,
     @StringRes override val summary: Int = 0,
 ) : TwoStatePreference
+
+/** A preference that provides a two-state toggleable option that can be used as a main switch. */
+open class MainSwitchPreference
+@JvmOverloads
+constructor(override val key: String, @StringRes override val title: Int = 0) : TwoStatePreference

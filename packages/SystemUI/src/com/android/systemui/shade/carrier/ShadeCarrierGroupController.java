@@ -44,6 +44,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
@@ -153,7 +154,7 @@ public class ShadeCarrierGroupController {
             ShadeCarrierGroupControllerLogger logger,
             NetworkController networkController,
             CarrierTextManager.Builder carrierTextManagerBuilder,
-            Context context,
+            @ShadeDisplayAware Context context,
             CarrierConfigTracker carrierConfigTracker,
             SlotIndexResolver slotIndexResolver,
             MobileUiAdapter mobileUiAdapter,
@@ -497,7 +498,7 @@ public class ShadeCarrierGroupController {
                 ShadeCarrierGroupControllerLogger logger,
                 NetworkController networkController,
                 CarrierTextManager.Builder carrierTextControllerBuilder,
-                Context context,
+                @ShadeDisplayAware Context context,
                 CarrierConfigTracker carrierConfigTracker,
                 SlotIndexResolver slotIndexResolver,
                 MobileUiAdapter mobileUiAdapter,

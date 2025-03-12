@@ -23,4 +23,7 @@
     <dimen name="keyguard_clock_top_margin">80dp</dimen>
     <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">155dp</dimen>
     <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">85dp</dimen>
+
+    <!-- The width of the shade overlay panel (both notifications and quick settings). -->
+    <dimen name="shade_panel_width">474dp</dimen>
 </resources>

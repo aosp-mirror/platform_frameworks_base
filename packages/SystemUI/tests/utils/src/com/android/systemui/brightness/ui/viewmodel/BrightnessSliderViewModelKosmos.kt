@@ -18,14 +18,25 @@ package com.android.systemui.brightness.ui.viewmodel
 
 import com.android.systemui.brightness.domain.interactor.brightnessPolicyEnforcementInteractor
 import com.android.systemui.brightness.domain.interactor.screenBrightnessInteractor
+import com.android.systemui.classifier.domain.interactor.falsingInteractor
+import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
+import com.android.systemui.settings.brightness.ui.brightnessWarningToast
 
-val Kosmos.brightnessSliderViewModel: BrightnessSliderViewModel by
+val Kosmos.brightnessSliderViewModelFactory: BrightnessSliderViewModel.Factory by
     Kosmos.Fixture {
-        BrightnessSliderViewModel(
-            screenBrightnessInteractor = screenBrightnessInteractor,
-            brightnessPolicyEnforcementInteractor = brightnessPolicyEnforcementInteractor,
-            applicationScope = applicationCoroutineScope,
-        )
+        object : BrightnessSliderViewModel.Factory {
+            override fun create(allowsMirroring: Boolean): BrightnessSliderViewModel {
+                return BrightnessSliderViewModel(
+                    screenBrightnessInteractor = screenBrightnessInteractor,
+                    brightnessPolicyEnforcementInteractor = brightnessPolicyEnforcementInteractor,
+                    hapticsViewModelFactory = sliderHapticsViewModelFactory,
+                    brightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor,
+                    supportsMirroring = allowsMirroring,
+                    falsingInteractor = falsingInteractor,
+                    brightnessWarningToast = brightnessWarningToast,
+                )
+            }
+        }
     }

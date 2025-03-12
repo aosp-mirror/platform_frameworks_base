@@ -619,7 +619,16 @@ namespace PaintGlue {
         // restore the original settings.
         font->setSkewX(saveSkewX);
         font->setEmbolden(savefakeBold);
-        if (paint->getFamilyVariant() == minikin::FamilyVariant::ELEGANT) {
+
+        // Don't use hard coded vertical metrics if target SDK is 35 or later.
+#ifdef __ANDROID__
+        uint32_t isTargetSdk35OrLater = android_get_application_target_sdk_version() >= 35;
+#else
+        uint32_t isTargetSdk35OrLater = true;
+#endif  // __ANDROID
+        bool useHardCodedMetrics = !isTargetSdk35OrLater &&
+                                   (paint->getFamilyVariant() == minikin::FamilyVariant::ELEGANT);
+        if (useHardCodedMetrics) {
             SkScalar size = font->getSize();
             metrics->fTop = -size * kElegantTop / 2048;
             metrics->fBottom = -size * kElegantBottom / 2048;
@@ -906,6 +915,13 @@ namespace PaintGlue {
         paint->setBlendMode(mode);
     }
 
+    static void setRuntimeXfermode(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle,
+                                   jlong xfermodeHandle) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        SkBlender* blender = reinterpret_cast<SkBlender*>(xfermodeHandle);
+        paint->setBlender(sk_ref_sp(blender));
+    }
+
     static jlong setPathEffect(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong effectHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkPathEffect* effect  = reinterpret_cast<SkPathEffect*>(effectHandle);
@@ -1127,6 +1143,36 @@ namespace PaintGlue {
         return leftMinikinPaint == rightMinikinPaint;
     }
 
+    struct VariationBuilder {
+        std::vector<minikin::FontVariation> varSettings;
+    };
+
+    static jlong createFontVariationBuilder(CRITICAL_JNI_PARAMS_COMMA jint size) {
+        VariationBuilder* builder = new VariationBuilder();
+        builder->varSettings.reserve(size);
+        return reinterpret_cast<jlong>(builder);
+    }
+
+    static void addFontVariationToBuilder(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr, jint tag,
+                                          jfloat value) {
+        VariationBuilder* builder = reinterpret_cast<VariationBuilder*>(builderPtr);
+        builder->varSettings.emplace_back(static_cast<minikin::AxisTag>(tag), value);
+    }
+
+    static void setFontVariationOverride(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle,
+                                         jlong builderPtr) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        if (builderPtr == 0) {
+            paint->setVariationOverride(minikin::VariationSettings());
+            return;
+        }
+
+        VariationBuilder* builder = reinterpret_cast<VariationBuilder*>(builderPtr);
+        paint->setVariationOverride(
+                minikin::VariationSettings(builder->varSettings, false /* sorted */));
+        delete builder;
+    }
+
 }; // namespace PaintGlue
 
 static const JNINativeMethod methods[] = {
@@ -1203,6 +1249,7 @@ static const JNINativeMethod methods[] = {
         {"nSetShader", "(JJ)J", (void*)PaintGlue::setShader},
         {"nSetColorFilter", "(JJ)J", (void*)PaintGlue::setColorFilter},
         {"nSetXfermode", "(JI)V", (void*)PaintGlue::setXfermode},
+        {"nSetXfermode", "(JJ)V", (void*)PaintGlue::setRuntimeXfermode},
         {"nSetPathEffect", "(JJ)J", (void*)PaintGlue::setPathEffect},
         {"nSetMaskFilter", "(JJ)J", (void*)PaintGlue::setMaskFilter},
         {"nSetTypeface", "(JJ)V", (void*)PaintGlue::setTypeface},
@@ -1235,6 +1282,9 @@ static const JNINativeMethod methods[] = {
         {"nSetShadowLayer", "(JFFFJJ)V", (void*)PaintGlue::setShadowLayer},
         {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
         {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
+        {"nCreateFontVariationBuilder", "(I)J", (void*)PaintGlue::createFontVariationBuilder},
+        {"nAddFontVariationToBuilder", "(JIF)V", (void*)PaintGlue::addFontVariationToBuilder},
+        {"nSetFontVariationOverride", "(JJ)V", (void*)PaintGlue::setFontVariationOverride},
 };
 
 int register_android_graphics_Paint(JNIEnv* env) {

@@ -16,7 +16,9 @@
 
 package com.android.systemui.inputdevice.tutorial
 
+import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.domain.interactor.ConnectionState
+import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor.TutorialType
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen as KeyboardTouchpadTutorialScreen
 import com.android.systemui.log.ConstantStringsLogger
 import com.android.systemui.log.ConstantStringsLoggerImpl
@@ -41,7 +43,7 @@ constructor(@InputDeviceTutorialLog private val buffer: LogBuffer) :
                 str1 = screen.toString()
                 str2 = context.string
             },
-            { "Emitting new screen $str1 in $str2" }
+            { "Emitting new screen $str1 in $str2" },
         )
     }
 
@@ -58,7 +60,7 @@ constructor(@InputDeviceTutorialLog private val buffer: LogBuffer) :
             TAG,
             LogLevel.WARNING,
             { str1 = nextScreen.toString() },
-            { "next screen should be $str1 but required hardware is missing" }
+            { "next screen should be $str1 but required hardware is missing" },
         )
     }
 
@@ -72,20 +74,20 @@ constructor(@InputDeviceTutorialLog private val buffer: LogBuffer) :
                 bool1 = connectionState.touchpadConnected
                 bool2 = connectionState.keyboardConnected
             },
-            { "Received connection state: touchpad connected: $bool1 keyboard connected: $bool2" }
+            { "Received connection state: touchpad connected: $bool1 keyboard connected: $bool2" },
         )
     }
 
     fun logMovingBetweenScreens(
         previousScreen: KeyboardTouchpadTutorialScreen?,
-        currentScreen: KeyboardTouchpadTutorialScreen
+        currentScreen: KeyboardTouchpadTutorialScreen,
     ) {
         logInfo(
             {
                 str1 = previousScreen?.toString() ?: "NO_SCREEN"
                 str2 = currentScreen.toString()
             },
-            { "Moving from $str1 screen to $str2 screen" }
+            { "Moving from $str1 screen to $str2 screen" },
         )
     }
 
@@ -93,9 +95,17 @@ constructor(@InputDeviceTutorialLog private val buffer: LogBuffer) :
         logInfo({ str1 = previousScreen.toString() }, { "Going back to $str1 screen" })
     }
 
+    fun logDeviceFirstConnection(deviceType: DeviceType) {
+        logInfo({ str1 = deviceType.toString() }, { "$str1 has connected for the first time" })
+    }
+
+    fun logTutorialLaunched(tutorialType: TutorialType) {
+        logInfo({ str1 = tutorialType.toString() }, { "Launching $str1 tutorial" })
+    }
+
     private inline fun logInfo(
         messageInitializer: MessageInitializer,
-        noinline messagePrinter: MessagePrinter
+        noinline messagePrinter: MessagePrinter,
     ) {
         buffer.log(TAG, LogLevel.INFO, messageInitializer, messagePrinter)
     }

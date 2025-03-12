@@ -41,7 +41,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.ComponentSystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -93,7 +92,7 @@ private fun DialogComposable(
     Box(
         Modifier.fillMaxWidth()
             .padding(top = 18.dp, bottom = 8.dp)
-            .background(LocalAndroidColorScheme.current.surfaceBright, RoundedCornerShape(28.dp))
+            .background(MaterialTheme.colorScheme.surfaceBright, RoundedCornerShape(28.dp))
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -106,7 +105,7 @@ private fun DialogComposable(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = LocalAndroidColorScheme.current.onSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                 )

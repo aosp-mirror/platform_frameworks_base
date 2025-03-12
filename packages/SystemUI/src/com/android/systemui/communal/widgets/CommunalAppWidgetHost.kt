@@ -18,6 +18,8 @@ package com.android.systemui.communal.widgets
 
 import android.appwidget.AppWidgetHost
 import android.content.Context
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import javax.annotation.concurrent.GuardedBy
@@ -25,7 +27,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 
 /** Communal app widget host that creates a [CommunalAppWidgetHostView]. */
 class CommunalAppWidgetHost(
@@ -33,7 +34,14 @@ class CommunalAppWidgetHost(
     private val backgroundScope: CoroutineScope,
     hostId: Int,
     logBuffer: LogBuffer,
+    glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper,
 ) : AppWidgetHost(context, hostId) {
+
+    init {
+        // The app widget host should never be accessed from a headless system user.
+        glanceableHubMultiUserHelper.assertNotInHeadlessSystemUser()
+    }
+
     private val logger = Logger(logBuffer, TAG)
 
     private val _appWidgetIdToRemove = MutableSharedFlow<Int>()

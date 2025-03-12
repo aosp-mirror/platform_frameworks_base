@@ -26,9 +26,9 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -44,20 +44,19 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.spy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
-    val kosmos =
+    private val kosmos =
         testKosmos().apply {
-            this.fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
         }
     val underTest = kosmos.fromPrimaryBouncerTransitionInteractor
     val testScope = kosmos.testScope
     val selectedUserInteractor = kosmos.selectedUserInteractor
-    val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    val transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
     val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
 
     @Test
@@ -67,12 +66,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // Transition-specific surface visibility should be null ("don't care") initially.
-            assertEquals(
-                listOf(
-                    null,
-                ),
-                values
-            )
+            assertEquals(listOf(null), values)
 
             transitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -86,9 +80,9 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
-                    null, // PRIMARY_BOUNCER -> LOCKSCREEN does not have any specific visibility.
+                    null // PRIMARY_BOUNCER -> LOCKSCREEN does not have any specific visibility.
                 ),
-                values
+                values,
             )
 
             transitionRepository.sendTransitionStep(
@@ -117,7 +111,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
                     null,
                     false, // Surface is only made visible once the bouncer UI animates out.
                 ),
-                values
+                values,
             )
 
             transitionRepository.sendTransitionStep(
@@ -137,7 +131,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
                     false,
                     true, // Surface should eventually be visible.
                 ),
-                values
+                values,
             )
         }
 
@@ -150,7 +144,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.PRIMARY_BOUNCER,
-                testScope
+                testScope,
             )
 
             reset(transitionRepository)
@@ -161,7 +155,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
             assertThat(transitionRepository)
                 .startedTransition(
                     from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.LOCKSCREEN
+                    to = KeyguardState.LOCKSCREEN,
                 )
         }
 
@@ -177,7 +171,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.PRIMARY_BOUNCER,
-                testScope
+                testScope,
             )
 
             reset(transitionRepository)
@@ -188,7 +182,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
             assertThat(transitionRepository)
                 .startedTransition(
                     from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.GLANCEABLE_HUB
+                    to = KeyguardState.GLANCEABLE_HUB,
                 )
         }
 
@@ -201,7 +195,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.PRIMARY_BOUNCER,
-                testScope
+                testScope,
             )
 
             reset(transitionRepository)
@@ -218,7 +212,7 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
             assertThat(transitionRepository)
                 .startedTransition(
                     from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.OCCLUDED
+                    to = KeyguardState.OCCLUDED,
                 )
         }
 }

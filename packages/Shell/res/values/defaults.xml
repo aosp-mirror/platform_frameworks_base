@@ -1,0 +1,5 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Default for Wear bugreport warning activity-->
+    <!-- DO NOT TRANSLATE -->
+    <string name="system_ui_wear_bugreport_warning_activity" />
+</resources>

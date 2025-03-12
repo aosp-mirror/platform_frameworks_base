@@ -16,8 +16,15 @@
 
 package android.media;
 
+import static android.media.audio.Flags.FLAG_ROUTED_DEVICE_IDS;
+
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.os.Handler;
 import android.os.Looper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * AudioRouting defines an interface for controlling routing and routing notifications in
@@ -47,6 +54,22 @@ public interface AudioRouting {
      * If it is not, <code>getRoutedDevice()</code> will return null.
      */
     public AudioDeviceInfo getRoutedDevice();
+
+    /**
+     * Returns a List of {@link AudioDeviceInfo} identifying the current routing of this
+     * AudioTrack/AudioRecord.
+     * Note: The query is only valid if the AudioTrack/AudioRecord is currently playing.
+     * If it is not, <code>getRoutedDevices()</code> will return an empty List.
+     */
+    @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
+    default @NonNull List<AudioDeviceInfo> getRoutedDevices() {
+        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
+        AudioDeviceInfo audioDeviceInfo = getRoutedDevice();
+        if (audioDeviceInfo != null) {
+            audioDeviceInfos.add(audioDeviceInfo);
+        }
+        return new ArrayList<AudioDeviceInfo>();
+    }
 
     /**
      * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing

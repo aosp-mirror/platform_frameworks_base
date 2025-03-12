@@ -115,14 +115,14 @@ private constructor(
         fun assertThat(
             repository: KeyguardTransitionRepository
         ): KeyguardTransitionRepositorySpySubject =
-            assertAbout { failureMetadata, repository: KeyguardTransitionRepository ->
+                assertAbout { failureMetadata, repository: KeyguardTransitionRepository? ->
                     if (!Mockito.mockingDetails(repository).isSpy) {
                         fail(
                             "Cannot assert on a non-spy KeyguardTransitionRepository. " +
                                 "Use Mockito.spy(keyguardTransitionRepository)."
                         )
                     }
-                    KeyguardTransitionRepositorySpySubject(failureMetadata, repository)
+                    KeyguardTransitionRepositorySpySubject(failureMetadata, repository!!)
                 }
                 .that(repository)
     }

@@ -51,7 +51,7 @@ class ReduceBrightColorsTileMapperTest : SysuiTestCase() {
                         addOverride(R.drawable.qs_extra_dim_icon_off, TestStubDrawable())
                     }
                     .resources,
-                context.theme
+                context.theme,
             )
     }
 
@@ -61,10 +61,7 @@ class ReduceBrightColorsTileMapperTest : SysuiTestCase() {
 
         val outputState = mapper.map(config, inputModel)
 
-        val expectedState =
-            createReduceBrightColorsTileState(
-                QSTileState.ActivationState.INACTIVE,
-            )
+        val expectedState = createReduceBrightColorsTileState(QSTileState.ActivationState.INACTIVE)
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
 
@@ -79,7 +76,7 @@ class ReduceBrightColorsTileMapperTest : SysuiTestCase() {
     }
 
     private fun createReduceBrightColorsTileState(
-        activationState: QSTileState.ActivationState,
+        activationState: QSTileState.ActivationState
     ): QSTileState {
         val label =
             context.getString(com.android.internal.R.string.reduce_bright_colors_feature_name)
@@ -88,7 +85,7 @@ class ReduceBrightColorsTileMapperTest : SysuiTestCase() {
                 R.drawable.qs_extra_dim_icon_on
             else R.drawable.qs_extra_dim_icon_off
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -101,7 +98,7 @@ class ReduceBrightColorsTileMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

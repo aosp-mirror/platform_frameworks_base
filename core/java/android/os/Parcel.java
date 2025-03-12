@@ -1402,7 +1402,6 @@ public final class Parcel {
         writeInt(N);
         if (DEBUG_ARRAY_MAP) {
             RuntimeException here =  new RuntimeException("here");
-            here.fillInStackTrace();
             Log.d(TAG, "Writing " + N + " ArrayMap entries", here);
         }
         int startPos;

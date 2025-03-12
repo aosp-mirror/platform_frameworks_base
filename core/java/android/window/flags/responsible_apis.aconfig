@@ -9,24 +9,10 @@ flag {
 }
 
 flag {
-    name: "bal_require_opt_in_same_uid"
-    namespace: "responsible_apis"
-    description: "Require the PendingIntent creator/sender to opt in if it is the same UID"
-    bug: "296478951"
-}
-
-flag {
     name: "bal_dont_bring_existing_background_task_stack_to_fg"
     namespace: "responsible_apis"
     description: "When starting a PendingIntent with ONLY creator privileges, don't bring the existing task stack to foreground"
     bug: "296478675"
-}
-
-flag {
-    name: "bal_show_toasts"
-    namespace: "responsible_apis"
-    description: "Enable toasts to indicate (potential) BAL blocking."
-    bug: "308059069"
 }
 
 flag {
@@ -62,6 +48,7 @@ flag {
     namespace: "responsible_apis"
     description: "Introduce additional start modes."
     bug: "352182359"
+    is_exported: true
 }
 
 flag {
@@ -69,6 +56,16 @@ flag {
     namespace: "responsible_apis"
     description: "Add options parameter to IntentSender.sendIntent."
     bug: "339720406"
+    is_exported: true
+}
+
+flag {
+    name: "bal_strict_mode_ro"
+    namespace: "responsible_apis"
+    description: "Strict mode flag"
+    bug: "324089586"
+    is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {

@@ -32,7 +32,9 @@ import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
@@ -53,7 +55,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.spy
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -77,14 +78,21 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
 
     private val kosmos =
         testKosmos().apply {
-            this.fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.fakeKeyguardTransitionRepository =
+                FakeKeyguardTransitionRepository(
+                    // This test sends transition steps manually in the test cases.
+                    initiallySendTransitionStepsOnStartTransition = false,
+                    testScope = testScope,
+                )
+
+            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
         }
 
     private val testScope = kosmos.testScope
     private val underTest by lazy { kosmos.fromDreamingTransitionInteractor }
 
     private val powerInteractor = kosmos.powerInteractor
-    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
 
     @Before
     fun setup() {
@@ -198,6 +206,13 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
     @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun testTransitionToGlanceableHubOnWake() =
         testScope.runTest {
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DREAMING,
+                testScope,
+            )
+            reset(transitionRepository)
+
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
             kosmos.setCommunalAvailable(true)
             runCurrent()

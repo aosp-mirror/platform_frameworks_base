@@ -30,6 +30,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.notifications.ui.composable.NotificationLockscreenScrim
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationLockscreenScrimViewModel
 
 /**
  * Renders the content of the lockscreen.
@@ -39,6 +41,7 @@ import com.android.systemui.lifecycle.rememberViewModel
  */
 class LockscreenContent(
     private val viewModelFactory: LockscreenContentViewModel.Factory,
+    private val notificationScrimViewModelFactory: NotificationLockscreenScrimViewModel.Factory,
     private val blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>,
     private val clockInteractor: KeyguardClockInteractor,
 ) {
@@ -47,10 +50,13 @@ class LockscreenContent(
     }
 
     @Composable
-    fun SceneScope.Content(
-        modifier: Modifier = Modifier,
-    ) {
-        val viewModel = rememberViewModel("LockscreenContent") { viewModelFactory.create() }
+    fun SceneScope.Content(modifier: Modifier = Modifier) {
+        val viewModel =
+            rememberViewModel("LockscreenContent-viewModel") { viewModelFactory.create() }
+        val notificationLockscreenScrimViewModel =
+            rememberViewModel("LockscreenContent-scrimViewModel") {
+                notificationScrimViewModelFactory.create()
+            }
         val isContentVisible: Boolean by viewModel.isContentVisible.collectAsStateWithLifecycle()
         if (!isContentVisible) {
             // If the content isn't supposed to be visible, show a large empty box as it's needed
@@ -71,6 +77,9 @@ class LockscreenContent(
         }
 
         val blueprint = blueprintByBlueprintId[blueprintId] ?: return
-        with(blueprint) { Content(viewModel, modifier.sysuiResTag("keyguard_root_view")) }
+        with(blueprint) {
+            Content(viewModel, modifier.sysuiResTag("keyguard_root_view"))
+            NotificationLockscreenScrim(notificationLockscreenScrimViewModel)
+        }
     }
 }

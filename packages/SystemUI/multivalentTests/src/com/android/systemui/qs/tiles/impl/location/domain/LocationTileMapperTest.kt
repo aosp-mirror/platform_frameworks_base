@@ -45,7 +45,7 @@ class LocationTileMapperTest : SysuiTestCase() {
                     addOverride(R.drawable.qs_location_icon_on, TestStubDrawable())
                 }
                 .resources,
-            context.theme
+            context.theme,
         )
     }
 
@@ -70,7 +70,7 @@ class LocationTileMapperTest : SysuiTestCase() {
         val tileState: QSTileState = mapper.map(qsTileConfig, LocationTileModel(true))
 
         val expectedIcon = Icon.Loaded(context.getDrawable(R.drawable.qs_location_icon_on)!!, null)
-        val actualIcon = tileState.icon()
+        val actualIcon = tileState.icon
         Truth.assertThat(actualIcon).isEqualTo(expectedIcon)
     }
 
@@ -79,7 +79,7 @@ class LocationTileMapperTest : SysuiTestCase() {
         val tileState: QSTileState = mapper.map(qsTileConfig, LocationTileModel(false))
 
         val expectedIcon = Icon.Loaded(context.getDrawable(R.drawable.qs_location_icon_off)!!, null)
-        val actualIcon = tileState.icon()
+        val actualIcon = tileState.icon
         Truth.assertThat(actualIcon).isEqualTo(expectedIcon)
     }
 

@@ -26,6 +26,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:minHeight="@dimen/min_clickable_item_size"
+        android:minWidth="@dimen/min_clickable_item_size"
         android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
 
     <TextView
@@ -34,6 +36,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="@dimen/qqs_layout_margin_top"
+        android:minHeight="@dimen/min_clickable_item_size"
+        android:minWidth="@dimen/min_clickable_item_size"
         android:textAppearance="@style/TextAppearance.Dialog.Body.Message" />
 
     <!-- Attach to Bugreport Switch -->
@@ -58,9 +62,9 @@
         <Switch
             android:id="@+id/attach_to_bugreport_switch"
             android:layout_width="wrap_content"
-            android:minHeight="@dimen/screenrecord_option_icon_size"
             android:layout_height="wrap_content"
             android:gravity="end"
+            style="@style/ScreenRecord.Switch"
             android:layout_gravity="fill_vertical"
             android:layout_weight="0" />
     </LinearLayout>
@@ -87,9 +91,9 @@
         <Switch
             android:id="@+id/winscope_switch"
             android:layout_width="wrap_content"
-            android:minHeight="@dimen/screenrecord_option_icon_size"
             android:layout_height="wrap_content"
             android:gravity="end"
+            style="@style/ScreenRecord.Switch"
             android:layout_gravity="fill_vertical"
             android:layout_weight="0" />
     </LinearLayout>
@@ -116,9 +120,9 @@
         <Switch
             android:id="@+id/trace_debuggable_apps_switch"
             android:layout_width="wrap_content"
-            android:minHeight="@dimen/screenrecord_option_icon_size"
             android:layout_height="wrap_content"
             android:gravity="end"
+            style="@style/ScreenRecord.Switch"
             android:layout_gravity="fill_vertical"
             android:layout_weight="0" />
     </LinearLayout>
@@ -145,9 +149,9 @@
         <Switch
             android:id="@+id/long_traces_switch"
             android:layout_width="wrap_content"
-            android:minHeight="@dimen/screenrecord_option_icon_size"
             android:layout_height="wrap_content"
             android:gravity="end"
+            style="@style/ScreenRecord.Switch"
             android:layout_gravity="fill_vertical"
             android:layout_weight="0" />
     </LinearLayout>

@@ -49,7 +49,8 @@ class MediaProjectionServiceHelper @Inject constructor() {
         fun createOrReuseProjection(
             uid: Int,
             packageName: String,
-            reviewGrantedConsentRequired: Boolean
+            reviewGrantedConsentRequired: Boolean,
+            displayId: Int,
         ): IMediaProjection {
             val existingProjection =
                 if (reviewGrantedConsentRequired) service.getProjection(uid, packageName) else null
@@ -58,7 +59,8 @@ class MediaProjectionServiceHelper @Inject constructor() {
                     uid,
                     packageName,
                     MediaProjectionManager.TYPE_SCREEN_CAPTURE,
-                    false /* permanentGrant */
+                    false /* permanentGrant */,
+                    displayId,
                 )
         }
 
@@ -76,7 +78,7 @@ class MediaProjectionServiceHelper @Inject constructor() {
         fun setReviewedConsentIfNeeded(
             @ReviewGrantedConsentResult consentResult: Int,
             reviewGrantedConsentRequired: Boolean,
-            projection: IMediaProjection?
+            projection: IMediaProjection?,
         ) {
             // Only send the result to the server, when the user needed to review the re-used
             // consent token.

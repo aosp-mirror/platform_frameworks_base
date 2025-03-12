@@ -21,13 +21,12 @@ import static com.android.systemui.flags.SceneContainerFlagParameterizationKt.pa
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static kotlinx.coroutines.flow.FlowKt.asStateFlow;
-import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
@@ -36,6 +35,9 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static kotlinx.coroutines.flow.FlowKt.asStateFlow;
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -68,9 +70,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.util.animation.DisappearParameters;
 
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.flow.StateFlow;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -86,6 +85,8 @@ import java.util.List;
 
 import javax.inject.Provider;
 
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
 
@@ -135,6 +136,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     Runnable mHorizontalLayoutListener;
     @Mock
     private ViewTreeObserver mViewTreeObserver;
+
+    private boolean mPagedTileLayoutListening = false;
 
     private TestableLongPressEffectProvider mLongPressEffectProvider =
             new TestableLongPressEffectProvider();
@@ -213,6 +216,11 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
             return null;
         }).when(mQSPanel).setListening(anyBoolean());
 
+        doAnswer(invocation -> {
+            mPagedTileLayoutListening = invocation.getArgument(0);
+            return null;
+        }).when(mPagedTileLayout).setListening(anyBoolean(), any());
+
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSHost,
                 mQSCustomizerController, mMediaHost,
                 mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager);
@@ -223,6 +231,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
+        mController.destroy();
         disallowTestableLooperAsMainThread();
     }
 
@@ -570,6 +579,73 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         assertThat(mController.mRecords).isEmpty();
     }
+
+    @Test
+    public void listening_dettach_reAttach_listeningSetAgain() {
+        mController.setListening(true);
+
+        assertThat(mPagedTileLayoutListening).isTrue();
+
+        mController.onViewDetached();
+        assertThat(mPagedTileLayoutListening).isFalse();
+
+        mController.onViewAttached();
+        assertThat(mPagedTileLayoutListening).isTrue();
+    }
+
+    @Test
+    public void notListening_dettach_reAttach_stillNotListening() {
+        mController.setListening(false);
+
+        assertThat(mPagedTileLayoutListening).isFalse();
+
+        mController.onViewDetached();
+        assertThat(mPagedTileLayoutListening).isFalse();
+
+        mController.onViewAttached();
+        assertThat(mPagedTileLayoutListening).isFalse();
+    }
+
+    @Test
+    public void reAttach_configurationChangePending_triggersConfigurationListener() {
+        mController.onViewDetached();
+
+        when(mQSPanel.hadConfigurationChangeWhileDetached()).thenReturn(true);
+        clearInvocations(mQSLogger);
+
+        mController.onViewAttached();
+
+        verify(mQSLogger).logOnConfigurationChanged(
+                anyInt(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
+                anyInt(),
+                anyInt(),
+                anyString()
+        );
+    }
+
+    @Test
+    public void reAttach_noConfigurationChangePending_doesntTriggerConfigurationListener() {
+        mController.onViewDetached();
+
+        when(mQSPanel.hadConfigurationChangeWhileDetached()).thenReturn(false);
+        clearInvocations(mQSLogger);
+
+        mController.onViewAttached();
+
+        verify(mQSLogger, never()).logOnConfigurationChanged(
+                anyInt(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
+                anyInt(),
+                anyInt(),
+                anyString()
+        );
+    }
+
 
     private boolean usingMediaPlayer() {
         return !SceneContainerFlag.isEnabled();

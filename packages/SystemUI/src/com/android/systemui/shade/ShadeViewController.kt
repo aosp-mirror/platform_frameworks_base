@@ -98,6 +98,10 @@ interface ShadeViewController {
     /** Returns the ShadeHeadsUpTracker. */
     val shadeHeadsUpTracker: ShadeHeadsUpTracker
 
+    @Deprecated("Temporary a11y solution until dual shade launch b/371224114")
+    /** Notifies the shade that a status bar detected a long press gesture. */
+    fun onStatusBarLongPress(event: MotionEvent)
+
     /** Returns the ShadeFoldAnimator. */
     @Deprecated("This interface is deprecated in Scene Container")
     val shadeFoldAnimator: ShadeFoldAnimator
@@ -179,9 +183,7 @@ interface ShadeViewStateProvider {
     /** Returns the expanded height of the panel view. */
     @Deprecated("deprecated by SceneContainerFlag.isEnabled") val panelViewExpandedHeight: Float
 
-    /**
-     * Returns true if heads up should be visible.
-     */
+    /** Returns true if heads up should be visible. */
     @Deprecated("deprecated by SceneContainerFlag.isEnabled.") fun shouldHeadsUpBeVisible(): Boolean
 
     /** Return the fraction of the shade that's expanded, when in lockscreen. */

@@ -42,17 +42,19 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
     private final BiometricUtils<S> mBiometricUtils;
     private final Map<Integer, Long> mAuthenticatorIds;
     private final boolean mHasEnrollmentsBeforeStarting;
+    private final int mReason;
 
     public RemovalClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int userId, @NonNull String owner, @NonNull BiometricUtils<S> utils, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            @NonNull Map<Integer, Long> authenticatorIds) {
+            @NonNull Map<Integer, Long> authenticatorIds, int reason) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 logger, biometricContext, false /* isMandatoryBiometrics */);
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
         mHasEnrollmentsBeforeStarting = !utils.getBiometricsForUser(context, userId).isEmpty();
+        mReason = reason;
     }
 
     @Override
@@ -87,6 +89,7 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
         Slog.d(TAG, "onRemoved: " + identifier.getBiometricId() + " remaining: " + remaining);
         mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
                 identifier.getBiometricId());
+        getLogger().logOnUnEnrolled(getTargetUserId(), mReason, identifier.getBiometricId());
 
         try {
             getListener().onRemoved(identifier, remaining);

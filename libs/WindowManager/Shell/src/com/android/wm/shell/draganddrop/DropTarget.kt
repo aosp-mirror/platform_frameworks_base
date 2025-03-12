@@ -47,7 +47,7 @@ interface DropTarget {
     /**
      * Called when user is hovering Drag object over the given Target
      */
-    fun onHoveringOver(target: SplitDragPolicy.Target) {}
+    fun onHoveringOver(target: SplitDragPolicy.Target?) {}
     /**
      * Called when the user has dropped the provided target (need not be the same target as
      * [onHoveringOver])

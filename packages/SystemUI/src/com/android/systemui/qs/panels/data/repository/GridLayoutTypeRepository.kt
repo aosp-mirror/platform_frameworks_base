@@ -17,28 +17,14 @@
 package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.shared.model.GridLayoutType
+import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PaginatedGridLayoutType
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-
-interface GridLayoutTypeRepository {
-    val layout: StateFlow<GridLayoutType>
-
-    fun setLayout(type: GridLayoutType)
-}
+import kotlinx.coroutines.flow.flowOf
 
 @SysUISingleton
-class GridLayoutTypeRepositoryImpl @Inject constructor() : GridLayoutTypeRepository {
-    private val _layout: MutableStateFlow<GridLayoutType> =
-        MutableStateFlow(PaginatedGridLayoutType)
-    override val layout = _layout.asStateFlow()
+class GridLayoutTypeRepository @Inject constructor() {
+    val defaultLayoutType = flowOf(PaginatedGridLayoutType)
 
-    override fun setLayout(type: GridLayoutType) {
-        if (_layout.value != type) {
-            _layout.value = type
-        }
-    }
+    val dualShadeLayoutType = flowOf(InfiniteGridLayoutType)
 }

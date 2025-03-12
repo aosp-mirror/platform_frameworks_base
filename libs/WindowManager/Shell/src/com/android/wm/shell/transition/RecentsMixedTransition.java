@@ -117,6 +117,11 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Mixed transition for Recents during"
                 + " Keyguard #%d", info.getDebugId());
 
+        if (!mKeyguardHandler.isKeyguardShowing() || mKeyguardHandler.isKeyguardAnimating()) {
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Cancel mixed transition because "
+                    + "keyguard state was changed #%d", info.getDebugId());
+            return false;
+        }
         if (mInfo == null) {
             mInfo = info;
             mFinishT = finishTransaction;

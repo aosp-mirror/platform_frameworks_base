@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -28,8 +29,10 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.telephony.SmsMessage;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.util.Preconditions;
 
 import java.util.List;
@@ -91,8 +94,12 @@ public final class CarrierMessagingServiceWrapper implements AutoCloseable {
         mOnServiceReadyCallback = onServiceReadyCallback;
         mServiceReadyCallbackExecutor = executor;
         mContext = context;
-        return context.bindService(intent, mCarrierMessagingServiceConnection,
-                Context.BIND_AUTO_CREATE);
+        return Flags.supportCarrierServicesForHsum()
+                ? context.bindServiceAsUser(intent, mCarrierMessagingServiceConnection,
+                Context.BIND_AUTO_CREATE,
+                UserHandle.of(ActivityManager.getCurrentUser()))
+                : context.bindService(intent, mCarrierMessagingServiceConnection,
+                        Context.BIND_AUTO_CREATE);
     }
 
     /**

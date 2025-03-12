@@ -19,6 +19,7 @@ package android.service.notification;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.app.AutomaticZenRule;
 import android.app.Flags;
 import android.content.Context;
@@ -121,25 +122,48 @@ public final class SystemZenRules {
     @Nullable
     public static String getTriggerDescriptionForScheduleTime(Context context,
             @NonNull ScheduleInfo schedule) {
-        final StringBuilder sb = new StringBuilder();
-        String daysSummary = getShortDaysSummary(context, schedule);
+        String daysSummary = getDaysOfWeekShort(context, schedule);
         if (daysSummary == null) {
             // no use outputting times without dates
             return null;
         }
-        sb.append(daysSummary);
-        sb.append(context.getString(R.string.zen_mode_trigger_summary_divider_text));
-        sb.append(getTimeSummary(context, schedule));
+        return context.getString(
+                R.string.zen_mode_trigger_summary_combined,
+                daysSummary,
+                getTimeSummary(context, schedule)
+        );
+    }
 
-        return sb.toString();
+    /**
+     * Returns a short, ordered summarized list of the days on which this schedule applies, using
+     * abbreviated week days, with adjacent days grouped together ("Sun-Wed" instead of
+     * "Sun,Mon,Tue,Wed").
+     */
+    @Nullable
+    public static String getDaysOfWeekShort(Context context, @NonNull ScheduleInfo schedule) {
+        return getDaysSummary(context, R.string.zen_mode_trigger_summary_range_symbol_combination,
+                new SimpleDateFormat("EEE", getLocale(context)), schedule);
+    }
+
+    /**
+     * Returns a string representing the days on which this schedule applies, using full week days,
+     * with adjacent days grouped together (e.g. "Sunday to Wednesday" instead of
+     * "Sunday,Monday,Tuesday,Wednesday").
+     */
+    @Nullable
+    public static String getDaysOfWeekFull(Context context, @NonNull ScheduleInfo schedule) {
+        return getDaysSummary(context, R.string.zen_mode_trigger_summary_range_words,
+                new SimpleDateFormat("EEEE", getLocale(context)), schedule);
     }
 
     /**
      * Returns an ordered summarized list of the days on which this schedule applies, with
-     * adjacent days grouped together ("Sun-Wed" instead of "Sun,Mon,Tue,Wed").
+     * adjacent days grouped together. The formatting of each individual day of week is done with
+     * the provided {@link SimpleDateFormat}.
      */
     @Nullable
-    public static String getShortDaysSummary(Context context, @NonNull ScheduleInfo schedule) {
+    private static String getDaysSummary(Context context, @StringRes int rangeFormatResId,
+            SimpleDateFormat dayOfWeekFormat, @NonNull ScheduleInfo schedule) {
         // Compute a list of days with contiguous days grouped together, for example: "Sun-Thu" or
         // "Sun-Mon,Wed,Fri"
         final int[] days = schedule.days;
@@ -197,19 +221,18 @@ public final class SystemZenRules {
                                 context.getString(R.string.zen_mode_trigger_summary_divider_text));
                     }
 
-                    SimpleDateFormat dayFormat = new SimpleDateFormat("EEE", getLocale(context));
                     if (startDay == lastSeenDay) {
                         // last group was only one day
                         cStart.set(Calendar.DAY_OF_WEEK, daysOfWeek[startDay]);
-                        sb.append(dayFormat.format(cStart.getTime()));
+                        sb.append(dayOfWeekFormat.format(cStart.getTime()));
                     } else {
                         // last group was a contiguous group of days, so group them together
                         cStart.set(Calendar.DAY_OF_WEEK, daysOfWeek[startDay]);
                         cEnd.set(Calendar.DAY_OF_WEEK, daysOfWeek[lastSeenDay]);
                         sb.append(context.getString(
-                                R.string.zen_mode_trigger_summary_range_symbol_combination,
-                                dayFormat.format(cStart.getTime()),
-                                dayFormat.format(cEnd.getTime())));
+                                rangeFormatResId,
+                                dayOfWeekFormat.format(cStart.getTime()),
+                                dayOfWeekFormat.format(cEnd.getTime())));
                     }
                 }
             }

@@ -121,7 +121,7 @@ class RestrictedSwitchPreferenceTest {
     }
 
     @Test
-    fun whenBlockedByAdmin_disabled() {
+    fun whenBlockedByAdmin_notOverrideChecked() {
         val restrictions = Restrictions(userId = USER_ID, keys = listOf(RESTRICTION_KEY))
         fakeRestrictionsProvider.restrictedMode = fakeBlockedByAdmin
 
@@ -130,6 +130,18 @@ class RestrictedSwitchPreferenceTest {
         composeTestRule.onNodeWithText(TITLE).assertIsDisplayed().assertIsEnabled()
         composeTestRule.onNodeWithText(FakeBlockedByAdmin.SUMMARY).assertIsDisplayed()
         composeTestRule.onNode(isOn()).assertIsDisplayed()
+    }
+
+    @Test
+    fun whenBlockedByAdmin_overrideCheckedToFalse() {
+        val restrictions = Restrictions(userId = USER_ID, keys = listOf(RESTRICTION_KEY))
+        fakeRestrictionsProvider.restrictedMode = fakeBlockedByAdmin
+
+        setContent(restrictions, ifBlockedByAdminOverrideCheckedValueTo = false)
+
+        composeTestRule.onNodeWithText(TITLE).assertIsDisplayed().assertIsEnabled()
+        composeTestRule.onNodeWithText(FakeBlockedByAdmin.SUMMARY).assertIsDisplayed()
+        composeTestRule.onNode(isOff()).assertIsDisplayed()
     }
 
     @Test
@@ -166,9 +178,16 @@ class RestrictedSwitchPreferenceTest {
         assertThat(fakeBlockedByEcm.showRestrictedSettingsDetailsIsCalled).isTrue()
     }
 
-    private fun setContent(restrictions: Restrictions) {
+    private fun setContent(
+        restrictions: Restrictions,
+        ifBlockedByAdminOverrideCheckedValueTo: Boolean? = null,
+    ) {
         composeTestRule.setContent {
-            RestrictedSwitchPreference(switchPreferenceModel, restrictions) { _, _ ->
+            RestrictedSwitchPreference(
+                model = switchPreferenceModel,
+                restrictions = restrictions,
+                ifBlockedByAdminOverrideCheckedValueTo = ifBlockedByAdminOverrideCheckedValueTo,
+            ) { _, _ ->
                 fakeRestrictionsProvider
             }
         }

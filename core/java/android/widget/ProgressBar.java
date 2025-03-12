@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.view.accessibility.Flags.indeterminateRangeInfo;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -2364,15 +2366,22 @@ public class ProgressBar extends View {
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
 
-        if (!isIndeterminate()) {
-            AccessibilityNodeInfo.RangeInfo rangeInfo = AccessibilityNodeInfo.RangeInfo.obtain(
+        AccessibilityNodeInfo.RangeInfo rangeInfo = null;
+        if (isIndeterminate()) {
+            if (indeterminateRangeInfo()) {
+                rangeInfo = AccessibilityNodeInfo.RangeInfo.INDETERMINATE;
+            }
+        }  else {
+            rangeInfo = new AccessibilityNodeInfo.RangeInfo(
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT, getMin(), getMax(),
                     getProgress());
-            info.setRangeInfo(rangeInfo);
         }
 
-        // Only set the default state description when custom state descripton is null.
+        info.setRangeInfo(rangeInfo);
+
+        // Only set the default state description when custom state description is null.
         if (getStateDescription() == null) {
+            // TODO(b/380340432): Remove after accessibility services stop relying on this.
             if (isIndeterminate()) {
                 info.setStateDescription(getResources().getString(R.string.in_progress));
             } else {

@@ -24,12 +24,12 @@ import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.SelectionsRequest;
 import android.content.ComponentName;
 import android.content.Context;
-import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.service.contentsuggestions.ContentSuggestionsService;
 import android.service.contentsuggestions.IContentSuggestionsService;
 import android.text.format.DateUtils;
+import android.window.TaskSnapshot;
 
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 
@@ -67,10 +67,14 @@ public class RemoteContentSuggestionsService extends
         return TIMEOUT_REMOTE_REQUEST_MILLIS;
     }
 
-    void provideContextImage(int taskId, @Nullable HardwareBuffer contextImage,
-            int colorSpaceId, @NonNull Bundle imageContextRequestExtras) {
-        scheduleAsyncRequest((s) -> s.provideContextImage(taskId, contextImage,
-                colorSpaceId, imageContextRequestExtras));
+    void provideContextImage(int taskId, @Nullable TaskSnapshot snapshot,
+            @NonNull Bundle imageContextRequestExtras) {
+        scheduleAsyncRequest((s) -> {
+            s.provideContextImage(taskId, snapshot, imageContextRequestExtras);
+            if (snapshot != null) {
+                snapshot.removeReference(TaskSnapshot.REFERENCE_CONTENT_SUGGESTION);
+            }
+        });
     }
 
     void suggestContentSelections(

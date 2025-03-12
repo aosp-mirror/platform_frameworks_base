@@ -126,7 +126,7 @@ class FileInfo(
                 +"\n}"
             }
             // Print general code as-is
-            is CodeChunk.Code -> chunk.lines.forEach { stringBuilder.appendln(it) }
+            is CodeChunk.Code -> chunk.lines.forEach { stringBuilder.appendLine(it) }
             // Recursively render data classes
             is CodeChunk.DataClass -> chunk.chunks.forEach { print(it) }
         }
@@ -175,11 +175,11 @@ class FileInfo(
         /** Debug info */
         override fun toString(): String {
             return buildString {
-                appendln("class $name $range")
+                appendLine("class $name $range")
                 nested.forEach {
-                    appendln(it)
+                    appendLine(it)
                 }
-                appendln("end $name")
+                appendLine("end $name")
             }
         }
     }

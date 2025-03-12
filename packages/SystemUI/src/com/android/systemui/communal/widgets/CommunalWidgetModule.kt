@@ -20,6 +20,7 @@ package com.android.systemui.communal.widgets
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.res.Resources
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -46,8 +47,15 @@ interface CommunalWidgetModule {
             @Application context: Context,
             @Background backgroundScope: CoroutineScope,
             @CommunalLog logBuffer: LogBuffer,
+            glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper,
         ): CommunalAppWidgetHost {
-            return CommunalAppWidgetHost(context, backgroundScope, APP_WIDGET_HOST_ID, logBuffer)
+            return CommunalAppWidgetHost(
+                context,
+                backgroundScope,
+                APP_WIDGET_HOST_ID,
+                logBuffer,
+                glanceableHubMultiUserHelper,
+            )
         }
 
         @SysUISingleton
@@ -58,6 +66,7 @@ interface CommunalWidgetModule {
             appWidgetHost: CommunalAppWidgetHost,
             selectedUserInteractor: SelectedUserInteractor,
             @CommunalLog logBuffer: LogBuffer,
+            glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper,
         ): CommunalWidgetHost {
             return CommunalWidgetHost(
                 applicationScope,
@@ -65,6 +74,7 @@ interface CommunalWidgetModule {
                 appWidgetHost,
                 selectedUserInteractor,
                 logBuffer,
+                glanceableHubMultiUserHelper,
             )
         }
 

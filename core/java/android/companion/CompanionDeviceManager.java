@@ -20,6 +20,8 @@ import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMIN
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
+import static android.graphics.drawable.Icon.TYPE_URI;
+import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 
 
 import android.annotation.CallbackExecutor;
@@ -49,6 +51,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
+import android.graphics.drawable.VectorDrawable;
 import android.net.MacAddress;
 import android.os.Binder;
 import android.os.Handler;
@@ -271,12 +278,6 @@ public final class CompanionDeviceManager {
     public static final int MESSAGE_ONEWAY_TO_WEARABLE = 0x43847987; // +TOW
 
     /**
-     * The length limit of Association tag.
-     * @hide
-     */
-    private static final int ASSOCIATION_TAG_LENGTH_LIMIT = 1024;
-
-    /**
      * Callback for applications to receive updates about and the outcome of
      * {@link AssociationRequest} issued via {@code associate()} call.
      *
@@ -471,6 +472,15 @@ public final class CompanionDeviceManager {
         Objects.requireNonNull(callback, "Callback cannot be null");
         handler = Handler.mainIfNull(handler);
 
+        if (Flags.associationDeviceIcon()) {
+            final Icon deviceIcon = request.getDeviceIcon();
+
+            if (deviceIcon != null && !isValidIcon(deviceIcon, mContext)) {
+                throw new IllegalArgumentException("The size of the device icon must be "
+                        + "24dp x 24dp to ensure proper display");
+            }
+        }
+
         try {
             mService.associate(request, new AssociationRequestCallbackProxy(handler, callback),
                     mContext.getOpPackageName(), mContext.getUserId());
@@ -534,6 +544,15 @@ public final class CompanionDeviceManager {
         Objects.requireNonNull(request, "Request cannot be null");
         Objects.requireNonNull(executor, "Executor cannot be null");
         Objects.requireNonNull(callback, "Callback cannot be null");
+
+        if (Flags.associationDeviceIcon()) {
+            final Icon deviceIcon = request.getDeviceIcon();
+
+            if (deviceIcon != null && !isValidIcon(deviceIcon, mContext)) {
+                throw new IllegalArgumentException("The size of the device icon must be "
+                        + "24dp x 24dp to ensure proper display");
+            }
+        }
 
         try {
             mService.associate(request, new AssociationRequestCallbackProxy(executor, callback),
@@ -1204,7 +1223,6 @@ public final class CompanionDeviceManager {
         }
     }
 
-    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Register to receive callbacks whenever the associated device comes in and out of range.
      *
@@ -1236,7 +1254,12 @@ public final class CompanionDeviceManager {
      *
      * @throws DeviceNotAssociatedException if the given device was not previously associated
      * with this app.
+     *
+     * @deprecated use {@link #startObservingDevicePresence(ObservingDevicePresenceRequest)}
+     * instead.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
     public void startObservingDevicePresence(@NonNull String deviceAddress)
             throws DeviceNotAssociatedException {
@@ -1263,7 +1286,7 @@ public final class CompanionDeviceManager {
                             callingUid, callingPid);
         }
     }
-    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
+
     /**
      * Unregister for receiving callbacks whenever the associated device comes in and out of range.
      *
@@ -1280,7 +1303,12 @@ public final class CompanionDeviceManager {
      *
      * @throws DeviceNotAssociatedException if the given device was not previously associated
      * with this app.
+     *
+     * @deprecated use {@link #stopObservingDevicePresence(ObservingDevicePresenceRequest)}
+     * instead.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
     public void stopObservingDevicePresence(@NonNull String deviceAddress)
             throws DeviceNotAssociatedException {
@@ -1746,57 +1774,25 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Sets the {@link AssociationInfo#getTag() tag} for this association.
+     * Sets the {@link DeviceId deviceId} for this association.
      *
-     * <p>The length of the tag must be at most 1024 characters to save disk space.
-     *
-     * <p>This allows to store useful information about the associated devices.
+     * <p>This device id helps the system uniquely identify your device for efficient device
+     * management and prevents duplicate entries.
      *
      * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
-     *                          of the companion device recorded by CompanionDeviceManager
-     * @param tag the tag of this association
+     *                          of the companion device recorded by CompanionDeviceManager.
+     * @param deviceId to be used as device identifier to represent the associated device.
      */
     @FlaggedApi(Flags.FLAG_ASSOCIATION_TAG)
     @UserHandleAware
-    public void setAssociationTag(int associationId, @NonNull String tag) {
-        if (mService == null) {
-            Log.w(TAG, "CompanionDeviceManager service is not available.");
-            return;
-        }
-
-        Objects.requireNonNull(tag, "tag cannot be null");
-
-        if (tag.length() > ASSOCIATION_TAG_LENGTH_LIMIT) {
-            throw new IllegalArgumentException("Length of the tag must be at most"
-                    + ASSOCIATION_TAG_LENGTH_LIMIT + " characters");
-        }
-
-        try {
-            mService.setAssociationTag(associationId, tag);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Clears the {@link AssociationInfo#getTag() tag} for this association.
-     *
-     * <p>The tag will be set to null for this association when calling this API.
-     *
-     * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
-     *                          of the companion device recorded by CompanionDeviceManager
-     * @see CompanionDeviceManager#setAssociationTag(int, String)
-     */
-    @FlaggedApi(Flags.FLAG_ASSOCIATION_TAG)
-    @UserHandleAware
-    public void clearAssociationTag(int associationId) {
+    public void setDeviceId(int associationId, @Nullable DeviceId deviceId) {
         if (mService == null) {
             Log.w(TAG, "CompanionDeviceManager service is not available.");
             return;
         }
 
         try {
-            mService.clearAssociationTag(associationId);
+            mService.setDeviceId(associationId, deviceId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2026,5 +2022,35 @@ public final class CompanionDeviceManager {
                 out.flush();
             }
         }
+    }
+
+    private boolean isValidIcon(Icon icon, Context context) {
+        if (icon.getType() == TYPE_URI_ADAPTIVE_BITMAP || icon.getType() == TYPE_URI) {
+            throw new IllegalArgumentException("The URI based Icon is not supported.");
+        }
+        Drawable drawable = icon.loadDrawable(context);
+        float density = context.getResources().getDisplayMetrics().density;
+
+        if (drawable instanceof BitmapDrawable) {
+            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+
+            float widthDp = bitmap.getWidth() / density;
+            float heightDp = bitmap.getHeight() / density;
+
+            if (widthDp != 24 || heightDp != 24) {
+                return false;
+            }
+        } else if (drawable instanceof VectorDrawable) {
+            VectorDrawable vectorDrawable = (VectorDrawable) drawable;
+            float widthDp = vectorDrawable.getIntrinsicWidth() / density;
+            float heightDp = vectorDrawable.getIntrinsicHeight() / density;
+
+            if (widthDp != 24 || heightDp != 24) {
+                return false;
+            }
+        } else {
+            throw new IllegalArgumentException("The format of the device icon is unsupported.");
+        }
+        return true;
     }
 }

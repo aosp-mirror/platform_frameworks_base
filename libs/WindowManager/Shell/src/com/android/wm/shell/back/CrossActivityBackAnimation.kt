@@ -39,6 +39,8 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.Interpolator
 import android.view.animation.Transformation
 import android.window.BackEvent
+import android.window.BackEvent.EDGE_LEFT
+import android.window.BackEvent.EDGE_RIGHT
 import android.window.BackMotionEvent
 import android.window.BackNavigationInfo
 import android.window.BackProgressAnimator
@@ -50,6 +52,7 @@ import com.android.internal.jank.Cuj
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.policy.SystemBarUtils
 import com.android.internal.protolog.ProtoLog
+import com.android.window.flags.Flags.predictiveBackTimestampApi
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
@@ -118,7 +121,9 @@ abstract class CrossActivityBackAnimation(
     private val postCommitFlingSpring = SpringForce(SPRING_SCALE)
             .setStiffness(SpringForce.STIFFNESS_LOW)
             .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY)
+    private var swipeEdge = EDGE_LEFT
     protected var gestureProgress = 0f
+    private val velocityTracker = ProgressVelocityTracker()
 
     /** Background color to be used during the animation, also see [getBackgroundColor] */
     protected var customizedBackgroundColor = 0
@@ -175,6 +180,7 @@ abstract class CrossActivityBackAnimation(
             )
             return
         }
+        swipeEdge = backMotionEvent.swipeEdge
         triggerBack = backMotionEvent.triggerBack
         initialTouchPos.set(backMotionEvent.touchX, backMotionEvent.touchY)
 
@@ -241,6 +247,9 @@ abstract class CrossActivityBackAnimation(
         )
         applyTransaction()
         background.customizeStatusBarAppearance(currentClosingRect.top.toInt())
+        if (predictiveBackTimestampApi()) {
+            velocityTracker.addPosition(backEvent.frameTimeMillis, progress)
+        }
     }
 
     private fun getYOffset(centeredRect: RectF, touchY: Float): Float {
@@ -272,10 +281,19 @@ abstract class CrossActivityBackAnimation(
 
         // kick off spring animation with the current velocity from the pre-commit phase, this
         // affects the scaling of the closing and/or opening activity during post-commit
-        val startVelocity =
-            if (gestureProgress < 0.1f) -DEFAULT_FLING_VELOCITY else -velocity * SPRING_SCALE
+
+        var startVelocity = if (predictiveBackTimestampApi()) {
+            // pronounce fling animation more for gestures
+            val velocityFactor = if (swipeEdge == EDGE_LEFT || swipeEdge == EDGE_RIGHT) 2f else 1f
+            velocity * SPRING_SCALE * (1f - MAX_SCALE) * velocityFactor
+        } else {
+            velocity * SPRING_SCALE
+        }
+        if (gestureProgress < 0.1f) {
+            startVelocity = startVelocity.coerceAtLeast(DEFAULT_FLING_VELOCITY)
+        }
         val flingAnimation = SpringAnimation(postCommitFlingScale, SPRING_SCALE)
-            .setStartVelocity(startVelocity.coerceIn(-MAX_FLING_VELOCITY, 0f))
+            .setStartVelocity(-startVelocity.coerceIn(0f, MAX_FLING_VELOCITY))
             .setStartValue(SPRING_SCALE)
             .setSpring(postCommitFlingSpring)
         flingAnimation.start()
@@ -338,6 +356,7 @@ abstract class CrossActivityBackAnimation(
         lastPostCommitFlingScale = SPRING_SCALE
         gestureProgress = 0f
         triggerBack = false
+        velocityTracker.resetTracking()
     }
 
     protected fun applyTransform(
@@ -520,7 +539,11 @@ abstract class CrossActivityBackAnimation(
         override fun onBackInvoked() {
             triggerBack = true
             progressAnimator.reset()
-            onGestureCommitted(progressAnimator.velocity)
+            if (predictiveBackTimestampApi()) {
+                onGestureCommitted(velocityTracker.calculateVelocity())
+            } else {
+                onGestureCommitted(progressAnimator.velocity)
+            }
         }
     }
 

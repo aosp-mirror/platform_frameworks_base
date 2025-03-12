@@ -17,8 +17,10 @@
 package android.view.inputmethod;
 
 import android.annotation.AnyThread;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
@@ -87,8 +89,17 @@ public final class InputMethodSubtype implements Parcelable {
     private final boolean mIsAsciiCapable;
     private final int mSubtypeHashCode;
     private final int mSubtypeIconResId;
+    /** The subtype name resource identifier. */
     private final int mSubtypeNameResId;
+    /** The untranslatable name of the subtype. */
+    @NonNull
     private final CharSequence mSubtypeNameOverride;
+    /** The layout label string resource identifier. */
+    @StringRes
+    private final int mLayoutLabelResId;
+    /** The non-localized layout label. */
+    @NonNull
+    private final CharSequence mLayoutLabelNonLocalized;
     private final String mPkLanguageTag;
     private final String mPkLayoutType;
     private final int mSubtypeId;
@@ -176,6 +187,7 @@ public final class InputMethodSubtype implements Parcelable {
             mSubtypeNameResId = subtypeNameResId;
             return this;
         }
+        /** The subtype name resource identifier. */
         private int mSubtypeNameResId = 0;
 
         /**
@@ -191,7 +203,54 @@ public final class InputMethodSubtype implements Parcelable {
             mSubtypeNameOverride = nameOverride;
             return this;
         }
+        /** The untranslatable name of the subtype. */
+        @NonNull
         private CharSequence mSubtypeNameOverride = "";
+
+        /**
+         * Sets the layout label string resource identifier.
+         *
+         * @param layoutLabelResId the layout label string resource identifier.
+         *
+         * @see #getLayoutDisplayName
+         */
+        @FlaggedApi(Flags.FLAG_IME_SWITCHER_REVAMP_API)
+        @NonNull
+        public InputMethodSubtypeBuilder setLayoutLabelResource(
+                @StringRes int layoutLabelResId) {
+            if (!Flags.imeSwitcherRevampApi()) {
+                return this;
+            }
+            mLayoutLabelResId = layoutLabelResId;
+            return this;
+        }
+        /** The layout label string resource identifier. */
+        @StringRes
+        private int mLayoutLabelResId = 0;
+
+        /**
+         * Sets the non-localized layout label. This is used as the layout display name if the
+         * {@link #getLayoutLabelResource layoutLabelResource} is not set ({@code 0}).
+         *
+         * @param layoutLabelNonLocalized the non-localized layout label.
+         *
+         * @see #getLayoutDisplayName
+         */
+        @FlaggedApi(Flags.FLAG_IME_SWITCHER_REVAMP_API)
+        @NonNull
+        public InputMethodSubtypeBuilder setLayoutLabelNonLocalized(
+                @NonNull CharSequence layoutLabelNonLocalized) {
+            if (!Flags.imeSwitcherRevampApi()) {
+                return this;
+            }
+            Objects.requireNonNull(layoutLabelNonLocalized,
+                    "layoutLabelNonLocalized cannot be null");
+            mLayoutLabelNonLocalized = layoutLabelNonLocalized;
+            return this;
+        }
+        /** The non-localized layout label. */
+        @NonNull
+        private CharSequence mLayoutLabelNonLocalized = "";
 
         /**
          * Sets the physical keyboard hint information, such as language and layout.
@@ -350,6 +409,8 @@ public final class InputMethodSubtype implements Parcelable {
     private InputMethodSubtype(InputMethodSubtypeBuilder builder) {
         mSubtypeNameResId = builder.mSubtypeNameResId;
         mSubtypeNameOverride = builder.mSubtypeNameOverride;
+        mLayoutLabelResId = builder.mLayoutLabelResId;
+        mLayoutLabelNonLocalized = builder.mLayoutLabelNonLocalized;
         mPkLanguageTag = builder.mPkLanguageTag;
         mPkLayoutType = builder.mPkLayoutType;
         mSubtypeIconResId = builder.mSubtypeIconResId;
@@ -376,6 +437,9 @@ public final class InputMethodSubtype implements Parcelable {
         mSubtypeNameResId = source.readInt();
         CharSequence cs = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mSubtypeNameOverride = cs != null ? cs : "";
+        mLayoutLabelResId = source.readInt();
+        cs = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+        mLayoutLabelNonLocalized = cs != null ? cs : "";
         s = source.readString8();
         mPkLanguageTag = s != null ? s : "";
         s = source.readString8();
@@ -409,6 +473,24 @@ public final class InputMethodSubtype implements Parcelable {
     @NonNull
     public CharSequence getNameOverride() {
         return mSubtypeNameOverride;
+    }
+
+    /**
+     * Returns the layout label string resource identifier.
+     */
+    @FlaggedApi(Flags.FLAG_IME_SWITCHER_REVAMP_API)
+    @StringRes
+    public int getLayoutLabelResource() {
+        return mLayoutLabelResId;
+    }
+
+    /**
+     * Returns the non-localized layout label.
+     */
+    @FlaggedApi(Flags.FLAG_IME_SWITCHER_REVAMP_API)
+    @NonNull
+    public CharSequence getLayoutLabelNonLocalized() {
+        return mLayoutLabelNonLocalized;
     }
 
     /**
@@ -643,9 +725,47 @@ public final class InputMethodSubtype implements Parcelable {
         try {
             return String.format(subtypeNameString, replacementString);
         } catch (IllegalFormatException e) {
-            Slog.w(TAG, "Found illegal format in subtype name("+ subtypeName + "): " + e);
+            Slog.w(TAG, "Found illegal format in subtype name(" + subtypeName + "): " + e);
             return "";
         }
+    }
+
+    /**
+     * Returns the layout display name.
+     *
+     * <p>If {@code layoutLabelResource} is non-zero (specified through
+     * {@link InputMethodSubtypeBuilder#setLayoutLabelResource setLayoutLabelResource}), the
+     * text generated from that resource will be returned. The localized string resource of the
+     * label should be capitalized for inclusion in UI lists.
+     *
+     * <p>If {@code layoutLabelResource} is zero, the framework returns the non-localized
+     * layout label, if specified through
+     * {@link InputMethodSubtypeBuilder#setLayoutLabelNonLocalized setLayoutLabelNonLocalized}.
+     *
+     * @param context The context used for getting the
+     * {@link android.content.pm.PackageManager PackageManager}.
+     * @param imeAppInfo The {@link ApplicationInfo} of the input method.
+     * @return the layout display name.
+     */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_IME_SWITCHER_REVAMP_API)
+    public CharSequence getLayoutDisplayName(@NonNull Context context,
+            @NonNull ApplicationInfo imeAppInfo) {
+        if (!Flags.imeSwitcherRevampApi()) {
+            return "";
+        }
+        Objects.requireNonNull(context, "context cannot be null");
+        Objects.requireNonNull(imeAppInfo, "imeAppInfo cannot be null");
+        if (mLayoutLabelResId == 0) {
+            return mLayoutLabelNonLocalized;
+        }
+
+        final CharSequence subtypeLayoutName = context.getPackageManager().getText(
+                imeAppInfo.packageName, mLayoutLabelResId, imeAppInfo);
+        if (TextUtils.isEmpty(subtypeLayoutName)) {
+            return "";
+        }
+        return subtypeLayoutName;
     }
 
     @Nullable
@@ -778,6 +898,8 @@ public final class InputMethodSubtype implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeInt(mSubtypeNameResId);
         TextUtils.writeToParcel(mSubtypeNameOverride, dest, parcelableFlags);
+        dest.writeInt(mLayoutLabelResId);
+        TextUtils.writeToParcel(mLayoutLabelNonLocalized, dest, parcelableFlags);
         dest.writeString8(mPkLanguageTag);
         dest.writeString8(mPkLayoutType);
         dest.writeInt(mSubtypeIconResId);
@@ -794,6 +916,7 @@ public final class InputMethodSubtype implements Parcelable {
 
     void dump(@NonNull Printer pw, @NonNull String prefix) {
         pw.println(prefix + "mSubtypeNameOverride=" + mSubtypeNameOverride
+                + " mLayoutLabelNonLocalized=" + mLayoutLabelNonLocalized
                 + " mPkLanguageTag=" + mPkLanguageTag
                 + " mPkLayoutType=" + mPkLayoutType
                 + " mSubtypeId=" + mSubtypeId

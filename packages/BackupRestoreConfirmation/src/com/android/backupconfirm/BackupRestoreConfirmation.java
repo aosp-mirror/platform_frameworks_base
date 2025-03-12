@@ -31,9 +31,16 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Slog;
 import android.view.View;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 /**
  * Confirm with the user that a requested full backup/restore operation is legitimate.
@@ -208,6 +215,8 @@ public class BackupRestoreConfirmation extends Activity {
         setTitle(titleId);
         setContentView(layoutId);
 
+        handleInsets();
+
         // Same resource IDs for each layout variant (backup / restore)
         mStatusView = findViewById(R.id.package_name);
         mAllowButton = findViewById(R.id.button_allow);
@@ -252,6 +261,31 @@ public class BackupRestoreConfirmation extends Activity {
                 encPwDesc.setText(R.string.backup_enc_password_optional);
             }
         }
+    }
+
+    // Handle insets so that UI components are not covered by navigation and status bars
+    private void handleInsets() {
+        LinearLayout buttonBar = findViewById(R.id.button_bar);
+        ViewCompat.setOnApplyWindowInsetsListener(buttonBar, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            MarginLayoutParams mlp = (MarginLayoutParams) v.getLayoutParams();
+            mlp.leftMargin = insets.left;
+            mlp.bottomMargin = insets.bottom;
+            mlp.rightMargin = insets.right;
+            v.setLayoutParams(mlp);
+            return WindowInsetsCompat.CONSUMED;
+        });
+
+        ScrollView scrollView = findViewById(R.id.scroll_view);
+        ViewCompat.setOnApplyWindowInsetsListener(scrollView, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            MarginLayoutParams mlp = (MarginLayoutParams) v.getLayoutParams();
+            mlp.leftMargin = insets.left;
+            mlp.topMargin = insets.top;
+            mlp.rightMargin = insets.right;
+            v.setLayoutParams(mlp);
+            return WindowInsetsCompat.CONSUMED;
+        });
     }
 
     private void monitorEncryptionPassword() {

@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.shared.bubbles
 
+import android.graphics.drawable.Icon
+import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE
 import android.testing.AndroidTestingRunner
@@ -42,7 +44,12 @@ class BubbleInfoTest : ShellTestCase() {
                 "title",
                 "Some app",
                 true,
-                true
+                true,
+                ParcelableFlyoutMessage(
+                    Icon.createWithContentUri(Uri.parse("content://image/123")),
+                    "sender",
+                    "message"
+                )
             )
         val parcel = Parcel.obtain()
         bubbleInfo.writeToParcel(parcel, PARCELABLE_WRITE_RETURN_VALUE)
@@ -60,5 +67,10 @@ class BubbleInfoTest : ShellTestCase() {
         assertThat(bubbleInfo.appName).isEqualTo(bubbleInfoFromParcel.appName)
         assertThat(bubbleInfo.isImportantConversation)
             .isEqualTo(bubbleInfoFromParcel.isImportantConversation)
+        with(bubbleInfo.parcelableFlyoutMessage!!) {
+            assertThat(icon!!.uri.toString()).isEqualTo("content://image/123")
+            assertThat(title).isEqualTo("sender")
+            assertThat(message).isEqualTo("message")
+        }
     }
 }

@@ -357,6 +357,25 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         assertEquals(activity1.app, mAtm.mTopApp);
     }
 
+    @Test
+    public void testTopResumedActivity_deferResume() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity2.setState(ActivityRecord.State.RESUMED, "test");
+        assertEquals(activity2.app, mAtm.mTopApp);
+        reset(activity2);
+
+        // Verify that no top-resumed activity changes to the client while defer-resume enabled.
+        mSupervisor.beginDeferResume();
+        activity1.getTask().moveToFront("test");
+        activity1.setState(ActivityRecord.State.RESUMED, "test");
+        verify(activity2, never()).scheduleTopResumedActivityChanged(eq(false));
+
+        // Verify that the change is scheduled to the client after defer-resumed disabled
+        mSupervisor.endDeferResume();
+        verify(activity2).scheduleTopResumedActivityChanged(eq(false));
+    }
+
     /**
      * We need to launch home again after user unlocked for those displays that do not have
      * encryption aware home app.
@@ -376,7 +395,8 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         IBinder launchCookie = new Binder("test_launch_cookie");
         ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchCookie(launchCookie);
-        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options.toBundle());
+        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options.toBundle(),
+                Binder.getCallingPid(), Binder.getCallingUid());
 
         doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
                 anyInt(), any());
@@ -393,7 +413,8 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
 
         SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
-                ActivityOptions.makeBasic().toBundle());
+                ActivityOptions.makeBasic().toBundle(),
+                Binder.getCallingPid(), Binder.getCallingUid());
 
         doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
                 anyInt(), any());

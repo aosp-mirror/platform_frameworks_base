@@ -73,6 +73,17 @@ flag {
 }
 
 flag {
+    name: "consistent_get_current_input_method_info"
+    namespace: "input_method"
+    description: "Use BindingController as the source of truth in getCurrentInputMethodInfo"
+    bug: "355034523"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "ime_switcher_revamp"
     is_exported: true
     namespace: "input_method"
@@ -146,4 +157,40 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "writing_tools"
+    namespace: "input_method"
+    description: "Writing tools API"
+    bug: "373788889"
+    is_fixed_read_only: true
+    is_exported: true
+}
+
+flag {
+  name: "public_autofill_id_in_editorinfo"
+  is_exported: true
+  namespace: "input_method"
+  description: "Guarding public API autofillId in editor info"
+  bug: "342672560"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "adaptive_handwriting_bounds"
+  is_exported: true
+  namespace: "input_method"
+  description: "Feature flag for adaptively increasing handwriting bounds."
+  bug: "350047836"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "verify_key_event"
+  namespace: "input_method"
+  description: "Verify KeyEvents in IME"
+  bug: "331730488"
+  is_fixed_read_only: true
+  is_exported: true
 }

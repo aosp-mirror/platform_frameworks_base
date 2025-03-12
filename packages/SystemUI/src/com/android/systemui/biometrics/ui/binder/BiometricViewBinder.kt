@@ -22,7 +22,6 @@ import android.content.Context
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
-import android.hardware.biometrics.Flags
 import android.hardware.face.FaceManager
 import android.util.Log
 import android.view.MotionEvent
@@ -64,7 +63,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val TAG = "BiometricViewBinder"
 
@@ -93,7 +92,7 @@ object BiometricViewBinder {
         val attributes =
             view.context.obtainStyledAttributes(
                 R.style.TextAppearance_AuthCredential_Indicator,
-                intArrayOf(android.R.attr.textColor)
+                intArrayOf(android.R.attr.textColor),
             )
         val textColorHint = attributes.getColor(0, 0)
         attributes.recycle()
@@ -130,13 +129,13 @@ object BiometricViewBinder {
             object : AccessibilityDelegateCompat() {
                 override fun onInitializeAccessibilityNodeInfo(
                     host: View,
-                    info: AccessibilityNodeInfoCompat
+                    info: AccessibilityNodeInfoCompat,
                 ) {
                     super.onInitializeAccessibilityNodeInfo(host, info)
                     info.addAction(
                         AccessibilityActionCompat(
                             AccessibilityNodeInfoCompat.ACTION_CLICK,
-                            view.context.getString(R.string.biometric_dialog_cancel_authentication)
+                            view.context.getString(R.string.biometric_dialog_cancel_authentication),
                         )
                     )
                 }
@@ -189,13 +188,11 @@ object BiometricViewBinder {
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
 
-            if (Flags.customBiometricPrompt()) {
-                BiometricCustomizedViewBinder.bind(
-                    customizedViewContainer,
-                    viewModel.contentView.first(),
-                    legacyCallback
-                )
-            }
+            BiometricCustomizedViewBinder.bind(
+                customizedViewContainer,
+                viewModel.contentView.first(),
+                legacyCallback,
+            )
 
             // set button listeners
             negativeButton.setOnClickListener { legacyCallback.onButtonNegative() }
@@ -233,10 +230,7 @@ object BiometricViewBinder {
             lifecycleScope.launch {
                 viewModel.hideSensorIcon.collect { showWithoutIcon ->
                     if (!showWithoutIcon) {
-                        PromptIconViewBinder.bind(
-                            iconView,
-                            viewModel,
-                        )
+                        PromptIconViewBinder.bind(iconView, viewModel)
                     }
                 }
             }
@@ -421,7 +415,7 @@ object BiometricViewBinder {
                     launch {
                         viewModel.onAnnounceAccessibilityHint(
                             event,
-                            accessibilityManager.isTouchExplorationEnabled
+                            accessibilityManager.isTouchExplorationEnabled,
                         )
                     }
                     false
@@ -444,10 +438,7 @@ object BiometricViewBinder {
                                         haptics.flag,
                                     )
                                 } else {
-                                    vibratorHelper.performHapticFeedback(
-                                        view,
-                                        haptics.constant,
-                                    )
+                                    vibratorHelper.performHapticFeedback(view, haptics.constant)
                                 }
                             }
                             is PromptViewModel.HapticsToPlay.MSDL -> {
@@ -561,14 +552,12 @@ class Spaghetti(
             viewModel.showAuthenticated(
                 modality = authenticatedModality,
                 dismissAfterDelay = 500,
-                helpMessage = if (msgId != null) applicationContext.getString(msgId) else ""
+                helpMessage = if (msgId != null) applicationContext.getString(msgId) else "",
             )
         }
     }
 
-    private fun getHelpForSuccessfulAuthentication(
-        authenticatedModality: BiometricModality,
-    ): Int? {
+    private fun getHelpForSuccessfulAuthentication(authenticatedModality: BiometricModality): Int? {
         // for coex, show a message when face succeeds after fingerprint has also started
         if (authenticatedModality != BiometricModality.Face) {
             return null

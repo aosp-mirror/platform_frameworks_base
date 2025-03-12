@@ -19,6 +19,7 @@ package com.android.wm.shell.compatui;
 import static android.content.res.Configuration.UI_MODE_NIGHT_YES;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.window.flags.Flags.FLAG_APP_COMPAT_ASYNC_RELAYOUT;
 import static com.android.window.flags.Flags.FLAG_APP_COMPAT_UI_FRAMEWORK;
 import static com.android.wm.shell.compatui.CompatUIStatusManager.COMPAT_UI_EDUCATION_HIDDEN;
 import static com.android.wm.shell.compatui.CompatUIStatusManager.COMPAT_UI_EDUCATION_VISIBLE;
@@ -42,10 +43,12 @@ import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 import android.view.DisplayCutout;
@@ -124,6 +127,9 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     @Mock private Transitions mTransitions;
     @Mock private Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnDismissCallback;
     @Mock private DockStateReader mDockStateReader;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private CompatUIConfiguration mCompatUIConfiguration;
     private TestShellExecutor mExecutor;
@@ -317,6 +323,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
     @Test
     @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
+    @DisableFlags(FLAG_APP_COMPAT_ASYNC_RELAYOUT)
     public void testUpdateCompatInfo_updatesLayoutCorrectly() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -332,6 +339,36 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
                 /* expectedHeight= */ 50, /* expectedExtraTopMargin= */ 0,
                 /* expectedExtraBottomMargin= */ 0);
         verify(mViewHost).relayout(mWindowAttrsCaptor.capture());
+        assertThat(mWindowAttrsCaptor.getValue()).isEqualTo(layout.getLayoutParams());
+
+        // Window manager should be released (without animation) when eligible becomes false.
+        assertFalse(windowManager.updateCompatInfo(createTaskInfo(/* eligible= */ false),
+                mTaskListener, /* canShow= */ true));
+
+        verify(windowManager).release();
+        verify(mOnDismissCallback, never()).accept(any());
+        verify(mAnimationController, never()).startExitAnimation(any(), any());
+        assertNull(windowManager.mLayout);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
+    @EnableFlags(FLAG_APP_COMPAT_ASYNC_RELAYOUT)
+    public void testUpdateCompatInfo_updatesLayoutCorrectlyAsync() {
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
+
+        assertTrue(windowManager.createLayout(/* canShow= */ true));
+        LetterboxEduDialogLayout layout = windowManager.mLayout;
+        assertNotNull(layout);
+
+        assertTrue(windowManager.updateCompatInfo(
+                createTaskInfo(/* eligible= */ true, USER_ID_1, new Rect(50, 25, 150, 75)),
+                mTaskListener, /* canShow= */ true));
+
+        verifyLayout(layout, layout.getLayoutParams(), /* expectedWidth= */ 100,
+                /* expectedHeight= */ 50, /* expectedExtraTopMargin= */ 0,
+                /* expectedExtraBottomMargin= */ 0);
+        verify(mViewHost).relayout(mWindowAttrsCaptor.capture(), any());
         assertThat(mWindowAttrsCaptor.getValue()).isEqualTo(layout.getLayoutParams());
 
         // Window manager should be released (without animation) when eligible becomes false.
@@ -375,6 +412,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
     @Test
     @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
+    @DisableFlags(FLAG_APP_COMPAT_ASYNC_RELAYOUT)
     public void testUpdateDisplayLayout_updatesLayoutCorrectly() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
 
@@ -392,6 +430,29 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
                 /* expectedHeight= */ TASK_HEIGHT, /* expectedExtraTopMargin= */
                 newDisplayCutoutTop, /* expectedExtraBottomMargin= */ newDisplayCutoutBottom);
         verify(mViewHost).relayout(mWindowAttrsCaptor.capture());
+        assertThat(mWindowAttrsCaptor.getValue()).isEqualTo(layout.getLayoutParams());
+    }
+
+    @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
+    @EnableFlags(FLAG_APP_COMPAT_ASYNC_RELAYOUT)
+    public void testUpdateDisplayLayout_updatesLayoutCorrectlyAsync() {
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
+
+        assertTrue(windowManager.createLayout(/* canShow= */ true));
+        LetterboxEduDialogLayout layout = windowManager.mLayout;
+        assertNotNull(layout);
+
+        int newDisplayCutoutTop = DISPLAY_CUTOUT_TOP + 7;
+        int newDisplayCutoutBottom = DISPLAY_CUTOUT_BOTTOM + 9;
+        windowManager.updateDisplayLayout(createDisplayLayout(
+                Insets.of(DISPLAY_CUTOUT_HORIZONTAL, newDisplayCutoutTop,
+                        DISPLAY_CUTOUT_HORIZONTAL, newDisplayCutoutBottom)));
+
+        verifyLayout(layout, layout.getLayoutParams(), /* expectedWidth= */ TASK_WIDTH,
+                /* expectedHeight= */ TASK_HEIGHT, /* expectedExtraTopMargin= */
+                newDisplayCutoutTop, /* expectedExtraBottomMargin= */ newDisplayCutoutBottom);
+        verify(mViewHost).relayout(mWindowAttrsCaptor.capture(), any());
         assertThat(mWindowAttrsCaptor.getValue()).isEqualTo(layout.getLayoutParams());
     }
 

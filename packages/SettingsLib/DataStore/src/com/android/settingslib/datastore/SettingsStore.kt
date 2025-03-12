@@ -19,28 +19,14 @@ package com.android.settingslib.datastore
 import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
-import android.provider.Settings
 import android.util.Log
-import java.util.concurrent.Executor
-import java.util.concurrent.atomic.AtomicInteger
 
 /** Base class of the Settings provider data stores. */
-open abstract class SettingsStore(protected val contentResolver: ContentResolver) :
-    KeyedDataObservable<String>(), KeyValueStore {
-
-    /**
-     * Counter of observers.
-     *
-     * The value is accurate only when [addObserver] and [removeObserver] are called correctly. When
-     * an observer is not removed (and its weak reference is garbage collected), the content
-     * observer is not unregistered but this is not a big deal.
-     */
-    private val counter = AtomicInteger()
+abstract class SettingsStore(protected val contentResolver: ContentResolver) :
+    AbstractKeyedDataObservable<String>(), KeyValueStore {
 
     private val contentObserver =
-        object : ContentObserver(Handler(Looper.getMainLooper())) {
+        object : ContentObserver(HandlerExecutor.main) {
             override fun onChange(selfChange: Boolean) {
                 super.onChange(selfChange, null)
             }
@@ -51,50 +37,15 @@ open abstract class SettingsStore(protected val contentResolver: ContentResolver
             }
         }
 
-    override fun addObserver(observer: KeyedObserver<String?>, executor: Executor) =
-        if (super.addObserver(observer, executor)) {
-            onObserverAdded()
-            true
-        } else {
-            false
-        }
+    /** The URI to watch for any key change. */
+    protected abstract val uri: Uri
 
-    override fun addObserver(key: String, observer: KeyedObserver<String>, executor: Executor) =
-        if (super.addObserver(key, observer, executor)) {
-            onObserverAdded()
-            true
-        } else {
-            false
-        }
-
-    private fun onObserverAdded() {
-        if (counter.getAndIncrement() != 0) return
+    override fun onFirstObserverAdded() {
         Log.i(tag, "registerContentObserver")
-        contentResolver.registerContentObserver(
-            Settings.Global.getUriFor(""),
-            true,
-            contentObserver,
-        )
+        contentResolver.registerContentObserver(uri, true, contentObserver)
     }
 
-    override fun removeObserver(observer: KeyedObserver<String?>) =
-        if (super.removeObserver(observer)) {
-            onObserverRemoved()
-            true
-        } else {
-            false
-        }
-
-    override fun removeObserver(key: String, observer: KeyedObserver<String>) =
-        if (super.removeObserver(key, observer)) {
-            onObserverRemoved()
-            true
-        } else {
-            false
-        }
-
-    private fun onObserverRemoved() {
-        if (counter.decrementAndGet() != 0) return
+    override fun onLastObserverRemoved() {
         Log.i(tag, "unregisterContentObserver")
         contentResolver.unregisterContentObserver(contentObserver)
     }

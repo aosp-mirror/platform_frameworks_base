@@ -22,10 +22,10 @@ import android.content.res.Resources
 import android.os.UserHandle
 import com.android.systemui.camera.data.repository.CameraAutoRotateRepository
 import com.android.systemui.camera.data.repository.CameraSensorPrivacyRepository
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.rotation.domain.model.RotationLockTileModel
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.RotationLockController
 import com.android.systemui.util.kotlin.isBatteryPowerSaveEnabled
@@ -44,30 +44,29 @@ constructor(
     private val cameraAutoRotateRepository: CameraAutoRotateRepository,
     private val cameraSensorPrivacyRepository: CameraSensorPrivacyRepository,
     private val packageManager: PackageManager,
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
 ) : QSTileDataInteractor<RotationLockTileModel> {
 
     override fun tileData(
         user: UserHandle,
-        triggers: Flow<DataUpdateTrigger>
+        triggers: Flow<DataUpdateTrigger>,
     ): Flow<RotationLockTileModel> =
         combine(
             rotationLockController.isRotationLockEnabled(),
             cameraSensorPrivacyRepository.isEnabled(user),
             batteryController.isBatteryPowerSaveEnabled(),
-            cameraAutoRotateRepository.isCameraAutoRotateSettingEnabled(user)
+            cameraAutoRotateRepository.isCameraAutoRotateSettingEnabled(user),
         ) {
             isRotationLockEnabled,
             isCamPrivacySensorEnabled,
             isBatteryPowerSaveEnabled,
-            isCameraAutoRotateEnabled,
-            ->
+            isCameraAutoRotateEnabled ->
             RotationLockTileModel(
                 isRotationLockEnabled,
                 isCameraRotationEnabled(
                     isBatteryPowerSaveEnabled,
                     isCamPrivacySensorEnabled,
-                    isCameraAutoRotateEnabled
+                    isCameraAutoRotateEnabled,
                 ),
             )
         }
@@ -75,16 +74,16 @@ constructor(
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(true)
 
     private fun hasSufficientPermission(): Boolean {
-        val rotationPackage: String = packageManager.rotationResolverPackageName
-        return rotationPackage != null &&
-            packageManager.checkPermission(Manifest.permission.CAMERA, rotationPackage) ==
+        return packageManager.rotationResolverPackageName?.let {
+            packageManager.checkPermission(Manifest.permission.CAMERA, it) ==
                 PackageManager.PERMISSION_GRANTED
+        } ?: false
     }
 
     private fun isCameraRotationEnabled(
         isBatteryPowerSaverModeOn: Boolean,
         isCameraSensorPrivacyEnabled: Boolean,
-        isCameraAutoRotateEnabled: Boolean
+        isCameraAutoRotateEnabled: Boolean,
     ): Boolean =
         resources.getBoolean(com.android.internal.R.bool.config_allowRotationResolver) &&
             !isBatteryPowerSaverModeOn &&

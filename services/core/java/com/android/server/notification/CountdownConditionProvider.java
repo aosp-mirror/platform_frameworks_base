@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
@@ -62,6 +63,11 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
     @Override
     public void onBootComplete() {
         // noop
+    }
+
+    @Override
+    public void onUserSwitched(UserHandle user) {
+        // Nothing to do because countdown conditions are not tied to any user data.
     }
 
     @Override

@@ -113,8 +113,10 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         });
         mKeyguardClockSwitch =
                 (KeyguardClockSwitch) layoutInflater.inflate(R.layout.keyguard_clock_switch, null);
-        mSmallClockFrame = mKeyguardClockSwitch.findViewById(R.id.lockscreen_clock_view);
-        mLargeClockFrame = mKeyguardClockSwitch.findViewById(R.id.lockscreen_clock_view_large);
+        mSmallClockFrame = mKeyguardClockSwitch
+                .findViewById(com.android.systemui.customization.R.id.lockscreen_clock_view);
+        mLargeClockFrame = mKeyguardClockSwitch
+                .findViewById(com.android.systemui.customization.R.id.lockscreen_clock_view_large);
         mStatusArea = mKeyguardClockSwitch.findViewById(R.id.keyguard_status_area);
         mKeyguardClockSwitch.mChildrenAreLaidOut = true;
     }

@@ -58,8 +58,6 @@ import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
-import android.view.MotionEvent.PointerCoords;
-import android.view.MotionEvent.PointerProperties;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.VelocityTracker;
@@ -154,9 +152,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     @VisibleForTesting State mCurrentState;
     @VisibleForTesting State mPreviousState;
-
-    private PointerCoords[] mTempPointerCoords;
-    private PointerProperties[] mTempPointerProperties;
 
     @VisibleForTesting static final int OVERSCROLL_NONE = 0;
     @VisibleForTesting static final int OVERSCROLL_LEFT_EDGE = 1;
@@ -345,7 +340,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     @Override
     void handleMouseOrStylusEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        if (Flags.enableMagnificationFollowsMouse()) {
+        if (Flags.enableMagnificationFollowsMouseBugfix()) {
             if (mFullScreenMagnificationController.isActivated(mDisplayId)) {
                 // TODO(b/354696546): Allow mouse/stylus to activate whichever display they are
                 // over, rather than only interacting with the current display.
@@ -428,38 +423,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         mDetectingState.clear();
         mViewportDraggingState.clear();
         mPanningScalingState.clear();
-    }
-
-    private PointerCoords[] getTempPointerCoordsWithMinSize(int size) {
-        final int oldSize = (mTempPointerCoords != null) ? mTempPointerCoords.length : 0;
-        if (oldSize < size) {
-            PointerCoords[] oldTempPointerCoords = mTempPointerCoords;
-            mTempPointerCoords = new PointerCoords[size];
-            if (oldTempPointerCoords != null) {
-                System.arraycopy(oldTempPointerCoords, 0, mTempPointerCoords, 0, oldSize);
-            }
-        }
-        for (int i = oldSize; i < size; i++) {
-            mTempPointerCoords[i] = new PointerCoords();
-        }
-        return mTempPointerCoords;
-    }
-
-    private PointerProperties[] getTempPointerPropertiesWithMinSize(int size) {
-        final int oldSize = (mTempPointerProperties != null) ? mTempPointerProperties.length
-                : 0;
-        if (oldSize < size) {
-            PointerProperties[] oldTempPointerProperties = mTempPointerProperties;
-            mTempPointerProperties = new PointerProperties[size];
-            if (oldTempPointerProperties != null) {
-                System.arraycopy(oldTempPointerProperties, 0, mTempPointerProperties, 0,
-                        oldSize);
-            }
-        }
-        for (int i = oldSize; i < size; i++) {
-            mTempPointerProperties[i] = new PointerProperties();
-        }
-        return mTempPointerProperties;
     }
 
     @VisibleForTesting
@@ -617,7 +580,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             }
 
             if (DEBUG_PANNING_SCALING) Slog.i(mLogTag, "Scaled content to: " + scale + "x");
-            mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY, false,
+            mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY,
+                    /* isScaleTransient= */ true, /* animate= */ false,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
 
             checkShouldDetectPassPersistedScale();
@@ -1206,7 +1170,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
         protected void cacheDelayedMotionEvent(MotionEvent event, MotionEvent rawEvent,
                 int policyFlags) {
-            if (Flags.enableMagnificationFollowsMouse()
+            if (Flags.enableMagnificationFollowsMouseBugfix()
                     && !event.isFromSource(SOURCE_TOUCHSCREEN)) {
                 // Only touch events need to be cached and sent later.
                 return;
@@ -1974,6 +1938,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                     /* scale= */ scale,
                     /* centerX= */ mPivotEdge.x,
                     /* centerY= */ mPivotEdge.y,
+                    /* isScaleTransient= */ true,
                     /* animate= */ true,
                     /* id= */ AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             if (scale == 1.0f) {

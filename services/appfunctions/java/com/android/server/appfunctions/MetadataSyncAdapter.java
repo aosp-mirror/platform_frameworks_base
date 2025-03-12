@@ -45,7 +45,6 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
-import com.android.server.appfunctions.FutureAppSearchSession.FutureSearchResults;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -85,7 +84,9 @@ public class MetadataSyncAdapter {
             @NonNull PackageManager packageManager, @NonNull AppSearchManager appSearchManager) {
         mPackageManager = Objects.requireNonNull(packageManager);
         mAppSearchManager = Objects.requireNonNull(appSearchManager);
-        mExecutor = Executors.newSingleThreadExecutor();
+        mExecutor =
+                Executors.newSingleThreadExecutor(
+                        new NamedThreadFactory("AppFunctionSyncExecutors"));
     }
 
     /**
@@ -421,26 +422,29 @@ public class MetadataSyncAdapter {
         Objects.requireNonNull(propertyPackageName);
         ArrayMap<String, ArraySet<String>> packageToFunctionIds = new ArrayMap<>();
 
-        FutureSearchResults futureSearchResults =
+        try (FutureSearchResults futureSearchResults =
                 searchSession
                         .search(
                                 "",
                                 buildMetadataSearchSpec(
                                         schemaType, propertyFunctionId, propertyPackageName))
-                        .get();
-        List<SearchResult> searchResultsList = futureSearchResults.getNextPage().get();
-        // TODO(b/357551503): This could be expensive if we have more functions
-        while (!searchResultsList.isEmpty()) {
-            for (SearchResult searchResult : searchResultsList) {
-                String packageName =
-                        searchResult.getGenericDocument().getPropertyString(propertyPackageName);
-                String functionId =
-                        searchResult.getGenericDocument().getPropertyString(propertyFunctionId);
-                packageToFunctionIds
-                        .computeIfAbsent(packageName, k -> new ArraySet<>())
-                        .add(functionId);
+                        .get(); ) {
+            List<SearchResult> searchResultsList = futureSearchResults.getNextPage().get();
+            // TODO(b/357551503): This could be expensive if we have more functions
+            while (!searchResultsList.isEmpty()) {
+                for (SearchResult searchResult : searchResultsList) {
+                    String packageName =
+                            searchResult
+                                    .getGenericDocument()
+                                    .getPropertyString(propertyPackageName);
+                    String functionId =
+                            searchResult.getGenericDocument().getPropertyString(propertyFunctionId);
+                    packageToFunctionIds
+                            .computeIfAbsent(packageName, k -> new ArraySet<>())
+                            .add(functionId);
+                }
+                searchResultsList = futureSearchResults.getNextPage().get();
             }
-            searchResultsList = futureSearchResults.getNextPage().get();
         }
         return packageToFunctionIds;
     }

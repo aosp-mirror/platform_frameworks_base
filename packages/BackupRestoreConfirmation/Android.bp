@@ -27,6 +27,7 @@ android_app {
     name: "BackupRestoreConfirmation",
     defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
+    static_libs: ["androidx.core_core"],
     platform_apis: true,
     certificate: "platform",
     privileged: true,

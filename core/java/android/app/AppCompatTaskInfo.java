@@ -21,6 +21,7 @@ import static android.app.TaskInfo.PROPERTY_VALUE_UNSET;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -69,6 +70,14 @@ public class AppCompatTaskInfo implements Parcelable {
     public int topActivityLetterboxAppWidth = PROPERTY_VALUE_UNSET;
 
     /**
+     * Contains the top activity bounds when the activity is letterboxed.
+     * It's {@code null} if there's no top activity in the task or it's not letterboxed.
+     */
+    // TODO(b/379824541) Remove duplicate information.
+    @Nullable
+    public Rect topActivityLetterboxBounds;
+
+    /**
      * Stores camera-related app compat information about a particular Task.
      */
     public CameraCompatTaskInfo cameraCompatTaskInfo = CameraCompatTaskInfo.create();
@@ -101,7 +110,6 @@ public class AppCompatTaskInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
             FLAG_UNDEFINED,
-            FLAG_BASE,
             FLAG_LETTERBOX_EDU_ENABLED,
             FLAG_ELIGIBLE_FOR_LETTERBOX_EDU,
             FLAG_LETTERBOXED,
@@ -115,6 +123,10 @@ public class AppCompatTaskInfo implements Parcelable {
     })
     public @interface TopActivityFlag {}
 
+    /**
+     * A combination of {@link TopActivityFlag}s that have been enabled through
+     * {@link #setTopActivityFlag}.
+     */
     @TopActivityFlag
     private int mTopActivityFlags;
 
@@ -167,10 +179,11 @@ public class AppCompatTaskInfo implements Parcelable {
     }
 
     /**
-     * @return {@code true} if top activity is pillarboxed.
+     * @return {@code true} if the top activity bounds are letterboxed with width <= height.
      */
-    public boolean isTopActivityPillarboxed() {
-        return topActivityLetterboxWidth < topActivityLetterboxHeight;
+    public boolean isTopActivityPillarboxShaped() {
+        return isTopActivityLetterboxed()
+                && topActivityLetterboxWidth <= topActivityLetterboxHeight;
     }
 
     /**
@@ -374,6 +387,7 @@ public class AppCompatTaskInfo implements Parcelable {
         topActivityLetterboxHeight = source.readInt();
         topActivityLetterboxAppWidth = source.readInt();
         topActivityLetterboxAppHeight = source.readInt();
+        topActivityLetterboxBounds = source.readTypedObject(Rect.CREATOR);
         cameraCompatTaskInfo = source.readTypedObject(CameraCompatTaskInfo.CREATOR);
     }
 
@@ -389,6 +403,7 @@ public class AppCompatTaskInfo implements Parcelable {
         dest.writeInt(topActivityLetterboxHeight);
         dest.writeInt(topActivityLetterboxAppWidth);
         dest.writeInt(topActivityLetterboxAppHeight);
+        dest.writeTypedObject(topActivityLetterboxBounds, flags);
         dest.writeTypedObject(cameraCompatTaskInfo, flags);
     }
 
@@ -411,6 +426,7 @@ public class AppCompatTaskInfo implements Parcelable {
                 + " isUserFullscreenOverrideEnabled=" + isUserFullscreenOverrideEnabled()
                 + " isSystemFullscreenOverrideEnabled=" + isSystemFullscreenOverrideEnabled()
                 + " hasMinAspectRatioOverride=" + hasMinAspectRatioOverride()
+                + " topActivityLetterboxBounds=" + topActivityLetterboxBounds
                 + " cameraCompatTaskInfo=" + cameraCompatTaskInfo.toString()
                 + "}";
     }

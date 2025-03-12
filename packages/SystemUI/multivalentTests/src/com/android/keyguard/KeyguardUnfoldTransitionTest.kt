@@ -17,10 +17,10 @@
 package com.android.keyguard
 
 import android.view.View
-import android.view.ViewGroup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -88,7 +88,7 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
         underTest.statusViewCentered = true
 
         val view = View(context)
-        whenever(keyguardRootView.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(
+        whenever(keyguardRootView.findViewById<View>(customR.id.lockscreen_clock_view_large)).thenReturn(
             view
         )
 
@@ -110,7 +110,7 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
         whenever(statusBarStateController.getState()).thenReturn(SHADE)
 
         val view = View(context)
-        whenever(keyguardRootView.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(
+        whenever(keyguardRootView.findViewById<View>(customR.id.lockscreen_clock_view_large)).thenReturn(
             view
         )
 
@@ -134,7 +134,7 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
         val view = View(context)
         whenever(
             notificationShadeWindowView
-                .findViewById<View>(R.id.lockscreen_clock_view_large)
+                .findViewById<View>(customR.id.lockscreen_clock_view_large)
         ).thenReturn(view)
 
         progressListener.onTransitionStarted()

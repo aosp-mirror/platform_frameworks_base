@@ -19,15 +19,21 @@ package com.android.systemui.communal.ui.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
 import com.android.systemui.communal.ui.compose.section.CommunalPopupSection
+import com.android.systemui.communal.ui.compose.section.CommunalToDreamButtonSection
 import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
@@ -48,6 +54,7 @@ constructor(
     private val ambientStatusBarSection: AmbientStatusBarSection,
     private val communalPopupSection: CommunalPopupSection,
     private val widgetSection: CommunalAppWidgetSection,
+    private val communalToDreamButtonSection: CommunalToDreamButtonSection,
 ) {
 
     @Composable
@@ -59,20 +66,21 @@ constructor(
                     Box(modifier = Modifier.fillMaxSize()) {
                         with(communalPopupSection) { Popup() }
                         with(ambientStatusBarSection) {
-                            AmbientStatusBar(modifier = Modifier.fillMaxWidth())
+                            AmbientStatusBar(modifier = Modifier.fillMaxWidth().zIndex(1f))
                         }
                         CommunalHub(
                             viewModel = viewModel,
                             interactionHandler = interactionHandler,
                             dialogFactory = dialogFactory,
                             widgetSection = widgetSection,
-                            modifier = Modifier.element(Communal.Elements.Grid)
+                            modifier = Modifier.element(Communal.Elements.Grid),
+                            sceneScope = this@Content,
                         )
                     }
                     with(lockSection) {
                         LockIcon(
-                            overrideColor = LocalAndroidColorScheme.current.onPrimaryContainer,
-                            modifier = Modifier.element(Communal.Elements.LockIcon)
+                            overrideColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.element(Communal.Elements.LockIcon),
                         )
                     }
                     with(bottomAreaSection) {
@@ -80,17 +88,15 @@ constructor(
                             Modifier.element(Communal.Elements.IndicationArea).fillMaxWidth()
                         )
                     }
-                }
+                    with(communalToDreamButtonSection) { Button() }
+                },
             ) { measurables, constraints ->
                 val communalGridMeasurable = measurables[0]
                 val lockIconMeasurable = measurables[1]
                 val bottomAreaMeasurable = measurables[2]
+                val screensaverButtonMeasurable: Measurable? = measurables.getOrNull(3)
 
-                val noMinConstraints =
-                    constraints.copy(
-                        minWidth = 0,
-                        minHeight = 0,
-                    )
+                val noMinConstraints = constraints.copy(minWidth = 0, minHeight = 0)
 
                 val lockIconPlaceable = lockIconMeasurable.measure(noMinConstraints)
                 val lockIconBounds =
@@ -103,26 +109,39 @@ constructor(
 
                 val bottomAreaPlaceable = bottomAreaMeasurable.measure(noMinConstraints)
 
+                val screensaverButtonSizeInt = screensaverButtonSize.roundToPx()
+                val screensaverButtonPlaceable =
+                    screensaverButtonMeasurable?.measure(
+                        Constraints.fixed(
+                            width = screensaverButtonSizeInt,
+                            height = screensaverButtonSizeInt,
+                        )
+                    )
+
                 val communalGridPlaceable =
                     communalGridMeasurable.measure(
                         noMinConstraints.copy(maxHeight = lockIconBounds.top)
                     )
 
                 layout(constraints.maxWidth, constraints.maxHeight) {
-                    communalGridPlaceable.place(
-                        x = 0,
-                        y = 0,
-                    )
-                    lockIconPlaceable.place(
-                        x = lockIconBounds.left,
+                    communalGridPlaceable.place(x = 0, y = 0)
+                    lockIconPlaceable.place(x = lockIconBounds.left, y = lockIconBounds.top)
+
+                    val bottomAreaTop = constraints.maxHeight - bottomAreaPlaceable.height
+                    bottomAreaPlaceable.place(x = 0, y = bottomAreaTop)
+                    screensaverButtonPlaceable?.place(
+                        x =
+                            constraints.maxWidth -
+                                screensaverButtonSizeInt -
+                                Dimensions.ItemSpacing.roundToPx(),
                         y = lockIconBounds.top,
-                    )
-                    bottomAreaPlaceable.place(
-                        x = 0,
-                        y = constraints.maxHeight - bottomAreaPlaceable.height,
                     )
                 }
             }
         }
+    }
+
+    companion object {
+        val screensaverButtonSize: Dp = 64.dp
     }
 }

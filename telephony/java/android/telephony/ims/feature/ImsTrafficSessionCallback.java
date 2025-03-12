@@ -16,20 +16,26 @@
 
 package android.telephony.ims.feature;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
+
+import com.android.internal.telephony.flags.Flags;
 
 /**
  * A callback class used to receive the result of {@link MmTelFeature#startImsTrafficSession}.
  * @hide
  */
+@FlaggedApi(Flags.FLAG_SUPPORT_IMS_MMTEL_INTERFACE)
+@SystemApi
 public interface ImsTrafficSessionCallback {
 
     /** The modem is ready to process the IMS traffic. */
     void onReady();
 
     /**
-     * Notifies that any IMS traffic is not sent to network due to any failure
-     * on cellular networks. IMS service shall call {@link MmTelFeature#stopImsTrafficSession()}
+     * Notifies that any IMS traffic can not be sent to the network due to the provided cellular
+     * network failure. IMS service shall call {@link MmTelFeature#stopImsTrafficSession()}
      * when receiving this callback.
      *
      * @param info The information of the failure.

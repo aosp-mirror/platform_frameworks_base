@@ -28,6 +28,7 @@ filegroup {
     exclude_srcs: [
         "android/os/*MessageQueue/**/*.java",
         "android/ranging/**/*.java",
+        ":dynamic_instrumentation_manager_aidl_sources",
     ],
     visibility: ["//frameworks/base"],
 }
@@ -120,6 +121,17 @@ filegroup {
 }
 
 filegroup {
+    name: "dynamic_instrumentation_manager_aidl_sources",
+    srcs: ["android/os/instrumentation/*.aidl"],
+}
+
+aidl_interface {
+    name: "dynamic_instrumentation_manager_aidl",
+    srcs: [":dynamic_instrumentation_manager_aidl_sources"],
+    unstable: true,
+}
+
+filegroup {
     name: "framework-internal-display-sources",
     srcs: ["com/android/internal/display/BrightnessSynchronizer.java"],
     visibility: ["//frameworks/base/services/tests/mockingservicestests"],
@@ -206,6 +218,7 @@ filegroup {
         "android/os/Temperature.aidl",
         "android/os/CoolingDevice.aidl",
         "android/os/IThermalEventListener.aidl",
+        "android/os/IThermalHeadroomListener.aidl",
         "android/os/IThermalStatusListener.aidl",
         "android/os/IThermalService.aidl",
         "android/os/IPowerManager.aidl",
@@ -215,9 +228,15 @@ filegroup {
 
 aidl_interface {
     name: "android.os.hintmanager_aidl",
+    defaults: [
+        "android.hardware.power-aidl",
+    ],
     srcs: [
+        "android/os/CpuHeadroomParamsInternal.aidl",
+        "android/os/GpuHeadroomParamsInternal.aidl",
         "android/os/IHintManager.aidl",
         "android/os/IHintSession.aidl",
+        "android/os/SessionCreationConfig.aidl",
     ],
     unstable: true,
     backend: {
@@ -232,9 +251,6 @@ aidl_interface {
             enabled: true,
         },
     },
-    imports: [
-        "android.hardware.power-V5",
-    ],
 }
 
 aidl_library {
@@ -341,6 +357,13 @@ filegroup {
     srcs: [
         "android/util/IndentingPrintWriter.java",
         "com/android/internal/util/dump/DualDumpOutputStream.java",
+    ],
+}
+
+filegroup {
+    name: "service-crashrecovery-shared-srcs",
+    srcs: [
+        "android/util/IndentingPrintWriter.java",
     ],
 }
 
@@ -660,7 +683,7 @@ java_library {
 java_library {
     name: "protolog-groups",
     srcs: [
-        "com/android/internal/protolog/ProtoLogGroup.java",
+        "com/android/internal/protolog/WmProtoLogGroups.java",
         ":protolog-common-src",
     ],
 }

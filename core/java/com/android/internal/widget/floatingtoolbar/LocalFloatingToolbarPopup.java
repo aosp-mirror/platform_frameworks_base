@@ -435,10 +435,15 @@ public final class LocalFloatingToolbarPopup implements FloatingToolbarPopup {
     private void refreshCoordinatesAndOverflowDirection(Rect contentRectOnScreen) {
         refreshViewPort();
 
-        // Initialize x ensuring that the toolbar isn't rendered behind the nav bar in
-        // landscape.
-        final int x = Math.clamp(contentRectOnScreen.centerX() - mPopupWindow.getWidth() / 2,
-                mViewPortOnScreen.left, mViewPortOnScreen.right - mPopupWindow.getWidth());
+        final int x;
+        if (mPopupWindow.getWidth() > mViewPortOnScreen.width()) {
+            // Not enough space - prefer to position as far left as possible
+            x = mViewPortOnScreen.left;
+        } else {
+            // Initialize x ensuring that the toolbar isn't rendered behind the system bar insets
+            x = Math.clamp(contentRectOnScreen.centerX() - mPopupWindow.getWidth() / 2,
+                    mViewPortOnScreen.left, mViewPortOnScreen.right - mPopupWindow.getWidth());
+        }
 
         final int y;
 
@@ -530,8 +535,26 @@ public final class LocalFloatingToolbarPopup implements FloatingToolbarPopup {
         int rootViewTopOnWindow = mTmpCoords[1];
         int windowLeftOnScreen = rootViewLeftOnScreen - rootViewLeftOnWindow;
         int windowTopOnScreen = rootViewTopOnScreen - rootViewTopOnWindow;
-        mCoordsOnWindow.set(
-                Math.max(0, x - windowLeftOnScreen), Math.max(0, y - windowTopOnScreen));
+        // In some cases, app can have specific Window for Android UI components such as EditText.
+        // In this case, Window bounds != App bounds. Hence, instead of ensuring non-negative
+        // PopupWindow coords, app bounds should be used to limit the coords. For instance,
+        //  ____  <- |
+        // |   |     |W1 & App bounds
+        // |___|    |
+        // |W2 |    | W2 has smaller bounds and contain EditText where PopupWindow will be opened.
+        // ----  <-|
+        // Here, we'll open PopupWindow upwards, but as PopupWindow is anchored based on W2, it
+        // will have negative Y coords. This negative Y is safe to use because it's still within app
+        // bounds. However, if it gets out of app bounds, we should clamp it to 0.
+        Rect appBounds = mContext
+                .getResources().getConfiguration().windowConfiguration.getAppBounds();
+        mCoordsOnWindow.set(x - windowLeftOnScreen, y - windowTopOnScreen);
+        if (rootViewLeftOnScreen + mCoordsOnWindow.x < appBounds.left) {
+            mCoordsOnWindow.x = 0;
+        }
+        if (rootViewTopOnScreen + mCoordsOnWindow.y < appBounds.top) {
+            mCoordsOnWindow.y = 0;
+        }
     }
 
     /**

@@ -20,20 +20,20 @@ import android.content.Intent
 import android.content.res.Resources
 import android.provider.Settings
 import com.android.systemui.accessibility.extradim.ExtraDimDialogManager
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.ReduceBrightColorsController
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.reducebrightness.domain.model.ReduceBrightColorsTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Handles reduce bright colors tile clicks. */
 class ReduceBrightColorsTileUserActionInteractor
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val qsTileIntentUserActionHandler: QSTileIntentUserInputHandler,
     private val reduceBrightColorsController: ReduceBrightColorsController,
     private val extraDimDialogManager: ExtraDimDialogManager,

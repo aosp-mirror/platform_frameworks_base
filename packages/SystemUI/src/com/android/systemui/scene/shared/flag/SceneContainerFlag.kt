@@ -20,7 +20,6 @@ package com.android.systemui.scene.shared.flag
 
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.Flags.sceneContainer
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
@@ -42,8 +41,7 @@ object SceneContainerFlag {
                 KeyguardWmStateRefactor.isEnabled &&
                 MigrateClocksToBlueprint.isEnabled &&
                 NotificationThrottleHun.isEnabled &&
-                PredictiveBackSysUiFlag.isEnabled &&
-                DeviceEntryUdfpsRefactor.isEnabled
+                PredictiveBackSysUiFlag.isEnabled
 
     // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
 
@@ -58,7 +56,6 @@ object SceneContainerFlag {
             MigrateClocksToBlueprint.token,
             NotificationThrottleHun.token,
             PredictiveBackSysUiFlag.token,
-            DeviceEntryUdfpsRefactor.token,
             // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer
         )
 

@@ -20,12 +20,20 @@ import static android.app.NotificationManager.IMPORTANCE_MIN;
 
 import android.app.Notification;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi;
 import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
+
+import com.google.common.primitives.Booleans;
 
 import javax.inject.Inject;
 
@@ -44,12 +52,21 @@ public class ColorizedFgsCoordinator implements Coordinator {
 
     @Override
     public void attach(NotifPipeline pipeline) {
+        if (PromotedNotificationUi.isEnabled()) {
+            pipeline.addPromoter(mPromotedOngoingPromoter);
+        }
     }
 
     public NotifSectioner getSectioner() {
         return mNotifSectioner;
     }
 
+    private final NotifPromoter mPromotedOngoingPromoter = new NotifPromoter("PromotedOngoing") {
+        @Override
+        public boolean shouldPromoteToTopLevel(NotificationEntry child) {
+            return isPromotedOngoing(child);
+        }
+    };
 
     /**
      * Puts colorized foreground service and call notifications into its own section.
@@ -64,11 +81,30 @@ public class ColorizedFgsCoordinator implements Coordinator {
             }
             return false;
         }
+
+        private NotifComparator mPreferPromoted = new NotifComparator("PreferPromoted") {
+            @Override
+            public int compare(@NonNull ListEntry o1, @NonNull ListEntry o2) {
+                return -1 * Booleans.compare(
+                        isPromotedOngoing(o1.getRepresentativeEntry()),
+                        isPromotedOngoing(o2.getRepresentativeEntry()));
+            }
+        };
+
+        @Nullable
+        @Override
+        public NotifComparator getComparator() {
+            if (PromotedNotificationUi.isEnabled()) {
+                return mPreferPromoted;
+            } else {
+                return null;
+            }
+        }
     };
 
     /** Determines if the given notification is a colorized or call notification */
     public static boolean isRichOngoing(NotificationEntry entry) {
-        return isColorizedForegroundService(entry) || isCall(entry);
+        return isPromotedOngoing(entry) || isColorizedForegroundService(entry) || isCall(entry);
     }
 
     private static boolean isColorizedForegroundService(NotificationEntry entry) {
@@ -76,6 +112,11 @@ public class ColorizedFgsCoordinator implements Coordinator {
         return notification.isForegroundService()
                 && notification.isColorized()
                 && entry.getImportance() > IMPORTANCE_MIN;
+    }
+
+    private static boolean isPromotedOngoing(NotificationEntry entry) {
+        // NOTE: isPromotedOngoing already checks the android.app.ui_rich_ongoing flag.
+        return entry != null && entry.getSbn().getNotification().isPromotedOngoing();
     }
 
     private static boolean isCall(NotificationEntry entry) {

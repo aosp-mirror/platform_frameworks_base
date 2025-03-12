@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
 
+import java.util.Objects;
+
 /**
  * Class used to identify a default value for the authority of the {@link EnforcingAdmin} setting
  * a policy, meaning it is not one of the other known subclasses of {@link Authority}, this would be
@@ -31,6 +33,7 @@ import android.os.Parcel;
  */
 @SystemApi
 public final class UnknownAuthority extends Authority {
+    private final String mName;
 
     /**
      * Object representing an unknown authority.
@@ -45,22 +48,40 @@ public final class UnknownAuthority extends Authority {
      * Creates an authority that represents an admin that can set a policy but
      * doesn't have a known authority (e.g. a system components).
      */
-    public UnknownAuthority() {}
+    public UnknownAuthority() {
+        mName = null;
+    }
+
+    /** @hide */
+    public UnknownAuthority(String name) {
+        mName = name;
+    }
+
+    private UnknownAuthority(Parcel source) {
+        this(source.readString8());
+    }
+
+    /** @hide */
+    public String getName() {
+        return mName;
+    }
 
     @Override
     public String toString() {
-        return "DefaultAuthority {}";
+        return "DefaultAuthority {" + mName + "}";
     }
 
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
-        return o != null && getClass() == o.getClass();
+        if (o == null || getClass() != o.getClass()) return false;
+        UnknownAuthority other = (UnknownAuthority) o;
+        return Objects.equals(mName, other.mName);
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hashCode(mName);
     }
 
     @Override
@@ -69,14 +90,16 @@ public final class UnknownAuthority extends Authority {
     }
 
     @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {}
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString8(mName);
+    }
 
     @NonNull
     public static final Creator<UnknownAuthority> CREATOR =
             new Creator<UnknownAuthority>() {
                 @Override
                 public UnknownAuthority createFromParcel(Parcel source) {
-                    return UNKNOWN_AUTHORITY;
+                    return new UnknownAuthority(source);
                 }
 
                 @Override

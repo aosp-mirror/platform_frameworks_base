@@ -61,6 +61,7 @@ stubs_defaults {
         ":framework-bluetooth-sources",
         ":framework-connectivity-tiramisu-updatable-sources",
         ":framework-graphics-srcs",
+        ":framework-healthfitness-sources",
         ":framework-mediaprovider-sources",
         ":framework-nearby-sources",
         ":framework-nfc-updatable-sources",

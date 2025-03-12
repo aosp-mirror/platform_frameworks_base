@@ -41,7 +41,7 @@ public class HearingDevicesToolItemParser {
     private static final String SPLIT_DELIMITER = "/";
     private static final String RES_TYPE = "drawable";
     @VisibleForTesting
-    static final int MAX_NUM = 3;
+    static final int MAX_NUM = 2;
 
     /**
      * Parses the string arrays to create a list of {@link ToolItem}.
@@ -82,7 +82,8 @@ public class HearingDevicesToolItemParser {
                     useCustomIcons ? iconList.get(i)
                             : activityInfoList.get(i).loadIcon(packageManager),
                     new Intent(Intent.ACTION_MAIN).setComponent(
-                            activityInfoList.get(i).getComponentName())
+                            activityInfoList.get(i).getComponentName()),
+                    useCustomIcons
             ));
         }
 

@@ -23,6 +23,7 @@ import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.graphics.common.DisplayDecorationSupport;
+import android.hardware.display.DisplayTopology;
 import android.hardware.display.HdrConversionMode;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -113,9 +114,6 @@ interface IDisplayManager {
 
     // No permissions required but must be same Uid as the creator.
     void releaseVirtualDisplay(in IVirtualDisplayCallback token);
-
-    // No permissions required but must be same Uid as the creator.
-    void setVirtualDisplayState(in IVirtualDisplayCallback token, boolean isOn);
 
     // No permissions required but must be same Uid as the creator.
     void setVirtualDisplayRotation(in IVirtualDisplayCallback token, int rotation);
@@ -257,4 +255,13 @@ interface IDisplayManager {
     // Get the default doze brightness
     @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     float getDefaultDozeBrightness(int displayId);
+
+    // Get the display topology
+    @EnforcePermission("MANAGE_DISPLAYS")
+    @nullable
+    DisplayTopology getDisplayTopology();
+
+    // Set the display topology
+    @EnforcePermission("MANAGE_DISPLAYS")
+    void setDisplayTopology(in DisplayTopology topology);
 }

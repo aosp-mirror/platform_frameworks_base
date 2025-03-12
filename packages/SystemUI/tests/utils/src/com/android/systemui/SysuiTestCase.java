@@ -56,6 +56,8 @@ import org.mockito.Mockito;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -69,6 +71,17 @@ import java.util.concurrent.Future;
 // background on Ravenwood is available at go/ravenwood-docs
 @DisabledOnRavenwood
 public abstract class SysuiTestCase {
+    /**
+     * Especially when self-testing test utilities, we may have classes that look like test
+     * classes, but we don't expect to ever actually run as a top-level test.
+     * For example, {@link com.android.systemui.TryToDoABadThing}.
+     * Verifying properties on these as a part of structural tests like
+     * AAAPlusPlusVerifySysuiRequiredTestPropertiesTest is a waste of our time, and makes things
+     * look more confusing, so this lets us skip when appropriate.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface SkipSysuiVerification {
+    }
 
     private static final String TAG = "SysuiTestCase";
 
@@ -105,6 +118,7 @@ public abstract class SysuiTestCase {
                     android.net.platform.flags.Flags.class,
                     android.os.Flags.class,
                     android.service.controls.flags.Flags.class,
+                    android.service.quickaccesswallet.Flags.class,
                     com.android.internal.telephony.flags.Flags.class,
                     com.android.server.notification.Flags.class,
                     com.android.systemui.Flags.class);
@@ -171,6 +185,15 @@ public abstract class SysuiTestCase {
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
+
+    @Rule public final OnTeardownRule mTearDownRule = new OnTeardownRule();
+
+    /**
+     * Schedule a cleanup routine to happen when the test state is torn down.
+     */
+    protected void onTeardown(Runnable tearDownRunnable) {
+        mTearDownRule.onTeardown(tearDownRunnable);
+    }
 
     // set the highest order so it's the innermost rule
     @Rule(order = Integer.MAX_VALUE)

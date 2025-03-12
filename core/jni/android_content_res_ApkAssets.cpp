@@ -16,26 +16,27 @@
 
 #define ATRACE_TAG ATRACE_TAG_RESOURCES
 
-#include <mutex>
+#include "android_content_res_ApkAssets.h"
 
-#include "signal.h"
+#include <mutex>
 
 #include "android-base/logging.h"
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
 #include "android-base/unique_fd.h"
 #include "androidfw/ApkAssets.h"
-#include "utils/misc.h"
-#include "utils/Trace.h"
-
-#include "android_content_res_ApkAssets.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
 #include "nativehelper/ScopedUtfChars.h"
+#include "signal.h"
+#include "utils/Trace.h"
+#include "utils/misc.h"
 
 using ::android::base::unique_fd;
 
 namespace android {
+
+static constexpr bool kLogWeakReachableDeletedAssets = false;
 
 static struct overlayableinfo_offsets_t {
   jclass classObject;
@@ -98,7 +99,7 @@ static void DeleteGuardedApkAssets(Guarded<AssetManager2::ApkAssetsPtr>& apk_ass
       if (useCount > 1) {
         ALOGW("ApkAssets: Deleting an object '%s' with %d > 1 strong and %d weak references",
               (*assets)->GetDebugName().c_str(), int(useCount), int(weakCount));
-      } else if (weakCount > 0) {
+      } else if constexpr (kLogWeakReachableDeletedAssets) if (weakCount > 0) {
         ALOGW("ApkAssets: Deleting an ApkAssets object '%s' with %d weak references",
               (*assets)->GetDebugName().c_str(), int(weakCount));
       }
@@ -266,6 +267,20 @@ static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t forma
   return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
+#if defined(_WIN32)
+int DupFdCloExec(int fd) {
+    int newfd = dup(fd);
+    fprintf(stderr, "duping %d to %d", fd, newfd);
+    return newfd;
+}
+#else
+int DupFdCloExec(int fd) {
+    int newfd = fcntl(fd, F_DUPFD_CLOEXEC, 0);
+    fprintf(stderr, "duping %d to %d", fd, newfd);
+    return newfd;
+}
+#endif
+
 static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
                               jobject file_descriptor, jstring friendly_name,
                               const jint property_flags, jobject assets_provider) {
@@ -282,7 +297,7 @@ static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t
     return 0;
   }
 
-  unique_fd dup_fd(::fcntl(fd, F_DUPFD_CLOEXEC, 0));
+  unique_fd dup_fd(DupFdCloExec(fd));
   if (dup_fd < 0) {
     jniThrowIOException(env, errno);
     return 0;
@@ -349,7 +364,7 @@ static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_
     return 0;
   }
 
-  unique_fd dup_fd(::fcntl(fd, F_DUPFD_CLOEXEC, 0));
+  unique_fd dup_fd(DupFdCloExec(fd));
   if (dup_fd < 0) {
     jniThrowIOException(env, errno);
     return 0;

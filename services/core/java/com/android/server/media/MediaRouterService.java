@@ -607,16 +607,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             IMediaRouter2Manager manager,
             int requestId,
             RoutingSessionInfo oldSession,
-            MediaRoute2Info route,
-            UserHandle transferInitiatorUserHandle,
-            String transferInitiatorPackageName) {
-        mService2.requestCreateSessionWithManager(
-                manager,
-                requestId,
-                oldSession,
-                route,
-                transferInitiatorUserHandle,
-                transferInitiatorPackageName);
+            MediaRoute2Info route) {
+        mService2.requestCreateSessionWithManager(manager, requestId, oldSession, route);
     }
 
     // Binder call

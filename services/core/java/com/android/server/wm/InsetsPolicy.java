@@ -47,6 +47,7 @@ import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowManager;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 
@@ -412,6 +413,22 @@ class InsetsPolicy {
                 state.addSource(imeSource);
                 return state;
             }
+        } else if (Flags.refactorInsetsController()
+                && (w.mMergedExcludeInsetsTypes & WindowInsets.Type.ime()) != 0) {
+            // In some cases (e.g. split screen from when the IME was requested and the animation
+            // actually starts) the insets should not be send, unless the flag is unset.
+            final InsetsSource originalImeSource = originalState.peekSource(ID_IME);
+            if (originalImeSource != null && originalImeSource.isVisible()) {
+                final InsetsState state = copyState
+                        ? new InsetsState(originalState)
+                        : originalState;
+                final InsetsSource imeSource = new InsetsSource(originalImeSource);
+                // Setting the height to zero, pretending we're in floating mode
+                imeSource.setFrame(0, 0, 0, 0);
+                imeSource.setVisibleFrame(imeSource.getFrame());
+                state.addSource(imeSource);
+                return state;
+            }
         }
         return originalState;
     }
@@ -611,8 +628,9 @@ class InsetsPolicy {
         return (mForcedShowingTypes & types) == types;
     }
 
-    void updateSystemBars(WindowState win, boolean inSplitScreenMode, boolean inFreeformMode) {
-        mForcedShowingTypes = (inSplitScreenMode || inFreeformMode)
+    void updateSystemBars(WindowState win, boolean inSplitScreenMode,
+            boolean inNonFullscreenFreeformMode) {
+        mForcedShowingTypes = (inSplitScreenMode || inNonFullscreenFreeformMode)
                 ? (Type.statusBars() | Type.navigationBars())
                 : forceShowingNavigationBars(win)
                         ? Type.navigationBars()

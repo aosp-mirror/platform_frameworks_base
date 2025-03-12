@@ -211,6 +211,102 @@ public class InsetsSourceTest {
     }
 
     @Test
+    public void testCalculateInsets_partialSideIntersection_leftCenter() {
+        mSource.setFrame(new Rect(0, 0, 100, 500));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(0, 100, 500, 400), false);
+        assertEquals(Insets.of(100, 0, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_leftTop() {
+        mSource.setFrame(new Rect(0, 0, 100, 500));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(0, -100, 500, 400), false);
+        assertEquals(Insets.of(100, 0, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_leftBottom() {
+        mSource.setFrame(new Rect(0, 0, 100, 500));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(0, 100, 500, 600), false);
+        assertEquals(Insets.of(100, 0, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_topCenter() {
+        mSource.setFrame(new Rect(0, 0, 500, 100));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(-100, 0, 600, 500), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_topLeft() {
+        mSource.setFrame(new Rect(0, 0, 500, 100));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(-100, 0, 400, 500), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_topRight() {
+        mSource.setFrame(new Rect(0, 0, 500, 100));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(100, 0, 600, 500), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_rightCenter() {
+        mSource.setFrame(new Rect(400, 0, 500, 500));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(0, 100, 500, 400), false);
+        assertEquals(Insets.of(0, 0, 100, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_rightTop() {
+        mSource.setFrame(new Rect(400, 0, 500, 500));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(0, -100, 500, 400), false);
+        assertEquals(Insets.of(0, 0, 100, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_rightBottom() {
+        mSource.setFrame(new Rect(400, 0, 500, 500));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(0, 100, 500, 600), false);
+        assertEquals(Insets.of(0, 0, 100, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_bottomCenter() {
+        mSource.setFrame(new Rect(0, 400, 500, 500));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(-100, 0, 600, 500), false);
+        assertEquals(Insets.of(0, 0, 0, 100), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_bottomLeft() {
+        mSource.setFrame(new Rect(0, 400, 500, 500));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(-100, 0, 400, 500), false);
+        assertEquals(Insets.of(0, 0, 0, 100), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_partialSideIntersection_bottomRight() {
+        mSource.setFrame(new Rect(0, 400, 500, 500));
+        mSource.updateSideHint(new Rect(0, 0, 500, 500));
+        Insets insets = mSource.calculateInsets(new Rect(100, 0, 600, 500), false);
+        assertEquals(Insets.of(0, 0, 0, 100), insets);
+    }
+
+    @Test
     public void testCalculateVisibleInsets_override() {
         mSource.setFrame(new Rect(0, 0, 500, 100));
         mSource.setVisibleFrame(new Rect(0, 0, 500, 200));

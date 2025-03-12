@@ -74,16 +74,6 @@ flag {
 }
 
 flag {
-    name: "volume_panel_broadcast_fix"
-    namespace: "systemui"
-    description: "Make the volume panel's repository listen for the new ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED broadcast instead of ACTION_NOTIFICATION_POLICY_CHANGED"
-    bug: "347707024"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "volume_dialog_audio_sharing_fix"
     namespace: "cross_device_experiences"
     description: "Gates whether to show separate volume bars during audio sharing"
@@ -108,6 +98,16 @@ flag {
     namespace: "android_settings"
     description: "Settings catalyst project migration"
     bug: "323791114"
+    is_exported: true
+}
+
+flag {
+    name: "write_system_preference_permission_enabled"
+    is_fixed_read_only: true
+    namespace: "android_settings"
+    description: "Enable WRITE_SYSTEM_PREFERENCE permission and appop"
+    bug: "375193223"
+    is_exported: true
 }
 
 flag {
@@ -145,6 +145,54 @@ flag {
     namespace: "cross_device_experiences"
     description: "Gates whether to enable audio sharing qs dialog improvement"
     bug: "360759048"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "audio_sharing_developer_option"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable audio sharing developer option"
+    bug: "368401233"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "hearing_devices_ambient_volume_control"
+    namespace: "accessibility"
+    description: "Enable the ambient volume control in device details and hearing devices dialog."
+    bug: "357878944"
+}
+
+flag {
+    name: "settings_preference_write_consent_enabled"
+    namespace: "android_settings"
+    description: "Enable the user consent prompt before writing sensitive preferences via service"
+    bug: "378552675"
+}
+
+flag {
+    name: "hearing_devices_input_routing_control"
+    namespace: "accessibility"
+    description: "Enable the input routing control in device details and hearing devices dialog."
+    bug: "349255906"
+}
+
+flag {
+    name: "hearing_device_set_connection_status_report"
+    namespace: "accessibility"
+    description: "Enable the connection status report for a set of hearing device."
+    bug: "357882387"
+}
+
+flag {
+    name: "ignore_a2dp_disconnection_for_android_auto"
+    namespace: "cross_device_experiences"
+    description: "Do not show problem connecting message when Android Auto disconnect A2DP"
+    bug: "381981752"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

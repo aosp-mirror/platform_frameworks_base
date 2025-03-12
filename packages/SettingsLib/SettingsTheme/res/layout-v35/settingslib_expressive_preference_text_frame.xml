@@ -20,7 +20,10 @@
     android:layout_width="@dimen/settingslib_expressive_space_none"
     android:layout_height="wrap_content"
     android:layout_weight="1"
-    android:padding="@dimen/settingslib_expressive_space_small1">
+    android:paddingVertical="@dimen/settingslib_expressive_space_small1"
+    android:paddingStart="@dimen/settingslib_expressive_space_none"
+    android:paddingEnd="@dimen/settingslib_expressive_space_small1"
+    android:filterTouchesWhenObscured="false">
 
     <TextView
         android:id="@android:id/title"
@@ -28,8 +31,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:textAlignment="viewStart"
-        android:textAppearance="?android:attr/textAppearanceListItem"
         android:maxLines="2"
+        android:hyphenationFrequency="normalFast"
+        android:lineBreakWordStyle="phrase"
+        android:textAppearance="?android:attr/textAppearanceListItem"
         android:ellipsize="marquee"/>
 
     <TextView
@@ -37,11 +42,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@android:id/title"
-        android:layout_alignLeft="@android:id/title"
         android:layout_alignStart="@android:id/title"
         android:layout_gravity="start"
         android:textAlignment="viewStart"
         android:textAppearance="?android:attr/textAppearanceListItemSecondary"
         android:textColor="?android:attr/textColorSecondary"
-        android:maxLines="10"/>
+        android:maxLines="10"
+        android:hyphenationFrequency="normalFast"
+        android:lineBreakWordStyle="phrase"/>
 </RelativeLayout>

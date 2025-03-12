@@ -76,6 +76,7 @@ import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
@@ -102,6 +103,7 @@ import kotlinx.coroutines.Job;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -426,6 +428,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final Provider<JavaAdapter> mJavaAdapter;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final Lazy<PrimaryBouncerInteractor> mPrimaryBouncerInteractor;
+    private final Executor mBgExecutor;
     @Nullable
     private Job mSceneTransitionCollectionJob;
 
@@ -459,6 +462,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             DevicePolicyManager devicePolicyManager,
             KeyguardDismissTransitionInteractor keyguardDismissTransitionInteractor,
             Lazy<PrimaryBouncerInteractor> primaryBouncerInteractor,
+            @Background Executor bgExecutor,
             Provider<DeviceEntryInteractor> deviceEntryInteractor
     ) {
         super(view);
@@ -493,11 +497,13 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mDeviceProvisionedController = deviceProvisionedController;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mDevicePolicyManager = devicePolicyManager;
+        mBgExecutor = bgExecutor;
     }
 
     @Override
     public void onInit() {
         mSecurityViewFlipperController.init();
+        mView.setBackgroundExecutor(mBgExecutor);
         updateResources();
         configureMode();
     }
@@ -891,6 +897,18 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     break;
             }
         }
+        // A check to dismiss was made without any authentication. Verify there are no remaining SIM
+        // screens, which may happen on an unlocked lockscreen
+        if (!authenticated) {
+            SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
+            if (Arrays.asList(SimPin, SimPuk).contains(securityMode)) {
+                Log.v(TAG, "Dismiss called but SIM/PUK unlock screen still required");
+                eventSubtype = -1;
+                showSecurityScreen(securityMode);
+                finish = false;
+            }
+        }
+
         // Check for device admin specified additional security measures.
         if (finish && !bypassSecondaryLockScreen) {
             Intent secondaryLockscreenIntent =
@@ -1096,8 +1114,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
 
         mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController,
-                () -> showMessage(getContext().getString(R.string.keyguard_unlock_to_continue),
-                        /* colorState= */ null, /* animated= */ true), mFalsingA11yDelegate);
+                () -> {
+                        String msg = getContext().getString(R.string.keyguard_unlock_to_continue);
+                        showMessage(msg, /* colorState= */ null, /* animated= */ true);
+                        mBouncerMessageInteractor.setUnlockToContinueMessage(msg);
+                }, mFalsingA11yDelegate);
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {

@@ -37,8 +37,7 @@ public final class LnbResource extends TunerResourceBasic {
      * Builder class for {@link LnbResource}.
      */
     public static class Builder extends TunerResourceBasic.Builder {
-
-        Builder(int handle) {
+        Builder(long handle) {
             super(handle);
         }
 

@@ -109,6 +109,7 @@ import android.app.admin.PasswordMetrics;
 import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.WifiSsidPolicy;
+import android.app.admin.flags.Flags;
 import android.app.role.RoleManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -134,6 +135,10 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.security.KeyChain;
@@ -165,6 +170,7 @@ import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
@@ -206,6 +212,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             "not the profile owner on organization-owned device";
     public static final String INVALID_CALLING_IDENTITY_MSG = "Calling identity is not authorized";
     public static final String ONGOING_CALL_MSG = "ongoing call on the device";
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     // TODO replace all instances of this with explicit {@link #mServiceContext}.
     @Deprecated
@@ -4395,6 +4404,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeEnabledModifiesSetting() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -4406,6 +4416,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeEnabledWithPOOnUser0() throws Exception {
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setupProfileOwnerOnUser0();
@@ -4425,6 +4436,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeEnabledWithPOOfOrganizationOwnedDevice() throws Exception {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
@@ -4902,6 +4914,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
     public void testSecondaryLockscreen_profileOwner() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
 
@@ -4930,6 +4943,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
     public void testSecondaryLockscreen_deviceOwner() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
 
@@ -4948,6 +4962,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
     public void testSecondaryLockscreen_nonOwner() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
 
@@ -4964,6 +4979,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
     public void testSecondaryLockscreen_nonSupervisionApp() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
 
@@ -4993,6 +5009,53 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertExpectException(SecurityException.class, "is not the default supervision component",
                 () -> dpm.setSecondaryLockscreenEnabled(admin1, true));
         assertThat(dpm.isSecondaryLockscreenEnabled(UserHandle.of(CALLER_USER_HANDLE))).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
+    public void testIsSecondaryLockscreenEnabled() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+
+        verifyIsSecondaryLockscreenEnabled(false);
+        verifyIsSecondaryLockscreenEnabled(true);
+    }
+
+    private void verifyIsSecondaryLockscreenEnabled(boolean expected) throws Exception {
+        reset(getServices().supervisionManagerInternal);
+
+        doReturn(expected).when(getServices().supervisionManagerInternal)
+                .isSupervisionLockscreenEnabledForUser(anyInt());
+
+        final boolean enabled = dpm.isSecondaryLockscreenEnabled(UserHandle.of(CALLER_USER_HANDLE));
+        verify(getServices().supervisionManagerInternal)
+                .isSupervisionLockscreenEnabledForUser(CALLER_USER_HANDLE);
+
+        assertThat(enabled).isEqualTo(expected);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
+    public void testSetSecondaryLockscreenEnabled() throws Exception {
+        verifySetSecondaryLockscreenEnabled(false);
+        verifySetSecondaryLockscreenEnabled(true);
+    }
+
+    private void verifySetSecondaryLockscreenEnabled(boolean enabled) throws Exception {
+        reset(getServices().supervisionManagerInternal);
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        doReturn(DpmMockContext.CALLER_UID).when(getServices().packageManagerInternal)
+                .getPackageUid(any(), anyLong(), anyInt());
+
+        dpm.setSecondaryLockscreenEnabled(admin1, enabled);
+        verify(getServices().supervisionManagerInternal).setSupervisionLockscreenEnabledForUser(
+                CALLER_USER_HANDLE, enabled, null);
+
+        reset(getServices().supervisionManagerInternal);
+
+        dpm.setSecondaryLockscreenEnabled(enabled, new PersistableBundle());
+        verify(getServices().supervisionManagerInternal).setSupervisionLockscreenEnabledForUser(
+                eq(CALLER_USER_HANDLE), eq(enabled), any(PersistableBundle.class));
     }
 
     @Test

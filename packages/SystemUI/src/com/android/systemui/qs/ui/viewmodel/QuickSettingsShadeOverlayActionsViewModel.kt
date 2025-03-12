@@ -18,11 +18,11 @@ package com.android.systemui.qs.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.UserActionResult.HideOverlay
 import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
+import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
@@ -33,11 +33,10 @@ import kotlinx.coroutines.flow.map
 /** Models the UI state for the user actions for navigating to other scenes or overlays. */
 class QuickSettingsShadeOverlayActionsViewModel
 @AssistedInject
-constructor(private val containerViewModel: QuickSettingsContainerViewModel) :
-    UserActionsViewModel() {
+constructor(private val editModeViewModel: EditModeViewModel) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
-        containerViewModel.editModeViewModel.isEditing
+        editModeViewModel.isEditing
             .map { isEditing ->
                 buildMap {
                     put(Swipe.Up, HideOverlay(Overlays.QuickSettingsShade))
@@ -47,7 +46,7 @@ constructor(private val containerViewModel: QuickSettingsContainerViewModel) :
                         put(Back, HideOverlay(Overlays.QuickSettingsShade))
                     }
                     put(
-                        Swipe(SwipeDirection.Down, fromSource = SceneContainerEdge.TopLeft),
+                        Swipe.Down(fromSource = SceneContainerEdge.TopLeft),
                         ReplaceByOverlay(Overlays.NotificationsShade),
                     )
                 }

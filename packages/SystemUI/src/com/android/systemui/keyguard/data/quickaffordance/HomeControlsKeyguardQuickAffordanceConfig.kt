@@ -36,6 +36,7 @@ import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.Companion.appStoreIntent
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.getOrNull
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -48,7 +49,7 @@ import kotlinx.coroutines.flow.flowOf
 class HomeControlsKeyguardQuickAffordanceConfig
 @Inject
 constructor(
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val component: ControlsComponent,
 ) : KeyguardQuickAffordanceConfig {
 

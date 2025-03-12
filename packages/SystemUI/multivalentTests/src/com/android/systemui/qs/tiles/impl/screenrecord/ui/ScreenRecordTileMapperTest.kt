@@ -52,7 +52,7 @@ class ScreenRecordTileMapperTest : SysuiTestCase() {
                         addOverride(R.drawable.qs_screen_record_icon_off, TestStubDrawable())
                     }
                     .resources,
-                context.theme
+                context.theme,
             )
     }
 
@@ -82,7 +82,7 @@ class ScreenRecordTileMapperTest : SysuiTestCase() {
             createScreenRecordTileState(
                 QSTileState.ActivationState.ACTIVE,
                 R.drawable.qs_screen_record_icon_on,
-                String.format("%d...", timeLeft)
+                String.format("%d...", timeLeft),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -110,7 +110,7 @@ class ScreenRecordTileMapperTest : SysuiTestCase() {
         val label = context.getString(R.string.quick_settings_screen_record_label)
 
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -123,7 +123,7 @@ class ScreenRecordTileMapperTest : SysuiTestCase() {
                 QSTileState.SideViewIcon.Chevron
             else QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

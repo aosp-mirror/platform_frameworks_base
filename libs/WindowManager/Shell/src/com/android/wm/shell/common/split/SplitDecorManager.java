@@ -23,8 +23,8 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
-import static com.android.wm.shell.common.split.SplitLayout.BEHIND_APP_VEIL_LAYER;
-import static com.android.wm.shell.common.split.SplitLayout.FRONT_APP_VEIL_LAYER;
+import static com.android.wm.shell.common.split.SplitLayout.ANIMATING_BACK_APP_VEIL_LAYER;
+import static com.android.wm.shell.common.split.SplitLayout.ANIMATING_FRONT_APP_VEIL_LAYER;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.FADE_DURATION;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.VEIL_DELAY_DURATION;
 
@@ -66,6 +66,13 @@ import java.util.function.Consumer;
  * Currently, we show a veil when:
  *  a) Task is resizing down from a fullscreen window.
  *  b) Task is being stretched past its original bounds.
+ * <br>
+ *                       Split root
+ *                    /      |       \
+ *         Stage root      Divider      Stage root
+ *           /   \
+ *      Task       *this class*
+ *
  */
 public class SplitDecorManager extends WindowlessWindowManager {
     private static final String TAG = SplitDecorManager.class.getSimpleName();
@@ -77,6 +84,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private Drawable mIcon;
     private ImageView mVeilIconView;
     private SurfaceControlViewHost mViewHost;
+    /** The parent surface that this is attached to. Should be the stage root. */
     private SurfaceControl mHostLeash;
     private SurfaceControl mIconLeash;
     private SurfaceControl mBackgroundLeash;
@@ -389,7 +397,9 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mOffsetX = (int) iconOffsetX;
         mOffsetY = (int) iconOffsetY;
 
-        t.setLayer(leash, isGoingBehind ? BEHIND_APP_VEIL_LAYER : FRONT_APP_VEIL_LAYER);
+        t.setLayer(leash, isGoingBehind
+                ? ANIMATING_BACK_APP_VEIL_LAYER
+                : ANIMATING_FRONT_APP_VEIL_LAYER);
 
         if (!mShown) {
             if (mFadeAnimator != null && mFadeAnimator.isRunning()) {

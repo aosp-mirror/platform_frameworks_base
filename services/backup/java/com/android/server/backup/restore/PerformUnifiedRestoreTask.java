@@ -51,8 +51,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
 
@@ -315,8 +315,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             }
         }
 
-        mAcceptSet = backupManagerService.filterUserFacingPackages(mAcceptSet);
-
         if (MORE_DEBUG) {
             Slog.v(TAG, "Restore; accept set size is " + mAcceptSet.size());
             for (PackageInfo info : mAcceptSet) {
@@ -481,6 +479,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 executeNextState(UnifiedRestoreState.FINAL);
                 return;
             }
+
+            // We ask the transport which packages should not be put in restricted mode and cache
+            // the result in UBMS to be used later when the apps are started for restore.
+            setNoRestrictedModePackages(transport, packages);
 
             RestoreDescription desc = transport.nextRestorePackage();
             if (desc == null) {
@@ -809,7 +811,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         // Good to go!  Set up and bind the agent...
         mAgent =
-                backupManagerService.bindToAgentSynchronous(
+                backupManagerService.getBackupAgentConnectionManager().bindToAgentSynchronous(
                         mCurrentPackage.applicationInfo,
                         ApplicationThreadConstants.BACKUP_MODE_RESTORE,
                         mBackupEligibilityRules.getBackupDestination());
@@ -1358,6 +1360,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // Clear any ongoing session timeout.
         backupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
+        // Clear this to avoid using the memory until reboot.
+        backupManagerService.getBackupAgentConnectionManager().clearNoRestrictedModePackages();
+
         // If we have a PM token, we must under all circumstances be sure to
         // handshake when we've finished.
         if (mPmToken > 0) {
@@ -1479,49 +1484,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         // If this wasn't the PM pseudopackage, tear down the agent side
         if (mCurrentPackage.applicationInfo != null) {
-            // unbind and tidy up even on timeout or failure
-            try {
-                backupManagerService
-                        .getActivityManager()
-                        .unbindBackupAgent(mCurrentPackage.applicationInfo);
-
-                // The agent was probably running with a stub Application object,
-                // which isn't a valid run mode for the main app logic.  Shut
-                // down the app so that next time it's launched, it gets the
-                // usual full initialization.  Note that this is only done for
-                // full-system restores: when a single app has requested a restore,
-                // it is explicitly not killed following that operation.
-                //
-                // We execute this kill when these conditions hold:
-                //    1. it's not a system-uid process,
-                //    2. the app did not request its own restore (mTargetPackage == null), and
-                // either
-                //    3a. the app is a full-data target (TYPE_FULL_STREAM) or
-                //     b. the app does not state android:killAfterRestore="false" in its manifest
-                final int appFlags = mCurrentPackage.applicationInfo.flags;
-                final boolean killAfterRestore =
-                        !UserHandle.isCore(mCurrentPackage.applicationInfo.uid)
-                                && ((mRestoreDescription.getDataType()
-                                                == RestoreDescription.TYPE_FULL_STREAM)
-                                        || ((appFlags & ApplicationInfo.FLAG_KILL_AFTER_RESTORE)
-                                                != 0));
-
-                if (mTargetPackage == null && killAfterRestore) {
-                    if (DEBUG) {
-                        Slog.d(
-                                TAG,
-                                "Restore complete, killing host process of "
-                                        + mCurrentPackage.applicationInfo.processName);
-                    }
-                    backupManagerService
-                            .getActivityManager()
-                            .killApplicationProcess(
-                                    mCurrentPackage.applicationInfo.processName,
-                                    mCurrentPackage.applicationInfo.uid);
-                }
-            } catch (RemoteException e) {
-                // can't happen; we run in the same process as the activity manager
-            }
+            // If mTargetPackage is not null it means the app requested its own restore, in which
+            // case we won't allow the app to be killed.
+            backupManagerService.getBackupAgentConnectionManager().unbindAgent(
+                    mCurrentPackage.applicationInfo, /* allowKill= */ mTargetPackage == null);
         }
 
         // The caller is responsible for reestablishing the state machine; our
@@ -1818,5 +1784,22 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         packageInfo.packageName = packageName;
 
         return packageInfo;
+    }
+
+    @VisibleForTesting
+    void setNoRestrictedModePackages(BackupTransportClient transport,
+            PackageInfo[] packages) {
+        try {
+            Set<String> packageNames = new ArraySet<>();
+            for (int i = 0; i < packages.length; i++) {
+                packageNames.add(packages[i].packageName);
+            }
+            packageNames = transport.getPackagesThatShouldNotUseRestrictedMode(packageNames,
+                    RESTORE);
+            backupManagerService.getBackupAgentConnectionManager().setNoRestrictedModePackages(
+                    packageNames, RESTORE);
+        } catch (RemoteException e) {
+            Slog.i(TAG, "Failed to retrieve restricted mode packages from transport");
+        }
     }
 }

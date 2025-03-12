@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -41,7 +42,7 @@ class DreamingToGlanceableHubTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow
@@ -49,15 +50,13 @@ constructor(
                 duration = TO_GLANCEABLE_HUB_DURATION,
                 edge = Edge.create(from = DREAMING, to = Scenes.Communal),
             )
-            .setupWithoutSceneContainer(
-                edge = Edge.create(from = DREAMING, to = GLANCEABLE_HUB),
-            )
+            .setupWithoutSceneContainer(edge = Edge.create(from = DREAMING, to = GLANCEABLE_HUB))
 
     val dreamOverlayTranslationX: Flow<Float> =
         configurationInteractor
             .directionalDimensionPixelSize(
                 LayoutDirection.LTR,
-                R.dimen.dreaming_to_hub_transition_dream_overlay_translation_x
+                R.dimen.dreaming_to_hub_transition_dream_overlay_translation_x,
             )
             .flatMapLatest { translatePx ->
                 transitionAnimation.sharedFlow(

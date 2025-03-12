@@ -21,7 +21,7 @@ import com.github.javaparser.ast.Node
 fun Node.dump(indent: String = ""): String {
     return buildString {
         append(indent)
-        appendln(dumpOneLineNoChildren())
+        appendLine(dumpOneLineNoChildren())
         childNodes.forEach { child ->
             append(child.dump(indent + "  "))
         }
