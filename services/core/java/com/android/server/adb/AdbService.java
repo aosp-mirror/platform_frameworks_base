@@ -21,10 +21,8 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.debug.AdbManager;
 import android.debug.AdbManagerInternal;
 import android.debug.AdbTransportType;
 import android.debug.FingerprintAndPairDevice;
@@ -40,10 +38,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.adb.AdbServiceDumpProto;
-import android.sysprop.AdbProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -63,7 +59,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The Android Debug Bridge (ADB) service. This controls the availability of ADB and authorization
@@ -84,12 +79,6 @@ public class AdbService extends IAdbManager.Stub {
      * Command to start native service.
      */
     static final String CTL_STOP = "ctl.stop";
-
-    // The tcp port adb is currently using
-    AtomicInteger mConnectionPort = new AtomicInteger(-1);
-
-    private final AdbConnectionPortListener mPortListener = new AdbConnectionPortListener();
-    private AdbDebuggingManager.AdbConnectionPortPoller mConnectionPortPoller;
 
     private final RemoteCallbackList<IAdbCallback> mCallbacks = new RemoteCallbackList<>();
     /**
@@ -404,39 +393,6 @@ public class AdbService extends IAdbManager.Stub {
         Slog.d(TAG, "Unregistering callback " + callback);
         mCallbacks.unregister(callback);
     }
-    /**
-     * This listener is only used when ro.adb.secure=0. Otherwise, AdbDebuggingManager will
-     * do this.
-     */
-    class AdbConnectionPortListener implements AdbDebuggingManager.AdbConnectionPortListener {
-        public void onPortReceived(int port) {
-            if (port > 0 && port <= 65535) {
-                mConnectionPort.set(port);
-            } else {
-                mConnectionPort.set(-1);
-                // Turn off wifi debugging, since the server did not start.
-                try {
-                    Settings.Global.putInt(mContentResolver,
-                            Settings.Global.ADB_WIFI_ENABLED, 0);
-                } catch (SecurityException e) {
-                    // If UserManager.DISALLOW_DEBUGGING_FEATURES is on, that this setting can't
-                    // be changed.
-                    Slog.d(TAG, "ADB_ENABLED is restricted.");
-                }
-            }
-            broadcastPortInfo(mConnectionPort.get());
-        }
-    }
-
-    private void broadcastPortInfo(int port) {
-        Intent intent = new Intent(AdbManager.WIRELESS_DEBUG_STATE_CHANGED_ACTION);
-        intent.putExtra(AdbManager.WIRELESS_STATUS_EXTRA, (port >= 0)
-                ? AdbManager.WIRELESS_STATUS_CONNECTED
-                : AdbManager.WIRELESS_STATUS_DISCONNECTED);
-        intent.putExtra(AdbManager.WIRELESS_DEBUG_PORT_EXTRA, port);
-        AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent, UserHandle.ALL);
-        Slog.i(TAG, "sent port broadcast port=" + port);
-    }
 
     private void startAdbd() {
         SystemProperties.set(CTL_START, ADBD);
@@ -470,20 +426,11 @@ public class AdbService extends IAdbManager.Stub {
         } else if (transportType == AdbTransportType.WIFI && enable != mIsAdbWifiEnabled) {
             mIsAdbWifiEnabled = enable;
             if (mIsAdbWifiEnabled) {
-                if (!AdbProperties.secure().orElse(false)) {
-                    // Start adbd. If this is secure adb, then we defer enabling adb over WiFi.
-                    SystemProperties.set(WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
-                    mConnectionPortPoller =
-                            new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
-                    mConnectionPortPoller.start();
-                }
+                // Start adb over WiFi.
+                SystemProperties.set(WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
             } else {
                 // Stop adb over WiFi.
                 SystemProperties.set(WIFI_PERSISTENT_CONFIG_PROPERTY, "0");
-                if (mConnectionPortPoller != null) {
-                    mConnectionPortPoller.cancelAndWait();
-                    mConnectionPortPoller = null;
-                }
             }
         } else {
             // No change
