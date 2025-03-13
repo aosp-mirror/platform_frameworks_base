@@ -74,6 +74,7 @@ static struct bindernative_offsets_t
     jmethodID mExecTransact;
     jmethodID mGetInterfaceDescriptor;
     jmethodID mTransactionCallback;
+    jmethodID mGetExtension;
 
     // Object state.
     jfieldID mObject;
@@ -489,8 +490,12 @@ public:
             if (mVintf) {
                 ::android::internal::Stability::markVintf(b.get());
             }
-            if (mExtension != nullptr) {
-                b.get()->setExtension(mExtension);
+            if (mSetExtensionCalled) {
+                jobject javaIBinderObject = env->CallObjectMethod(obj, gBinderOffsets.mGetExtension);
+                sp<IBinder> extensionFromJava = ibinderForJavaObject(env, javaIBinderObject);
+                if (extensionFromJava != nullptr) {
+                    b.get()->setExtension(extensionFromJava);
+                }
             }
             mBinder = b;
             ALOGV("Creating JavaBinder %p (refs %p) for Object %p, weakCount=%" PRId32 "\n",
@@ -516,21 +521,12 @@ public:
         mVintf = false;
     }
 
-    sp<IBinder> getExtension() {
-        AutoMutex _l(mLock);
-        sp<JavaBBinder> b = mBinder.promote();
-        if (b != nullptr) {
-            return b.get()->getExtension();
-        }
-        return mExtension;
-    }
-
     void setExtension(const sp<IBinder>& extension) {
         AutoMutex _l(mLock);
-        mExtension = extension;
+        mSetExtensionCalled = true;
         sp<JavaBBinder> b = mBinder.promote();
         if (b != nullptr) {
-            b.get()->setExtension(mExtension);
+            b.get()->setExtension(extension);
         }
     }
 
@@ -542,8 +538,7 @@ private:
     // is too much binder state here, we can think about making JavaBBinder an
     // sp here (avoid recreating it)
     bool            mVintf = false;
-
-    sp<IBinder>     mExtension;
+    bool            mSetExtensionCalled = false;
 };
 
 // ----------------------------------------------------------------------------
@@ -1249,10 +1244,6 @@ static void android_os_Binder_blockUntilThreadAvailable(JNIEnv* env, jobject cla
     return IPCThreadState::self()->blockUntilThreadAvailable();
 }
 
-static jobject android_os_Binder_getExtension(JNIEnv* env, jobject obj) {
-    JavaBBinderHolder* jbh = (JavaBBinderHolder*) env->GetLongField(obj, gBinderOffsets.mObject);
-    return javaObjectForIBinder(env, jbh->getExtension());
-}
 
 static void android_os_Binder_setExtension(JNIEnv* env, jobject obj, jobject extensionObject) {
     JavaBBinderHolder* jbh = (JavaBBinderHolder*) env->GetLongField(obj, gBinderOffsets.mObject);
@@ -1295,8 +1286,7 @@ static const JNINativeMethod gBinderMethods[] = {
     { "getNativeBBinderHolder", "()J", (void*)android_os_Binder_getNativeBBinderHolder },
     { "getNativeFinalizer", "()J", (void*)android_os_Binder_getNativeFinalizer },
     { "blockUntilThreadAvailable", "()V", (void*)android_os_Binder_blockUntilThreadAvailable },
-    { "getExtension", "()Landroid/os/IBinder;", (void*)android_os_Binder_getExtension },
-    { "setExtension", "(Landroid/os/IBinder;)V", (void*)android_os_Binder_setExtension },
+    { "setExtensionNative", "(Landroid/os/IBinder;)V", (void*)android_os_Binder_setExtension },
 };
 // clang-format on
 
@@ -1313,6 +1303,8 @@ static int int_register_android_os_Binder(JNIEnv* env)
     gBinderOffsets.mTransactionCallback =
             GetStaticMethodIDOrDie(env, clazz, "transactionCallback", "(IIII)V");
     gBinderOffsets.mObject = GetFieldIDOrDie(env, clazz, "mObject", "J");
+    gBinderOffsets.mGetExtension = GetMethodIDOrDie(env, clazz, "getExtension",
+                                                        "()Landroid/os/IBinder;");
 
     return RegisterMethodsOrDie(
         env, kBinderPathName,
