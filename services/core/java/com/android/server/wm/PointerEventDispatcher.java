@@ -80,7 +80,7 @@ public class PointerEventDispatcher extends InputEventReceiver {
     public void unregisterInputEventListener(PointerEventListener listener) {
         synchronized (mListeners) {
             if (!mListeners.contains(listener)) {
-                throw new IllegalStateException("registerInputEventListener: " + listener +
+                throw new IllegalStateException("unregisterInputEventListener: " + listener +
                         " not registered.");
             }
             mListeners.remove(listener);
