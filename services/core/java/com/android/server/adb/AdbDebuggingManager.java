@@ -788,7 +788,6 @@ public class AdbDebuggingManager {
 
         // === Messages we can send to adbd ===========
         static final String MSG_DISCONNECT_DEVICE = "DD";
-        static final String MSG_DISABLE_ADBDWIFI = "DA";
 
         @Nullable @VisibleForTesting AdbKeyStore mAdbKeyStore;
 
@@ -1093,9 +1092,6 @@ public class AdbDebuggingManager {
                     setAdbConnectionInfo(null);
                     mContext.unregisterReceiver(mBroadcastReceiver);
 
-                    if (mThread != null) {
-                        mThread.sendResponse(MSG_DISABLE_ADBDWIFI);
-                    }
                     onAdbdWifiServerDisconnected(-1);
                     stopAdbDebuggingThread();
                     break;
