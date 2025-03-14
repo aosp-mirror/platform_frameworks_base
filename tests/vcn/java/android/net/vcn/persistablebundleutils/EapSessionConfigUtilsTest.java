@@ -21,14 +21,11 @@ import static android.telephony.TelephonyManager.APPTYPE_USIM;
 import static org.junit.Assert.assertEquals;
 
 import android.net.eap.EapSessionConfig;
-import android.os.Build;
 import android.os.PersistableBundle;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
-import com.android.testutils.DevSdkIgnoreRule;
-import com.android.testutils.DevSdkIgnoreRunner;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,10 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
-// Android B/B+
-@RunWith(DevSdkIgnoreRunner.class)
-@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class EapSessionConfigUtilsTest {
     private static final byte[] EAP_ID = "test@android.net".getBytes(StandardCharsets.US_ASCII);

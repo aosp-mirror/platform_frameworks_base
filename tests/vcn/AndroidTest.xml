@@ -27,6 +27,8 @@
             class="com.android.tradefed.testtype.suite.module.MainlineTestModuleController">
         <option name="mainline-module-package-name" value="com.google.android.tethering" />
     </object>
+    <object type="module_controller"
+            class="com.android.tradefed.testtype.suite.module.Sdk36ModuleController" />
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.tests.vcn" />
