@@ -25,6 +25,19 @@ phony {
         "frameworks_ui_sounds",
         "frameworks_ui_48k_sounds",
     ],
+    product_specific: true,
+    enabled: select(soong_config_variable("frameworks_sounds", "use_all_audio_sounds"), {
+        true: true,
+        default: false,
+    }),
+}
+
+prebuilt_defaults {
+    name: "frameworks_sounds_defaults",
+    enabled: select(soong_config_variable("frameworks_sounds", "use_all_audio_sounds"), {
+        true: true,
+        default: false,
+    }),
 }
 
 prebuilt_media {
@@ -51,7 +64,7 @@ prebuilt_media {
     ],
     relative_install_path: "audio/alarms",
     product_specific: true,
-    no_full_install: true,
+    defaults: ["frameworks_sounds_defaults"],
 }
 
 prebuilt_media {
@@ -135,7 +148,7 @@ prebuilt_media {
     ],
     relative_install_path: "audio/notifications",
     product_specific: true,
-    no_full_install: true,
+    defaults: ["frameworks_sounds_defaults"],
 }
 
 prebuilt_media {
@@ -246,7 +259,7 @@ prebuilt_media {
     ],
     relative_install_path: "audio/ringtones",
     product_specific: true,
-    no_full_install: true,
+    defaults: ["frameworks_sounds_defaults"],
 }
 
 prebuilt_media {
@@ -277,7 +290,7 @@ prebuilt_media {
     ],
     relative_install_path: "audio/ui",
     product_specific: true,
-    no_full_install: true,
+    defaults: ["frameworks_sounds_defaults"],
 }
 
 prebuilt_media {
@@ -300,5 +313,276 @@ prebuilt_media {
     ],
     relative_install_path: "audio/ui",
     product_specific: true,
-    no_full_install: true,
+    defaults: ["frameworks_sounds_defaults"],
+}
+
+// AudioPackage5.mk
+phony {
+    name: "audio_package5_frameworks_sounds",
+    required: [
+        "audio_package5_frameworks_alarm_sounds",
+        "audio_package5_frameworks_notifications_sounds",
+        "audio_package5_frameworks_ringtones_sounds",
+        "audio_package5_frameworks_ui_sounds",
+    ],
+    product_specific: true,
+    enabled: select(soong_config_variable("frameworks_sounds", "use_audio_package5_sounds"), {
+        true: true,
+        default: false,
+    }),
+}
+
+prebuilt_defaults {
+    name: "audio_package5_frameworks_sounds_defaults",
+    enabled: select(soong_config_variable("frameworks_sounds", "use_audio_package5_sounds"), {
+        true: true,
+        default: false,
+    }),
+}
+
+prebuilt_media {
+    name: "audio_package5_frameworks_alarm_sounds",
+    srcs: [
+        "Alarm_Beep_01.ogg",
+        "Alarm_Beep_02.ogg",
+        "Alarm_Beep_03.ogg",
+        "Alarm_Buzzer.ogg",
+        "Alarm_Classic.ogg",
+    ],
+    relative_install_path: "audio/alarms",
+    product_specific: true,
+    defaults: ["audio_package5_frameworks_sounds_defaults"],
+}
+
+prebuilt_media {
+    name: "audio_package5_frameworks_notifications_sounds",
+    srcs: [
+        "notifications/Aldebaran.ogg",
+        "notifications/Altair.ogg",
+        "notifications/Antares.ogg",
+        "notifications/arcturus.ogg",
+        "notifications/Betelgeuse.ogg",
+        "notifications/Canopus.ogg",
+        "notifications/Capella.ogg",
+        "notifications/Castor.ogg",
+        "notifications/CetiAlpha.ogg",
+        "notifications/Deneb.ogg",
+        "notifications/Electra.ogg",
+        "notifications/Fomalhaut.ogg",
+        "notifications/Merope.ogg",
+        "notifications/Polaris.ogg",
+        "notifications/Pollux.ogg",
+        "notifications/Procyon.ogg",
+        "notifications/regulus.ogg",
+        "notifications/sirius.ogg",
+        "notifications/Sirrah.ogg",
+        "notifications/vega.ogg",
+    ],
+    relative_install_path: "audio/notifications",
+    product_specific: true,
+    defaults: ["audio_package5_frameworks_sounds_defaults"],
+}
+
+prebuilt_media {
+    name: "audio_package5_frameworks_ringtones_sounds",
+    srcs: [
+        "ringtones/ANDROMEDA.ogg",
+        "ringtones/Aquila.ogg",
+        "ringtones/ArgoNavis.ogg",
+        "ringtones/BOOTES.ogg",
+        "ringtones/CANISMAJOR.ogg",
+        "ringtones/CASSIOPEIA.ogg",
+        "ringtones/Carina.ogg",
+        "ringtones/Centaurus.ogg",
+        "ringtones/Cygnus.ogg",
+        "ringtones/Draco.ogg",
+        "ringtones/Eridani.ogg",
+        "ringtones/Lyra.ogg",
+        "ringtones/Machina.ogg",
+        "ringtones/Orion.ogg",
+        "ringtones/PERSEUS.ogg",
+        "ringtones/Pegasus.ogg",
+        "ringtones/Pyxis.ogg",
+        "ringtones/Rigel.ogg",
+        "ringtones/Scarabaeus.ogg",
+        "ringtones/Sceptrum.ogg",
+        "ringtones/Solarium.ogg",
+        "ringtones/Testudo.ogg",
+        "ringtones/URSAMINOR.ogg",
+        "ringtones/Vespa.ogg",
+        "ringtones/hydra.ogg",
+    ],
+    relative_install_path: "audio/ringtones",
+    product_specific: true,
+    defaults: ["audio_package5_frameworks_sounds_defaults"],
+}
+
+prebuilt_media {
+    name: "audio_package5_frameworks_ui_sounds",
+    srcs: [
+        "effects/Effect_Tick.ogg",
+        "effects/KeypressStandard.ogg",
+        "effects/KeypressSpacebar.ogg",
+        "effects/KeypressDelete.ogg",
+        "effects/KeypressInvalid.ogg",
+        "effects/KeypressReturn.ogg",
+        "effects/VideoRecord.ogg",
+        "effects/VideoStop.ogg",
+        "effects/camera_click.ogg",
+        "effects/ogg/camera_focus.ogg",
+        "effects/LowBattery.ogg",
+        "effects/Dock.ogg",
+        "effects/Undock.ogg",
+        "effects/Lock.ogg",
+        "effects/Unlock.ogg",
+        "effects/ogg/Trusted.ogg",
+    ],
+    relative_install_path: "audio/ui",
+    product_specific: true,
+    defaults: ["audio_package5_frameworks_sounds_defaults"],
+}
+
+// AudioPackageGo.mk
+phony {
+    name: "audio_package_go_frameworks_sounds",
+    required: [
+        "audio_package_go_frameworks_alarm_sounds",
+        "audio_package_go_frameworks_notifications_sounds",
+        "audio_package_go_frameworks_ringtones_sounds",
+        "audio_package_go_frameworks_ui_sounds",
+    ],
+    product_specific: true,
+    enabled: select(soong_config_variable("frameworks_sounds", "use_audio_package_go_sounds"), {
+        true: true,
+        default: false,
+    }),
+}
+
+prebuilt_defaults {
+    name: "audio_package_go_frameworks_sounds_defaults",
+    enabled: select(soong_config_variable("frameworks_sounds", "use_audio_package_go_sounds"), {
+        true: true,
+        default: false,
+    }),
+}
+
+prebuilt_media {
+    name: "audio_package_go_frameworks_alarm_sounds",
+    srcs: [
+        "Alarm_Classic.ogg",
+        "alarms/ogg/Argon.ogg",
+        "alarms/ogg/Platinum.ogg",
+        "Alarm_Beep_03.ogg",
+        "alarms/ogg/Helium.ogg",
+        "alarms/ogg/Oxygen.ogg",
+    ],
+    relative_install_path: "audio/alarms",
+    product_specific: true,
+    defaults: ["audio_package_go_frameworks_sounds_defaults"],
+}
+
+prebuilt_media {
+    name: "audio_package_go_frameworks_notifications_sounds",
+    srcs: [
+        "notifications/ogg/Alya.ogg",
+        "notifications/ogg/Argon.ogg",
+        "notifications/Canopus.ogg",
+        "notifications/Deneb.ogg",
+        "newwavelabs/Highwire.ogg",
+        "notifications/ogg/Iridium.ogg",
+        "notifications/pixiedust.ogg",
+        "notifications/ogg/Talitha.ogg",
+    ],
+    relative_install_path: "audio/notifications",
+    product_specific: true,
+    defaults: ["audio_package_go_frameworks_sounds_defaults"],
+}
+
+prebuilt_media {
+    name: "audio_package_go_frameworks_ringtones_sounds",
+    srcs: [
+        "Ring_Classic_02.ogg",
+        "Ring_Synth_02.ogg",
+        "ringtones/ogg/Cygnus.ogg",
+        "Ring_Digital_02.ogg",
+        "Ring_Synth_04.ogg",
+        "ringtones/ogg/Kuma.ogg",
+        "ringtones/ogg/Themos.ogg",
+    ],
+    relative_install_path: "audio/ringtones",
+    product_specific: true,
+    defaults: ["audio_package_go_frameworks_sounds_defaults"],
+}
+
+prebuilt_media {
+    name: "audio_package_go_frameworks_ui_sounds",
+    srcs: [
+        "effects/ogg/Effect_Tick.ogg",
+        "effects/ogg/KeypressStandard.ogg",
+        "effects/ogg/KeypressSpacebar.ogg",
+        "effects/ogg/KeypressDelete.ogg",
+        "effects/ogg/KeypressInvalid.ogg",
+        "effects/ogg/KeypressReturn.ogg",
+        "effects/ogg/Lock.ogg",
+        "effects/ogg/Unlock.ogg",
+        "effects/ogg/Trusted_48k.ogg",
+    ],
+    dsts: [
+        "Effect_Tick.ogg",
+        "KeypressStandard.ogg",
+        "KeypressSpacebar.ogg",
+        "KeypressDelete.ogg",
+        "KeypressInvalid.ogg",
+        "KeypressReturn.ogg",
+        "Lock.ogg",
+        "Unlock.ogg",
+        "Trusted.ogg",
+    ],
+    relative_install_path: "audio/ui",
+    product_specific: true,
+    defaults: ["audio_package_go_frameworks_sounds_defaults"],
+}
+
+// AudioTv.mk
+phony {
+    name: "audio_tv_frameworks_sounds",
+    required: [
+        "audio_tv_frameworks_ui_48k_sounds",
+    ],
+    product_specific: true,
+    enabled: select(soong_config_variable("frameworks_sounds", "use_audio_tv_sounds"), {
+        true: true,
+        default: false,
+    }),
+}
+
+prebuilt_defaults {
+    name: "audio_tv_frameworks_sounds_defaults",
+    enabled: select(soong_config_variable("frameworks_sounds", "use_audio_tv_sounds"), {
+        true: true,
+        default: false,
+    }),
+}
+
+prebuilt_media {
+    name: "audio_tv_frameworks_ui_48k_sounds",
+    srcs: [
+        "effects/ogg/Effect_Tick_48k.ogg",
+        "effects/ogg/KeypressDelete_120_48k.ogg",
+        "effects/ogg/KeypressInvalid_120_48k.ogg",
+        "effects/ogg/KeypressReturn_120_48k.ogg",
+        "effects/ogg/KeypressSpacebar_120_48k.ogg",
+        "effects/ogg/KeypressStandard_120_48k.ogg",
+    ],
+    dsts: [
+        "Effect_Tick.ogg",
+        "KeypressDelete.ogg",
+        "KeypressInvalid.ogg",
+        "KeypressReturn.ogg",
+        "KeypressSpacebar.ogg",
+        "KeypressStandard.ogg",
+    ],
+    relative_install_path: "audio/ui",
+    product_specific: true,
+    defaults: ["audio_tv_frameworks_sounds_defaults"],
 }
