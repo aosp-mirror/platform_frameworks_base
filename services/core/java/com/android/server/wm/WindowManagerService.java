@@ -2546,6 +2546,14 @@ public class WindowManagerService extends IWindowManager.Stub
             // in the new out values right now we need to force a layout.
             mWindowPlacerLocked.performSurfacePlacement(true /* force */);
 
+            if (!win.mHaveFrame && displayContent.mWaitingForConfig) {
+                // We just forcibly triggered the layout, but this could still be intercepted by
+                // mWaitingForConfig. Here, we are forcefully marking a value for mLayoutSeq to
+                // ensure that the resize can occur properly later. Otherwise, the window's frame
+                // will remain empty forever.
+                win.mLayoutSeq = displayContent.mLayoutSeq;
+            }
+
             if (shouldRelayout) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
 
