@@ -37,9 +37,6 @@ import android.util.Log;
 
 import com.android.server.SystemService;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -66,8 +63,8 @@ public class MediaQualityService extends SystemService {
     public MediaQualityService(Context context) {
         super(context);
         mContext = context;
-        mPictureProfileTempIdMap = HashBiMap.create();
-        mSoundProfileTempIdMap = HashBiMap.create();
+        mPictureProfileTempIdMap = new BiMap<>();
+        mSoundProfileTempIdMap = new BiMap<>();
         mMediaQualityDbHelper = new MediaQualityDbHelper(mContext);
         mMediaQualityDbHelper.setWriteAheadLoggingEnabled(true);
         mMediaQualityDbHelper.setIdleConnectionTimeout(30);
@@ -96,7 +93,7 @@ public class MediaQualityService extends SystemService {
             Long id = db.insert(mMediaQualityDbHelper.PICTURE_QUALITY_TABLE_NAME,
                     null, values);
             populateTempIdMap(mPictureProfileTempIdMap, id);
-            pp.setProfileId(mPictureProfileTempIdMap.get(id));
+            pp.setProfileId(mPictureProfileTempIdMap.getValue(id));
             return pp;
         }
 
@@ -107,7 +104,7 @@ public class MediaQualityService extends SystemService {
 
         @Override
         public void removePictureProfile(String id, UserHandle user) {
-            Long intId = mPictureProfileTempIdMap.inverse().get(id);
+            Long intId = mPictureProfileTempIdMap.getKey(id);
             if (intId != null) {
                 SQLiteDatabase db = mMediaQualityDbHelper.getWritableDatabase();
                 String selection = BaseParameters.PARAMETER_ID + " = ?";
@@ -202,7 +199,7 @@ public class MediaQualityService extends SystemService {
             Long id = db.insert(mMediaQualityDbHelper.SOUND_QUALITY_TABLE_NAME,
                     null, values);
             populateTempIdMap(mSoundProfileTempIdMap, id);
-            sp.setProfileId(mSoundProfileTempIdMap.get(id));
+            sp.setProfileId(mSoundProfileTempIdMap.getValue(id));
             return sp;
         }
 
@@ -213,7 +210,7 @@ public class MediaQualityService extends SystemService {
 
         @Override
         public void removeSoundProfile(String id, UserHandle user) {
-            Long intId = mSoundProfileTempIdMap.inverse().get(id);
+            Long intId = mSoundProfileTempIdMap.getKey(id);
             if (intId != null) {
                 SQLiteDatabase db = mMediaQualityDbHelper.getWritableDatabase();
                 String selection = BaseParameters.PARAMETER_ID + " = ?";
@@ -284,9 +281,9 @@ public class MediaQualityService extends SystemService {
         }
 
         private void populateTempIdMap(BiMap<Long, String> map, Long id) {
-            if (id != null && map.get(id) == null) {
+            if (id != null && map.getValue(id) == null) {
                 String uuid = UUID.randomUUID().toString();
-                while (map.inverse().containsKey(uuid)) {
+                while (map.getKey(uuid) != null) {
                     uuid = UUID.randomUUID().toString();
                 }
                 map.put(id, uuid);
@@ -386,7 +383,7 @@ public class MediaQualityService extends SystemService {
             int colIndex = cursor.getColumnIndex(BaseParameters.PARAMETER_ID);
             Long dbId = colIndex != -1 ? cursor.getLong(colIndex) : null;
             populateTempIdMap(map, dbId);
-            return map.get(dbId);
+            return map.getValue(dbId);
         }
 
         private int getType(Cursor cursor) {
