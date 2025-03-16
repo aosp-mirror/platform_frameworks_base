@@ -9,6 +9,16 @@ flag {
 }
 
 flag {
+  name: "improve_fill_dialog_aconfig"
+  namespace: "autofill"
+  description: "Improvements for Fill Dialog. Guard DeviceConfig rollout "
+  bug: "382493181"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "fill_fields_from_current_session_only"
   namespace: "autofill"
   description: "Only fill autofill fields that are part of the current session."
@@ -20,6 +30,16 @@ flag {
   namespace: "autofill"
   description: "Mitigation for relayout issue"
   bug: "294330426"
+}
+
+flag {
+  name: "relayout_fix"
+  namespace: "autofill"
+  description: "Fixing relayout issue. Guarding enabling device config flags"
+  bug: "381226145"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -44,8 +64,25 @@ flag {
 }
 
 flag {
+  name: "test_flag"
+  namespace: "autofill"
+  description: "Test flag "
+  bug: "377868687"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "add_session_id_to_client_state"
   namespace: "autofill"
   description: "Include the session id into the FillEventHistory events as part of ClientState"
   bug: "333927465"
+}
+
+flag {
+  name: "highlight_autofill_single_field"
+  namespace: "autofill"
+  description: "Highlight single field after autofill selection"
+  bug: "41496744"
 }

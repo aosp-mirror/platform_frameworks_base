@@ -213,7 +213,8 @@ class ShareTargetPredictor extends AppTargetPredictor {
     }
 
     private int getShareEventType(IntentFilter intentFilter) {
-        String mimeType = intentFilter != null ? intentFilter.getDataType(0) : null;
+        String mimeType = (intentFilter != null && intentFilter.countDataTypes() > 0)
+                ? intentFilter.getDataType(0) : null;
         return getDataManager().mimeTypeToShareEventType(mimeType);
     }
 

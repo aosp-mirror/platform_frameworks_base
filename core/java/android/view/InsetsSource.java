@@ -357,6 +357,31 @@ public class InsetsSource implements Parcelable {
             } else if (mTmpFrame.right == relativeFrame.right) {
                 return Insets.of(0, 0, mTmpFrame.width(), 0);
             }
+        } else {
+            // The source doesn't cover the width or the height of relativeFrame, but just parts of
+            // them. Here uses mSideHint to decide which side should be inset.
+            switch (mSideHint) {
+                case SIDE_LEFT:
+                    if (mTmpFrame.left == relativeFrame.left) {
+                        return Insets.of(mTmpFrame.width(), 0, 0, 0);
+                    }
+                    break;
+                case SIDE_TOP:
+                    if (mTmpFrame.top == relativeFrame.top) {
+                        return Insets.of(0, mTmpFrame.height(), 0, 0);
+                    }
+                    break;
+                case SIDE_RIGHT:
+                    if (mTmpFrame.right == relativeFrame.right) {
+                        return Insets.of(0, 0, mTmpFrame.width(), 0);
+                    }
+                    break;
+                case SIDE_BOTTOM:
+                    if (mTmpFrame.bottom == relativeFrame.bottom) {
+                        return Insets.of(0, 0, 0, mTmpFrame.height());
+                    }
+                    break;
+            }
         }
         return Insets.NONE;
     }

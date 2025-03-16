@@ -14,3 +14,10 @@ flag {
     description: "This flag enables binding to MtpService when in mtp/ptp modes"
     bug: "332256525"
 }
+
+flag {
+    name: "check_user_action_unlocked"
+    namespace: "usb"
+    description: "This flag checks if phone is unlocked after boot"
+    bug: "73654179"
+}

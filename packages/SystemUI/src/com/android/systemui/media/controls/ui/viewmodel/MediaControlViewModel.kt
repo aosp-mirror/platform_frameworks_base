@@ -33,16 +33,16 @@ import com.android.systemui.media.controls.domain.pipeline.interactor.MediaContr
 import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaControlModel
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaLocation
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_CLICK_EVENT
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.res.R
 import java.util.concurrent.Executor
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -54,15 +54,9 @@ class MediaControlViewModel(
     private val interactor: MediaControlInteractor,
     private val logger: MediaUiEventLogger,
 ) {
-
-    @OptIn(ExperimentalCoroutinesApi::class)
     val player: Flow<MediaPlayerViewModel?> =
-        interactor.onAnyMediaConfigurationChange
-            .flatMapLatest {
-                interactor.mediaControl.map { mediaControl ->
-                    mediaControl?.let { toViewModel(it) }
-                }
-            }
+        interactor.mediaControl
+            .map { mediaControl -> mediaControl?.let { toViewModel(it) } }
             .distinctUntilChanged { old, new ->
                 (new == null && old == null) || new?.contentEquals(old) ?: false
             }
@@ -70,16 +64,23 @@ class MediaControlViewModel(
 
     private var isPlaying = false
     private var isAnyButtonClicked = false
-    private var location = -1
+    @MediaLocation private var location = MediaHierarchyManager.LOCATION_UNKNOWN
     private var playerViewModel: MediaPlayerViewModel? = null
+    private var allowPlayerUpdate: Boolean = false
 
-    fun isNewPlayer(viewModel: MediaPlayerViewModel): Boolean {
-        val contentEquals = playerViewModel?.contentEquals(viewModel) ?: false
-        return (!contentEquals).also { playerViewModel = viewModel }
+    fun setPlayer(viewModel: MediaPlayerViewModel): Boolean {
+        val tempViewModel = playerViewModel
+        playerViewModel = viewModel
+        return allowPlayerUpdate || !(tempViewModel?.contentEquals(viewModel) ?: false)
+    }
+
+    fun onMediaConfigChanged() {
+        allowPlayerUpdate = true
     }
 
     fun onMediaControlIsBound(artistName: CharSequence, titleName: CharSequence) {
         interactor.logMediaControlIsBound(artistName, titleName)
+        allowPlayerUpdate = false
     }
 
     private fun onDismissMediaData(

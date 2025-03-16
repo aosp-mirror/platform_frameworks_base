@@ -1905,8 +1905,11 @@ public class TrustManagerService extends SystemService {
             }
         }
 
+        @EnforcePermission(Manifest.permission.ACCESS_FINE_LOCATION)
         @Override
         public boolean isInSignificantPlace() {
+            super.isInSignificantPlace_enforcePermission();
+
             if (android.security.Flags.significantPlaces()) {
                 mSignificantPlaceServiceWatcher.runOnBinder(
                         binder -> ISignificantPlaceProvider.Stub.asInterface(binder)

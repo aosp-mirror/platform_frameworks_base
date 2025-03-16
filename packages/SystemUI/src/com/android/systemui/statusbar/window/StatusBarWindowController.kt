@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.window
 
+import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.fragments.FragmentHostManager
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import java.util.Optional
 
 /** Encapsulates all logic for the status bar window state management. */
@@ -31,6 +35,9 @@ interface StatusBarWindowController {
 
     /** Adds the status bar view to the window manager. */
     fun attach()
+
+    /** Called when work should stop and resources should be released. */
+    fun stop()
 
     /** Adds the given view to the status bar window view. */
     fun addViewToWindow(view: View, layoutParams: ViewGroup.LayoutParams)
@@ -73,4 +80,13 @@ interface StatusBarWindowController {
      *   this#setForceStatusBarVisible} together and use some sort of ranking system instead.
      */
     fun setOngoingProcessRequiresStatusBarVisible(visible: Boolean)
+
+    fun interface Factory {
+        fun create(
+            context: Context,
+            viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
+            statusBarConfigurationController: StatusBarConfigurationController,
+            contentInsetsProvider: StatusBarContentInsetsProvider,
+        ): StatusBarWindowController
+    }
 }

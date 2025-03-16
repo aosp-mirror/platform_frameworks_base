@@ -130,10 +130,12 @@ import com.google.android.collect.Sets;
 
 import libcore.util.HexEncoding;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -379,6 +381,8 @@ public class SettingsProvider extends ContentProvider {
 
     @GuardedBy("mLock")
     private Handler mHandler;
+
+    private static final Set<String> sDeviceConfigAllowlistedNamespaces = new ArraySet<>();
 
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
@@ -2434,28 +2438,44 @@ public class SettingsProvider extends ContentProvider {
                 context.checkCallingOrSelfPermission(
                 Manifest.permission.WRITE_DEVICE_CONFIG)
                 == PackageManager.PERMISSION_GRANTED;
-        boolean isRoot = Binder.getCallingUid() == Process.ROOT_UID;
+        // Only the shell user and tests request the allowlist permission; this is used to force
+        // the WRITE_ALLOWLISTED_DEVICE_CONFIG path to log any flags that need to be allowlisted.
+        boolean isRestrictedShell = android.security.Flags.protectDeviceConfigFlags()
+                && hasAllowlistPermission;
 
-        if (isRoot) {
-            return;
-        }
-
-        if (hasWritePermission) {
+        if (!isRestrictedShell && hasWritePermission) {
             assertCallingUserDenyList(flags);
         } else if (hasAllowlistPermission) {
+            Set<String> allowlistedDeviceConfigNamespaces = null;
+            if (isRestrictedShell) {
+                allowlistedDeviceConfigNamespaces = getAllowlistedDeviceConfigNamespaces();
+            }
             for (String flag : flags) {
                 boolean namespaceAllowed = false;
-                for (String allowlistedPrefix : WritableNamespacePrefixes.ALLOWLIST) {
-                    if (flag.startsWith(allowlistedPrefix)) {
+                if (isRestrictedShell) {
+                    int delimiterIndex = flag.indexOf("/");
+                    String flagNamespace;
+                    if (delimiterIndex != -1) {
+                        flagNamespace = flag.substring(0, delimiterIndex);
+                    } else {
+                        flagNamespace = flag;
+                    }
+                    if (allowlistedDeviceConfigNamespaces.contains(flagNamespace)) {
                         namespaceAllowed = true;
-                        break;
+                    }
+                } else {
+                    for (String allowlistedPrefix : WritableNamespacePrefixes.ALLOWLIST) {
+                        if (flag.startsWith(allowlistedPrefix)) {
+                            namespaceAllowed = true;
+                            break;
+                        }
                     }
                 }
 
                 if (!namespaceAllowed && !DeviceConfig.getAdbWritableFlags().contains(flag)) {
-                    throw new SecurityException("Permission denial for flag '"
-                        + flag
-                        + "'; allowlist permission granted, but must add flag to the allowlist.");
+                    Slog.wtf(LOG_TAG, "Permission denial for flag '" + flag
+                            + "'; allowlist permission granted, but must add flag to the "
+                            + "allowlist");
                 }
             }
             assertCallingUserDenyList(flags);
@@ -2498,6 +2518,60 @@ public class SettingsProvider extends ContentProvider {
                             + "denylist.");
                 }
             }
+        }
+    }
+
+    /**
+     * Returns a Set of DeviceConfig allowlisted namespaces in which all flags can be modified
+     * by a caller with the {@code WRITE_ALLOWLISTED_DEVICE_CONFIG} permission.
+     * <p>
+     * This method also supports mainline modules that introduce their own allowlisted
+     * namespaces within the {@code etc/writable_namespaces} file under their directory.
+     */
+    private Set<String> getAllowlistedDeviceConfigNamespaces() {
+        synchronized (sDeviceConfigAllowlistedNamespaces) {
+            if (!sDeviceConfigAllowlistedNamespaces.isEmpty()) {
+                return sDeviceConfigAllowlistedNamespaces;
+            }
+            if (android.provider.flags.Flags.deviceConfigWritableNamespacesApi()) {
+                sDeviceConfigAllowlistedNamespaces.addAll(DeviceConfig.getAdbWritableNamespaces());
+            } else {
+                sDeviceConfigAllowlistedNamespaces.addAll(WritableNamespaces.ALLOWLIST);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                List<String> apexDirectories;
+                try {
+                    apexDirectories = mPackageManager.getAllApexDirectories();
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Caught a RemoteException obtaining APEX directories: ", e);
+                    return sDeviceConfigAllowlistedNamespaces;
+                }
+                for (int i = 0; i < apexDirectories.size(); i++) {
+                    String apexDirectory = apexDirectories.get(i);
+                    File namespaceFile = Environment.buildPath(new File(apexDirectory), "etc",
+                            "writable_namespaces");
+                    if (namespaceFile.exists() && namespaceFile.isFile()) {
+                        try (BufferedReader reader = new BufferedReader(
+                                new FileReader(namespaceFile))) {
+                            String namespace;
+                            while ((namespace = reader.readLine()) != null) {
+                                namespace = namespace.trim();
+                                // Support comments by ignoring any lines that start with '#'.
+                                if (!namespace.isEmpty() && !namespace.startsWith("#")) {
+                                    sDeviceConfigAllowlistedNamespaces.add(namespace);
+                                }
+                            }
+                        } catch (IOException e) {
+                            Slog.e(LOG_TAG, "Caught an exception parsing file: " + namespaceFile,
+                                    e);
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return sDeviceConfigAllowlistedNamespaces;
         }
     }
 
@@ -4771,9 +4845,9 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 169) {
-                    // Version 169: Set the default value for Secure Settings ZEN_DURATION,
-                    // SHOW_ZEN_SETTINGS_SUGGESTION, ZEN_SETTINGS_UPDATE and
-                    // ZEN_SETTINGS_SUGGESTION_VIEWED
+                    // Version 169: Set the default value for Secure Settings ZEN_DURATION.
+                    // Also used to update SHOW_ZEN_SETTINGS_SUGGESTION, ZEN_SETTINGS_UPDATE and
+                    // ZEN_SETTINGS_SUGGESTION_VIEWED, but those properties are gone now.
 
                     final SettingsState globalSettings = getGlobalSettingsLocked();
                     final Setting globalZenDuration = globalSettings.getSettingLocked(
@@ -4799,33 +4873,6 @@ public class SettingsProvider extends ContentProvider {
                         secureSettings.insertSettingOverrideableByRestoreLocked(
                                 Secure.ZEN_DURATION, defaultZenDuration, null, true,
                                 SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
-                    // SHOW_ZEN_SETTINGS_SUGGESTION
-                    final Setting currentShowZenSettingSuggestion = secureSettings.getSettingLocked(
-                            Secure.SHOW_ZEN_SETTINGS_SUGGESTION);
-                    if (currentShowZenSettingSuggestion.isNull()) {
-                        secureSettings.insertSettingOverrideableByRestoreLocked(
-                                Secure.SHOW_ZEN_SETTINGS_SUGGESTION, "1",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
-                    // ZEN_SETTINGS_UPDATED
-                    final Setting currentUpdatedSetting = secureSettings.getSettingLocked(
-                            Secure.ZEN_SETTINGS_UPDATED);
-                    if (currentUpdatedSetting.isNull()) {
-                        secureSettings.insertSettingOverrideableByRestoreLocked(
-                                Secure.ZEN_SETTINGS_UPDATED, "0",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
-                    // ZEN_SETTINGS_SUGGESTION_VIEWED
-                    final Setting currentSettingSuggestionViewed = secureSettings.getSettingLocked(
-                            Secure.ZEN_SETTINGS_SUGGESTION_VIEWED);
-                    if (currentSettingSuggestionViewed.isNull()) {
-                        secureSettings.insertSettingOverrideableByRestoreLocked(
-                                Secure.ZEN_SETTINGS_SUGGESTION_VIEWED, "0",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
 
                     currentVersion = 170;

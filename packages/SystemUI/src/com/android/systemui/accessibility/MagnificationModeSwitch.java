@@ -305,7 +305,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         }
         if (mMagnificationMode != mode) {
             mMagnificationMode = mode;
-            mImageView.setImageResource(getIconResId(mMagnificationMode));
+            mImageView.setImageResource(getIconResId());
         }
         if (!mIsVisible) {
             onConfigurationChanged(mContext.getResources().getConfiguration());
@@ -455,7 +455,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     }
 
     @VisibleForTesting
-    static int getIconResId(int mode) { // TODO(b/242233514): delete non used param
+    static int getIconResId() {
         return R.drawable.ic_open_in_new_window;
     }
 

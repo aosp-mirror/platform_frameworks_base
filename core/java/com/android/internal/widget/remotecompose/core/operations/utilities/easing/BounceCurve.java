@@ -15,9 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
-/**
- * Provide a specific bouncing easing function
- */
+/** Provide a specific bouncing easing function */
 public class BounceCurve extends Easing {
     private static final float N1 = 7.5625f;
     private static final float D1 = 2.75f;
@@ -63,5 +61,4 @@ public class BounceCurve extends Easing {
         }
         return 0f;
     }
-
 }

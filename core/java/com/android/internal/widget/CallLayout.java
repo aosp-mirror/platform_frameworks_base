@@ -30,7 +30,6 @@ import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 import android.widget.flags.Flags;
 
 import com.android.internal.R;
@@ -59,7 +58,6 @@ public class CallLayout extends FrameLayout {
     private CachingIconView mConversationIconView;
     private CachingIconView mIcon;
     private CachingIconView mConversationIconBadgeBg;
-    private TextView mConversationText;
 
     public CallLayout(@NonNull Context context) {
         super(context);
@@ -83,7 +81,6 @@ public class CallLayout extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPeopleHelper.init(getContext());
-        mConversationText = findViewById(R.id.conversation_text);
         mConversationIconView = findViewById(R.id.conversation_icon);
         mIcon = findViewById(R.id.icon);
         mConversationIconBadgeBg = findViewById(R.id.conversation_icon_badge_bg);

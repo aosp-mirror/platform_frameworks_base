@@ -16,8 +16,10 @@
 
 package com.android.systemui.animation.server;
 
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
@@ -26,6 +28,7 @@ import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -51,8 +54,8 @@ import java.util.function.Predicate;
 
 /** An implementation of the {@link IOriginTransitions}. */
 public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
-    private static final boolean DEBUG = true;
     private static final String TAG = "OriginTransitions";
+    private static final boolean DEBUG = Build.IS_USERDEBUG || Log.isLoggable(TAG, Log.DEBUG);
 
     private final Object mLock = new Object();
     private final ShellTransitions mShellTransitions;
@@ -149,18 +152,7 @@ public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
             if (DEBUG) {
                 Log.d(TAG, "startAnimation: " + info);
             }
-            if (!mOnStarting.test(info)) {
-                Log.w(TAG, "Skipping cancelled transition " + mTransition);
-                t.addTransactionCommittedListener(
-                                mExecutor,
-                                () -> {
-                                    try {
-                                        finishCallback.onTransitionFinished(null, null);
-                                    } catch (RemoteException e) {
-                                        Log.e(TAG, "Unable to report finish.", e);
-                                    }
-                                })
-                        .apply();
+            if (maybeInterceptTransition(info, t, finishCallback)) {
                 return;
             }
             mTransition.startAnimation(token, info, t, finishCallback);
@@ -191,6 +183,9 @@ public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
             if (DEBUG) {
                 Log.d(TAG, "takeOverAnimation: " + info);
             }
+            if (maybeInterceptTransition(info, t, finishCallback)) {
+                return;
+            }
             mTransition.takeOverAnimation(transition, info, t, finishCallback, states);
         }
 
@@ -206,6 +201,27 @@ public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
         @Override
         public String toString() {
             return "RemoteTransitionDelegate{transition=" + mTransition + "}";
+        }
+
+        private boolean maybeInterceptTransition(
+                TransitionInfo info,
+                SurfaceControl.Transaction t,
+                IRemoteTransitionFinishedCallback finishCallback) {
+            if (!mOnStarting.test(info)) {
+                Log.w(TAG, "Intercepting cancelled transition " + mTransition);
+                t.addTransactionCommittedListener(
+                                mExecutor,
+                                () -> {
+                                    try {
+                                        finishCallback.onTransitionFinished(null, null);
+                                    } catch (RemoteException e) {
+                                        Log.e(TAG, "Unable to report finish.", e);
+                                    }
+                                })
+                        .apply();
+                return true;
+            }
+            return false;
         }
     }
 
@@ -229,12 +245,24 @@ public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
                 if (mDestroyed) {
                     return false;
                 }
-                TransitionFilter filter = createFilterForReverseTransition(info);
+                TransitionFilter filter =
+                        createFilterForReverseTransition(
+                                info, /* forPredictiveBackTakeover= */ false);
                 if (filter != null) {
                     if (DEBUG) {
                         Log.d(TAG, "Registering filter " + filter);
                     }
                     mShellTransitions.registerRemote(filter, mWrappedReturnTransition);
+                }
+                TransitionFilter takeoverFilter =
+                        createFilterForReverseTransition(
+                                info, /* forPredictiveBackTakeover= */ true);
+                if (takeoverFilter != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Registering filter for takeover " + takeoverFilter);
+                    }
+                    mShellTransitions.registerRemoteForTakeover(
+                            takeoverFilter, mWrappedReturnTransition);
                 }
                 return true;
             }
@@ -331,7 +359,8 @@ public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
         }
 
         @Nullable
-        private static TransitionFilter createFilterForReverseTransition(TransitionInfo info) {
+        private static TransitionFilter createFilterForReverseTransition(
+                TransitionInfo info, boolean forPredictiveBackTakeover) {
             TaskInfo launchingTaskInfo = null;
             TaskInfo launchedTaskInfo = null;
             ComponentName launchingActivity = null;
@@ -365,7 +394,9 @@ public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
             if (DEBUG) {
                 Log.d(
                         TAG,
-                        "createFilterForReverseTransition: launchingTaskInfo="
+                        "createFilterForReverseTransition: forPredictiveBackTakeover="
+                                + forPredictiveBackTakeover
+                                + ", launchingTaskInfo="
                                 + launchingTaskInfo
                                 + ", launchedTaskInfo="
                                 + launchedTaskInfo
@@ -395,8 +426,21 @@ public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
                                 + " cookie!");
                 return null;
             }
+            if (forPredictiveBackTakeover && launchedTaskInfo == null) {
+                // Predictive back take over currently only support cross-task transition.
+                Log.d(
+                        TAG,
+                        "createFilterForReverseTransition: skipped - unable to find launched task"
+                                + " for predictive back takeover");
+                return null;
+            }
             TransitionFilter filter = new TransitionFilter();
-            filter.mTypeSet = new int[] {TRANSIT_CLOSE, TRANSIT_TO_BACK};
+            if (forPredictiveBackTakeover) {
+                filter.mTypeSet = new int[] {TRANSIT_PREPARE_BACK_NAVIGATION};
+            } else {
+                filter.mTypeSet =
+                        new int[] {TRANSIT_CLOSE, TRANSIT_TO_BACK, TRANSIT_OPEN, TRANSIT_TO_FRONT};
+            }
 
             // The opening activity of the return transition must match the activity we just closed.
             TransitionFilter.Requirement req1 = new TransitionFilter.Requirement();
@@ -405,15 +449,18 @@ public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
                     launchingActivity == null ? launchingTaskInfo.topActivity : launchingActivity;
 
             TransitionFilter.Requirement req2 = new TransitionFilter.Requirement();
-            req2.mModes = new int[] {TRANSIT_CLOSE, TRANSIT_TO_BACK};
+            if (forPredictiveBackTakeover) {
+                req2.mModes = new int[] {TRANSIT_CHANGE};
+            } else {
+                req2.mModes = new int[] {TRANSIT_CLOSE, TRANSIT_TO_BACK};
+            }
             if (launchedTaskInfo != null) {
                 // For task transitions, the closing task's cookie must match the task we just
                 // launched.
                 req2.mLaunchCookie = launchedTaskInfo.launchCookies.get(0);
             } else {
                 // For activity transitions, the closing activity of the return transition must
-                // match
-                // the activity we just launched.
+                // match the activity we just launched.
                 req2.mTopActivity = launchedActivity;
             }
 

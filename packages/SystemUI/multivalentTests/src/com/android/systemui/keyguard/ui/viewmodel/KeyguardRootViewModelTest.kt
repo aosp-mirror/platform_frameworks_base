@@ -26,7 +26,6 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
-import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -37,6 +36,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.pulseExpansionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -74,11 +74,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-@EnableFlags(
-    FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
-    FLAG_NEW_AOD_TRANSITION,
-    FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
-)
+@EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT, FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -87,6 +83,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
     private val communalRepository by lazy { kosmos.communalSceneRepository }
     private val screenOffAnimationController by lazy { kosmos.screenOffAnimationController }
     private val deviceEntryRepository by lazy { kosmos.fakeDeviceEntryRepository }
+    private val pulseExpansionInteractor by lazy { kosmos.pulseExpansionInteractor }
     private val notificationsKeyguardInteractor by lazy { kosmos.notificationsKeyguardInteractor }
     private val dozeParameters by lazy { kosmos.dozeParameters }
     private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
@@ -193,7 +190,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
             runCurrent()
-            notificationsKeyguardInteractor.setPulseExpanding(true)
+            pulseExpansionInteractor.setPulseExpanding(true)
             deviceEntryRepository.setBypassEnabled(false)
             runCurrent()
 
@@ -205,7 +202,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
             runCurrent()
-            notificationsKeyguardInteractor.setPulseExpanding(false)
+            pulseExpansionInteractor.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(true)
             notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
             runCurrent()
@@ -224,7 +221,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
                 to = KeyguardState.DOZING,
                 testScope,
             )
-            notificationsKeyguardInteractor.setPulseExpanding(false)
+            pulseExpansionInteractor.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParameters.alwaysOn).thenReturn(false)
             notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
@@ -244,7 +241,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
                 to = KeyguardState.DOZING,
                 testScope,
             )
-            notificationsKeyguardInteractor.setPulseExpanding(false)
+            pulseExpansionInteractor.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParameters.alwaysOn).thenReturn(true)
             whenever(dozeParameters.displayNeedsBlanking).thenReturn(true)
@@ -265,7 +262,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
                 to = KeyguardState.DOZING,
                 testScope,
             )
-            notificationsKeyguardInteractor.setPulseExpanding(false)
+            pulseExpansionInteractor.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParameters.alwaysOn).thenReturn(true)
             whenever(dozeParameters.displayNeedsBlanking).thenReturn(false)
@@ -281,7 +278,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
             runCurrent()
-            notificationsKeyguardInteractor.setPulseExpanding(false)
+            pulseExpansionInteractor.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(true)
             whenever(dozeParameters.alwaysOn).thenReturn(true)
             whenever(dozeParameters.displayNeedsBlanking).thenReturn(false)
@@ -303,7 +300,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
             runCurrent()
-            notificationsKeyguardInteractor.setPulseExpanding(false)
+            pulseExpansionInteractor.setPulseExpanding(false)
             deviceEntryRepository.setBypassEnabled(false)
             whenever(dozeParameters.alwaysOn).thenReturn(true)
             whenever(dozeParameters.displayNeedsBlanking).thenReturn(false)

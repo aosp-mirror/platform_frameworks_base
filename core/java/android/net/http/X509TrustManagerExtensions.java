@@ -16,6 +16,13 @@
 
 package android.net.http;
 
+import static com.android.org.conscrypt.flags.Flags.certificateTransparencyCheckservertrustedApi;
+
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.net.platform.flags.Flags;
 import android.security.net.config.UserCertificateSource;
 
 import com.android.org.conscrypt.TrustManagerImpl;
@@ -24,6 +31,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.List;
 
 import javax.net.ssl.X509TrustManager;
@@ -31,9 +39,9 @@ import javax.net.ssl.X509TrustManager;
 /**
  * X509TrustManager wrapper exposing Android-added features.
  * <p>
- * The checkServerTrusted method allows callers to perform additional
- * verification of certificate chains after they have been successfully verified
- * by the platform.
+ * The checkServerTrusted methods allow callers to provide some additional
+ * context for the verification. This is particularly useful when an SSLEngine
+ * or SSLSocket is not available.
  * </p>
  */
 public class X509TrustManagerExtensions {
@@ -42,6 +50,7 @@ public class X509TrustManagerExtensions {
     // Methods to use when mDelegate is not a TrustManagerImpl and duck typing is being used.
     private final X509TrustManager mTrustManager;
     private final Method mCheckServerTrusted;
+    private final Method mCheckServerTrustedOcspAndTlsData;
     private final Method mIsSameTrustConfiguration;
 
     /**
@@ -55,6 +64,7 @@ public class X509TrustManagerExtensions {
             mDelegate = (TrustManagerImpl) tm;
             mTrustManager = null;
             mCheckServerTrusted = null;
+            mCheckServerTrustedOcspAndTlsData = null;
             mIsSameTrustConfiguration = null;
             return;
         }
@@ -69,8 +79,19 @@ public class X509TrustManagerExtensions {
                     String.class);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Required method"
-                    + " checkServerTrusted(X509Certificate[], String, String, String) missing");
+                    + " checkServerTrusted(X509Certificate[], String, String) missing");
         }
+        // Check that the OCSP and TlsData aware checkServerTrusted is present.
+        Method checkServerTrustedOcspAndTlsData = null;
+        try {
+            checkServerTrustedOcspAndTlsData = tm.getClass().getMethod("checkServerTrusted",
+                    X509Certificate[].class,
+                    Byte[].class,
+                    Byte[].class,
+                    String.class,
+                    String.class);
+        } catch (ReflectiveOperationException ignored) { }
+        mCheckServerTrustedOcspAndTlsData = checkServerTrustedOcspAndTlsData;
         // Get the option isSameTrustConfiguration method.
         Method isSameTrustConfiguration = null;
         try {
@@ -111,6 +132,65 @@ public class X509TrustManagerExtensions {
                 }
                 throw new CertificateException("checkServerTrusted failed", e.getCause());
             }
+        }
+    }
+
+    /**
+     * Verifies the given certificate chain.
+     *
+     * <p>See {@link X509TrustManager#checkServerTrusted(X509Certificate[], String)} for a
+     * description of the chain and authType parameters. The final parameter, host, should be the
+     * hostname of the server.</p>
+     *
+     * <p>ocspData and tlsSctData may be provided to verify any Signed Certificate Timestamp (SCT)
+     * attached to the connection. These are ASN.1 octet strings (SignedCertificateTimestampList)
+     * as described in RFC 6962, Section 3.3. Note that SCTs embedded in the certificate chain
+     * will automatically be processed.
+     * </p>
+     *
+     * @throws CertificateException if the chain does not verify correctly.
+     * @throws IllegalArgumentException if the TrustManager is not compatible.
+     * @return the properly ordered chain used for verification as a list of X509Certificates.
+     */
+    @FlaggedApi(Flags.FLAG_X509_EXTENSIONS_CERTIFICATE_TRANSPARENCY)
+    @NonNull
+    public List<X509Certificate> checkServerTrusted(
+            @SuppressLint("ArrayReturn") @NonNull X509Certificate[] chain,
+            @Nullable byte[] ocspData,
+            @Nullable byte[] tlsSctData,
+            @NonNull String authType,
+            @NonNull String host) throws CertificateException {
+        List<X509Certificate> result;
+        if (mDelegate != null) {
+            if (certificateTransparencyCheckservertrustedApi()) {
+                result = mDelegate.checkServerTrusted(chain, ocspData, tlsSctData, authType, host);
+                return result == null ? Collections.emptyList() : result;
+            } else {
+                // The conscrypt mainline module does not have the required method.
+                throw new IllegalArgumentException("Required method"
+                    + " checkServerTrusted(X509Certificate[], byte[], byte[], String, String)"
+                    + " not available in TrustManagerImpl");
+            }
+        }
+        if (mCheckServerTrustedOcspAndTlsData == null) {
+            throw new IllegalArgumentException("Required method"
+                    + " checkServerTrusted(X509Certificate[], byte[], byte[], String, String)"
+                    + " missing");
+        }
+        try {
+            result = (List<X509Certificate>) mCheckServerTrustedOcspAndTlsData.invoke(mTrustManager,
+                    ocspData, tlsSctData, chain, authType, host);
+            return result == null ? Collections.emptyList() : result;
+        } catch (IllegalAccessException e) {
+            throw new CertificateException("Failed to call checkServerTrusted", e);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof CertificateException) {
+                throw (CertificateException) e.getCause();
+            }
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            }
+            throw new CertificateException("checkServerTrusted failed", e.getCause());
         }
     }
 

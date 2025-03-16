@@ -188,22 +188,60 @@ private fun shouldComposeMovableElement(
     return when (
         val elementState = movableElementState(element, layoutImpl.state.transitionStates)
     ) {
-        null -> false
+        null ->
+            movableElementContentWhenIdle(layoutImpl, element, layoutImpl.state.transitionState) ==
+                content
         is TransitionState.Idle ->
             movableElementContentWhenIdle(layoutImpl, element, elementState) == content
         is TransitionState.Transition -> {
             // During transitions, always compose movable elements in the scene picked by their
             // content picker.
-            val contents = element.contentPicker.contents
-            shouldPlaceOrComposeSharedElement(
+            shouldComposeMoveableElement(
                 layoutImpl,
                 content,
                 element,
                 elementState,
-                isInContent = { contents.contains(it) },
+                element.contentPicker.contents,
             )
         }
     }
+}
+
+private fun shouldComposeMoveableElement(
+    layoutImpl: SceneTransitionLayoutImpl,
+    content: ContentKey,
+    elementKey: ElementKey,
+    transition: TransitionState.Transition,
+    containingContents: Set<ContentKey>,
+): Boolean {
+    val overscrollContent = transition.currentOverscrollSpec?.content
+    if (overscrollContent != null) {
+        return when (transition) {
+            // If we are overscrolling between scenes, only place/compose the element in the
+            // overscrolling scene.
+            is TransitionState.Transition.ChangeScene -> content == overscrollContent
+
+            // If we are overscrolling an overlay, place/compose the element if [content] is the
+            // overscrolling content or if [content] is the current scene and the overscrolling
+            // overlay does not contain the element.
+            is TransitionState.Transition.ReplaceOverlay,
+            is TransitionState.Transition.ShowOrHideOverlay ->
+                content == overscrollContent ||
+                    (content == transition.currentScene &&
+                        !containingContents.contains(overscrollContent))
+        }
+    }
+
+    val scenePicker = elementKey.contentPicker
+    val pickedScene =
+        scenePicker.contentDuringTransition(
+            element = elementKey,
+            transition = transition,
+            fromContentZIndex = layoutImpl.content(transition.fromContent).zIndex,
+            toContentZIndex = layoutImpl.content(transition.toContent).zIndex,
+        )
+
+    return pickedScene == content
 }
 
 private fun movableElementState(
@@ -217,7 +255,7 @@ private fun movableElementState(
 private fun movableElementContentWhenIdle(
     layoutImpl: SceneTransitionLayoutImpl,
     element: MovableElementKey,
-    elementState: TransitionState.Idle,
+    elementState: TransitionState,
 ): ContentKey {
     val contents = element.contentPicker.contents
     return elementContentWhenIdle(layoutImpl, elementState, isInContent = { contents.contains(it) })
@@ -241,6 +279,10 @@ private fun placeholderContentSize(
         return targetValueInScene
     }
 
+    fun TransitionState.Transition.otherContent(): ContentKey {
+        return if (fromContent == content) toContent else fromContent
+    }
+
     // If the element content was already composed in the other overlay/scene, we use that
     // target size assuming it doesn't change between scenes.
     // TODO(b/317026105): Provide a way to give a hint size/content for cases where this is
@@ -249,8 +291,10 @@ private fun placeholderContentSize(
         when (val state = movableElementState(elementKey, transitionStates)) {
             null -> return IntSize.Zero
             is TransitionState.Idle -> movableElementContentWhenIdle(layoutImpl, elementKey, state)
-            is TransitionState.Transition ->
-                if (state.fromContent == content) state.toContent else state.fromContent
+            is TransitionState.Transition.ReplaceOverlay -> {
+                state.otherContent().takeIf { it in element.stateByContent } ?: state.currentScene
+            }
+            is TransitionState.Transition -> state.otherContent()
         }
 
     val targetValueInOtherContent = element.stateByContent[otherContent]?.targetSize

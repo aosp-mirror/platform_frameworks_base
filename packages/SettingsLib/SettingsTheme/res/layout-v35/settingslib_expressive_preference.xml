@@ -25,7 +25,8 @@
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:background="?android:attr/selectableItemBackground"
     android:clipToPadding="false"
-    android:baselineAligned="false">
+    android:baselineAligned="false"
+    android:filterTouchesWhenObscured="false">
 
     <include layout="@layout/settingslib_expressive_preference_icon_frame"/>
 

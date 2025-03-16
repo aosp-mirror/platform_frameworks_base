@@ -33,5 +33,6 @@ val Kosmos.sceneInteractor: SceneInteractor by
             sceneFamilyResolvers = { sceneFamilyResolvers },
             deviceUnlockedInteractor = { deviceUnlockedInteractor },
             keyguardEnabledInteractor = { keyguardEnabledInteractor },
+            disabledContentInteractor = disabledContentInteractor,
         )
     }

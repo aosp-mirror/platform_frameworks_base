@@ -19,7 +19,6 @@ package com.android.systemui.common.ui.view;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -129,16 +128,43 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void setProgress_onlyOnProgressChangedTriggeredWithFromUserFalse() {
+    public void setProgress_onProgressChangedAndOnUserInteractionFinalized() {
         reset(mOnSeekBarChangeListener);
         mIconDiscreteSliderLinearLayout.setProgress(1);
 
+        // If users are changing seekbar progress without touching the seekbar or clicking the
+        // buttons, trigger onUserInteractionFinalized.
         verify(mOnSeekBarChangeListener).onProgressChanged(
                 eq(mSeekbar), /* progress= */ eq(1), /* fromUser= */ eq(false));
         verify(mOnSeekBarChangeListener, never()).onStartTrackingTouch(/* seekBar= */ any());
         verify(mOnSeekBarChangeListener, never()).onStopTrackingTouch(/* seekBar= */ any());
+        verify(mOnSeekBarChangeListener).onUserInteractionFinalized(
+                /* seekBar= */ any(),
+                eq(OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER));
+    }
+
+    @Test
+    public void setProgressToSeekBarByTouch_onUserInteractionFinalizedAfterTouchEnds() {
+        reset(mOnSeekBarChangeListener);
+        final SeekBarWithIconButtonsView.SeekBarChangeListener seekBarChangeListener =
+                mIconDiscreteSliderLinearLayout.getSeekBarChangeListener();
+        final SeekBar seekBar = mIconDiscreteSliderLinearLayout.findViewById(R.id.seekbar);
+
+        // Simulate changing seekbar progress by touch
+        seekBarChangeListener.onStartTrackingTouch(seekBar);
+        mIconDiscreteSliderLinearLayout.setProgress(1);
+
+        verify(mOnSeekBarChangeListener).onProgressChanged(
+                eq(mSeekbar), /* progress= */ eq(1), /* fromUser= */ eq(false));
         verify(mOnSeekBarChangeListener, never()).onUserInteractionFinalized(
-                /* seekBar= */any(), /* control= */ anyInt());
+                /* seekBar= */ any(),
+                eq(OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER));
+
+        // Notify onUserInteractionFinalized after touch ends
+        seekBarChangeListener.onStopTrackingTouch(seekBar);
+        verify(mOnSeekBarChangeListener).onUserInteractionFinalized(
+                /* seekBar= */ any(),
+                eq(OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER));
     }
 
     @Test

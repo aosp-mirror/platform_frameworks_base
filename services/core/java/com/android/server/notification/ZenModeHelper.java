@@ -24,6 +24,8 @@ import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_UNKNOWN;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static android.service.notification.Condition.SOURCE_UNKNOWN;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_FALSE;
@@ -40,6 +42,7 @@ import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_ACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
 import static android.service.notification.ZenModeConfig.implicitRuleId;
+import static android.service.notification.ZenModeConfig.isImplicitRuleId;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -54,10 +57,9 @@ import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.Flags;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
-import android.app.PendingIntent;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -74,7 +76,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
-import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
@@ -90,7 +91,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
@@ -112,13 +112,12 @@ import android.util.SparseArray;
 import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -173,15 +172,13 @@ public class ZenModeHelper {
     private final Clock mClock;
     private final SettingsObserver mSettingsObserver;
     private final AppOpsManager mAppOps;
-    private final NotificationManager mNotificationManager;
     private final ZenModeConfig mDefaultConfig;
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final ZenModeFiltering mFiltering;
     private final RingerModeDelegate mRingerModeDelegate = new
             RingerModeDelegate();
     @VisibleForTesting protected final ZenModeConditions mConditions;
-    private final Object mConfigsArrayLock = new Object();
-    @GuardedBy("mConfigsArrayLock")
+    @GuardedBy("mConfigLock")
     @VisibleForTesting final SparseArray<ZenModeConfig> mConfigs = new SparseArray<>();
     private final Metrics mMetrics = new Metrics();
     private final ConditionProviders.Config mServiceConfig;
@@ -221,15 +218,14 @@ public class ZenModeHelper {
         mClock = clock;
         addCallback(mMetrics);
         mAppOps = context.getSystemService(AppOpsManager.class);
-        mNotificationManager = context.getSystemService(NotificationManager.class);
 
         mDefaultConfig = Flags.modesUi()
                 ? ZenModeConfig.getDefaultConfig()
                 : readDefaultConfig(mContext.getResources());
         updateDefaultConfig(mContext, mDefaultConfig);
 
-        mConfig = mDefaultConfig.copy();
-        synchronized (mConfigsArrayLock) {
+        synchronized (mConfigLock) {
+            mConfig = mDefaultConfig.copy();
             mConfigs.put(UserHandle.USER_SYSTEM, mConfig);
         }
         mConsolidatedPolicy = mConfig.toNotificationPolicy();
@@ -241,10 +237,6 @@ public class ZenModeHelper {
         mServiceConfig = conditionProviders.getConfig();
         mFlagResolver = flagResolver;
         mZenModeEventLogger = zenModeEventLogger;
-    }
-
-    public Looper getLooper() {
-        return mHandler.getLooper();
     }
 
     @Override
@@ -288,6 +280,11 @@ public class ZenModeHelper {
         mCallbacks.remove(callback);
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public List<Callback> getCallbacks() {
+        return mCallbacks;
+    }
+
     public void initZenMode() {
         if (DEBUG) Log.d(TAG, "initZenMode");
         synchronized (mConfigLock) {
@@ -309,7 +306,15 @@ public class ZenModeHelper {
         mHandler.postMetricsTimer();
         cleanUpZenRules();
         mIsSystemServicesReady = true;
-        showZenUpgradeNotification(mZenMode);
+    }
+
+    /**
+     * @return whether a {@link DeviceEffectsApplier} has already been set or not
+     */
+    boolean hasDeviceEffectsApplier() {
+        synchronized (mConfigLock) {
+            return mDeviceEffectsApplier != null;
+        }
     }
 
     /**
@@ -338,7 +343,7 @@ public class ZenModeHelper {
     public void onUserRemoved(int user) {
         if (user < UserHandle.USER_SYSTEM) return;
         if (DEBUG) Log.d(TAG, "onUserRemoved u=" + user);
-        synchronized (mConfigsArrayLock) {
+        synchronized (mConfigLock) {
             mConfigs.remove(user);
         }
     }
@@ -357,7 +362,7 @@ public class ZenModeHelper {
         mUser = user;
         if (DEBUG) Log.d(TAG, reason + " u=" + user);
         ZenModeConfig config = null;
-        synchronized (mConfigsArrayLock) {
+        synchronized (mConfigLock) {
             if (mConfigs.get(user) != null) {
                 config = mConfigs.get(user).copy();
             }
@@ -383,7 +388,9 @@ public class ZenModeHelper {
             boolean fromSystemOrSystemUi) {
         final int newZen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);
         if (newZen != -1) {
-            setManualZenMode(newZen, null,
+            // This change is known to be for UserHandle.CURRENT because NLSes for
+            // background users are unbound.
+            setManualZenMode(UserHandle.CURRENT, newZen, null,
                     fromSystemOrSystemUi ? ORIGIN_SYSTEM : ORIGIN_APP,
                     /* reason= */ "listener:" + (name != null ? name.flattenToShortString() : null),
                     /* caller= */ name != null ? name.getPackageName() : null,
@@ -406,11 +413,12 @@ public class ZenModeHelper {
     }
 
     // TODO: b/310620812 - Make private (or inline) when MODES_API is inlined.
-    public List<ZenRule> getZenRules() {
+    public List<ZenRule> getZenRules(UserHandle user) {
         List<ZenRule> rules = new ArrayList<>();
         synchronized (mConfigLock) {
-            if (mConfig == null) return rules;
-            for (ZenRule rule : mConfig.automaticRules.values()) {
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return rules;
+            for (ZenRule rule : config.automaticRules.values()) {
                 if (canManageAutomaticZenRule(rule)) {
                     rules.add(rule);
                 }
@@ -424,8 +432,8 @@ public class ZenModeHelper {
      * (which means the owned rules for a regular app, and every rule for system callers) together
      * with their ids.
      */
-    Map<String, AutomaticZenRule> getAutomaticZenRules() {
-        List<ZenRule> ruleList = getZenRules();
+    Map<String, AutomaticZenRule> getAutomaticZenRules(UserHandle user) {
+        List<ZenRule> ruleList = getZenRules(user);
         HashMap<String, AutomaticZenRule> rules = new HashMap<>(ruleList.size());
         for (ZenRule rule : ruleList) {
             rules.put(rule.id, zenRuleToAutomaticZenRule(rule));
@@ -433,11 +441,12 @@ public class ZenModeHelper {
         return rules;
     }
 
-    public AutomaticZenRule getAutomaticZenRule(String id) {
+    public AutomaticZenRule getAutomaticZenRule(UserHandle user, String id) {
         ZenRule rule;
         synchronized (mConfigLock) {
-            if (mConfig == null) return null;
-            rule = mConfig.automaticRules.get(id);
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return null;
+            rule = config.automaticRules.get(id);
         }
         if (rule == null) return null;
         if (canManageAutomaticZenRule(rule)) {
@@ -446,8 +455,9 @@ public class ZenModeHelper {
         return null;
     }
 
-    public String addAutomaticZenRule(String pkg, AutomaticZenRule automaticZenRule,
-            @ConfigOrigin int origin, String reason, int callingUid) {
+    public String addAutomaticZenRule(UserHandle user, String pkg,
+            AutomaticZenRule automaticZenRule, @ConfigOrigin int origin, String reason,
+            int callingUid) {
         checkManageRuleOrigin("addAutomaticZenRule", origin);
         if (!ZenModeConfig.SYSTEM_AUTHORITY.equals(pkg)) {
             PackageItemInfo component = getServiceInfo(automaticZenRule.getOwner());
@@ -462,10 +472,10 @@ public class ZenModeHelper {
                 ruleInstanceLimit = component.metaData.getInt(
                         ConditionProviderService.META_DATA_RULE_INSTANCE_LIMIT, -1);
             }
-            int newRuleInstanceCount = getCurrentInstanceCount(automaticZenRule.getOwner())
-                    + getCurrentInstanceCount(automaticZenRule.getConfigurationActivity())
+            int newRuleInstanceCount = getCurrentInstanceCount(user, automaticZenRule.getOwner())
+                    + getCurrentInstanceCount(user, automaticZenRule.getConfigurationActivity())
                     + 1;
-            int newPackageRuleCount = getPackageRuleCount(pkg) + 1;
+            int newPackageRuleCount = getPackageRuleCount(user, pkg) + 1;
             if (newPackageRuleCount > RULE_LIMIT_PER_PACKAGE
                     || (ruleInstanceLimit > 0 && ruleInstanceLimit < newRuleInstanceCount)) {
                 throw new IllegalArgumentException("Rule instance limit exceeded");
@@ -474,18 +484,19 @@ public class ZenModeHelper {
 
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
-            if (mConfig == null) {
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) {
                 throw new AndroidRuntimeException("Could not create rule");
             }
             if (DEBUG) {
                 Log.d(TAG, "addAutomaticZenRule rule= " + automaticZenRule + " reason=" + reason);
             }
-            newConfig = mConfig.copy();
+            newConfig = config.copy();
             ZenRule rule = new ZenRule();
-            populateZenRule(pkg, automaticZenRule, rule, origin, /* isNew= */ true);
+            populateZenRule(pkg, automaticZenRule, newConfig, rule, origin, /* isNew= */ true);
             rule = maybeRestoreRemovedRule(newConfig, pkg, rule, automaticZenRule, origin);
             newConfig.automaticRules.put(rule.id, rule);
-            maybeReplaceDefaultRule(newConfig, automaticZenRule);
+            maybeReplaceDefaultRule(newConfig, null, automaticZenRule);
 
             if (setConfigLocked(newConfig, origin, reason, rule.component, true, callingUid)) {
                 return rule.id;
@@ -531,17 +542,28 @@ public class ZenModeHelper {
 
         // "Preserve" the previous rule by considering the azrToAdd an update instead.
         // Only app-modifiable fields will actually be modified.
-        populateZenRule(pkg, azrToAdd, ruleToRestore, origin, /* isNew= */ false);
+        populateZenRule(pkg, azrToAdd, config, ruleToRestore, origin, /* isNew= */ false);
         return ruleToRestore;
     }
 
-    private static void maybeReplaceDefaultRule(ZenModeConfig config, AutomaticZenRule addedRule) {
+    /**
+     * Possibly delete built-in rules if a more suitable rule is added or updated.
+     *
+     * <p>Today, this is done in one case: delete a disabled "Sleeping" rule if a Bedtime Mode is
+     * added (or an existing mode is turned into {@link AutomaticZenRule#TYPE_BEDTIME}, when
+     * upgrading). Because only the {@code config_systemWellbeing} package is allowed to use rules
+     * of this type, this will not trigger wantonly.
+     *
+     * @param oldRule If non-null, {@code rule} is updating {@code oldRule}. Otherwise,
+     *                {@code rule} is being added.
+     */
+    private static void maybeReplaceDefaultRule(ZenModeConfig config, @Nullable ZenRule oldRule,
+            AutomaticZenRule rule) {
         if (!Flags.modesApi()) {
             return;
         }
-        if (addedRule.getType() == AutomaticZenRule.TYPE_BEDTIME) {
-            // Delete a built-in disabled "Sleeping" rule when a BEDTIME rule is added; it may have
-            // smarter triggers and it will prevent confusion about which one to use.
+        if (rule.getType() == AutomaticZenRule.TYPE_BEDTIME
+                && (oldRule == null || oldRule.type != rule.getType())) {
             // Note: we must not verify canManageAutomaticZenRule here, since most likely they
             // won't have the same owner (sleeping - system; bedtime - DWB).
             ZenRule sleepingRule = config.automaticRules.get(
@@ -554,40 +576,46 @@ public class ZenModeHelper {
         }
     }
 
-    public boolean updateAutomaticZenRule(String ruleId, AutomaticZenRule automaticZenRule,
-            @ConfigOrigin int origin, String reason, int callingUid) {
+    public boolean updateAutomaticZenRule(UserHandle user, String ruleId,
+            AutomaticZenRule automaticZenRule, @ConfigOrigin int origin, String reason,
+            int callingUid) {
         checkManageRuleOrigin("updateAutomaticZenRule", origin);
         if (ruleId == null) {
             throw new IllegalArgumentException("ruleId cannot be null");
         }
         synchronized (mConfigLock) {
-            if (mConfig == null) return false;
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return false;
             if (DEBUG) {
                 Log.d(TAG, "updateAutomaticZenRule zenRule=" + automaticZenRule
                         + " reason=" + reason);
             }
-            ZenModeConfig.ZenRule oldRule = mConfig.automaticRules.get(ruleId);
+            ZenModeConfig.ZenRule oldRule = config.automaticRules.get(ruleId);
             if (oldRule == null || !canManageAutomaticZenRule(oldRule)) {
                 throw new SecurityException(
                         "Cannot update rules not owned by your condition provider");
             }
-            ZenModeConfig newConfig = mConfig.copy();
+            ZenModeConfig newConfig = config.copy();
             ZenModeConfig.ZenRule newRule = requireNonNull(newConfig.automaticRules.get(ruleId));
             if (!Flags.modesApi()) {
                 if (newRule.enabled != automaticZenRule.isEnabled()) {
-                    dispatchOnAutomaticRuleStatusChanged(mConfig.user, newRule.getPkg(), ruleId,
+                    dispatchOnAutomaticRuleStatusChanged(config.user, newRule.getPkg(), ruleId,
                             automaticZenRule.isEnabled()
                                     ? AUTOMATIC_RULE_STATUS_ENABLED
                                     : AUTOMATIC_RULE_STATUS_DISABLED);
                 }
             }
 
-            boolean updated = populateZenRule(newRule.pkg, automaticZenRule, newRule,
+            boolean updated = populateZenRule(newRule.pkg, automaticZenRule, newConfig, newRule,
                     origin, /* isNew= */ false);
             if (Flags.modesApi() && !updated) {
                 // Bail out so we don't have the side effects of updating a rule (i.e. dropping
                 // condition) when no changes happen.
                 return true;
+            }
+
+            if (Flags.modesUi()) {
+                maybeReplaceDefaultRule(newConfig, oldRule, automaticZenRule);
             }
             return setConfigLocked(newConfig, origin, reason,
                     newRule.component, true, callingUid);
@@ -611,16 +639,18 @@ public class ZenModeHelper {
      *
      * @param zenMode one of the {@code Global#ZEN_MODE_x} values
      */
-    void applyGlobalZenModeAsImplicitZenRule(String callingPkg, int callingUid, int zenMode) {
+    void applyGlobalZenModeAsImplicitZenRule(UserHandle user, String callingPkg, int callingUid,
+            int zenMode) {
         if (!android.app.Flags.modesApi()) {
             Log.wtf(TAG, "applyGlobalZenModeAsImplicitZenRule called with flag off!");
             return;
         }
         synchronized (mConfigLock) {
-            if (mConfig == null) {
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) {
                 return;
             }
-            ZenModeConfig newConfig = mConfig.copy();
+            ZenModeConfig newConfig = config.copy();
             ZenRule rule = newConfig.automaticRules.get(implicitRuleId(callingPkg));
             if (zenMode == Global.ZEN_MODE_OFF) {
                 // Deactivate implicit rule if it exists and is active; otherwise ignore.
@@ -642,9 +672,14 @@ public class ZenModeHelper {
                     // would apply if changing the global interruption filter. We only do this
                     // for newly created rules, as existing rules have a pre-existing policy
                     // (whether initialized here or set via app or user).
-                    rule.zenPolicy = mConfig.getZenPolicy().copy();
+                    rule.zenPolicy = config.getZenPolicy().copy();
                     newConfig.automaticRules.put(rule.id, rule);
+                } else {
+                    if (Flags.modesUi()) {
+                        updateImplicitZenRuleNameAndDescription(rule);
+                    }
                 }
+
                 // If the user has changed the rule's *zenMode*, then don't let app overwrite it.
                 // We allow the update if the user has only changed other aspects of the rule.
                 if ((rule.userModifiedFields & AutomaticZenRule.FIELD_INTERRUPTION_FILTER) == 0) {
@@ -672,17 +707,18 @@ public class ZenModeHelper {
      * {@link AutomaticZenRule#configurationActivity}. Its zen mode will be set to
      * {@link Global#ZEN_MODE_IMPORTANT_INTERRUPTIONS}.
      */
-    void applyGlobalPolicyAsImplicitZenRule(String callingPkg, int callingUid,
+    void applyGlobalPolicyAsImplicitZenRule(UserHandle user, String callingPkg, int callingUid,
             NotificationManager.Policy policy) {
         if (!android.app.Flags.modesApi()) {
             Log.wtf(TAG, "applyGlobalPolicyAsImplicitZenRule called with flag off!");
             return;
         }
         synchronized (mConfigLock) {
-            if (mConfig == null) {
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) {
                 return;
             }
-            ZenModeConfig newConfig = mConfig.copy();
+            ZenModeConfig newConfig = config.copy();
             boolean isNew = false;
             ZenRule rule = newConfig.automaticRules.get(implicitRuleId(callingPkg));
             if (rule == null) {
@@ -690,7 +726,12 @@ public class ZenModeHelper {
                 rule = newImplicitZenRule(callingPkg);
                 rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                 newConfig.automaticRules.put(rule.id, rule);
+            } else {
+                if (Flags.modesUi()) {
+                    updateImplicitZenRuleNameAndDescription(rule);
+                }
             }
+
             // If the user has changed the rule's *ZenPolicy*, then don't let app overwrite it.
             // We allow the update if the user has only changed other aspects of the rule.
             if (rule.zenPolicyUserModifiedFields == 0) {
@@ -701,9 +742,10 @@ public class ZenModeHelper {
                     // would take effect if changing the global policy.
                     // Note that NotificationManager.Policy cannot have any unset priority
                     // categories, but *can* have unset visual effects, which is why we do this.
-                    newZenPolicy = mConfig.getZenPolicy().overwrittenWith(newZenPolicy);
+                    newZenPolicy = config.getZenPolicy().overwrittenWith(newZenPolicy);
                 }
                 updatePolicy(
+                        newConfig,
                         rule,
                         newZenPolicy,
                         /* updateBitmask= */ false,
@@ -726,25 +768,26 @@ public class ZenModeHelper {
      * <p>Any unset values in the {@link ZenPolicy} will be mapped to their current defaults.
      */
     @Nullable
-    Policy getNotificationPolicyFromImplicitZenRule(String callingPkg) {
+    Policy getNotificationPolicyFromImplicitZenRule(UserHandle user, String callingPkg) {
         if (!android.app.Flags.modesApi()) {
             Log.wtf(TAG, "getNotificationPolicyFromImplicitZenRule called with flag off!");
-            return getNotificationPolicy();
+            return getNotificationPolicy(user);
         }
         synchronized (mConfigLock) {
-            if (mConfig == null) {
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) {
                 return null;
             }
-            ZenRule implicitRule = mConfig.automaticRules.get(implicitRuleId(callingPkg));
+            ZenRule implicitRule = config.automaticRules.get(implicitRuleId(callingPkg));
             if (implicitRule != null && implicitRule.zenPolicy != null) {
-                // toNotificationPolicy takes defaults from mConfig, and technically, those are not
+                // toNotificationPolicy takes defaults from config, and technically those are not
                 // the defaults that would apply if any fields were unset. However, all rules should
                 // have all fields set in their ZenPolicy objects upon rule creation, so in
                 // practice, this is only filling in the areChannelsBypassingDnd field, which is a
                 // state rather than a part of the policy.
-                return mConfig.toNotificationPolicy(implicitRule.zenPolicy);
+                return config.toNotificationPolicy(implicitRule.zenPolicy);
             } else {
-                return getNotificationPolicy();
+                return getNotificationPolicy(user);
             }
         }
     }
@@ -758,24 +801,8 @@ public class ZenModeHelper {
         rule.id = implicitRuleId(pkg);
         rule.pkg = pkg;
         rule.creationTime = mClock.millis();
-
-        Binder.withCleanCallingIdentity(() -> {
-            try {
-                ApplicationInfo applicationInfo = mPm.getApplicationInfo(pkg, 0);
-                rule.name = applicationInfo.loadLabel(mPm).toString();
-                if (!Flags.modesUi()) {
-                    rule.iconResName = drawableResIdToResName(pkg, applicationInfo.icon);
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                // Should not happen, since it's the app calling us (?)
-                Log.w(TAG, "Package not found for creating implicit zen rule");
-                rule.name = "Unknown";
-            }
-        });
-
+        updateImplicitZenRuleNameAndDescription(rule);
         rule.type = AutomaticZenRule.TYPE_OTHER;
-        rule.triggerDescription = mContext.getString(R.string.zen_mode_implicit_trigger_description,
-                rule.name);
         rule.condition = null;
         rule.conditionId = new Uri.Builder()
                 .scheme(Condition.SCHEME)
@@ -790,13 +817,46 @@ public class ZenModeHelper {
         return rule;
     }
 
-    boolean removeAutomaticZenRule(String id, @ConfigOrigin int origin, String reason,
-            int callingUid) {
+    private void updateImplicitZenRuleNameAndDescription(ZenRule rule) {
+        checkArgument(isImplicitRuleId(rule.id));
+        requireNonNull(rule.pkg, "Implicit rule is not associated to package yet!");
+
+        String pkgAppName = Binder.withCleanCallingIdentity(() -> {
+            try {
+                ApplicationInfo applicationInfo = mPm.getApplicationInfo(rule.pkg, 0);
+                return applicationInfo.loadLabel(mPm).toString();
+            } catch (PackageManager.NameNotFoundException e) {
+                // Should not happen. When creating it's the app calling us, and when updating
+                // the rule would've been deleted if the package was removed.
+                Slog.e(TAG, "Package not found when updating implicit zen rule name", e);
+                return null;
+            }
+        });
+
+        if (pkgAppName != null) {
+            if ((rule.userModifiedFields & AutomaticZenRule.FIELD_NAME) == 0) {
+                if (Flags.modesUi()) {
+                    rule.name = mContext.getString(R.string.zen_mode_implicit_name, pkgAppName);
+                } else {
+                    rule.name = pkgAppName;
+                }
+            }
+            rule.triggerDescription = mContext.getString(
+                    R.string.zen_mode_implicit_trigger_description, pkgAppName);
+        } else if (rule.name == null) {
+            // We must give a new rule SOME name. But this path should never be hit.
+            rule.name = "Unknown";
+        }
+    }
+
+    boolean removeAutomaticZenRule(UserHandle user, String id, @ConfigOrigin int origin,
+            String reason, int callingUid) {
         checkManageRuleOrigin("removeAutomaticZenRule", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
-            if (mConfig == null) return false;
-            newConfig = mConfig.copy();
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return false;
+            newConfig = config.copy();
             ZenRule ruleToRemove = newConfig.automaticRules.get(id);
             if (ruleToRemove == null) return false;
             if (canManageAutomaticZenRule(ruleToRemove)) {
@@ -818,18 +878,19 @@ public class ZenModeHelper {
                         "Cannot delete rules not owned by your condition provider");
             }
             dispatchOnAutomaticRuleStatusChanged(
-                    mConfig.user, ruleToRemove.getPkg(), id, AUTOMATIC_RULE_STATUS_REMOVED);
+                    config.user, ruleToRemove.getPkg(), id, AUTOMATIC_RULE_STATUS_REMOVED);
             return setConfigLocked(newConfig, origin, reason, null, true, callingUid);
         }
     }
 
-    boolean removeAutomaticZenRules(String packageName, @ConfigOrigin int origin,
+    boolean removeAutomaticZenRules(UserHandle user, String packageName, @ConfigOrigin int origin,
             String reason, int callingUid) {
         checkManageRuleOrigin("removeAutomaticZenRules", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
-            if (mConfig == null) return false;
-            newConfig = mConfig.copy();
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return false;
+            newConfig = config.copy();
             for (int i = newConfig.automaticRules.size() - 1; i >= 0; i--) {
                 ZenRule rule = newConfig.automaticRules.get(newConfig.automaticRules.keyAt(i));
                 if (Objects.equals(rule.getPkg(), packageName) && canManageAutomaticZenRule(rule)) {
@@ -877,12 +938,13 @@ public class ZenModeHelper {
     }
 
     @Condition.State
-    int getAutomaticZenRuleState(String id) {
+    int getAutomaticZenRuleState(UserHandle user, String id) {
         synchronized (mConfigLock) {
-            if (mConfig == null) {
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) {
                 return Condition.STATE_UNKNOWN;
             }
-            ZenRule rule = mConfig.automaticRules.get(id);
+            ZenRule rule = config.automaticRules.get(id);
             if (rule == null || !canManageAutomaticZenRule(rule)) {
                 return Condition.STATE_UNKNOWN;
             }
@@ -895,14 +957,15 @@ public class ZenModeHelper {
         }
     }
 
-    void setAutomaticZenRuleState(String id, Condition condition, @ConfigOrigin int origin,
-            int callingUid) {
+    void setAutomaticZenRuleState(UserHandle user, String id, Condition condition,
+            @ConfigOrigin int origin, int callingUid) {
         checkSetRuleStateOrigin("setAutomaticZenRuleState(String id)", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
-            if (mConfig == null) return;
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return;
 
-            newConfig = mConfig.copy();
+            newConfig = config.copy();
             ZenRule rule = newConfig.automaticRules.get(id);
             if (Flags.modesApi()) {
                 if (rule != null && canManageAutomaticZenRule(rule)) {
@@ -917,13 +980,14 @@ public class ZenModeHelper {
         }
     }
 
-    void setAutomaticZenRuleState(Uri ruleDefinition, Condition condition,
+    void setAutomaticZenRuleState(UserHandle user, Uri ruleDefinition, Condition condition,
             @ConfigOrigin int origin, int callingUid) {
         checkSetRuleStateOrigin("setAutomaticZenRuleState(Uri ruleDefinition)", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
-            if (mConfig == null) return;
-            newConfig = mConfig.copy();
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return;
+            newConfig = config.copy();
 
             List<ZenRule> matchingRules = findMatchingRules(newConfig, ruleDefinition, condition);
             if (Flags.modesApi()) {
@@ -957,7 +1021,13 @@ public class ZenModeHelper {
     private static void applyConditionAndReconsiderOverride(ZenRule rule, Condition condition,
             int origin) {
         if (Flags.modesApi() && Flags.modesUi()) {
-            if (origin == ORIGIN_USER_IN_SYSTEMUI && condition != null
+            if (isImplicitRuleId(rule.id)) {
+                // Implicit rules do not use overrides, and always apply conditions directly.
+                // This is compatible with the previous behavior (where the package set the
+                // interruption filter, and no "snoozing" took place if the user changed it later).
+                rule.condition = condition;
+                rule.resetConditionOverride();
+            } else if (origin == ORIGIN_USER_IN_SYSTEMUI && condition != null
                     && condition.source == SOURCE_USER_ACTION) {
                 // Apply as override, instead of actual condition.
                 // If the new override is the reverse of a previous (still active) override, try
@@ -1017,13 +1087,16 @@ public class ZenModeHelper {
         return true;
     }
 
-    public int getCurrentInstanceCount(ComponentName cn) {
+    public int getCurrentInstanceCount(UserHandle user, ComponentName cn) {
         if (cn == null) {
             return 0;
         }
         int count = 0;
         synchronized (mConfigLock) {
-            for (ZenRule rule : mConfig.automaticRules.values()) {
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return 0;
+
+            for (ZenRule rule : config.automaticRules.values()) {
                 if (cn.equals(rule.component) || cn.equals(rule.configurationActivity)) {
                     count++;
                 }
@@ -1034,13 +1107,16 @@ public class ZenModeHelper {
 
     // Equivalent method to getCurrentInstanceCount, but for all rules associated with a specific
     // package rather than a condition provider service or activity.
-    private int getPackageRuleCount(String pkg) {
+    private int getPackageRuleCount(UserHandle user, String pkg) {
         if (pkg == null) {
             return 0;
         }
         int count = 0;
         synchronized (mConfigLock) {
-            for (ZenRule rule : mConfig.automaticRules.values()) {
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return 0;
+
+            for (ZenRule rule : config.automaticRules.values()) {
                 if (pkg.equals(rule.getPkg())) {
                     count++;
                 }
@@ -1073,13 +1149,15 @@ public class ZenModeHelper {
     void updateZenRulesOnLocaleChange() {
         updateRuleStringsForCurrentLocale(mContext, mDefaultConfig);
         synchronized (mConfigLock) {
-            if (mConfig == null) {
+            ZenModeConfig config = getConfigLocked(UserHandle.CURRENT);
+            if (config == null) {
                 return;
             }
-            ZenModeConfig config = mConfig.copy();
+
+            ZenModeConfig newConfig = config.copy();
             boolean updated = false;
             for (ZenRule defaultRule : mDefaultConfig.automaticRules.values()) {
-                ZenRule currRule = config.automaticRules.get(defaultRule.id);
+                ZenRule currRule = newConfig.automaticRules.get(defaultRule.id);
                 // if default rule wasn't user-modified use localized name
                 // instead of previous system name
                 if (currRule != null
@@ -1095,14 +1173,16 @@ public class ZenModeHelper {
                 }
             }
             if (Flags.modesApi() && Flags.modesUi()) {
-                for (ZenRule rule : config.automaticRules.values()) {
+                for (ZenRule rule : newConfig.automaticRules.values()) {
                     if (SystemZenRules.isSystemOwnedRule(rule)) {
                         updated |= SystemZenRules.updateTriggerDescription(mContext, rule);
+                    } else if (isImplicitRuleId(rule.id)) {
+                        updateImplicitZenRuleNameAndDescription(rule);
                     }
                 }
             }
             if (updated) {
-                setConfigLocked(config, null, ORIGIN_SYSTEM,
+                setConfigLocked(newConfig, null, ORIGIN_SYSTEM,
                         "updateZenRulesOnLocaleChange", Process.SYSTEM_UID);
             }
         }
@@ -1162,8 +1242,8 @@ public class ZenModeHelper {
      * deactivated) unless the update has origin == {@link ZenModeConfig#ORIGIN_USER_IN_SYSTEMUI}.
      */
     @GuardedBy("mConfigLock")
-    private boolean populateZenRule(String pkg, AutomaticZenRule azr, ZenRule rule,
-                         @ConfigOrigin int origin, boolean isNew) {
+    private boolean populateZenRule(String pkg, AutomaticZenRule azr, ZenModeConfig config,
+            ZenRule rule, @ConfigOrigin int origin, boolean isNew) {
         if (Flags.modesApi()) {
             boolean modified = false;
             // These values can always be edited by the app, so we apply changes immediately.
@@ -1299,7 +1379,7 @@ public class ZenModeHelper {
             }
 
             // Updates the bitmask and values for all policy fields, based on the origin.
-            modified |= updatePolicy(rule, azr.getZenPolicy(), updateBitmask, isNew);
+            modified |= updatePolicy(config, rule, azr.getZenPolicy(), updateBitmask, isNew);
 
             // Updates the bitmask and values for all device effect fields, based on the origin.
             modified |= updateZenDeviceEffects(rule, azr.getDeviceEffects(),
@@ -1352,13 +1432,13 @@ public class ZenModeHelper {
      * <p>Returns {@code true} if the policy of the rule was modified.
      */
     @GuardedBy("mConfigLock")
-    private boolean updatePolicy(ZenRule zenRule, @Nullable ZenPolicy newPolicy,
-            boolean updateBitmask, boolean isNew) {
+    private boolean updatePolicy(ZenModeConfig config, ZenRule zenRule,
+            @Nullable ZenPolicy newPolicy, boolean updateBitmask, boolean isNew) {
         if (newPolicy == null) {
             if (isNew) {
                 // Newly created rule with no provided policy; fill in with the default.
                 zenRule.zenPolicy =
-                        (Flags.modesUi() ? mDefaultConfig.getZenPolicy() : mConfig.getZenPolicy())
+                        (Flags.modesUi() ? mDefaultConfig.getZenPolicy() : config.getZenPolicy())
                                 .copy();
                 return true;
             }
@@ -1370,7 +1450,7 @@ public class ZenModeHelper {
         // fields in the bitmask should be marked as updated.
         ZenPolicy oldPolicy = zenRule.zenPolicy != null
                 ? zenRule.zenPolicy
-                : (Flags.modesUi() ? mDefaultConfig.getZenPolicy() : mConfig.getZenPolicy());
+                : (Flags.modesUi() ? mDefaultConfig.getZenPolicy() : config.getZenPolicy());
 
         // If this is updating a rule rather than creating a new one, keep any fields from the
         // old policy if they are unspecified in the new policy. For newly created rules, oldPolicy
@@ -1559,6 +1639,31 @@ public class ZenModeHelper {
         return azr;
     }
 
+    // Update only the hasPriorityChannels state (aka areChannelsBypassingDnd) without modifying
+    // any of the rest of the existing policy. This allows components that only want to modify
+    // this bit (PreferencesHelper) to not have to adjust the rest of the policy.
+    protected void updateHasPriorityChannels(UserHandle user, boolean hasPriorityChannels) {
+        if (!Flags.modesUi()) {
+            Log.wtf(TAG, "updateHasPriorityChannels called without modes_ui");
+        }
+        synchronized (mConfigLock) {
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return;
+
+            // If it already matches, do nothing
+            if (config.areChannelsBypassingDnd == hasPriorityChannels) {
+                return;
+            }
+
+            ZenModeConfig newConfig = config.copy();
+            newConfig.areChannelsBypassingDnd = hasPriorityChannels;
+            // The updated calculation of whether there are priority channels is always done by
+            // the system, even if the event causing the calculation had a different origin.
+            setConfigLocked(newConfig, null, ORIGIN_SYSTEM, "updateHasPriorityChannels",
+                    Process.SYSTEM_UID);
+        }
+    }
+
     @SuppressLint("MissingPermission")
     void scheduleActivationBroadcast(String pkg, @UserIdInt int userId, String ruleId,
             boolean activated) {
@@ -1580,24 +1685,25 @@ public class ZenModeHelper {
                 : AUTOMATIC_RULE_STATUS_DISABLED);
     }
 
-    void setManualZenMode(int zenMode, Uri conditionId, @ConfigOrigin int origin,
+    void setManualZenMode(UserHandle user, int zenMode, Uri conditionId, @ConfigOrigin int origin,
             String reason, @Nullable String caller, int callingUid) {
-        setManualZenMode(zenMode, conditionId, origin, reason, caller, true /*setRingerMode*/,
+        setManualZenMode(user, zenMode, conditionId, origin, reason, caller, true /*setRingerMode*/,
                 callingUid);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_ZEN_SETTINGS_SUGGESTION, 0);
     }
 
-    private void setManualZenMode(int zenMode, Uri conditionId, @ConfigOrigin int origin,
-            String reason, @Nullable String caller, boolean setRingerMode, int callingUid) {
+    private void setManualZenMode(UserHandle user, int zenMode, Uri conditionId,
+            @ConfigOrigin int origin, String reason, @Nullable String caller, boolean setRingerMode,
+            int callingUid) {
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
-            if (mConfig == null) return;
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return;
+
             if (!Global.isValidZenMode(zenMode)) return;
             if (DEBUG) Log.d(TAG, "setManualZenMode " + Global.zenModeToString(zenMode)
                     + " conditionId=" + conditionId + " reason=" + reason
                     + " setRingerMode=" + setRingerMode);
-            newConfig = mConfig.copy();
+            newConfig = config.copy();
             if (Flags.modesUi()) {
                 newConfig.manualRule.enabler = caller;
                 newConfig.manualRule.conditionId = conditionId != null ? conditionId : Uri.EMPTY;
@@ -1640,18 +1746,20 @@ public class ZenModeHelper {
         }
     }
 
-    public void setManualZenRuleDeviceEffects(ZenDeviceEffects deviceEffects,
+    public void setManualZenRuleDeviceEffects(UserHandle user, ZenDeviceEffects deviceEffects,
             @ConfigOrigin int origin, String reason, int callingUid) {
         if (!Flags.modesUi()) {
             return;
         }
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
-            if (mConfig == null) return;
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return;
+
             if (DEBUG) Log.d(TAG, "updateManualRule " + deviceEffects
                     + " reason=" + reason
                     + " callingUid=" + callingUid);
-            newConfig = mConfig.copy();
+            newConfig = config.copy();
 
             newConfig.manualRule.pkg = PACKAGE_ANDROID;
             newConfig.manualRule.zenDeviceEffects = deviceEffects;
@@ -1681,7 +1789,7 @@ public class ZenModeHelper {
         pw.println(Global.zenModeToString(mZenMode));
         pw.print(prefix);
         pw.println("mConsolidatedPolicy=" + mConsolidatedPolicy.toString());
-        synchronized (mConfigsArrayLock) {
+        synchronized (mConfigLock) {
             final int N = mConfigs.size();
             for (int i = 0; i < N; i++) {
                 dump(pw, prefix, "mConfigs[u=" + mConfigs.keyAt(i) + "]", mConfigs.valueAt(i));
@@ -1702,11 +1810,10 @@ public class ZenModeHelper {
         pw.println(config);
     }
 
-    public void readXml(TypedXmlPullParser parser, boolean forRestore, int userId)
-            throws XmlPullParserException, IOException {
-        ZenModeConfig config = ZenModeConfig.readXml(parser);
+    public boolean readXml(TypedXmlPullParser parser, boolean forRestore, int userId,
+            @Nullable BackupRestoreEventLogger logger) throws XmlPullParserException, IOException {
+        ZenModeConfig config = ZenModeConfig.readXml(parser, logger);
         String reason = "readXml";
-
         if (config != null) {
             if (forRestore) {
                 config.user = userId;
@@ -1783,17 +1890,6 @@ public class ZenModeHelper {
                 SystemZenRules.maybeUpgradeRules(mContext, config);
             }
 
-            // Resolve user id for settings.
-            userId = userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId;
-            if (config.version < ZenModeConfig.XML_VERSION_ZEN_UPGRADE) {
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1, userId);
-            } else {
-                // devices not restoring/upgrading already have updated zen settings
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.ZEN_SETTINGS_UPDATED, 1, userId);
-            }
-
             if (Flags.modesApi() && forRestore) {
                 // Note: forBackup doesn't write deletedRules, but just in case.
                 config.deletedRules.clear();
@@ -1809,22 +1905,38 @@ public class ZenModeHelper {
 
             if (DEBUG) Log.d(TAG, reason);
             synchronized (mConfigLock) {
-                setConfigLocked(config, null,
+                return setConfigLocked(config, null,
                         forRestore ? ORIGIN_RESTORE_BACKUP : ORIGIN_INIT, reason,
                         Process.SYSTEM_UID);
             }
         }
+        return false;
     }
 
-    public void writeXml(TypedXmlSerializer out, boolean forBackup, Integer version, int userId)
-            throws IOException {
-        synchronized (mConfigsArrayLock) {
+    public void writeXml(TypedXmlSerializer out, boolean forBackup, Integer version, int userId,
+            @Nullable BackupRestoreEventLogger logger) throws IOException {
+        synchronized (mConfigLock) {
+            int successfulWrites = 0;
+            int unsuccessfulWrites = 0;
             final int n = mConfigs.size();
             for (int i = 0; i < n; i++) {
                 if (forBackup && mConfigs.keyAt(i) != userId) {
                     continue;
                 }
-                mConfigs.valueAt(i).writeXml(out, version, forBackup);
+                try {
+                    mConfigs.valueAt(i).writeXml(out, version, forBackup, logger);
+                    successfulWrites++;
+                } catch (Exception e) {
+                    Slog.e(TAG, "failed to write config", e);
+                    unsuccessfulWrites++;
+                }
+            }
+            if (logger != null) {
+                logger.logItemsBackedUp(DATA_TYPE_ZEN_CONFIG, successfulWrites);
+                if (unsuccessfulWrites > 0) {
+                    logger.logItemsBackupFailed(DATA_TYPE_ZEN_CONFIG,
+                            unsuccessfulWrites, ERROR_XML_PARSING);
+                }
             }
         }
     }
@@ -1832,24 +1944,39 @@ public class ZenModeHelper {
     /**
      * @return user-specified default notification policy for priority only do not disturb
      */
-    public Policy getNotificationPolicy() {
+    @Nullable
+    public Policy getNotificationPolicy(UserHandle user) {
         synchronized (mConfigLock) {
-            return getNotificationPolicy(mConfig);
+            if (Flags.modesMultiuser()) {
+                // Return a fallback (default) policy for users without a zen config.
+                // Note that zen updates (setPolicy, setFilter) won't be applied, so this is mostly
+                // about preventing NPEs for careless callers.
+                ZenModeConfig config = getConfigLocked(user);
+                return config != null
+                        ? getNotificationPolicy(config)
+                        : getNotificationPolicy(mDefaultConfig);
+            } else {
+                return getNotificationPolicy(getConfigLocked(user));
+            }
         }
     }
 
-    private static Policy getNotificationPolicy(ZenModeConfig config) {
+    @Nullable
+    private static Policy getNotificationPolicy(@Nullable ZenModeConfig config) {
         return config == null ? null : config.toNotificationPolicy();
     }
 
     /**
      * Sets the global notification policy used for priority only do not disturb
      */
-    public void setNotificationPolicy(Policy policy, @ConfigOrigin int origin,
+    public void setNotificationPolicy(UserHandle user, Policy policy, @ConfigOrigin int origin,
             int callingUid) {
         synchronized (mConfigLock) {
-            if (policy == null || mConfig == null) return;
-            final ZenModeConfig newConfig = mConfig.copy();
+            if (policy == null) return;
+            ZenModeConfig config = getConfigLocked(user);
+            if (config == null) return;
+
+            final ZenModeConfig newConfig = config.copy();
             if (Flags.modesApi() && !Flags.modesUi()) {
                 // Fix for b/337193321 -- propagate changes to notificationPolicy to rules where
                 // the user cannot edit zen policy to emulate the previous "inheritance".
@@ -1877,7 +2004,7 @@ public class ZenModeHelper {
     }
 
     /**
-     * Cleans up obsolete rules:
+     * Cleans up obsolete rules in the current {@link ZenModeConfig}.
      * <ul>
      *     <li>Rule instances whose owner is not installed.
      *     <li>Deleted rules that were deleted more than 30 days ago.
@@ -1949,6 +2076,27 @@ public class ZenModeHelper {
         return mDefaultConfig.getZenPolicy();
     }
 
+    /**
+     * Returns the {@link ZenModeConfig} corresponding to the supplied {@link UserHandle}.
+     * The result will be {@link #mConfig} if the user is {@link UserHandle#CURRENT}, or the same
+     * as {@link #mUser}, otherwise will be the corresponding entry in {@link #mConfigs}.
+     *
+     * <p>Remember to continue holding {@link #mConfigLock} while operating on the returned value.
+     */
+    @Nullable
+    @GuardedBy("mConfigLock")
+    private ZenModeConfig getConfigLocked(@NonNull UserHandle user) {
+        if (Flags.modesMultiuser()) {
+            if (user.getIdentifier() == UserHandle.USER_CURRENT || user.getIdentifier() == mUser) {
+                return mConfig;
+            } else {
+                return mConfigs.get(user.getIdentifier());
+            }
+        } else {
+            return mConfig;
+        }
+    }
+
     @GuardedBy("mConfigLock")
     private boolean setConfigLocked(ZenModeConfig config, ComponentName triggeringComponent,
             @ConfigOrigin int origin, String reason, int callingUid) {
@@ -1975,7 +2123,7 @@ public class ZenModeHelper {
             }
             if (config.user != mUser) {
                 // simply store away for background users
-                synchronized (mConfigsArrayLock) {
+                synchronized (mConfigLock) {
                     mConfigs.put(config.user, config);
                 }
                 if (DEBUG) Log.d(TAG, "setConfigLocked: store config for user " + config.user);
@@ -1984,7 +2132,7 @@ public class ZenModeHelper {
             // handle CPS backed conditions - danger! may modify config
             mConditions.evaluateConfig(config, null, false /*processSubscriptions*/);
 
-            synchronized (mConfigsArrayLock) {
+            synchronized (mConfigLock) {
                 mConfigs.put(config.user, config);
             }
             if (DEBUG) Log.d(TAG, "setConfigLocked reason=" + reason, new Throwable());
@@ -2062,7 +2210,6 @@ public class ZenModeHelper {
         Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zen);
         ZenLog.traceSetZenMode(Global.getInt(mContext.getContentResolver(), Global.ZEN_MODE, -1),
                 "updated setting");
-        showZenUpgradeNotification(zen);
     }
 
     private int getPreviousRingerModeSetting() {
@@ -2117,12 +2264,6 @@ public class ZenModeHelper {
             for (ZenRule automaticRule : mConfig.automaticRules.values()) {
                 if (automaticRule.isActive()) {
                     if (zenSeverity(automaticRule.zenMode) > zenSeverity(zen)) {
-                        // automatic rule triggered dnd and user hasn't seen update dnd dialog
-                        if (Settings.Secure.getInt(mContext.getContentResolver(),
-                                Settings.Secure.ZEN_SETTINGS_SUGGESTION_VIEWED, 1) == 0) {
-                            Settings.Secure.putInt(mContext.getContentResolver(),
-                                    Settings.Secure.SHOW_ZEN_SETTINGS_SUGGESTION, 1);
-                        }
                         zen = automaticRule.zenMode;
                     }
                 }
@@ -2132,7 +2273,8 @@ public class ZenModeHelper {
     }
 
     @GuardedBy("mConfigLock")
-    private void applyCustomPolicy(ZenPolicy policy, ZenRule rule, boolean useManualConfig) {
+    private void applyCustomPolicy(ZenModeConfig config, ZenPolicy policy, ZenRule rule,
+            boolean useManualConfig) {
         if (rule.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             if (Flags.modesApi() && Flags.modesUi()) {
                 policy.apply(ZenPolicy.getBasePolicyInterruptionFilterNone());
@@ -2158,8 +2300,8 @@ public class ZenModeHelper {
         } else {
             if (Flags.modesApi()) {
                 if (useManualConfig) {
-                    // manual rule is configured using the settings stored directly in mConfig
-                    policy.apply(mConfig.getZenPolicy());
+                    // manual rule is configured using the settings stored directly in ZenModeConfig
+                    policy.apply(config.getZenPolicy());
                 } else {
                     // under modes_api flag, an active automatic rule with no specified policy
                     // inherits the device default settings as stored in mDefaultConfig. While the
@@ -2167,11 +2309,11 @@ public class ZenModeHelper {
                     // catch any that may have fallen through the cracks.
                     Log.wtf(TAG, "active automatic rule found with no specified policy: " + rule);
                     policy.apply(Flags.modesUi()
-                            ? mDefaultConfig.getZenPolicy() : mConfig.getZenPolicy());
+                            ? mDefaultConfig.getZenPolicy() : config.getZenPolicy());
                 }
             } else {
                 // active rule with no specified policy inherits the manual rule config settings
-                policy.apply(mConfig.getZenPolicy());
+                policy.apply(config.getZenPolicy());
             }
         }
     }
@@ -2184,7 +2326,7 @@ public class ZenModeHelper {
             ZenPolicy policy = new ZenPolicy();
             ZenDeviceEffects.Builder deviceEffectsBuilder = new ZenDeviceEffects.Builder();
             if (mConfig.isManualActive()) {
-                applyCustomPolicy(policy, mConfig.manualRule, true);
+                applyCustomPolicy(mConfig, policy, mConfig.manualRule, true);
                 if (Flags.modesApi()) {
                     deviceEffectsBuilder.add(mConfig.manualRule.zenDeviceEffects);
                 }
@@ -2196,7 +2338,7 @@ public class ZenModeHelper {
                     // policy. This is relevant in case some other active rule has a more
                     // restrictive INTERRUPTION_FILTER but a more lenient ZenPolicy!
                     if (!Flags.modesApi() || automaticRule.zenMode != Global.ZEN_MODE_OFF) {
-                        applyCustomPolicy(policy, automaticRule, false);
+                        applyCustomPolicy(mConfig, policy, automaticRule, false);
                     }
                     if (Flags.modesApi()) {
                         deviceEffectsBuilder.add(automaticRule.zenDeviceEffects);
@@ -2311,7 +2453,7 @@ public class ZenModeHelper {
                 || (mSuppressedEffects & SUPPRESSED_EFFECT_NOTIFICATIONS) != 0;
         // call restrictions
         final boolean muteCalls = zenAlarmsOnly
-                || (zenPriorityOnly && !(allowCalls || allowRepeatCallers))
+                || (zenPriorityOnly && (!allowCalls || !allowRepeatCallers))
                 || (mSuppressedEffects & SUPPRESSED_EFFECT_CALLS) != 0;
         // alarm restrictions
         final boolean muteAlarms = zenPriorityOnly && !allowAlarms;
@@ -2435,7 +2577,8 @@ public class ZenModeHelper {
         try {
             parser = resources.getXml(R.xml.default_zen_mode_config);
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                final ZenModeConfig config = ZenModeConfig.readXml(XmlUtils.makeTyped(parser));
+                final ZenModeConfig config =
+                        ZenModeConfig.readXml(XmlUtils.makeTyped(parser), null);
                 if (config != null) return config;
             }
         } catch (Exception e) {
@@ -2459,7 +2602,7 @@ public class ZenModeHelper {
      * Generate pulled atoms about do not disturb configurations.
      */
     public void pullRules(List<StatsEvent> events) {
-        synchronized (mConfigsArrayLock) {
+        synchronized (mConfigLock) {
             final int numConfigs = mConfigs.size();
             for (int i = 0; i < numConfigs; i++) {
                 final int user = mConfigs.keyAt(i);
@@ -2486,7 +2629,7 @@ public class ZenModeHelper {
         }
     }
 
-    @GuardedBy("mConfigsArrayLock")
+    @GuardedBy("mConfigLock")
     private void ruleToProtoLocked(int user, ZenRule rule, boolean isManualRule,
             List<StatsEvent> events) {
         // Make the ID safe.
@@ -2591,7 +2734,7 @@ public class ZenModeHelper {
             }
 
             if (newZen != -1) {
-                setManualZenMode(newZen, null, ORIGIN_SYSTEM,
+                setManualZenMode(UserHandle.CURRENT, newZen, null, ORIGIN_SYSTEM,
                         "ringerModeInternal", /* caller= */ null, /* setRingerMode= */ false,
                         Process.SYSTEM_UID);
             }
@@ -2636,7 +2779,7 @@ public class ZenModeHelper {
                     break;
             }
             if (newZen != -1) {
-                setManualZenMode(newZen, null, ORIGIN_SYSTEM,
+                setManualZenMode(UserHandle.CURRENT, newZen, null, ORIGIN_SYSTEM,
                         "ringerModeExternal", caller, false /*setRingerMode*/, Process.SYSTEM_UID);
             }
 
@@ -2700,62 +2843,6 @@ public class ZenModeHelper {
                 }
             }
         }
-    }
-
-    private void showZenUpgradeNotification(int zen) {
-        final boolean isWatch = mContext.getPackageManager().hasSystemFeature(
-            PackageManager.FEATURE_WATCH);
-        final boolean showNotification = mIsSystemServicesReady
-                && zen != Global.ZEN_MODE_OFF
-                && !isWatch
-                && Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0
-                && Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ZEN_SETTINGS_UPDATED, 0) != 1;
-
-        if (isWatch) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
-        }
-
-        if (showNotification) {
-            mNotificationManager.notify(TAG, SystemMessage.NOTE_ZEN_UPGRADE,
-                    createZenUpgradeNotification());
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
-        }
-    }
-
-    @VisibleForTesting
-    protected Notification createZenUpgradeNotification() {
-        final Bundle extras = new Bundle();
-        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                mContext.getResources().getString(R.string.global_action_settings));
-        int title = R.string.zen_upgrade_notification_title;
-        int content = R.string.zen_upgrade_notification_content;
-        int drawable = R.drawable.ic_zen_24dp;
-        if (NotificationManager.Policy.areAllVisualEffectsSuppressed(
-                getConsolidatedNotificationPolicy().suppressedVisualEffects)) {
-            title = R.string.zen_upgrade_notification_visd_title;
-            content = R.string.zen_upgrade_notification_visd_content;
-            drawable = R.drawable.ic_dnd_block_notifications;
-        }
-
-        Intent onboardingIntent = new Intent(Settings.ZEN_MODE_ONBOARDING);
-        onboardingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        return new Notification.Builder(mContext, SystemNotificationChannels.DO_NOT_DISTURB)
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_settings_24dp)
-                .setLargeIcon(Icon.createWithResource(mContext, drawable))
-                .setContentTitle(mContext.getResources().getString(title))
-                .setContentText(mContext.getResources().getString(content))
-                .setContentIntent(PendingIntent.getActivity(mContext, 0, onboardingIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
-                .setAutoCancel(true)
-                .setLocalOnly(true)
-                .addExtras(extras)
-                .setStyle(new Notification.BigTextStyle())
-                .build();
     }
 
     private int drawableResNameToResId(String packageName, String resourceName) {

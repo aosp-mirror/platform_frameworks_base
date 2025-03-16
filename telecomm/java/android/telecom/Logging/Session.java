@@ -16,7 +16,6 @@
 
 package android.telecom.Logging;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -24,8 +23,13 @@ import android.telecom.Log;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.telecom.flags.Flags;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Stores information about a thread's point of entry into that should persist until that thread
@@ -55,7 +59,7 @@ public class Session {
      * Initial value of mExecutionEndTimeMs and the final value of {@link #getLocalExecutionTime()}
      * if the Session is canceled.
      */
-    public static final int UNDEFINED = -1;
+    public static final long UNDEFINED = -1;
 
     public static class Info implements Parcelable {
         public final String sessionId;
@@ -129,44 +133,37 @@ public class Session {
         }
     }
 
-    private String mSessionId;
-    private String mShortMethodName;
+    private final String mSessionId;
+    private volatile String mShortMethodName;
     private long mExecutionStartTimeMs;
     private long mExecutionEndTimeMs = UNDEFINED;
-    private Session mParentSession;
-    private ArrayList<Session> mChildSessions;
+    private volatile Session mParentSession;
+    private final ArrayList<Session> mChildSessions = new ArrayList<>(5);
     private boolean mIsCompleted = false;
-    private boolean mIsExternal = false;
-    private int mChildCounter = 0;
+    private final boolean mIsExternal;
+    private final AtomicInteger mChildCounter = new AtomicInteger(0);
     // True if this is a subsession that has been started from the same thread as the parent
     // session. This can happen if Log.startSession(...) is called multiple times on the same
     // thread in the case of one Telecom entry point method calling another entry point method.
     // In this case, we can just make this subsession "invisible," but still keep track of it so
     // that the Log.endSession() calls match up.
-    private boolean mIsStartedFromActiveSession = false;
+    private final boolean mIsStartedFromActiveSession;
     // Optionally provided info about the method/class/component that started the session in order
     // to make Logging easier. This info will be provided in parentheses along with the session.
-    private String mOwnerInfo;
+    private final String mOwnerInfo;
     // Cache Full Method path so that recursive population of the full method path only needs to
     // be calculated once.
-    private String mFullMethodPathCache;
+    private volatile String mFullMethodPathCache;
 
     public Session(String sessionId, String shortMethodName, long startTimeMs,
-            boolean isStartedFromActiveSession, String ownerInfo) {
-        setSessionId(sessionId);
+            boolean isStartedFromActiveSession, boolean isExternal, String ownerInfo) {
+        mSessionId = (sessionId != null) ? sessionId : "???";
         setShortMethodName(shortMethodName);
         mExecutionStartTimeMs = startTimeMs;
         mParentSession = null;
-        mChildSessions = new ArrayList<>(5);
         mIsStartedFromActiveSession = isStartedFromActiveSession;
+        mIsExternal = isExternal;
         mOwnerInfo = ownerInfo;
-    }
-
-    public void setSessionId(@NonNull String sessionId) {
-        if (sessionId == null) {
-            mSessionId = "?";
-        }
-        mSessionId = sessionId;
     }
 
     public String getShortMethodName() {
@@ -180,10 +177,6 @@ public class Session {
         mShortMethodName = shortMethodName;
     }
 
-    public void setIsExternal(boolean isExternal) {
-        mIsExternal = isExternal;
-    }
-
     public boolean isExternal() {
         return mIsExternal;
     }
@@ -193,13 +186,15 @@ public class Session {
     }
 
     public void addChild(Session childSession) {
-        if (childSession != null) {
+        if (childSession == null) return;
+        synchronized (mChildSessions) {
             mChildSessions.add(childSession);
         }
     }
 
     public void removeChild(Session child) {
-        if (child != null) {
+        if (child == null) return;
+        synchronized (mChildSessions) {
             mChildSessions.remove(child);
         }
     }
@@ -217,7 +212,9 @@ public class Session {
     }
 
     public ArrayList<Session> getChildSessions() {
-        return mChildSessions;
+        synchronized (mChildSessions) {
+            return new ArrayList<>(mChildSessions);
+        }
     }
 
     public boolean isSessionCompleted() {
@@ -259,17 +256,41 @@ public class Session {
         return mExecutionEndTimeMs - mExecutionStartTimeMs;
     }
 
-    public synchronized String getNextChildId() {
-        return String.valueOf(mChildCounter++);
+    public String getNextChildId() {
+        return String.valueOf(mChildCounter.getAndIncrement());
     }
 
-    // Builds full session id recursively
+    // Builds full session ID, which incliudes the optional external indicators (E),
+    // base session ID, and the optional sub-session IDs (_X): @[E-]...[ID][_X][_Y]...
     private String getFullSessionId() {
-        return getFullSessionId(0);
+        if (!Flags.endSessionImprovements()) return getFullSessionIdRecursive(0);
+        int currParentCount = 0;
+        StringBuilder id = new StringBuilder();
+        Session currSession = this;
+        while (currSession != null) {
+            Session parentSession = currSession.getParentSession();
+            if (parentSession != null) {
+                if (currParentCount >= SESSION_RECURSION_LIMIT) {
+                    id.insert(0, getSessionId());
+                    id.insert(0, TRUNCATE_STRING);
+                    android.util.Slog.w(LOG_TAG, "getFullSessionId: Hit iteration limit!");
+                    return id.toString();
+                }
+                if (Log.VERBOSE) {
+                    id.insert(0, currSession.getSessionId());
+                    id.insert(0, SESSION_SEPARATION_CHAR_CHILD);
+                }
+            } else {
+                id.insert(0, currSession.getSessionId());
+            }
+            currSession = parentSession;
+            currParentCount++;
+        }
+        return id.toString();
     }
 
     // keep track of calls and bail if we hit the recursion limit
-    private String getFullSessionId(int parentCount) {
+    private String getFullSessionIdRecursive(int parentCount) {
         if (parentCount >= SESSION_RECURSION_LIMIT) {
             // Don't use Telecom's Log.w here or it will cause infinite recursion because it will
             // try to add session information to this logging statement, which will cause it to hit
@@ -286,12 +307,12 @@ public class Session {
             return mSessionId;
         } else {
             if (Log.VERBOSE) {
-                return parentSession.getFullSessionId(parentCount + 1)
+                return parentSession.getFullSessionIdRecursive(parentCount + 1)
                         // Append "_X" to subsession to show subsession designation.
                         + SESSION_SEPARATION_CHAR_CHILD + mSessionId;
             } else {
                 // Only worry about the base ID at the top of the tree.
-                return parentSession.getFullSessionId(parentCount + 1);
+                return parentSession.getFullSessionIdRecursive(parentCount + 1);
             }
 
         }
@@ -300,16 +321,18 @@ public class Session {
     private Session getRootSession(String callingMethod) {
         int currParentCount = 0;
         Session topNode = this;
-        while (topNode.getParentSession() != null) {
+        Session parentNode = topNode.getParentSession();
+        while (parentNode != null) {
             if (currParentCount >= SESSION_RECURSION_LIMIT) {
                 // Don't use Telecom's Log.w here or it will cause infinite recursion because it
                 // will try to add session information to this logging statement, which will cause
                 // it to hit this condition again and so on...
-                android.util.Slog.w(LOG_TAG, "getRootSession: Hit recursion limit from "
+                android.util.Slog.w(LOG_TAG, "getRootSession: Hit iteration limit from "
                         + callingMethod);
                 break;
             }
-            topNode = topNode.getParentSession();
+            topNode = parentNode;
+            parentNode = topNode.getParentSession();
             currParentCount++;
         }
         return topNode;
@@ -320,14 +343,40 @@ public class Session {
         return getRootSession("printFullSessionTree").printSessionTree();
     }
 
-    // Recursively move down session tree using DFS, but print out each node when it is reached.
     private String printSessionTree() {
         StringBuilder sb = new StringBuilder();
-        printSessionTree(0, sb, 0);
+        if (!Flags.endSessionImprovements()) {
+            printSessionTreeRecursive(0, sb, 0);
+            return sb.toString();
+        }
+        int depth = 0;
+        ArrayDeque<Session> deque = new ArrayDeque<>();
+        deque.add(this);
+        while (!deque.isEmpty()) {
+            Session node = deque.pollFirst();
+            sb.append("\t".repeat(depth));
+            sb.append(node.toString());
+            sb.append("\n");
+            if (depth >= SESSION_RECURSION_LIMIT) {
+                sb.append(TRUNCATE_STRING);
+                depth -= 1;
+                continue;
+            }
+            List<Session> childSessions = node.getChildSessions().reversed();
+            if (!childSessions.isEmpty()) {
+                depth += 1;
+                for (Session child : childSessions) {
+                    deque.addFirst(child);
+                }
+            } else {
+                depth -= 1;
+            }
+        }
         return sb.toString();
     }
 
-    private void printSessionTree(int tabI, StringBuilder sb, int currChildCount) {
+    // Recursively move down session tree using DFS, but print out each node when it is reached.
+    private void printSessionTreeRecursive(int tabI, StringBuilder sb, int currChildCount) {
         // Prevent infinite recursion.
         if (currChildCount >= SESSION_RECURSION_LIMIT) {
             // Don't use Telecom's Log.w here or it will cause infinite recursion because it will
@@ -343,26 +392,85 @@ public class Session {
             for (int i = 0; i <= tabI; i++) {
                 sb.append("\t");
             }
-            child.printSessionTree(tabI + 1, sb, currChildCount + 1);
+            child.printSessionTreeRecursive(tabI + 1, sb, currChildCount + 1);
         }
     }
 
-    // Recursively concatenate mShortMethodName with the parent Sessions to create full method
-    // path. if truncatePath is set to true, all other external sessions (except for the most
-    // recent) will be truncated to "..."
+    //
+
+    /**
+     * Concatenate the short method name with the parent Sessions to create full method path.
+     * @param truncatePath if truncatePath is set to true, all other external sessions (except for
+     *                     the most recent) will be truncated to "..."
+     * @return The full method path associated with this Session.
+     */
+    @VisibleForTesting
     public String getFullMethodPath(boolean truncatePath) {
         StringBuilder sb = new StringBuilder();
-        getFullMethodPath(sb, truncatePath, 0);
+        if (!Flags.endSessionImprovements()) {
+            getFullMethodPathRecursive(sb, truncatePath, 0);
+            return sb.toString();
+        }
+        // Check to see if the session has been renamed yet. If it has not, then the session
+        // has not been continued.
+        Session parentSession = getParentSession();
+        boolean isSessionStarted = parentSession == null
+                || !getShortMethodName().equals(parentSession.getShortMethodName());
+        int depth = 0;
+        Session currSession = this;
+        while (currSession != null) {
+            String cache = currSession.mFullMethodPathCache;
+            // Return cached value for method path. When returning the truncated path, recalculate
+            // the full path without using the cached value.
+            if (!TextUtils.isEmpty(cache) && !truncatePath) {
+                sb.insert(0, cache);
+                return sb.toString();
+            }
+
+            parentSession = currSession.getParentSession();
+            // Encapsulate the external session's method name so it is obvious what part of the
+            // session is external or truncate it if we do not want the entire history.
+            if (currSession.isExternal()) {
+                if (truncatePath) {
+                    sb.insert(0, TRUNCATE_STRING);
+                } else {
+                    sb.insert(0, ")");
+                    sb.insert(0, currSession.getShortMethodName());
+                    sb.insert(0, "(");
+                }
+            } else {
+                sb.insert(0, currSession.getShortMethodName());
+            }
+            if (parentSession != null) {
+                sb.insert(0, SUBSESSION_SEPARATION_CHAR);
+            }
+
+            if (depth >= SESSION_RECURSION_LIMIT) {
+                // Don't use Telecom's Log.w here or it will cause infinite recursion because it
+                // will try to add session information to this logging statement, which will cause
+                // it to hit this condition again and so on...
+                android.util.Slog.w(LOG_TAG, "getFullMethodPath: Hit iteration limit!");
+                sb.insert(0, TRUNCATE_STRING);
+                return sb.toString();
+            }
+            currSession = parentSession;
+            depth++;
+        }
+        if (isSessionStarted && !truncatePath) {
+            // Cache the full method path for this node so that we do not need to calculate it
+            // again in the future.
+            mFullMethodPathCache = sb.toString();
+        }
         return sb.toString();
     }
 
-    private synchronized void getFullMethodPath(StringBuilder sb, boolean truncatePath,
+    private synchronized void getFullMethodPathRecursive(StringBuilder sb, boolean truncatePath,
             int parentCount) {
         if (parentCount >= SESSION_RECURSION_LIMIT) {
             // Don't use Telecom's Log.w here or it will cause infinite recursion because it will
             // try to add session information to this logging statement, which will cause it to hit
             // this condition again and so on...
-            android.util.Slog.w(LOG_TAG, "getFullMethodPath: Hit recursion limit!");
+            android.util.Slog.w(LOG_TAG, "getFullMethodPathRecursive: Hit recursion limit!");
             sb.append(TRUNCATE_STRING);
             return;
         }
@@ -378,7 +486,7 @@ public class Session {
             // Check to see if the session has been renamed yet. If it has not, then the session
             // has not been continued.
             isSessionStarted = !mShortMethodName.equals(parentSession.mShortMethodName);
-            parentSession.getFullMethodPath(sb, truncatePath, parentCount + 1);
+            parentSession.getFullMethodPathRecursive(sb, truncatePath, parentCount + 1);
             sb.append(SUBSESSION_SEPARATION_CHAR);
         }
         // Encapsulate the external session's method name so it is obvious what part of the session
@@ -409,14 +517,14 @@ public class Session {
 
     @Override
     public int hashCode() {
-        int result = mSessionId != null ? mSessionId.hashCode() : 0;
-        result = 31 * result + (mShortMethodName != null ? mShortMethodName.hashCode() : 0);
-        result = 31 * result + (int) (mExecutionStartTimeMs ^ (mExecutionStartTimeMs >>> 32));
-        result = 31 * result + (int) (mExecutionEndTimeMs ^ (mExecutionEndTimeMs >>> 32));
+        int result = mSessionId.hashCode();
+        result = 31 * result + mShortMethodName.hashCode();
+        result = 31 * result + Long.hashCode(mExecutionStartTimeMs);
+        result = 31 * result + Long.hashCode(mExecutionEndTimeMs);
         result = 31 * result + (mParentSession != null ? mParentSession.hashCode() : 0);
-        result = 31 * result + (mChildSessions != null ? mChildSessions.hashCode() : 0);
+        result = 31 * result + mChildSessions.hashCode();
         result = 31 * result + (mIsCompleted ? 1 : 0);
-        result = 31 * result + mChildCounter;
+        result = 31 * result + mChildCounter.hashCode();
         result = 31 * result + (mIsStartedFromActiveSession ? 1 : 0);
         result = 31 * result + (mOwnerInfo != null ? mOwnerInfo.hashCode() : 0);
         return result;
@@ -432,23 +540,13 @@ public class Session {
         if (mExecutionStartTimeMs != session.mExecutionStartTimeMs) return false;
         if (mExecutionEndTimeMs != session.mExecutionEndTimeMs) return false;
         if (mIsCompleted != session.mIsCompleted) return false;
-        if (mChildCounter != session.mChildCounter) return false;
+        if (!(mChildCounter.get() == session.mChildCounter.get())) return false;
         if (mIsStartedFromActiveSession != session.mIsStartedFromActiveSession) return false;
-        if (mSessionId != null ?
-                !mSessionId.equals(session.mSessionId) : session.mSessionId != null)
-            return false;
-        if (mShortMethodName != null ? !mShortMethodName.equals(session.mShortMethodName)
-                : session.mShortMethodName != null)
-            return false;
-        if (mParentSession != null ? !mParentSession.equals(session.mParentSession)
-                : session.mParentSession != null)
-            return false;
-        if (mChildSessions != null ? !mChildSessions.equals(session.mChildSessions)
-                : session.mChildSessions != null)
-            return false;
-        return mOwnerInfo != null ? mOwnerInfo.equals(session.mOwnerInfo)
-                : session.mOwnerInfo == null;
-
+        if (!Objects.equals(mSessionId, session.mSessionId)) return false;
+        if (!Objects.equals(mShortMethodName, session.mShortMethodName)) return false;
+        if (!Objects.equals(mParentSession, session.mParentSession)) return false;
+        if (!Objects.equals(mChildSessions, session.mChildSessions)) return false;
+        return Objects.equals(mOwnerInfo, session.mOwnerInfo);
     }
 
     @Override

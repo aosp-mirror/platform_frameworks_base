@@ -1022,7 +1022,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 // Close.
                 file.finishWrite(outs);
             } catch (IOException e) {
-                Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
+                Slog.w(TAG, "Failed to write to file " + file.getBaseFile(), e);
                 file.failWrite(outs);
             }
         }
@@ -1055,7 +1055,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     final String tag = parser.getName();
                     if (depth == 1) {
                         if (!TAG_ROOT.equals(tag)) {
-                            Slog.e(TAG, "Invalid root tag: " + tag);
+                            Slog.v(TAG, "Invalid root tag: " + tag);
                             return;
                         }
                         continue;
@@ -1066,7 +1066,7 @@ public class ShortcutService extends IShortcutService.Stub {
                             mRawLastResetTime.set(parseLongAttribute(parser, ATTR_VALUE));
                             break;
                         default:
-                            Slog.e(TAG, "Invalid tag: " + tag);
+                            Slog.v(TAG, "Invalid tag: " + tag);
                             break;
                     }
                 }
@@ -1113,7 +1113,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 // Remove all dangling bitmap files.
                 cleanupDanglingBitmapDirectoriesLocked(userId);
             } catch (XmlPullParserException | IOException e) {
-                Slog.e(TAG, "Failed to write to file " + file, e);
+                Slog.w(TAG, "Failed to write to file " + file, e);
                 file.failWrite(os);
             }
         }

@@ -19,6 +19,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.res.R;
 
@@ -78,6 +80,12 @@ public interface QSHost {
      */
     void addTile(String spec, int requestPosition);
     void addTile(ComponentName tile);
+
+    /**
+     * Click on a tile. Used by external commands
+     * @param tile the component name of the {@link android.service.quicksettings.TileService}
+     */
+    void clickTile(@NonNull ComponentName tile);
 
     /**
      * Adds a custom tile to the set of current tiles.

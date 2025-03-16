@@ -605,7 +605,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     @Test
     public void testGetOrCreateRootHomeTask_supportedSecondaryDisplay() {
         DisplayContent display = createNewDisplay();
-        doReturn(true).when(display).supportsSystemDecorations();
+        doReturn(true).when(display).isSystemDecorationsSupported();
 
         // Remove the current home root task if it exists so a new one can be created below.
         TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
@@ -622,7 +622,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     public void testGetOrCreateRootHomeTask_unsupportedSystemDecorations() {
         DisplayContent display = createNewDisplay();
         TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
-        doReturn(false).when(display).supportsSystemDecorations();
+        doReturn(false).when(display).isSystemDecorationsSupported();
 
         assertNull(taskDisplayArea.getRootHomeTask());
         assertNull(taskDisplayArea.getOrCreateRootHomeTask());

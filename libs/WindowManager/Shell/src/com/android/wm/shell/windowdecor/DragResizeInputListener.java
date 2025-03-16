@@ -29,10 +29,12 @@ import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP;
+import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.isEdgeResizePermitted;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.isEventFromTouchscreen;
 
 import android.annotation.NonNull;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -59,6 +61,7 @@ import android.window.InputTransferToken;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -83,14 +86,17 @@ class DragResizeInputListener implements AutoCloseable {
     private final TaskResizeInputEventReceiver mInputEventReceiver;
 
     private final Context mContext;
+    private final RunningTaskInfo mTaskInfo;
     private final SurfaceControl mInputSinkSurface;
     private final IBinder mSinkClientToken;
     private final InputChannel mSinkInputChannel;
     private final DisplayController mDisplayController;
+    private final DesktopModeEventLogger mDesktopModeEventLogger;
     private final Region mTouchRegion = new Region();
 
     DragResizeInputListener(
             Context context,
+            RunningTaskInfo taskInfo,
             Handler handler,
             Choreographer choreographer,
             int displayId,
@@ -98,12 +104,15 @@ class DragResizeInputListener implements AutoCloseable {
             DragPositioningCallback callback,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
-            DisplayController displayController) {
+            DisplayController displayController,
+            DesktopModeEventLogger desktopModeEventLogger) {
         mContext = context;
+        mTaskInfo = taskInfo;
         mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mDisplayId = displayId;
         mDecorationSurface = decorationSurface;
         mDisplayController = displayController;
+        mDesktopModeEventLogger = desktopModeEventLogger;
         mClientToken = new Binder();
         final InputTransferToken inputTransferToken = new InputTransferToken();
         mInputChannel = new InputChannel();
@@ -125,11 +134,12 @@ class DragResizeInputListener implements AutoCloseable {
             e.rethrowFromSystemServer();
         }
 
-        mInputEventReceiver = new TaskResizeInputEventReceiver(context, mInputChannel, callback,
+        mInputEventReceiver = new TaskResizeInputEventReceiver(context, mTaskInfo, mInputChannel,
+                callback,
                 handler, choreographer, () -> {
             final DisplayLayout layout = mDisplayController.getDisplayLayout(mDisplayId);
             return new Size(layout.width(), layout.height());
-        }, this::updateSinkInputChannel);
+        }, this::updateSinkInputChannel, mDesktopModeEventLogger);
         mInputEventReceiver.setTouchSlop(ViewConfiguration.get(context).getScaledTouchSlop());
 
         mInputSinkSurface = surfaceControlBuilderSupplier.get()
@@ -161,6 +171,22 @@ class DragResizeInputListener implements AutoCloseable {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    DragResizeInputListener(
+            Context context,
+            RunningTaskInfo taskInfo,
+            Handler handler,
+            Choreographer choreographer,
+            int displayId,
+            SurfaceControl decorationSurface,
+            DragPositioningCallback callback,
+            Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
+            Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
+            DisplayController displayController) {
+        this(context, taskInfo, handler, choreographer, displayId, decorationSurface, callback,
+                surfaceControlBuilderSupplier, surfaceControlTransactionSupplier, displayController,
+                new DesktopModeEventLogger());
     }
 
     /**
@@ -274,6 +300,7 @@ class DragResizeInputListener implements AutoCloseable {
     private static class TaskResizeInputEventReceiver extends InputEventReceiver implements
             DragDetector.MotionEventHandler {
         @NonNull private final Context mContext;
+        @NonNull private final RunningTaskInfo mTaskInfo;
         private final InputManager mInputManager;
         @NonNull private final InputChannel mInputChannel;
         @NonNull private final DragPositioningCallback mCallback;
@@ -282,6 +309,7 @@ class DragResizeInputListener implements AutoCloseable {
         @NonNull private final DragDetector mDragDetector;
         @NonNull private final Supplier<Size> mDisplayLayoutSizeSupplier;
         @NonNull private final Consumer<Region> mTouchRegionConsumer;
+        @NonNull private final DesktopModeEventLogger mDesktopModeEventLogger;
         private final Rect mTmpRect = new Rect();
         private boolean mConsumeBatchEventScheduled;
         private DragResizeWindowGeometry mDragResizeWindowGeometry;
@@ -293,15 +321,24 @@ class DragResizeInputListener implements AutoCloseable {
         // resize events. For example, if multiple fingers are touching the screen, then each one
         // has a separate pointer id, but we only accept drag input from one.
         private int mDragPointerId = -1;
+        // The type of resizing that is currently being done. Used to track the same resize trigger
+        // on start and end of the resizing action.
+        private ResizeTrigger mResizeTrigger = ResizeTrigger.UNKNOWN_RESIZE_TRIGGER;
+        // The last MotionEvent on ACTION_DOWN, used to track the input tool type and source for
+        // logging the start and end of the resizing action.
+        private MotionEvent mLastMotionEventOnDown;
 
         private TaskResizeInputEventReceiver(@NonNull Context context,
+                @NonNull RunningTaskInfo taskInfo,
                 @NonNull InputChannel inputChannel,
                 @NonNull DragPositioningCallback callback, @NonNull Handler handler,
                 @NonNull Choreographer choreographer,
                 @NonNull Supplier<Size> displayLayoutSizeSupplier,
-                @NonNull Consumer<Region> touchRegionConsumer) {
+                @NonNull Consumer<Region> touchRegionConsumer,
+                @NonNull DesktopModeEventLogger desktopModeEventLogger) {
             super(inputChannel, handler.getLooper());
             mContext = context;
+            mTaskInfo = taskInfo;
             mInputManager = context.getSystemService(InputManager.class);
             mInputChannel = inputChannel;
             mCallback = callback;
@@ -322,6 +359,7 @@ class DragResizeInputListener implements AutoCloseable {
                     ViewConfiguration.get(mContext).getScaledTouchSlop());
             mDisplayLayoutSizeSupplier = displayLayoutSizeSupplier;
             mTouchRegionConsumer = touchRegionConsumer;
+            mDesktopModeEventLogger = desktopModeEventLogger;
         }
 
         /**
@@ -395,6 +433,7 @@ class DragResizeInputListener implements AutoCloseable {
         @Override
         public boolean handleMotionEvent(View v, MotionEvent e) {
             boolean result = false;
+
             // Check if this is a touch event vs mouse event.
             // Touch events are tracked in four corners. Other events are tracked in resize edges.
             switch (e.getActionMasked()) {
@@ -416,6 +455,15 @@ class DragResizeInputListener implements AutoCloseable {
                                 "%s: Handling action down, update ctrlType to %d", TAG, ctrlType);
                         mDragStartTaskBounds = mCallback.onDragPositioningStart(ctrlType,
                                 rawX, rawY);
+                        mLastMotionEventOnDown = e;
+                        mResizeTrigger = (ctrlType == CTRL_TYPE_BOTTOM || ctrlType == CTRL_TYPE_TOP
+                                || ctrlType == CTRL_TYPE_RIGHT || ctrlType == CTRL_TYPE_LEFT)
+                                ? ResizeTrigger.EDGE : ResizeTrigger.CORNER;
+                        mDesktopModeEventLogger.logTaskResizingStarted(mResizeTrigger,
+                                DesktopModeEventLogger.getInputMethodFromMotionEvent(e),
+                                mTaskInfo, mDragStartTaskBounds.width(),
+                                mDragStartTaskBounds.height(), /* displayController= */ null,
+                                /* displayLayoutSize= */ mDisplayLayoutSizeSupplier.get());
                         // Increase the input sink region to cover the whole screen; this is to
                         // prevent input and focus from going to other tasks during a drag resize.
                         updateInputSinkRegionForDrag(mDragStartTaskBounds);
@@ -464,6 +512,13 @@ class DragResizeInputListener implements AutoCloseable {
                         if (taskBounds.equals(mDragStartTaskBounds)) {
                             mTouchRegionConsumer.accept(mTouchRegion);
                         }
+
+                        mDesktopModeEventLogger.logTaskResizingEnded(mResizeTrigger,
+                                DesktopModeEventLogger.getInputMethodFromMotionEvent(
+                                        mLastMotionEventOnDown), mTaskInfo, taskBounds.width(),
+                                taskBounds.height(),
+                                /* displayController= */ null,
+                                /* displayLayoutSize= */ mDisplayLayoutSizeSupplier.get());
                     }
                     mShouldHandleEvents = false;
                     mDragPointerId = -1;

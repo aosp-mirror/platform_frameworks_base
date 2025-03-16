@@ -33,7 +33,7 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * To run this test: `atest FlickerTestsIme1:CloseImeOnDismissPopupDialogTest`
+ * To run this test: `atest FlickerTestsIme:CloseImeOnDismissPopupDialogTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

@@ -32,7 +32,9 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.R;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * LocalBluetoothLeBroadcastAssistant provides an interface between the Settings app and the
@@ -63,6 +66,7 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
     private BluetoothLeBroadcastMetadata mBluetoothLeBroadcastMetadata;
     private BluetoothLeBroadcastMetadata.Builder mBuilder;
     private boolean mIsProfileReady;
+    private Executor mExecutor;
     // Cached assistant callbacks being register before service is connected.
     private final Map<BluetoothLeBroadcastAssistant.Callback, Executor> mCachedCallbackExecutorMap =
             new ConcurrentHashMap<>();
@@ -98,15 +102,19 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
                     }
 
                     mProfileManager.callServiceConnectedListeners();
-                    mIsProfileReady = true;
-                    if (DEBUG) {
-                        Log.d(
-                                TAG,
-                                "onServiceConnected, register mCachedCallbackExecutorMap = "
-                                        + mCachedCallbackExecutorMap);
+                    if (!mIsProfileReady) {
+                        mIsProfileReady = true;
+                        registerServiceCallBack(mExecutor, mAssistantCallback);
+                        if (DEBUG) {
+                            Log.d(
+                                    TAG,
+                                    "onServiceConnected, register mCachedCallbackExecutorMap = "
+                                            + mCachedCallbackExecutorMap);
+                        }
+                        mCachedCallbackExecutorMap.forEach(
+                                (callback, executor) -> registerServiceCallBack(executor,
+                                        callback));
                     }
-                    mCachedCallbackExecutorMap.forEach(
-                            (callback, executor) -> registerServiceCallBack(executor, callback));
                 }
 
                 @Override
@@ -119,9 +127,62 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
                         Log.d(TAG, "Bluetooth service disconnected");
                     }
                     mProfileManager.callServiceDisconnectedListeners();
-                    mIsProfileReady = false;
-                    mCachedCallbackExecutorMap.clear();
+                    if (mIsProfileReady) {
+                        mIsProfileReady = false;
+                        unregisterServiceCallBack(mAssistantCallback);
+                        mCachedCallbackExecutorMap.clear();
+                    }
                 }
+            };
+
+    private final BluetoothLeBroadcastAssistant.Callback mAssistantCallback =
+            new BluetoothLeBroadcastAssistant.Callback() {
+                @Override
+                public void onSourceAdded(@NonNull BluetoothDevice sink, int sourceId, int reason) {
+                }
+
+                @Override
+                public void onSearchStarted(int reason) {}
+
+                @Override
+                public void onSearchStartFailed(int reason) {}
+
+                @Override
+                public void onSearchStopped(int reason) {}
+
+                @Override
+                public void onSearchStopFailed(int reason) {}
+
+                @Override
+                public void onSourceFound(@NonNull BluetoothLeBroadcastMetadata source) {}
+
+                @Override
+                public void onSourceAddFailed(
+                        @NonNull BluetoothDevice sink,
+                        @NonNull BluetoothLeBroadcastMetadata source,
+                        int reason) {}
+
+                @Override
+                public void onSourceModified(
+                        @NonNull BluetoothDevice sink, int sourceId, int reason) {}
+
+                @Override
+                public void onSourceModifyFailed(
+                        @NonNull BluetoothDevice sink, int sourceId, int reason) {}
+
+                @Override
+                public void onSourceRemoved(
+                        @NonNull BluetoothDevice sink, int sourceId, int reason) {}
+
+                @Override
+                public void onSourceRemoveFailed(
+                        @NonNull BluetoothDevice sink, int sourceId, int reason) {}
+
+                @Override
+                public void onReceiveStateChanged(
+                        @NonNull BluetoothDevice sink,
+                        int sourceId,
+                        @NonNull BluetoothLeBroadcastReceiveState state) {}
             };
 
     public LocalBluetoothLeBroadcastAssistant(
@@ -130,6 +191,7 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
             LocalBluetoothProfileManager profileManager) {
         mProfileManager = profileManager;
         mDeviceManager = deviceManager;
+        mExecutor = Executors.newSingleThreadExecutor();
         BluetoothAdapter.getDefaultAdapter()
                 .getProfileProxy(
                         context, mServiceListener, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
@@ -309,6 +371,27 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
             return new ArrayList<BluetoothLeBroadcastReceiveState>();
         }
         return mService.getAllSources(sink);
+    }
+
+    /**
+     * Gets the {@link BluetoothLeBroadcastMetadata} of a specified source added to this sink.
+     *
+     * @param sink Broadcast Sink device
+     * @param sourceId Broadcast source id
+     * @return metadata {@link BluetoothLeBroadcastMetadata} associated with the specified source.
+     */
+    public @Nullable BluetoothLeBroadcastMetadata getSourceMetadata(
+            @NonNull BluetoothDevice sink, @IntRange(from = 0x00, to = 0xFF) int sourceId) {
+        if (mService == null) {
+            Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
+            return null;
+        }
+        try {
+            return mService.getSourceMetadata(sink, sourceId);
+        } catch (IllegalArgumentException | NoSuchMethodError e) {
+            Log.w(TAG, "Error calling getSourceMetadata()", e);
+        }
+        return null;
     }
 
     /**

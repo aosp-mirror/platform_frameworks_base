@@ -20,40 +20,36 @@
 
      Typical shortcuts (not necessarily defined here):
        'b': Browser
-       'c': Contacts
+       'p': Contacts
        'e': Email
-       'g': GMail
-       'k': Calendar
+       'c': Calendar
        'm': Maps
-       'p': Music
-       's': SMS
-       't': Talk
        'u': Calculator
        'y': YouTube
 -->
-<bookmarks>
+<bookmarks xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <bookmark
         role="android.app.role.BROWSER"
-        shortcut="b" />
+        androidprv:keycode="KEYCODE_B"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_CONTACTS"
-        shortcut="c" />
+        androidprv:keycode="KEYCODE_P"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_EMAIL"
-        shortcut="e" />
+        androidprv:keycode="KEYCODE_E"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_CALENDAR"
-        shortcut="k" />
+        androidprv:keycode="KEYCODE_C"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_MAPS"
-        shortcut="m" />
-    <bookmark
-        category="android.intent.category.APP_MUSIC"
-        shortcut="p" />
-    <bookmark
-        role="android.app.role.SMS"
-        shortcut="s" />
+        androidprv:keycode="KEYCODE_M"
+        androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_CALCULATOR"
-        shortcut="u" />
+        androidprv:keycode="KEYCODE_U"
+        androidprv:modifierState="META" />
 </bookmarks>

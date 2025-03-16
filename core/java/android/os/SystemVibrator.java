@@ -18,8 +18,11 @@ package android.os;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.hardware.vibrator.IVibratorManager;
+import android.os.vibrator.VendorVibrationSession;
 import android.os.vibrator.VibratorInfoFactory;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -53,6 +56,7 @@ public class SystemVibrator extends Vibrator {
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private VibratorInfo mVibratorInfo;
+    private int[] mVibratorIds;
 
     @UnsupportedAppUsage
     public SystemVibrator(Context context) {
@@ -71,7 +75,11 @@ public class SystemVibrator extends Vibrator {
                 Log.w(TAG, "Failed to retrieve vibrator info; no vibrator manager.");
                 return VibratorInfo.EMPTY_VIBRATOR_INFO;
             }
-            int[] vibratorIds = mVibratorManager.getVibratorIds();
+            int[] vibratorIds = getVibratorIds();
+            if (vibratorIds == null) {
+                Log.w(TAG, "Failed to retrieve vibrator info; error retrieving vibrator ids.");
+                return VibratorInfo.EMPTY_VIBRATOR_INFO;
+            }
             if (vibratorIds.length == 0) {
                 // It is known that the device has no vibrator, so cache and return info that
                 // reflects the lack of support for effects/primitives.
@@ -95,20 +103,22 @@ public class SystemVibrator extends Vibrator {
 
     @Override
     public boolean hasVibrator() {
-        if (mVibratorManager == null) {
+        int[] vibratorIds = getVibratorIds();
+        if (vibratorIds == null) {
             Log.w(TAG, "Failed to check if vibrator exists; no vibrator manager.");
             return false;
         }
-        return mVibratorManager.getVibratorIds().length > 0;
+        return vibratorIds.length > 0;
     }
 
     @Override
     public boolean isVibrating() {
-        if (mVibratorManager == null) {
+        int[] vibratorIds = getVibratorIds();
+        if (vibratorIds == null) {
             Log.w(TAG, "Failed to vibrate; no vibrator manager.");
             return false;
         }
-        for (int vibratorId : mVibratorManager.getVibratorIds()) {
+        for (int vibratorId : vibratorIds) {
             if (mVibratorManager.getVibrator(vibratorId).isVibrating()) {
                 return true;
             }
@@ -136,6 +146,11 @@ public class SystemVibrator extends Vibrator {
             Log.w(TAG, "Failed to add vibrate state listener; no vibrator manager.");
             return;
         }
+        int[] vibratorIds = getVibratorIds();
+        if (vibratorIds == null) {
+            Log.w(TAG, "Failed to add vibrate state listener; error retrieving vibrator ids.");
+            return;
+        }
         MultiVibratorStateListener delegate = null;
         try {
             synchronized (mRegisteredListeners) {
@@ -145,7 +160,7 @@ public class SystemVibrator extends Vibrator {
                     return;
                 }
                 delegate = new MultiVibratorStateListener(executor, listener);
-                delegate.register(mVibratorManager);
+                delegate.register(mVibratorManager, vibratorIds);
                 mRegisteredListeners.put(listener, delegate);
                 delegate = null;
             }
@@ -181,6 +196,11 @@ public class SystemVibrator extends Vibrator {
     @Override
     public boolean hasAmplitudeControl() {
         return getInfo().hasAmplitudeControl();
+    }
+
+    @Override
+    public boolean areVendorSessionsSupported() {
+        return mVibratorManager.hasCapabilities(IVibratorManager.CAP_START_SESSIONS);
     }
 
     @Override
@@ -241,6 +261,41 @@ public class SystemVibrator extends Vibrator {
             return;
         }
         mVibratorManager.cancel(usageFilter);
+    }
+
+    @Override
+    public void startVendorSession(@NonNull VibrationAttributes attrs, @Nullable String reason,
+            @Nullable CancellationSignal cancellationSignal, @NonNull Executor executor,
+            @NonNull VendorVibrationSession.Callback callback) {
+        if (mVibratorManager == null) {
+            Log.w(TAG, "Failed to start vibration session; no vibrator manager.");
+            executor.execute(
+                    () -> callback.onFinished(VendorVibrationSession.STATUS_UNKNOWN_ERROR));
+            return;
+        }
+        int[] vibratorIds = getVibratorIds();
+        if (vibratorIds == null) {
+            Log.w(TAG, "Failed to start vibration session; error retrieving vibrator ids.");
+            executor.execute(
+                    () -> callback.onFinished(VendorVibrationSession.STATUS_UNKNOWN_ERROR));
+            return;
+        }
+        mVibratorManager.startVendorSession(vibratorIds, attrs, reason, cancellationSignal,
+                executor, callback);
+    }
+
+    @Nullable
+    private int[] getVibratorIds() {
+        synchronized (mLock) {
+            if (mVibratorIds != null) {
+                return mVibratorIds;
+            }
+            if (mVibratorManager == null) {
+                Log.w(TAG, "Failed to retrieve vibrator ids; no vibrator manager.");
+                return null;
+            }
+            return mVibratorIds = mVibratorManager.getVibratorIds();
+        }
     }
 
     /**
@@ -319,8 +374,7 @@ public class SystemVibrator extends Vibrator {
         }
 
         /** Registers a listener to all individual vibrators in {@link VibratorManager}. */
-        public void register(VibratorManager vibratorManager) {
-            int[] vibratorIds = vibratorManager.getVibratorIds();
+        public void register(VibratorManager vibratorManager, @NonNull int[] vibratorIds) {
             synchronized (mLock) {
                 for (int i = 0; i < vibratorIds.length; i++) {
                     int vibratorId = vibratorIds[i];

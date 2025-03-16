@@ -16,76 +16,62 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/list_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingHorizontal="16dp"
-    android:paddingBottom="8dp">
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/materialColorSurfaceVariant"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="12dp"
-        android:visibility="gone"
-        android:importantForAccessibility="no"/>
-
-    <TextView
-        android:id="@+id/header_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:fontFamily="google-sans-text"
-        android:textAppearance="?attr/textAppearance"
-        android:textColor="?attr/materialColorPrimary"
-        android:visibility="gone"/>
+    android:minHeight="72dp"
+    android:background="@drawable/input_method_switch_item_background"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginBottom="8dp"
+    android:paddingStart="20dp"
+    android:paddingEnd="24dp"
+    android:paddingVertical="8dp">
 
     <LinearLayout
-        android:id="@+id/list_item"
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:background="@drawable/input_method_switch_item_background"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingEnd="24dp">
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="start|center_vertical"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="start|center_vertical"
-            android:orientation="vertical">
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="1"
+            android:singleLine="true"
+            android:fontFamily="google-sans-text"
+            android:textColor="@color/input_method_switch_on_item"
+            android:textAppearance="?attr/textAppearanceListItem"/>
 
-            <TextView
-                android:id="@+id/text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="marquee"
-                android:singleLine="true"
-                android:fontFamily="google-sans-text"
-                android:textColor="@color/input_method_switch_on_item"
-                android:textAppearance="?attr/textAppearanceListItem"/>
-
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/image"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:gravity="center_vertical"
-            android:layout_marginStart="12dp"
-            android:src="@drawable/ic_check_24dp"
-            android:tint="@color/input_method_switch_on_item"
-            android:visibility="gone"
-            android:importantForAccessibility="no"/>
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="1"
+            android:singleLine="true"
+            android:fontFamily="google-sans-text"
+            android:textColor="?attr/materialColorOnSurfaceVariant"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textAllCaps="true"
+            android:visibility="gone"/>
 
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:gravity="center_vertical"
+        android:layout_marginStart="12dp"
+        android:src="@drawable/ic_check_24dp"
+        android:tint="@color/input_method_switch_on_item"
+        android:visibility="gone"
+        android:importantForAccessibility="no"/>
 
 </LinearLayout>

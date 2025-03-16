@@ -53,8 +53,8 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     public static final String TILE_SPEC = "work";
 
-    private final Icon mIcon = ResourceIcon.get(
-            com.android.internal.R.drawable.stat_sys_managed_profile_status);
+    @Nullable
+    private Icon mIcon = null;
 
     private final ManagedProfileController mProfileController;
 
@@ -127,6 +127,11 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             state.value = (Boolean) arg;
         } else {
             state.value = mProfileController.isWorkModeEnabled();
+        }
+
+        if (mIcon == null) {
+            mIcon = maybeLoadResourceIcon(
+                    com.android.internal.R.drawable.stat_sys_managed_profile_status);
         }
 
         state.icon = mIcon;

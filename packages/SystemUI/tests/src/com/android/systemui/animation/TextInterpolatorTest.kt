@@ -31,11 +31,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
+import java.io.File
+import kotlin.math.ceil
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
-import kotlin.math.ceil
 
 private const val TEXT = "Hello, World."
 private const val BIDI_TEXT = "abc\u05D0\u05D1\u05D2"
@@ -47,20 +47,23 @@ private const val BMP_HEIGHT = 300
 private val VF_FONT = Font.Builder(File("/system/fonts/Roboto-Regular.ttf")).build()
 
 private fun Font.toTypeface() =
-        Typeface.CustomFallbackBuilder(FontFamily.Builder(this).build()).build()
+    Typeface.CustomFallbackBuilder(FontFamily.Builder(this).build()).build()
 
-internal val PAINT = TextPaint().apply {
-    typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 400").build().toTypeface()
-    textSize = 32f
-}
+internal val PAINT =
+    TextPaint().apply {
+        typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 400").build().toTypeface()
+        textSize = 32f
+    }
 
-private val START_PAINT = TextPaint(PAINT).apply {
-    typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 400").build().toTypeface()
-}
+private val START_PAINT =
+    TextPaint(PAINT).apply {
+        typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 400").build().toTypeface()
+    }
 
-private val END_PAINT = TextPaint(PAINT).apply {
-    typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 700").build().toTypeface()
-}
+private val END_PAINT =
+    TextPaint(PAINT).apply {
+        typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 700").build().toTypeface()
+    }
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -70,16 +73,17 @@ class TextInterpolatorTest : SysuiTestCase() {
     private fun makeLayout(
         text: String,
         paint: TextPaint,
-        dir: TextDirectionHeuristic = TextDirectionHeuristics.LTR
+        dir: TextDirectionHeuristic = TextDirectionHeuristics.LTR,
     ): Layout {
         val width = ceil(Layout.getDesiredWidth(text, 0, text.length, paint)).toInt()
         return StaticLayout.Builder.obtain(text, 0, text.length, paint, width)
-                .setTextDirection(dir).build()
+            .setTextDirection(dir)
+            .build()
     }
 
     @Before
     fun setup() {
-        typefaceCache = TypefaceVariantCacheImpl(PAINT.typeface)
+        typefaceCache = TypefaceVariantCacheImpl(PAINT.typeface, 10)
     }
 
     @Test
@@ -135,10 +139,10 @@ class TextInterpolatorTest : SysuiTestCase() {
         // end state.
         interp.progress = 0.5f
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        assertThat(actual.sameAs(makeLayout(TEXT, START_PAINT)
-            .toBitmap(BMP_WIDTH, BMP_HEIGHT))).isFalse()
-        assertThat(actual.sameAs(makeLayout(TEXT, END_PAINT)
-            .toBitmap(BMP_WIDTH, BMP_HEIGHT))).isFalse()
+        assertThat(actual.sameAs(makeLayout(TEXT, START_PAINT).toBitmap(BMP_WIDTH, BMP_HEIGHT)))
+            .isFalse()
+        assertThat(actual.sameAs(makeLayout(TEXT, END_PAINT).toBitmap(BMP_WIDTH, BMP_HEIGHT)))
+            .isFalse()
     }
 
     @Test
@@ -177,7 +181,8 @@ class TextInterpolatorTest : SysuiTestCase() {
         // Just after created TextInterpolator, it should have 0 progress.
         assertThat(interp.progress).isEqualTo(0f)
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.LTR)
+        val expected =
+            makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.LTR)
                 .toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
@@ -197,7 +202,8 @@ class TextInterpolatorTest : SysuiTestCase() {
         // Just after created TextInterpolator, it should have 0 progress.
         assertThat(interp.progress).isEqualTo(0f)
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
+        val expected =
+            makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
                 .toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
@@ -207,10 +213,8 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_Empty() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout, typefaceCache).apply {
-            glyphFilter = { glyph, progress ->
-            }
-        }
+        val interp =
+            TextInterpolator(layout, typefaceCache).apply { glyphFilter = { glyph, progress -> } }
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -219,7 +223,8 @@ class TextInterpolatorTest : SysuiTestCase() {
 
         // Just after created TextInterpolator, it should have 0 progress.
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
+        val expected =
+            makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
                 .toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
@@ -229,11 +234,10 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_Xcoordinate() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout, typefaceCache).apply {
-            glyphFilter = { glyph, progress ->
-                glyph.x += 30f
+        val interp =
+            TextInterpolator(layout, typefaceCache).apply {
+                glyphFilter = { glyph, progress -> glyph.x += 30f }
             }
-        }
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -242,7 +246,8 @@ class TextInterpolatorTest : SysuiTestCase() {
 
         // Just after created TextInterpolator, it should have 0 progress.
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
+        val expected =
+            makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
                 .toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         // The glyph position was modified by callback, so the bitmap should not be the same.
@@ -254,11 +259,10 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_Ycoordinate() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout, typefaceCache).apply {
-            glyphFilter = { glyph, progress ->
-                glyph.y += 30f
+        val interp =
+            TextInterpolator(layout, typefaceCache).apply {
+                glyphFilter = { glyph, progress -> glyph.y += 30f }
             }
-        }
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -267,7 +271,8 @@ class TextInterpolatorTest : SysuiTestCase() {
 
         // Just after created TextInterpolator, it should have 0 progress.
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
+        val expected =
+            makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
                 .toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         // The glyph position was modified by callback, so the bitmap should not be the same.
@@ -279,11 +284,10 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_TextSize() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout, typefaceCache).apply {
-            glyphFilter = { glyph, progress ->
-                glyph.textSize += 10f
+        val interp =
+            TextInterpolator(layout, typefaceCache).apply {
+                glyphFilter = { glyph, progress -> glyph.textSize += 10f }
             }
-        }
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -292,7 +296,8 @@ class TextInterpolatorTest : SysuiTestCase() {
 
         // Just after created TextInterpolator, it should have 0 progress.
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
+        val expected =
+            makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
                 .toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         // The glyph position was modified by callback, so the bitmap should not be the same.
@@ -304,11 +309,10 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_Color() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout, typefaceCache).apply {
-            glyphFilter = { glyph, progress ->
-                glyph.color = Color.RED
+        val interp =
+            TextInterpolator(layout, typefaceCache).apply {
+                glyphFilter = { glyph, progress -> glyph.color = Color.RED }
             }
-        }
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -317,7 +321,8 @@ class TextInterpolatorTest : SysuiTestCase() {
 
         // Just after created TextInterpolator, it should have 0 progress.
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
+        val expected =
+            makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
                 .toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         // The glyph position was modified by callback, so the bitmap should not be the same.
@@ -327,7 +332,7 @@ class TextInterpolatorTest : SysuiTestCase() {
 }
 
 private fun Layout.toBitmap(width: Int, height: Int) =
-        Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { draw(Canvas(it)) }!!
+    Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { draw(Canvas(it)) }!!
 
 private fun TextInterpolator.toBitmap(width: Int, height: Int) =
-        Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { draw(Canvas(it)) }
+    Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { draw(Canvas(it)) }

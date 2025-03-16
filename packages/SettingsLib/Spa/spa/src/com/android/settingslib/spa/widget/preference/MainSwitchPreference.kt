@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -35,13 +37,19 @@ import com.android.settingslib.spa.framework.util.EntryHighlight
 fun MainSwitchPreference(model: SwitchPreferenceModel) {
     EntryHighlight {
         Surface(
-            modifier = Modifier.padding(SettingsDimension.itemPaddingEnd),
-            color = when (model.checked()) {
-                true -> MaterialTheme.colorScheme.primaryContainer
-                else -> MaterialTheme.colorScheme.secondaryContainer
-            },
-            shape = if (isSpaExpressiveEnabled) CircleShape
-            else SettingsShape.CornerExtraLarge,
+            modifier =
+                Modifier.padding(SettingsDimension.itemPaddingEnd)
+                    .then(
+                        if (isSpaExpressiveEnabled)
+                            Modifier.heightIn(min = SettingsDimension.preferenceMinHeight)
+                        else Modifier
+                    ),
+            color =
+                when (model.checked()) {
+                    true -> MaterialTheme.colorScheme.primaryContainer
+                    else -> MaterialTheme.colorScheme.secondaryContainer
+                },
+            shape = if (isSpaExpressiveEnabled) CircleShape else SettingsShape.CornerExtraLarge,
         ) {
             InternalSwitchPreference(
                 title = model.title,
@@ -61,16 +69,20 @@ fun MainSwitchPreference(model: SwitchPreferenceModel) {
 private fun MainSwitchPreferencePreview() {
     SettingsTheme {
         Column {
-            MainSwitchPreference(object : SwitchPreferenceModel {
-                override val title = "Use Dark theme"
-                override val checked = { true }
-                override val onCheckedChange: (Boolean) -> Unit = {}
-            })
-            MainSwitchPreference(object : SwitchPreferenceModel {
-                override val title = "Use Dark theme"
-                override val checked = { false }
-                override val onCheckedChange: (Boolean) -> Unit = {}
-            })
+            MainSwitchPreference(
+                object : SwitchPreferenceModel {
+                    override val title = "Use Dark theme"
+                    override val checked = { true }
+                    override val onCheckedChange: (Boolean) -> Unit = {}
+                }
+            )
+            MainSwitchPreference(
+                object : SwitchPreferenceModel {
+                    override val title = "Use Dark theme"
+                    override val checked = { false }
+                    override val onCheckedChange: (Boolean) -> Unit = {}
+                }
+            )
         }
     }
 }

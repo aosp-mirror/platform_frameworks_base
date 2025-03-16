@@ -3,6 +3,7 @@ package com.android.systemui.biometrics.domain.interactor
 import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResources
 import android.content.Context
+import android.hardware.biometrics.Flags
 import android.os.UserManager
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
@@ -71,13 +72,22 @@ constructor(
         // Request LockSettingsService to return the Gatekeeper Password in the
         // VerifyCredentialResponse so that we can request a Gatekeeper HAT with the
         // Gatekeeper Password and operationId.
-        val effectiveUserId = request.userInfo.deviceCredentialOwnerId
+        var effectiveUserId = request.userInfo.deviceCredentialOwnerId
         val response =
-            lockPatternUtils.verifyCredential(
-                credential,
-                effectiveUserId,
-                LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE
-            )
+            if (Flags.privateSpaceBp() && effectiveUserId != request.userInfo.userId) {
+                effectiveUserId = request.userInfo.userId
+                lockPatternUtils.verifyTiedProfileChallenge(
+                    credential,
+                    request.userInfo.userId,
+                    LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE,
+                )
+            } else {
+                lockPatternUtils.verifyCredential(
+                    credential,
+                    effectiveUserId,
+                    LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE,
+                )
+            }
 
         if (response.isMatched) {
             lockPatternUtils.userPresent(effectiveUserId)
@@ -91,7 +101,7 @@ constructor(
                 lockPatternUtils.verifyGatekeeperPasswordHandle(
                     pwHandle,
                     request.operationInfo.gatekeeperChallenge,
-                    effectiveUserId
+                    effectiveUserId,
                 )
             val hat = gkResponse.gatekeeperHAT
             lockPatternUtils.removeGatekeeperPasswordHandle(pwHandle)
@@ -108,7 +118,7 @@ constructor(
                     CredentialStatus.Fail.Throttled(
                         applicationContext.getString(
                             R.string.biometric_dialog_credential_too_many_attempts,
-                            remaining / 1000
+                            remaining / 1000,
                         )
                     )
                 )
@@ -129,10 +139,10 @@ constructor(
                         applicationContext.getString(
                             R.string.biometric_dialog_credential_attempts_before_wipe,
                             numAttempts,
-                            maxAttempts
+                            maxAttempts,
                         ),
                         remainingAttempts,
-                        fetchFinalAttemptMessageOrNull(request, remainingAttempts)
+                        fetchFinalAttemptMessageOrNull(request, remainingAttempts),
                     )
                 )
             }
@@ -150,9 +160,9 @@ constructor(
                 devicePolicyManager,
                 userManager.getUserTypeForWipe(
                     devicePolicyManager,
-                    request.userInfo.deviceCredentialOwnerId
+                    request.userInfo.deviceCredentialOwnerId,
                 ),
-                remainingAttempts
+                remainingAttempts,
             )
         } else {
             null
@@ -205,7 +215,7 @@ private fun Context.getLastAttemptBeforeWipeMessage(
     }
 
 private fun Context.getLastAttemptBeforeWipeDeviceMessage(
-    request: BiometricPromptRequest.Credential,
+    request: BiometricPromptRequest.Credential
 ): String {
     val id =
         when (request) {
@@ -249,7 +259,7 @@ private fun Context.getLastAttemptBeforeWipeProfileMessage(
 }
 
 private fun Context.getLastAttemptBeforeWipeUserMessage(
-    request: BiometricPromptRequest.Credential,
+    request: BiometricPromptRequest.Credential
 ): String {
     val resId =
         when (request) {

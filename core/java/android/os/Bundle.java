@@ -18,10 +18,12 @@ package android.os;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Size;
@@ -62,20 +64,33 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @VisibleForTesting
     static final int FLAG_HAS_BINDERS = 1 << 12;
 
+    /**
+     * Indicates there may be intents with creator tokens contained in this bundle. When unparceled,
+     * they should be verified if tokens are missing or invalid.
+     */
+    static final int FLAG_VERIFY_TOKENS_PRESENT = 1 << 13;
+
+    /**
+     * Indicates the bundle definitely contains an Intent.
+     */
+    static final int FLAG_HAS_INTENT = 1 << 14;
+
 
     /**
      * Status when the Bundle can <b>assert</b> that the underlying Parcel DOES NOT contain
      * Binder object(s).
-     *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_HAS_BINDERS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int STATUS_BINDERS_NOT_PRESENT = 0;
 
     /**
      * Status when the Bundle can <b>assert</b> that there are Binder object(s) in the Parcel.
-     *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_HAS_BINDERS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int STATUS_BINDERS_PRESENT = 1;
 
     /**
@@ -88,9 +103,10 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * object to the Bundle but it is not possible to assert this fact unless the Bundle is written
      * to a Parcel.
      * </p>
-     *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_HAS_BINDERS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int STATUS_BINDERS_UNKNOWN = 2;
 
     /** @hide */
@@ -105,6 +121,11 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
 
     /** An unmodifiable {@code Bundle} that is always {@link #isEmpty() empty}. */
     public static final Bundle EMPTY;
+
+    /**
+     * @hide
+     */
+    public static Class<?> intentClass;
 
     /**
      * Special extras used to denote extras have been stripped off.
@@ -274,6 +295,11 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         return orig;
     }
 
+    /** {@hide} */
+    public void enableTokenVerification() {
+        mFlags |= FLAG_VERIFY_TOKENS_PRESENT;
+    }
+
     /**
      * Mark if this Bundle is okay to "defuse." That is, it's okay for system
      * processes to ignore any {@link BadParcelableException} encountered when
@@ -372,6 +398,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         if ((bundle.mFlags & FLAG_HAS_BINDERS_KNOWN) == 0) {
             mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
         }
+        mFlags |= bundle.mFlags & FLAG_HAS_INTENT;
     }
 
     /**
@@ -406,6 +433,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * Returns a status indicating whether the bundle contains any parcelled Binder objects.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_HAS_BINDERS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public @HasBinderStatus int hasBinders() {
         if ((mFlags & FLAG_HAS_BINDERS_KNOWN) != 0) {
             if ((mFlags & FLAG_HAS_BINDERS) != 0) {
@@ -427,6 +456,16 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             mFlags |= FLAG_HAS_BINDERS_KNOWN;
             return STATUS_BINDERS_NOT_PRESENT;
         }
+    }
+
+    /**
+     * Returns if the bundle definitely contains at least an intent. This method returns false does
+     * not guarantee the bundle does not contain a nested intent. An intent could still exist in a
+     * ParcelableArrayList, ParcelableArray, ParcelableList, a bundle in this bundle, etc.
+     * @hide
+     */
+    public boolean hasIntent() {
+        return (mFlags & FLAG_HAS_INTENT) != 0;
     }
 
     /** {@hide} */
@@ -551,6 +590,9 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         mMap.put(key, value);
         mFlags &= ~FLAG_HAS_FDS_KNOWN;
         mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
+        if (intentClass != null && intentClass.isInstance(value)) {
+            mFlags |= FLAG_HAS_INTENT;
+        }
     }
 
     /**

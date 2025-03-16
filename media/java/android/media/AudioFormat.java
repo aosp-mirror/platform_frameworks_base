@@ -17,6 +17,7 @@
 package android.media;
 
 import static android.media.audio.Flags.FLAG_DOLBY_AC4_LEVEL4_ENCODING_API;
+import static android.media.audio.Flags.FLAG_IAMF_DEFINITIONS_API;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -382,6 +383,103 @@ public final class AudioFormat implements Parcelable {
     @FlaggedApi(FLAG_DOLBY_AC4_LEVEL4_ENCODING_API)
     public static final int ENCODING_AC4_L4 = 32;
 
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in OPUS.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_SIMPLE_PROFILE_OPUS = 33;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in AAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_SIMPLE_PROFILE_AAC = 34;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in FLAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_SIMPLE_PROFILE_FLAC = 35;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in PCM.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_SIMPLE_PROFILE_PCM = 36;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in OPUS.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_PROFILE_OPUS = 37;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in AAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_PROFILE_AAC = 38;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in FLAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_PROFILE_FLAC = 39;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in PCM.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_PROFILE_PCM = 40;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in OPUS.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS = 41;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in AAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC = 42;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in FLAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC = 43;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in PCM.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM = 44;
+
     /** @hide */
     public static String toLogFriendlyEncoding(int enc) {
         switch(enc) {
@@ -449,6 +547,30 @@ public final class AudioFormat implements Parcelable {
                 return "ENCODING_DTS_UHD_P2";
             case ENCODING_DSD:
                 return "ENCODING_DSD";
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+                return "ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC";
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+                return "ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC";
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+                return "ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS";
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+                return "ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM";
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+                return "ENCODING_IAMF_BASE_PROFILE_AAC";
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+                return "ENCODING_IAMF_BASE_PROFILE_FLAC";
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+                return "ENCODING_IAMF_BASE_PROFILE_OPUS";
+            case ENCODING_IAMF_BASE_PROFILE_PCM:
+                return "ENCODING_IAMF_BASE_PROFILE_PCM";
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+                return "ENCODING_IAMF_SIMPLE_PROFILE_AAC";
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+                return "ENCODING_IAMF_SIMPLE_PROFILE_FLAC";
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+                return "ENCODING_IAMF_SIMPLE_PROFILE_OPUS";
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
+                return "ENCODING_IAMF_SIMPLE_PROFILE_PCM";
             default :
                 return "invalid encoding " + enc;
         }
@@ -714,7 +836,7 @@ public final class AudioFormat implements Parcelable {
     /**
      * @hide
      * Return a channel mask ready to be used by native code
-     * @param mask a combination of the CHANNEL_OUT_* definitions, but not CHANNEL_OUT_DEFAULT
+     * @param javaMask a combination of the CHANNEL_OUT_* definitions, but not CHANNEL_OUT_DEFAULT
      * @return a native channel mask
      */
     public static int convertChannelOutMaskToNativeMask(int javaMask) {
@@ -724,11 +846,96 @@ public final class AudioFormat implements Parcelable {
     /**
      * @hide
      * Return a java output channel mask
-     * @param mask a native channel mask
+     * @param nativeMask a native channel mask
      * @return a combination of the CHANNEL_OUT_* definitions
      */
     public static int convertNativeChannelMaskToOutMask(int nativeMask) {
         return (nativeMask << 2);
+    }
+
+    /**
+     * @hide
+     * Return a human-readable string from a java channel mask
+     * @param javaMask a bit field of CHANNEL_OUT_* values
+     * @return a string in the "mono", "stereo", "5.1" style, or the hex version when not a standard
+     *   mask.
+     */
+    public static String javaChannelOutMaskToString(int javaMask) {
+        // save haptics info for end of string
+        int haptics = javaMask & (CHANNEL_OUT_HAPTIC_A | CHANNEL_OUT_HAPTIC_B);
+        // continue without looking at haptic channels
+        javaMask &= ~(CHANNEL_OUT_HAPTIC_A | CHANNEL_OUT_HAPTIC_B);
+        StringBuilder result = new StringBuilder("");
+        switch (javaMask) {
+            case CHANNEL_OUT_MONO:
+                result.append("mono");
+                break;
+            case CHANNEL_OUT_STEREO:
+                result.append("stereo");
+                break;
+            case CHANNEL_OUT_QUAD:
+                result.append("quad");
+                break;
+            case CHANNEL_OUT_QUAD_SIDE:
+                result.append("quad side");
+                break;
+            case CHANNEL_OUT_SURROUND:
+                result.append("4.0");
+                break;
+            case CHANNEL_OUT_5POINT1:
+                result.append("5.1");
+                break;
+            case CHANNEL_OUT_6POINT1:
+                result.append("6.1");
+                break;
+            case CHANNEL_OUT_5POINT1_SIDE:
+                result.append("5.1 side");
+                break;
+            case CHANNEL_OUT_7POINT1:
+                result.append("7.1 (5 fronts)");
+                break;
+            case CHANNEL_OUT_7POINT1_SURROUND:
+                result.append("7.1");
+                break;
+            case CHANNEL_OUT_5POINT1POINT2:
+                result.append("5.1.2");
+                break;
+            case CHANNEL_OUT_5POINT1POINT4:
+                result.append("5.1.4");
+                break;
+            case CHANNEL_OUT_7POINT1POINT2:
+                result.append("7.1.2");
+                break;
+            case CHANNEL_OUT_7POINT1POINT4:
+                result.append("7.1.4");
+                break;
+            case CHANNEL_OUT_9POINT1POINT4:
+                result.append("9.1.4");
+                break;
+            case CHANNEL_OUT_9POINT1POINT6:
+                result.append("9.1.6");
+                break;
+            case CHANNEL_OUT_13POINT_360RA:
+                result.append("360RA 13ch");
+                break;
+            case CHANNEL_OUT_22POINT2:
+                result.append("22.2");
+                break;
+            default:
+                result.append("0x").append(Integer.toHexString(javaMask));
+                break;
+        }
+        if ((haptics & (CHANNEL_OUT_HAPTIC_A | CHANNEL_OUT_HAPTIC_B)) != 0) {
+            result.append("(+haptic ");
+            if ((haptics & CHANNEL_OUT_HAPTIC_A) == CHANNEL_OUT_HAPTIC_A) {
+                result.append("A");
+            }
+            if ((haptics & CHANNEL_OUT_HAPTIC_B) == CHANNEL_OUT_HAPTIC_B) {
+                result.append("B");
+            }
+            result.append(")");
+        }
+        return result.toString();
     }
 
     public static final int CHANNEL_IN_DEFAULT = 1;
@@ -846,6 +1053,18 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
             case ENCODING_DSD:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_PROFILE_PCM:
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
                 return true;
             default:
                 return false;
@@ -887,6 +1106,18 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
             case ENCODING_DSD:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_PROFILE_PCM:
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
                 return true;
             default:
                 return false;
@@ -930,6 +1161,18 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DRA:
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM: // PCM but inside compressed stream
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_PROFILE_PCM: // PCM but inside compressed stream
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM: // PCM but inside compressed stream
                 return false;
             case ENCODING_INVALID:
             default:
@@ -973,6 +1216,18 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DRA:
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_PROFILE_PCM:
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
                 return false;
             case ENCODING_INVALID:
             default:
@@ -1265,6 +1520,18 @@ public final class AudioFormat implements Parcelable {
                 case ENCODING_DTS_HD_MA:
                 case ENCODING_DTS_UHD_P2:
                 case ENCODING_DSD:
+                case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+                case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+                case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+                case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+                case ENCODING_IAMF_BASE_PROFILE_AAC:
+                case ENCODING_IAMF_BASE_PROFILE_FLAC:
+                case ENCODING_IAMF_BASE_PROFILE_OPUS:
+                case ENCODING_IAMF_BASE_PROFILE_PCM:
+                case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+                case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+                case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+                case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -1495,7 +1762,19 @@ public final class AudioFormat implements Parcelable {
         ENCODING_DRA,
         ENCODING_DTS_HD_MA,
         ENCODING_DTS_UHD_P2,
-        ENCODING_DSD }
+        ENCODING_DSD,
+        ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC,
+        ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC,
+        ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS,
+        ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM,
+        ENCODING_IAMF_BASE_PROFILE_AAC,
+        ENCODING_IAMF_BASE_PROFILE_FLAC,
+        ENCODING_IAMF_BASE_PROFILE_OPUS,
+        ENCODING_IAMF_BASE_PROFILE_PCM,
+        ENCODING_IAMF_SIMPLE_PROFILE_AAC,
+        ENCODING_IAMF_SIMPLE_PROFILE_FLAC,
+        ENCODING_IAMF_SIMPLE_PROFILE_OPUS,
+        ENCODING_IAMF_SIMPLE_PROFILE_PCM }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
@@ -1534,7 +1813,19 @@ public final class AudioFormat implements Parcelable {
             ENCODING_DRA,
             ENCODING_DTS_HD_MA,
             ENCODING_DTS_UHD_P2,
-            ENCODING_DSD }
+            ENCODING_DSD,
+            ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC,
+            ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC,
+            ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS,
+            ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM,
+            ENCODING_IAMF_BASE_PROFILE_AAC,
+            ENCODING_IAMF_BASE_PROFILE_FLAC,
+            ENCODING_IAMF_BASE_PROFILE_OPUS,
+            ENCODING_IAMF_BASE_PROFILE_PCM,
+            ENCODING_IAMF_SIMPLE_PROFILE_AAC,
+            ENCODING_IAMF_SIMPLE_PROFILE_FLAC,
+            ENCODING_IAMF_SIMPLE_PROFILE_OPUS,
+            ENCODING_IAMF_SIMPLE_PROFILE_PCM }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncodingCanBeInvalid {}

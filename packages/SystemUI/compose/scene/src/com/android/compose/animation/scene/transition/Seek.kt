@@ -145,7 +145,7 @@ internal suspend fun <T : ContentKey> animateProgress(
     cancelSpec: AnimationSpec<Float>?,
     animationScope: CoroutineScope? = null,
 ) {
-    fun animateOffset(targetContent: T, spec: AnimationSpec<Float>?) {
+    suspend fun animateOffset(targetContent: T, spec: AnimationSpec<Float>?) {
         if (state.transitionState != animation.contentTransition || animation.isAnimatingOffset()) {
             return
         }

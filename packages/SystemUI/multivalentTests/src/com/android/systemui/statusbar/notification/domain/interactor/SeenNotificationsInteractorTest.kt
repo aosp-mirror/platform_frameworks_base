@@ -21,7 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -57,7 +57,7 @@ class SeenNotificationsInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(NotificationMinimalismPrototype.FLAG_NAME)
+    @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun topOngoingAndUnseenNotification() = runTest {
         val entry1 = NotificationEntryBuilder().setTag("entry1").build()
         val entry2 = NotificationEntryBuilder().setTag("entry2").build()
@@ -88,6 +88,19 @@ class SeenNotificationsInteractorTest : SysuiTestCase() {
         assertThat(settingEnabled).isFalse()
 
         kosmos.lockScreenShowOnlyUnseenNotificationsSetting = true
+        testScheduler.runCurrent()
+        assertThat(settingEnabled).isTrue()
+    }
+
+    fun testLockScreenNotificationMinimalismSetting() = runTest {
+        val settingEnabled by
+            collectLastValue(underTest.isLockScreenNotificationMinimalismEnabled())
+
+        kosmos.lockScreenNotificationMinimalismSetting = false
+        testScheduler.runCurrent()
+        assertThat(settingEnabled).isFalse()
+
+        kosmos.lockScreenNotificationMinimalismSetting = true
         testScheduler.runCurrent()
         assertThat(settingEnabled).isTrue()
     }

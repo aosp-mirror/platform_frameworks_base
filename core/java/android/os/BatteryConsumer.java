@@ -69,6 +69,7 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_AMBIENT_DISPLAY,
             POWER_COMPONENT_IDLE,
             POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS,
+            POWER_COMPONENT_BASE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PowerComponent {
@@ -101,8 +102,10 @@ public abstract class BatteryConsumer {
     // The value should be negative or zero.
     public static final int POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS =
             OsProtoEnums.POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS; // 17
-
-    public static final int POWER_COMPONENT_COUNT = 18;
+    // Power component ID that is used for technical purposes of attribution of time-in-state
+    // for UIDs and other general computations not associated with specific hardware.
+    public static final int POWER_COMPONENT_BASE = 18;
+    public static final int POWER_COMPONENT_COUNT = 19;
 
     public static final int FIRST_CUSTOM_POWER_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
@@ -129,6 +132,7 @@ public abstract class BatteryConsumer {
         sPowerComponentNames[POWER_COMPONENT_AMBIENT_DISPLAY] = "ambient_display";
         sPowerComponentNames[POWER_COMPONENT_IDLE] = "idle";
         sPowerComponentNames[POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS] = "reattributed";
+        sPowerComponentNames[POWER_COMPONENT_BASE] = "";        // Top-level, no need for a name
     }
 
     /**
@@ -157,18 +161,27 @@ public abstract class BatteryConsumer {
 
     /**
      * Unspecified power model.
+     *
+     * @deprecated PowerModel is no longer supported
      */
+    @Deprecated
     public static final int POWER_MODEL_UNDEFINED = 0;
 
     /**
      * Power model that is based on average consumption rates that hardware components
      * consume in various states.
+     *
+     * @deprecated PowerModel is no longer supported
      */
+    @Deprecated
     public static final int POWER_MODEL_POWER_PROFILE = 1;
 
     /**
      * Power model that is based on energy consumption stats provided by PowerStats HAL.
+     *
+     * @deprecated PowerModel is no longer supported
      */
+    @Deprecated
     public static final int POWER_MODEL_ENERGY_CONSUMPTION = 2;
 
     /**
@@ -211,6 +224,7 @@ public abstract class BatteryConsumer {
     private static final IntArray SUPPORTED_POWER_COMPONENTS_PER_PROCESS_STATE;
     static {
         int[] supportedPowerComponents = {
+                POWER_COMPONENT_BASE,
                 POWER_COMPONENT_CPU,
                 POWER_COMPONENT_MOBILE_RADIO,
                 POWER_COMPONENT_WIFI,
@@ -220,7 +234,9 @@ public abstract class BatteryConsumer {
                 POWER_COMPONENT_FLASHLIGHT,
                 POWER_COMPONENT_CAMERA,
                 POWER_COMPONENT_GNSS,
-                POWER_COMPONENT_SENSORS};
+                POWER_COMPONENT_SENSORS,
+                POWER_COMPONENT_WAKELOCK,
+        };
         Arrays.sort(supportedPowerComponents);
         SUPPORTED_POWER_COMPONENTS_PER_PROCESS_STATE = IntArray.wrap(supportedPowerComponents);
     };
@@ -373,19 +389,17 @@ public abstract class BatteryConsumer {
         public final @ScreenState int screenState;
         public final @PowerState int powerState;
 
-        final int mPowerModelColumnIndex;
         final int mPowerColumnIndex;
         final int mDurationColumnIndex;
 
         private Key(@PowerComponentId int powerComponentId, @ProcessState int processState,
-                @ScreenState int screenState, @PowerState int powerState, int powerModelColumnIndex,
+                @ScreenState int screenState, @PowerState int powerState,
                 int powerColumnIndex, int durationColumnIndex) {
             this.powerComponentId = powerComponentId;
             this.processState = processState;
             this.screenState = screenState;
             this.powerState = powerState;
 
-            mPowerModelColumnIndex = powerModelColumnIndex;
             mPowerColumnIndex = powerColumnIndex;
             mDurationColumnIndex = durationColumnIndex;
         }
@@ -570,11 +584,11 @@ public abstract class BatteryConsumer {
      *
      * @param componentId The ID of the power component, e.g.
      *                    {@link BatteryConsumer#POWER_COMPONENT_CPU}.
+     * @deprecated PowerModel is no longer supported
      */
+    @Deprecated
     public @PowerModel int getPowerModel(@PowerComponentId int componentId) {
-        return mPowerComponents.getPowerModel(
-                mData.layout.getKeyOrThrow(componentId, PROCESS_STATE_UNSPECIFIED,
-                        SCREEN_STATE_UNSPECIFIED, POWER_STATE_UNSPECIFIED));
+        return POWER_MODEL_UNDEFINED;
     }
 
     /**
@@ -582,9 +596,11 @@ public abstract class BatteryConsumer {
      *
      * @param key The key of the power component, obtained by calling {@link #getKey} or
      *            {@link #getKeys} method.
+     * @deprecated PowerModel is no longer supported
      */
+    @Deprecated
     public @PowerModel int getPowerModel(@NonNull BatteryConsumer.Key key) {
-        return mPowerComponents.getPowerModel(key);
+        return POWER_MODEL_UNDEFINED;
     }
 
     /**
@@ -647,20 +663,6 @@ public abstract class BatteryConsumer {
             return "all";
         }
         return sPowerComponentNames[componentId];
-    }
-
-    /**
-     * Returns the name of the specified power model.  Intended for logging and debugging.
-     */
-    public static String powerModelToString(@BatteryConsumer.PowerModel int powerModel) {
-        switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
-                return "energy consumption";
-            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
-                return "power profile";
-            default:
-                return "";
-        }
     }
 
     /**
@@ -850,10 +852,8 @@ public abstract class BatteryConsumer {
 
     static class BatteryConsumerDataLayout {
         private static final Key[] KEY_ARRAY = new Key[0];
-        public static final int POWER_MODEL_NOT_INCLUDED = -1;
         public final String[] customPowerComponentNames;
         public final int customPowerComponentCount;
-        public final boolean powerModelsIncluded;
         public final boolean processStateDataIncluded;
         public final boolean screenStateDataIncluded;
         public final boolean powerStateDataIncluded;
@@ -865,11 +865,10 @@ public abstract class BatteryConsumer {
         private SparseArray<Key[]> mPerComponentKeys;
 
         private BatteryConsumerDataLayout(int firstColumn, String[] customPowerComponentNames,
-                boolean powerModelsIncluded, boolean includeProcessStateData,
-                boolean includeScreenState, boolean includePowerState) {
+                boolean includeProcessStateData, boolean includeScreenState,
+                boolean includePowerState) {
             this.customPowerComponentNames = customPowerComponentNames;
             this.customPowerComponentCount = customPowerComponentNames.length;
-            this.powerModelsIncluded = powerModelsIncluded;
             this.processStateDataIncluded = includeProcessStateData;
             this.screenStateDataIncluded = includeScreenState;
             this.powerStateDataIncluded = includePowerState;
@@ -897,7 +896,7 @@ public abstract class BatteryConsumer {
                         continue;
                     }
                     for (int i = 0; i < powerComponentIds.length; i++) {
-                        columnIndex = addKeys(keyList, powerModelsIncluded, includeProcessStateData,
+                        columnIndex = addKeys(keyList, includeProcessStateData,
                                 powerComponentIds[i], screenState, powerState, columnIndex);
                     }
                 }
@@ -927,19 +926,16 @@ public abstract class BatteryConsumer {
             }
         }
 
-        private int addKeys(List<Key> keys, boolean powerModelsIncluded,
-                boolean includeProcessStateData, @PowerComponentId int componentId,
-                int screenState, int powerState, int columnIndex) {
+        private int addKeys(List<Key> keys, boolean includeProcessStateData,
+                @PowerComponentId int componentId, int screenState, int powerState,
+                int columnIndex) {
             keys.add(new Key(componentId, PROCESS_STATE_UNSPECIFIED, screenState, powerState,
-                    powerModelsIncluded
-                            ? columnIndex++
-                            : POWER_MODEL_NOT_INCLUDED,  // power model
                     columnIndex++,      // power
                     columnIndex++       // usage duration
             ));
 
             // Declare Keys for all process states, if needed
-            if (includeProcessStateData) {
+            if (includeProcessStateData || componentId == POWER_COMPONENT_BASE) {
                 boolean isSupported = SUPPORTED_POWER_COMPONENTS_PER_PROCESS_STATE
                         .binarySearch(componentId) >= 0
                         || componentId >= FIRST_CUSTOM_POWER_COMPONENT_ID;
@@ -949,9 +945,6 @@ public abstract class BatteryConsumer {
                             continue;
                         }
                         keys.add(new Key(componentId, processState, screenState, powerState,
-                                powerModelsIncluded
-                                        ? columnIndex++
-                                        : POWER_MODEL_NOT_INCLUDED, // power model
                                 columnIndex++,      // power
                                 columnIndex++       // usage duration
                         ));
@@ -1009,7 +1002,7 @@ public abstract class BatteryConsumer {
     }
 
     static BatteryConsumerDataLayout createBatteryConsumerDataLayout(
-            String[] customPowerComponentNames, boolean includePowerModels,
+            String[] customPowerComponentNames,
             boolean includeProcessStateData, boolean includeScreenStateData,
             boolean includePowerStateData) {
         int columnCount = BatteryConsumer.COLUMN_COUNT;
@@ -1018,8 +1011,7 @@ public abstract class BatteryConsumer {
         columnCount = Math.max(columnCount, UserBatteryConsumer.COLUMN_COUNT);
 
         return new BatteryConsumerDataLayout(columnCount, customPowerComponentNames,
-                includePowerModels, includeProcessStateData, includeScreenStateData,
-                includePowerStateData);
+                includeProcessStateData, includeScreenStateData, includePowerStateData);
     }
 
     protected abstract static class BaseBuilder<T extends BaseBuilder<?>> {
@@ -1057,7 +1049,9 @@ public abstract class BatteryConsumer {
          * @param componentId    The ID of the power component, e.g.
          *                       {@link BatteryConsumer#POWER_COMPONENT_CPU}.
          * @param componentPower Amount of consumed power in mAh.
+         * @deprecated use {@link #addConsumedPower}
          */
+        @Deprecated
         @NonNull
         public T setConsumedPower(@PowerComponentId int componentId, double componentPower) {
             return setConsumedPower(componentId, componentPower, POWER_MODEL_POWER_PROFILE);
@@ -1069,13 +1063,15 @@ public abstract class BatteryConsumer {
          * @param componentId    The ID of the power component, e.g.
          *                       {@link BatteryConsumer#POWER_COMPONENT_CPU}.
          * @param componentPower Amount of consumed power in mAh.
+         * @deprecated use {@link #addConsumedPower}
          */
+        @Deprecated
         @SuppressWarnings("unchecked")
         @NonNull
         public T setConsumedPower(@PowerComponentId int componentId, double componentPower,
                 @PowerModel int powerModel) {
             mPowerComponentsBuilder.setConsumedPower(getKey(componentId, PROCESS_STATE_UNSPECIFIED),
-                    componentPower, powerModel);
+                    componentPower);
             return (T) this;
         }
 
@@ -1084,21 +1080,29 @@ public abstract class BatteryConsumer {
         public T addConsumedPower(@PowerComponentId int componentId, double componentPower,
                 @PowerModel int powerModel) {
             mPowerComponentsBuilder.addConsumedPower(getKey(componentId, PROCESS_STATE_UNSPECIFIED),
-                    componentPower, powerModel);
+                    componentPower);
             return (T) this;
         }
 
         @SuppressWarnings("unchecked")
         @NonNull
         public T setConsumedPower(Key key, double componentPower, @PowerModel int powerModel) {
-            mPowerComponentsBuilder.setConsumedPower(key, componentPower, powerModel);
+            mPowerComponentsBuilder.setConsumedPower(key, componentPower);
             return (T) this;
         }
 
         @SuppressWarnings("unchecked")
         @NonNull
-        public T addConsumedPower(Key key, double componentPower, @PowerModel int powerModel) {
-            mPowerComponentsBuilder.addConsumedPower(key, componentPower, powerModel);
+        public T addConsumedPower(@PowerComponentId int componentId, double componentPower) {
+            mPowerComponentsBuilder.addConsumedPower(getKey(componentId, PROCESS_STATE_UNSPECIFIED),
+                    componentPower);
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @NonNull
+        public T addConsumedPower(Key key, double componentPower) {
+            mPowerComponentsBuilder.addConsumedPower(key, componentPower);
             return (T) this;
         }
 
@@ -1108,7 +1112,9 @@ public abstract class BatteryConsumer {
          * @param componentId              The ID of the power component, e.g.
          *                                 {@link UidBatteryConsumer#POWER_COMPONENT_CPU}.
          * @param componentUsageTimeMillis Amount of time in microseconds.
+         * @deprecated use {@link #addUsageDurationMillis}
          */
+        @Deprecated
         @SuppressWarnings("unchecked")
         @NonNull
         public T setUsageDurationMillis(@PowerComponentId int componentId,
@@ -1119,10 +1125,26 @@ public abstract class BatteryConsumer {
             return (T) this;
         }
 
+        @Deprecated
         @SuppressWarnings("unchecked")
         @NonNull
         public T setUsageDurationMillis(Key key, long componentUsageTimeMillis) {
             mPowerComponentsBuilder.setUsageDurationMillis(key, componentUsageTimeMillis);
+            return (T) this;
+        }
+
+        @NonNull
+        public T addUsageDurationMillis(@PowerComponentId int componentId,
+                long componentUsageTimeMillis) {
+            mPowerComponentsBuilder.addUsageDurationMillis(
+                    getKey(componentId, PROCESS_STATE_UNSPECIFIED), componentUsageTimeMillis);
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @NonNull
+        public T addUsageDurationMillis(Key key, long componentUsageTimeMillis) {
+            mPowerComponentsBuilder.addUsageDurationMillis(key, componentUsageTimeMillis);
             return (T) this;
         }
 

@@ -25,6 +25,7 @@ import android.hardware.devicestate.DeviceStateManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -212,7 +213,8 @@ public final class CommonFoldingFeature {
     @NonNull
     private final Rect mRect;
 
-    CommonFoldingFeature(int type, @State int state, @NonNull Rect rect) {
+    @VisibleForTesting
+    public CommonFoldingFeature(int type, @State int state, @NonNull Rect rect) {
         assertReportableState(state);
         this.mType = type;
         this.mState = state;

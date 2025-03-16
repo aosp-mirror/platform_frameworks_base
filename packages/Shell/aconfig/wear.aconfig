@@ -1,0 +1,9 @@
+package: "com.android.shell.flags"
+container: "system"
+
+flag {
+    name: "handle_bugreports_for_wear"
+    namespace: "wear_services"
+    description: "This flag enables Shell to propagate bugreport results to WearServices."
+    bug: "338029043"
+}

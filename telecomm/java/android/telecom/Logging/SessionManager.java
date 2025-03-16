@@ -27,6 +27,7 @@ import android.telecom.Log;
 import android.util.Base64;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.telecom.flags.Flags;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -36,10 +37,16 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * TODO: Create better Sessions Documentation
+ * SessionManager manages the active sessions in a HashMap, which maps the active thread(s) to the
+ * associated {@link Session}s.
+ * <p>
+ * Note: Sessions assume that session structure modification is synchronized on this object - only
+ * one thread can modify the structure of any Session at one time. Printing the current session to
+ * the log is not synchronized because we should not clean up a session chain while printing from
+ * another Thread. Either the Session chain is still active and can not be cleaned up yet, or the
+ * Session chain has ended and we are cleaning up.
  * @hide
  */
-
 public class SessionManager {
 
     // Currently using 3 letters, So don't exceed 64^3
@@ -54,11 +61,9 @@ public class SessionManager {
     private Context mContext;
 
     @VisibleForTesting
-    public ConcurrentHashMap<Integer, Session> mSessionMapper = new ConcurrentHashMap<>(100);
-    @VisibleForTesting
-    public java.lang.Runnable mCleanStaleSessions = () ->
-            cleanupStaleSessions(getSessionCleanupTimeoutMs());
-    private Handler mSessionCleanupHandler = new Handler(Looper.getMainLooper());
+    public final ConcurrentHashMap<Integer, Session> mSessionMapper = new ConcurrentHashMap<>(64);
+    private final java.lang.Runnable mCleanStaleSessions;
+    private final Handler mSessionCleanupHandler = new Handler(Looper.getMainLooper());
 
     // Overridden in LogTest to skip query to ContentProvider
     private interface ISessionCleanupTimeoutMs {
@@ -83,7 +88,7 @@ public class SessionManager {
     };
 
     // Usage is synchronized on this class.
-    private List<ISessionListener> mSessionListeners = new ArrayList<>();
+    private final List<ISessionListener> mSessionListeners = new ArrayList<>();
 
     public interface ISessionListener {
         /**
@@ -103,18 +108,37 @@ public class SessionManager {
     }
 
     public SessionManager() {
+        mCleanStaleSessions = () -> cleanupStaleSessions(getSessionCleanupTimeoutMs());
+    }
+
+    @VisibleForTesting
+    public SessionManager(java.lang.Runnable cleanStaleSessionsRunnable) {
+        mCleanStaleSessions = cleanStaleSessionsRunnable;
     }
 
     private long getSessionCleanupTimeoutMs() {
         return mSessionCleanupTimeoutMs.get();
     }
 
-    private synchronized void resetStaleSessionTimer() {
-        mSessionCleanupHandler.removeCallbacksAndMessages(null);
-        // Will be null in Log Testing
-        if (mCleanStaleSessions != null) {
-            mSessionCleanupHandler.postDelayed(mCleanStaleSessions, getSessionCleanupTimeoutMs());
+    private void resetStaleSessionTimer() {
+        if (!Flags.endSessionImprovements()) {
+            resetStaleSessionTimerOld();
+            return;
         }
+        // Will be null in Log Testing
+        if (mCleanStaleSessions == null) return;
+        synchronized (mSessionCleanupHandler) {
+            if (!mSessionCleanupHandler.hasCallbacks(mCleanStaleSessions)) {
+                mSessionCleanupHandler.postDelayed(mCleanStaleSessions,
+                        getSessionCleanupTimeoutMs());
+            }
+        }
+    }
+
+    private synchronized void resetStaleSessionTimerOld() {
+        if (mCleanStaleSessions == null) return;
+        mSessionCleanupHandler.removeCallbacksAndMessages(null);
+        mSessionCleanupHandler.postDelayed(mCleanStaleSessions, getSessionCleanupTimeoutMs());
     }
 
     /**
@@ -147,13 +171,11 @@ public class SessionManager {
             Session childSession = createSubsession(true);
             continueSession(childSession, shortMethodName);
             return;
-        } else {
-            // Only Log that we are starting the parent session.
-            Log.d(LOGGING_TAG, Session.START_SESSION);
         }
         Session newSession = new Session(getNextSessionID(), shortMethodName,
-                System.currentTimeMillis(), false, callerIdentification);
+                System.currentTimeMillis(), false, false, callerIdentification);
         mSessionMapper.put(threadId, newSession);
+        Log.d(LOGGING_TAG, Session.START_SESSION);
     }
 
     /**
@@ -179,17 +201,16 @@ public class SessionManager {
         }
 
         // Create Session from Info and add to the sessionMapper under this ID.
-        Log.d(LOGGING_TAG, Session.START_EXTERNAL_SESSION);
         Session externalSession = new Session(Session.EXTERNAL_INDICATOR + sessionInfo.sessionId,
-                sessionInfo.methodPath, System.currentTimeMillis(),
-                false /*isStartedFromActiveSession*/, sessionInfo.ownerInfo);
-        externalSession.setIsExternal(true);
+                sessionInfo.methodPath, System.currentTimeMillis(), false, true,
+                sessionInfo.ownerInfo);
         // Mark the external session as already completed, since we have no way of knowing when
         // the external session actually has completed.
         externalSession.markSessionCompleted(Session.UNDEFINED);
         // Track the external session with the SessionMapper so that we can create and continue
         // an active subsession based on it.
         mSessionMapper.put(threadId, externalSession);
+        Log.d(LOGGING_TAG, Session.START_EXTERNAL_SESSION);
         // Create a subsession from this external Session parent node
         Session childSession = createSubsession();
         continueSession(childSession, shortMethodName);
@@ -226,13 +247,12 @@ public class SessionManager {
         // Start execution time of the session will be overwritten in continueSession(...).
         Session newSubsession = new Session(threadSession.getNextChildId(),
                 threadSession.getShortMethodName(), System.currentTimeMillis(),
-                isStartedFromActiveSession, threadSession.getOwnerInfo());
+                isStartedFromActiveSession, false, threadSession.getOwnerInfo());
         threadSession.addChild(newSubsession);
         newSubsession.setParentSession(threadSession);
 
         if (!isStartedFromActiveSession) {
-            Log.v(LOGGING_TAG, Session.CREATE_SUBSESSION + " " +
-                    newSubsession.toString());
+            Log.v(LOGGING_TAG, Session.CREATE_SUBSESSION);
         } else {
             Log.v(LOGGING_TAG, Session.CREATE_SUBSESSION +
                     " (Invisible subsession)");
@@ -273,7 +293,7 @@ public class SessionManager {
         }
 
         subsession.markSessionCompleted(Session.UNDEFINED);
-        endParentSessions(subsession);
+        cleanupSessionTreeAndNotify(subsession);
     }
 
     /**
@@ -328,7 +348,7 @@ public class SessionManager {
         // Remove after completed so that reference still exists for logging the end events
         Session parentSession = completedSession.getParentSession();
         mSessionMapper.remove(threadId);
-        endParentSessions(completedSession);
+        cleanupSessionTreeAndNotify(completedSession);
         // If this subsession was started from a parent session using Log.startSession, return the
         // ThreadID back to the parent after completion.
         if (parentSession != null && !parentSession.isSessionCompleted() &&
@@ -337,8 +357,49 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Move up the session tree and remove completed sessions until we either hit a session that was
+     * not completed yet or we reach the root node. Once we reach the root node, we will report the
+     * session times to session complete listeners.
+     * @param session The Session to clean up.
+     */
+    private void cleanupSessionTreeAndNotify(Session session) {
+        if (session == null) return;
+        if (!Flags.endSessionImprovements()) {
+            endParentSessionsRecursive(session);
+            return;
+        }
+        Session currSession = session;
+        // Traverse upwards and unlink until we either hit the root node or a node that isn't
+        // complete yet.
+        while (currSession != null) {
+            if (!currSession.isSessionCompleted() || !currSession.getChildSessions().isEmpty()) {
+                // We will return once the active session is completed.
+                return;
+            }
+            Session parentSession = currSession.getParentSession();
+            currSession.setParentSession(null);
+            // The session is either complete when we have reached the top node or we have reached
+            // the node where the parent is external. We only want to report the time it took to
+            // complete the local session, so for external nodes, report finished when the sub-node
+            // completes.
+            boolean reportSessionComplete =
+                    (parentSession == null && !currSession.isExternal())
+                            || (parentSession != null && parentSession.isExternal());
+            if (parentSession != null) parentSession.removeChild(currSession);
+            if (reportSessionComplete) {
+                long fullSessionTimeMs = System.currentTimeMillis()
+                        - currSession.getExecutionStartTimeMilliseconds();
+                Log.d(LOGGING_TAG, Session.END_SESSION + " (dur: " + fullSessionTimeMs
+                        + " ms): " + currSession);
+                notifySessionCompleteListeners(currSession.getShortMethodName(), fullSessionTimeMs);
+            }
+            currSession = parentSession;
+        }
+    }
+
     // Recursively deletes all complete parent sessions of the current subsession if it is a leaf.
-    private void endParentSessions(Session subsession) {
+    private void endParentSessionsRecursive(Session subsession) {
         // Session is not completed or not currently a leaf, so we can not remove because a child is
         // still running
         if (!subsession.isSessionCompleted() || subsession.getChildSessions().size() != 0) {
@@ -355,7 +416,7 @@ public class SessionManager {
                         System.currentTimeMillis() - subsession.getExecutionStartTimeMilliseconds();
                 notifySessionCompleteListeners(subsession.getShortMethodName(), fullSessionTimeMs);
             }
-            endParentSessions(parentSession);
+            endParentSessionsRecursive(parentSession);
         } else {
             // All of the subsessions have been completed and it is time to report on the full
             // running time of the session.
@@ -370,8 +431,10 @@ public class SessionManager {
     }
 
     private void notifySessionCompleteListeners(String methodName, long sessionTimeMs) {
-        for (ISessionListener l : mSessionListeners) {
-            l.sessionComplete(methodName, sessionTimeMs);
+        synchronized (mSessionListeners) {
+            for (ISessionListener l : mSessionListeners) {
+                l.sessionComplete(methodName, sessionTimeMs);
+            }
         }
     }
 
@@ -380,8 +443,8 @@ public class SessionManager {
         return currentSession != null ? currentSession.toString() : "";
     }
 
-    public synchronized void registerSessionListener(ISessionListener l) {
-        if (l != null) {
+    public void registerSessionListener(ISessionListener l) {
+        synchronized (mSessionListeners) {
             mSessionListeners.add(l);
         }
     }
@@ -425,25 +488,30 @@ public class SessionManager {
 
     @VisibleForTesting
     public synchronized void cleanupStaleSessions(long timeoutMs) {
-        String logMessage = "Stale Sessions Cleaned:\n";
+        StringBuilder logMessage = new StringBuilder("Stale Sessions Cleaned:");
         boolean isSessionsStale = false;
         long currentTimeMs = System.currentTimeMillis();
         // Remove references that are in the Session Mapper (causing GC to occur) on
-        // sessions that are lasting longer than LOGGING_SESSION_TIMEOUT_MS.
+        // sessions that are lasting longer than DEFAULT_SESSION_TIMEOUT_MS.
         // If this occurs, then there is most likely a Session active that never had
         // Log.endSession called on it.
         for (Iterator<ConcurrentHashMap.Entry<Integer, Session>> it =
              mSessionMapper.entrySet().iterator(); it.hasNext(); ) {
             ConcurrentHashMap.Entry<Integer, Session> entry = it.next();
             Session session = entry.getValue();
-            if (currentTimeMs - session.getExecutionStartTimeMilliseconds() > timeoutMs) {
+            long runTime = currentTimeMs - session.getExecutionStartTimeMilliseconds();
+            if (runTime > timeoutMs) {
                 it.remove();
-                logMessage += session.printFullSessionTree() + "\n";
+                logMessage.append("\n");
+                logMessage.append("[");
+                logMessage.append(runTime);
+                logMessage.append("ms] ");
+                logMessage.append(session.printFullSessionTree());
                 isSessionsStale = true;
             }
         }
         if (isSessionsStale) {
-            Log.w(LOGGING_TAG, logMessage);
+            Log.w(LOGGING_TAG, logMessage.toString());
         } else {
             Log.v(LOGGING_TAG, "No stale logging sessions needed to be cleaned...");
         }

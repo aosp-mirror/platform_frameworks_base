@@ -16,8 +16,6 @@
 
 package android.webkit;
 
-import static android.webkit.Flags.updateServiceV2;
-
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UptimeMillisLong;
@@ -53,12 +51,6 @@ import java.lang.reflect.Method;
  */
 @SystemApi
 public final class WebViewFactory {
-
-    // visible for WebViewZygoteInit to look up the class by reflection and call preloadInZygote.
-    /** @hide */
-    private static final String CHROMIUM_WEBVIEW_FACTORY =
-            "com.android.webview.chromium.WebViewChromiumFactoryProviderForT";
-
     private static final String CHROMIUM_WEBVIEW_FACTORY_METHOD = "create";
 
     private static final String LOGTAG = "WebViewFactory";
@@ -277,8 +269,8 @@ public final class WebViewFactory {
      */
     public static Class<WebViewFactoryProvider> getWebViewProviderClass(ClassLoader clazzLoader)
             throws ClassNotFoundException {
-        return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY,
-                true, clazzLoader);
+        return (Class<WebViewFactoryProvider>) Class.forName(
+                WebViewFactoryProvider.getWebViewFactoryClassName(), true, clazzLoader);
     }
 
     /**
@@ -490,7 +482,7 @@ public final class WebViewFactory {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
 
-            if (updateServiceV2() && !isInstalledPackage(newPackageInfo)) {
+            if (!isInstalledPackage(newPackageInfo)) {
                 throw new MissingWebViewPackageException(
                         TextUtils.formatSimple(
                                 "Current WebView Package (%s) is not installed for the current "
@@ -498,7 +490,7 @@ public final class WebViewFactory {
                                 newPackageInfo.packageName));
             }
 
-            if (updateServiceV2() && !isEnabledPackage(newPackageInfo)) {
+            if (!isEnabledPackage(newPackageInfo)) {
                 throw new MissingWebViewPackageException(
                         TextUtils.formatSimple(
                                 "Current WebView Package (%s) is not enabled for the current user",

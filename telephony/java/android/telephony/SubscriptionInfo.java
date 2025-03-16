@@ -951,7 +951,6 @@ public class SubscriptionInfo implements Parcelable {
      * @see SubscriptionManager#SERVICE_CAPABILITY_DATA
      */
     @NonNull
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public @SubscriptionManager.ServiceCapability Set<Integer> getServiceCapabilities() {
         return SubscriptionManager.getServiceCapabilitiesSet(mServiceCapabilities);
     }
@@ -1829,7 +1828,6 @@ public class SubscriptionInfo implements Parcelable {
          * @throws IllegalArgumentException when any capability is not supported.
          */
         @NonNull
-        @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
         public Builder setServiceCapabilities(
                 @NonNull @SubscriptionManager.ServiceCapability Set<Integer> capabilities) {
             int combinedCapabilities = 0;

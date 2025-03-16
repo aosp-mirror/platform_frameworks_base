@@ -155,35 +155,35 @@ class IntDefProcessor : AbstractProcessor() {
         ) {
             val indent = "  "
 
-            writer.appendln("{")
+            writer.appendLine("{")
 
             val intDefTypesCount = annotationTypeToIntDefMapping.size
             var currentIntDefTypesCount = 0
             for ((field, intDefMapping) in annotationTypeToIntDefMapping) {
-                writer.appendln("""$indent"$field": {""")
+                writer.appendLine("""$indent"$field": {""")
 
                 // Start IntDef
 
-                writer.appendln("""$indent$indent"flag": ${intDefMapping.flag},""")
+                writer.appendLine("""$indent$indent"flag": ${intDefMapping.flag},""")
 
-                writer.appendln("""$indent$indent"values": {""")
+                writer.appendLine("""$indent$indent"values": {""")
                 intDefMapping.entries.joinTo(writer, separator = ",\n") { (value, identifier) ->
                     """$indent$indent$indent"$value": "$identifier""""
                 }
-                writer.appendln()
-                writer.appendln("$indent$indent}")
+                writer.appendLine()
+                writer.appendLine("$indent$indent}")
 
                 // End IntDef
 
                 writer.append("$indent}")
                 if (++currentIntDefTypesCount < intDefTypesCount) {
-                    writer.appendln(",")
+                    writer.appendLine(",")
                 } else {
-                    writer.appendln("")
+                    writer.appendLine("")
                 }
             }
 
-            writer.appendln("}")
+            writer.appendLine("}")
         }
     }
 }

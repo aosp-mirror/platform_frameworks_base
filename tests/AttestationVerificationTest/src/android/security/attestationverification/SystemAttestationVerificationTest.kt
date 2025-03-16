@@ -2,6 +2,9 @@ package android.security.attestationverification
 
 import android.os.Bundle
 import android.app.Activity
+import android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_CERTS
+import android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS
+import android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_UNSUPPORTED_PROFILE
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -14,9 +17,6 @@ import com.google.common.truth.Truth.assertThat
 import android.security.attestationverification.AttestationVerificationManager.PARAM_CHALLENGE
 import android.security.attestationverification.AttestationVerificationManager.PROFILE_SELF_TRUSTED
 import android.security.attestationverification.AttestationVerificationManager.PROFILE_UNKNOWN
-import android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE
-import android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS
-import android.security.attestationverification.AttestationVerificationManager.RESULT_UNKNOWN
 import android.security.attestationverification.AttestationVerificationManager.TYPE_PUBLIC_KEY
 import android.security.attestationverification.AttestationVerificationManager.TYPE_CHALLENGE
 import android.security.keystore.KeyGenParameterSpec
@@ -58,19 +58,19 @@ class SystemAttestationVerificationTest {
             future.complete(result)
         }
 
-        assertThat(future.getSoon()).isEqualTo(RESULT_UNKNOWN)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_UNSUPPORTED_PROFILE)
     }
 
     @Test
     fun verifyAttestation_returnsFailureWithEmptyAttestation() {
         val future = CompletableFuture<Int>()
-        val profile = AttestationProfile(PROFILE_SELF_TRUSTED)
-        avm.verifyAttestation(profile, TYPE_CHALLENGE, Bundle(), ByteArray(0),
-            activity.mainExecutor) { result, _ ->
+        val selfTrusted = TestSelfTrustedAttestation("test", "challengeStr")
+        avm.verifyAttestation(selfTrusted.profile, selfTrusted.localBindingType,
+            selfTrusted.requirements, ByteArray(0), activity.mainExecutor) { result, _ ->
             future.complete(result)
         }
 
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_CERTS)
     }
 
     @Test
@@ -81,7 +81,7 @@ class SystemAttestationVerificationTest {
             Bundle(), selfTrusted.attestation, activity.mainExecutor) { result, _ ->
             future.complete(result)
         }
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     @Test
@@ -92,7 +92,7 @@ class SystemAttestationVerificationTest {
             selfTrusted.requirements, selfTrusted.attestation, activity.mainExecutor) { result, _ ->
             future.complete(result)
         }
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     @Test
@@ -106,7 +106,7 @@ class SystemAttestationVerificationTest {
             wrongKeyRequirements, selfTrusted.attestation, activity.mainExecutor) { result, _ ->
             future.complete(result)
         }
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     @Test
@@ -119,7 +119,7 @@ class SystemAttestationVerificationTest {
             wrongChallengeRequirements, selfTrusted.attestation, activity.mainExecutor) {
                 result, _ -> future.complete(result)
         }
-        assertThat(future.getSoon()).isEqualTo(RESULT_FAILURE)
+        assertThat(future.getSoon()).isEqualTo(FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS)
     }
 
     // TODO(b/216144791): Add more failure tests for PROFILE_SELF_TRUSTED.
@@ -131,20 +131,7 @@ class SystemAttestationVerificationTest {
             selfTrusted.requirements, selfTrusted.attestation, activity.mainExecutor) { result, _ ->
             future.complete(result)
         }
-        assertThat(future.getSoon()).isEqualTo(RESULT_SUCCESS)
-    }
-
-    @Test
-    fun verifyToken_returnsUnknown() {
-        val future = CompletableFuture<Int>()
-        val profile = AttestationProfile(PROFILE_SELF_TRUSTED)
-        avm.verifyAttestation(profile, TYPE_PUBLIC_KEY, Bundle(), ByteArray(0),
-                activity.mainExecutor) { _, token ->
-            val result = avm.verifyToken(profile, TYPE_PUBLIC_KEY, Bundle(), token, null)
-            future.complete(result)
-        }
-
-        assertThat(future.getSoon()).isEqualTo(RESULT_UNKNOWN)
+        assertThat(future.getSoon()).isEqualTo(0)
     }
 
     @Test

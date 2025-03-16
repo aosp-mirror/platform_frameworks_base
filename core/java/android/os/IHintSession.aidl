@@ -27,4 +27,9 @@ oneway interface IHintSession {
     void sendHint(int hint);
     void setMode(int mode, boolean enabled);
     void reportActualWorkDuration2(in WorkDuration[] workDurations);
+
+    /**
+     * Used by apps to associate a session to a given set of layers
+     */
+    oneway void associateToLayers(in IBinder[] layerTokens);
 }

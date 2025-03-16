@@ -35,6 +35,8 @@ private const val TYPEFACE_CACHE_MAX_ENTRIES = 5
 typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
 
 interface TypefaceVariantCache {
+    val fontCache: FontCache
+    val animationFrameCount: Int
     fun getTypefaceForVariant(fvar: String?): Typeface?
 
     companion object {
@@ -57,8 +59,10 @@ interface TypefaceVariantCache {
 
 class TypefaceVariantCacheImpl(
     var baseTypeface: Typeface,
+    override val animationFrameCount: Int,
 ) : TypefaceVariantCache {
     private val cache = LruCache<String, Typeface>(TYPEFACE_CACHE_MAX_ENTRIES)
+    override val fontCache = FontCacheImpl(animationFrameCount)
     override fun getTypefaceForVariant(fvar: String?): Typeface? {
         if (fvar == null) {
             return baseTypeface
@@ -100,25 +104,17 @@ class TypefaceVariantCacheImpl(
  */
 class TextAnimator(
     layout: Layout,
-    numberOfAnimationSteps: Int? = null, // Only do this number of discrete animation steps.
-    private val invalidateCallback: () -> Unit,
+    private val typefaceCache: TypefaceVariantCache,
+    private val invalidateCallback: () -> Unit = {},
 ) {
-    var typefaceCache: TypefaceVariantCache = TypefaceVariantCacheImpl(layout.paint.typeface)
-        get() = field
-        set(value) {
-            field = value
-            textInterpolator.typefaceCache = value
-        }
-
     // Following two members are for mutable for testing purposes.
-    public var textInterpolator: TextInterpolator =
-        TextInterpolator(layout, typefaceCache, numberOfAnimationSteps)
-    public var animator: ValueAnimator =
+    public var textInterpolator = TextInterpolator(layout, typefaceCache)
+    public var animator =
         ValueAnimator.ofFloat(1f).apply {
             duration = DEFAULT_ANIMATION_DURATION
             addUpdateListener {
                 textInterpolator.progress =
-                    calculateProgress(it.animatedValue as Float, numberOfAnimationSteps)
+                    calculateProgress(it.animatedValue as Float, typefaceCache.animationFrameCount)
                 invalidateCallback()
             }
             addListener(

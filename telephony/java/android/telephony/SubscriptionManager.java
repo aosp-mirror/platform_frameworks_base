@@ -1422,7 +1422,6 @@ public class SubscriptionManager {
      *
      * @see TelephonyManager#isDeviceVoiceCapable()
      */
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public static final int SERVICE_CAPABILITY_VOICE = 1;
 
     /**
@@ -1440,13 +1439,11 @@ public class SubscriptionManager {
      *
      * @see TelephonyManager#isDeviceSmsCapable()
      */
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public static final int SERVICE_CAPABILITY_SMS = 2;
 
     /**
      * Represents a value indicating the data calling capabilities of a subscription.
      */
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public static final int SERVICE_CAPABILITY_DATA = 3;
 
     /**
@@ -3474,14 +3471,62 @@ public class SubscriptionManager {
     @SystemApi
     public boolean canManageSubscription(@NonNull SubscriptionInfo info,
             @NonNull String packageName) {
+        if (Flags.hsumPackageManager()) {
+            return canManageSubscriptionAsUser(info, packageName, mContext.getUser());
+        } else {
+            if (info == null || info.getAccessRules() == null || packageName == null) {
+                return false;
+            }
+            PackageManager packageManager = mContext.getPackageManager();
+            PackageInfo packageInfo;
+            try {
+                packageInfo = packageManager.getPackageInfo(packageName,
+                        PackageManager.GET_SIGNING_CERTIFICATES);
+            } catch (PackageManager.NameNotFoundException e) {
+                logd("Unknown package: " + packageName);
+                return false;
+            }
+            for (UiccAccessRule rule : info.getAccessRules()) {
+                if (rule.getCarrierPrivilegeStatus(packageInfo)
+                        == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the given app is authorized to manage the given subscription for given user.
+     *
+     * <p>An app can only be authorized if it is available to the given user and included in the
+     * {@link android.telephony.UiccAccessRule} of the {@link android.telephony.SubscriptionInfo}
+     * with the access status.
+     *
+     * <p>Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded} returns
+     * true). To check for permissions for non-embedded subscription as well,
+     * see {@link android.telephony.TelephonyManager#hasCarrierPrivileges}.
+     *
+     * @param info        The subscription to check.
+     * @param packageName Package name of the app to check.
+     * @param user        UserHandle to check
+     * @return whether the app is authorized to manage this subscription per its access rules.
+     *
+     * @see android.telephony.TelephonyManager#hasCarrierPrivileges
+     * @hide
+     */
+    public boolean canManageSubscriptionAsUser(@NonNull SubscriptionInfo info,
+            @NonNull String packageName, @NonNull UserHandle user) {
         if (info == null || info.getAccessRules() == null || packageName == null) {
             return false;
         }
-        PackageManager packageManager = mContext.getPackageManager();
+        PackageManager pm = mContext.getUser().equals(user)
+                ? mContext.getPackageManager()
+                : mContext.createContextAsUser(user, 0).getPackageManager();
         PackageInfo packageInfo;
         try {
-            packageInfo = packageManager.getPackageInfo(packageName,
-                PackageManager.GET_SIGNING_CERTIFICATES);
+            packageInfo = pm.getPackageInfo(packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES);
         } catch (PackageManager.NameNotFoundException e) {
             logd("Unknown package: " + packageName);
             return false;
@@ -3663,7 +3708,7 @@ public class SubscriptionManager {
      * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
      * privilege permission of the subscription.
      *
-     * @param opportunistic whether it’s opportunistic subscription.
+     * @param opportunistic whether it's an opportunistic subscription.
      * @param subId the unique SubscriptionInfo index in database
      * @return {@code true} if the operation is succeed, {@code false} otherwise.
      *

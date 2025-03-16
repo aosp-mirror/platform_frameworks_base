@@ -18,6 +18,7 @@ package android.os;
 
 import android.os.CoolingDevice;
 import android.os.IThermalEventListener;
+import android.os.IThermalHeadroomListener;
 import android.os.IThermalStatusListener;
 import android.os.Temperature;
 
@@ -116,4 +117,20 @@ interface IThermalService {
      * @return thermal headroom for each thermal status
      */
     float[] getThermalHeadroomThresholds();
+
+    /**
+      * Register a listener for thermal headroom change.
+      * @param listener the {@link android.os.IThermalHeadroomListener} to be notified.
+      * @return true if registered successfully.
+      * {@hide}
+      */
+    boolean registerThermalHeadroomListener(in IThermalHeadroomListener listener);
+
+    /**
+      * Unregister a previously-registered listener for thermal headroom.
+      * @param listener the {@link android.os.IThermalHeadroomListener} to no longer be notified.
+      * @return true if unregistered successfully.
+      * {@hide}
+      */
+    boolean unregisterThermalHeadroomListener(in IThermalHeadroomListener listener);
 }

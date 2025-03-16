@@ -99,7 +99,7 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
 
   std::vector<std::string> idmap_paths;
   for (const std::string& overlay_apk_path : overlay_apk_paths) {
-    const std::string idmap_path = Idmap::CanonicalIdmapPathFor(idmap_dir, overlay_apk_path);
+    std::string idmap_path = Idmap::CanonicalIdmapPathFor(idmap_dir, overlay_apk_path);
     const uid_t uid = getuid();
     if (!UidHasWriteAccessToPath(uid, idmap_path)) {
       LOG(WARNING) << "uid " << uid << "does not have write access to " << idmap_path.c_str();
@@ -111,7 +111,7 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
                 !ignore_overlayable)) {
       const auto overlay = OverlayResourceContainer::FromPath(overlay_apk_path);
       if (!overlay) {
-        LOG(WARNING) << "failed to load apk " << overlay_apk_path.c_str();
+        LOG(WARNING) << "failed to load apk " << overlay_apk_path;
         continue;
       }
 
@@ -138,7 +138,7 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
       }
     }
 
-    idmap_paths.emplace_back(idmap_path);
+    idmap_paths.emplace_back(std::move(idmap_path));
   }
 
   for (const std::string& idmap_path : idmap_paths) {

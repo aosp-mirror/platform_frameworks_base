@@ -234,6 +234,7 @@ public class AudioServiceEvents {
         static final int VOL_SET_LE_AUDIO_VOL = 10;
         static final int VOL_ADJUST_GROUP_VOL = 11;
         static final int VOL_MASTER_MUTE = 12;
+        static final int VOL_ABS_DEVICE_ENABLED_ERROR = 13;
 
         final int mOp;
         final int mStream;
@@ -365,6 +366,19 @@ public class AudioServiceEvents {
             logMetricEvent();
         }
 
+        /** used for VOL_ABS_DEVICE_ENABLED_ERROR */
+        VolumeEvent(int op, int result, int device, boolean enabled, int streamType) {
+            mOp = op;
+            mStream = streamType;
+            mVal1 = device;
+            mVal2 = enabled ? 1 : 0;
+            mVal3 = result;
+            // unused
+            mCaller = null;
+            mGroupName = null;
+            logMetricEvent();
+        }
+
 
         /**
          * Audio Analytics unique Id.
@@ -481,6 +495,9 @@ public class AudioServiceEvents {
                 case VOL_MASTER_MUTE:
                     // No value in logging metrics for this internal event
                     return;
+                case VOL_ABS_DEVICE_ENABLED_ERROR:
+                    // No value in logging metrics for this internal event
+                    return;
                 default:
                     return;
             }
@@ -569,6 +586,13 @@ public class AudioServiceEvents {
                     return new StringBuilder("Master mute:")
                             .append(mVal1 == 1 ? " muted)" : " unmuted)")
                             .toString();
+                case VOL_ABS_DEVICE_ENABLED_ERROR:
+                    return new StringBuilder("setDeviceAbsoluteVolumeEnabled failed with ")
+                            .append(mVal3)
+                            .append(" for dev: 0x").append(Integer.toHexString(mVal1))
+                            .append(" enabled: ").append(mVal2)
+                            .append(" streamType: ").append(mStream)
+                            .toString();
                 default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }
         }
@@ -633,8 +657,8 @@ public class AudioServiceEvents {
                     return "CSD lowering volume to RS1";
                 case UPDATE_ABS_VOLUME_ATTENUATION:
                     return String.format(java.util.Locale.US,
-                            "Updating CSD absolute volume attenuation on device %d with %.2f dB ",
-                            mLongValue, mFloatValue);
+                            "Updating CSD absolute volume attenuation on device 0x%s with %.2f dB ",
+                            Long.toHexString(mLongValue), mFloatValue);
             }
             return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
         }

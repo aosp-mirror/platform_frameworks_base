@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"צריך ליישר את הטלפון כדי לטעון אותו במהירות"</string>
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"צריך ליישר את הטלפון כדי לטעון אותו באופן אלחוטי"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"‏מכשיר ה-Android TV ייכבה בקרוב. יש ללחוץ על לחצן כלשהו כדי שהוא ימשיך לפעול."</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"‏מכשיר ה-Android TV ייכבה בקרוב. יש ללחוץ על כפתור כלשהו כדי שהוא ימשיך לפעול."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"המכשיר ייכבה בקרוב, יש ללחוץ כדי שהוא ימשיך לפעול."</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"‏אין כרטיס SIM בטאבלט."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"‏אין כרטיס SIM בטלפון."</string>
@@ -43,24 +43,24 @@
     <string name="thermal_shutdown_title" product="default" msgid="8039593017174903505">"הטלפון כבה בגלל התחממות"</string>
     <string name="thermal_shutdown_title" product="device" msgid="2954206342842856379">"המכשיר כבה בגלל התחממות"</string>
     <string name="thermal_shutdown_title" product="tablet" msgid="8941033526856177533">"הטאבלט כבה בגלל התחממות"</string>
-    <string name="thermal_shutdown_message" product="default" msgid="6685194547904051408">"הטלפון פועל כרגיל עכשיו.\nיש להקיש כדי להציג מידע נוסף"</string>
-    <string name="thermal_shutdown_message" product="device" msgid="3039675532521590478">"המכשיר פועל כרגיל עכשיו.\nיש להקיש כדי להציג מידע נוסף"</string>
-    <string name="thermal_shutdown_message" product="tablet" msgid="5285898074484811386">"הטאבלט פועל כרגיל עכשיו.\nיש להקיש כדי להציג מידע נוסף"</string>
+    <string name="thermal_shutdown_message" product="default" msgid="6685194547904051408">"הטלפון פועל כרגיל עכשיו.\nיש ללחוץ כדי להציג מידע נוסף"</string>
+    <string name="thermal_shutdown_message" product="device" msgid="3039675532521590478">"המכשיר פועל כרגיל עכשיו.\nיש ללחוץ כדי להציג מידע נוסף"</string>
+    <string name="thermal_shutdown_message" product="tablet" msgid="5285898074484811386">"הטאבלט פועל כרגיל עכשיו.\nיש ללחוץ כדי להציג מידע נוסף"</string>
     <string name="thermal_shutdown_dialog_message" product="default" msgid="6145923570358574186">"הטלפון שלך התחמם יותר מדי וכבה כדי להתקרר. הטלפון פועל כרגיל עכשיו.\n\nייתכן שהטלפון יתחמם יותר מדי אם:\n	• משתמשים באפליקציות עתירות משאבים (כמו משחקים, אפליקציות וידאו או אפליקציות ניווט).\n	• מורידים או מעלים קבצים גדולים.\n	• משתמשים בטלפון בסביבה עם טמפרטורות גבוהות."</string>
     <string name="thermal_shutdown_dialog_message" product="device" msgid="3647879000909527365">"המכשיר שלך התחמם יותר מדי וכבה כדי להתקרר. המכשיר פועל כרגיל עכשיו.\n\nייתכן שהמכשיר יתחמם יותר מדי אם:\n	• משתמשים באפליקציות עתירות משאבים (כמו משחקים, אפליקציות וידאו או אפליקציות ניווט).\n	• מורידים או מעלים קבצים גדולים.\n	• משתמשים במכשיר בסביבה עם טמפרטורות גבוהות."</string>
     <string name="thermal_shutdown_dialog_message" product="tablet" msgid="8274487811928782165">"הטאבלט שלך התחמם יותר מדי וכבה כדי להתקרר. הטאבלט פועל כרגיל עכשיו.\n\nייתכן שהטאבלט יתחמם יותר מדי אם:\n	• משתמשים באפליקציות עתירות משאבים (כמו משחקים, אפליקציות וידאו או אפליקציות ניווט).\n	• מורידים או מעלים קבצים גדולים.\n	• משתמשים בטאבלט בסביבה עם טמפרטורות גבוהות."</string>
     <string name="high_temp_title" product="default" msgid="5365000411304924115">"הטלפון מתחמם"</string>
     <string name="high_temp_title" product="device" msgid="6622009907401563664">"המכשיר מתחמם"</string>
     <string name="high_temp_title" product="tablet" msgid="9039733706606446616">"הטאבלט מתחמם"</string>
-    <string name="high_temp_notif_message" product="default" msgid="3928947950087257452">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר.\nיש להקיש כדי להציג מידע נוסף"</string>
-    <string name="high_temp_notif_message" product="device" msgid="6105125771372547292">"חלק מהתכונות מוגבלות כל עוד המכשיר מתקרר.\nיש להקיש כדי להציג מידע נוסף"</string>
-    <string name="high_temp_notif_message" product="tablet" msgid="7799279192797476850">"חלק מהתכונות מוגבלות כל עוד הטאבלט מתקרר.\nיש להקיש כדי להציג מידע נוסף"</string>
+    <string name="high_temp_notif_message" product="default" msgid="3928947950087257452">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר.\nיש ללחוץ כדי להציג מידע נוסף"</string>
+    <string name="high_temp_notif_message" product="device" msgid="6105125771372547292">"חלק מהתכונות מוגבלות כל עוד המכשיר מתקרר.\nיש ללחוץ כדי להציג מידע נוסף"</string>
+    <string name="high_temp_notif_message" product="tablet" msgid="7799279192797476850">"חלק מהתכונות מוגבלות כל עוד הטאבלט מתקרר.\nיש ללחוץ כדי להציג מידע נוסף"</string>
     <string name="high_temp_dialog_message" product="default" msgid="4272882413847595625">"קירור הטלפון ייעשה באופן אוטומטי. אפשר עדיין להשתמש בטלפון, אבל ייתכן שהוא יפעל לאט יותר.\n\nהטלפון יחזור לפעול כרגיל לאחר שיתקרר."</string>
     <string name="high_temp_dialog_message" product="device" msgid="263861943935989046">"קירור המכשיר ייעשה באופן אוטומטי. אפשר עדיין להשתמש במכשיר אבל ייתכן שהוא יפעל לאט יותר.\n\nהמכשיר יחזור לפעול כרגיל לאחר שיתקרר."</string>
     <string name="high_temp_dialog_message" product="tablet" msgid="5613713326841935537">"קירור הטאבלט ייעשה באופן אוטומטי. אפשר עדיין להשתמש בטאבלט אבל ייתכן שהוא יפעל לאט יותר.\n\nהטאבלט יחזור לפעול כרגיל לאחר שיתקרר."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"חיישן טביעות האצבע נמצא על לחצן ההפעלה. זה הלחצן השטוח ליד הלחצן הבולט של עוצמת הקול בקצה הטאבלט."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"חיישן טביעות האצבע נמצא על לחצן ההפעלה. זה הלחצן השטוח ליד הלחצן הבולט של עוצמת הקול בשולי המכשיר."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"חיישן טביעות האצבע נמצא על לחצן ההפעלה. זה הלחצן השטוח ליד הלחצן הבולט של עוצמת הקול בקצה הטלפון."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"חיישן טביעות האצבע נמצא על כפתור ההפעלה. זה הכפתור השטוח ליד הכפתור הבולט של עוצמת הקול בקצה הטאבלט."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"חיישן טביעות האצבע נמצא על כפתור ההפעלה. זה הכפתור השטוח ליד הכפתור הבולט של עוצמת הקול בשולי המכשיר."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"חיישן טביעות האצבע נמצא על כפתור ההפעלה. זה הכפתור השטוח ליד הכפתור הבולט של עוצמת הקול בקצה הטלפון."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"לאפשרויות נוספות, יש לבטל את נעילת הטלפון"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"לאפשרויות נוספות, יש לבטל את נעילת הטאבלט"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"לאפשרויות נוספות, יש לבטל את נעילת המכשיר"</string>

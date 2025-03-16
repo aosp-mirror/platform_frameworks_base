@@ -23,8 +23,12 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.Instrumentation;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.Flags;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -32,6 +36,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -40,6 +45,10 @@ import org.junit.runner.RunWith;
 @Presubmit
 public class ProgressBarTest {
     private final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
     private ProgressBar mBar;
     private AccessibilityNodeInfo mInfo;
 
@@ -180,5 +189,17 @@ public class ProgressBarTest {
 
         mBar.onInitializeAccessibilityNodeInfo(mInfo);
         assertEquals("custom state", mInfo.getStateDescription().toString());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INDETERMINATE_RANGE_INFO)
+    public void testRangeInfo_indeterminateProgressBar_usesTypeIndeterminate() {
+        mBar.setIndeterminate(true);
+        assertTrue(mBar.isIndeterminate());
+
+        mBar.onInitializeAccessibilityNodeInfo(mInfo);
+
+        assertEquals(mInfo.getRangeInfo().getType(),
+                AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INDETERMINATE);
     }
 }

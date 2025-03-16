@@ -46,7 +46,7 @@ class DataSaverTileMapperTest : SysuiTestCase() {
                     addOverride(R.drawable.qs_data_saver_icon_on, TestStubDrawable())
                 }
                 .resources,
-            context.theme
+            context.theme,
         )
     }
 
@@ -59,7 +59,7 @@ class DataSaverTileMapperTest : SysuiTestCase() {
         val expectedState =
             createDataSaverTileState(
                 QSTileState.ActivationState.ACTIVE,
-                R.drawable.qs_data_saver_icon_on
+                R.drawable.qs_data_saver_icon_on,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -73,14 +73,14 @@ class DataSaverTileMapperTest : SysuiTestCase() {
         val expectedState =
             createDataSaverTileState(
                 QSTileState.ActivationState.INACTIVE,
-                R.drawable.qs_data_saver_icon_off
+                R.drawable.qs_data_saver_icon_off,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
 
     private fun createDataSaverTileState(
         activationState: QSTileState.ActivationState,
-        iconRes: Int
+        iconRes: Int,
     ): QSTileState {
         val label = context.getString(R.string.data_saver)
         val secondaryLabel =
@@ -91,7 +91,7 @@ class DataSaverTileMapperTest : SysuiTestCase() {
             else context.resources.getStringArray(R.array.tile_states_saver)[0]
 
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -101,7 +101,7 @@ class DataSaverTileMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

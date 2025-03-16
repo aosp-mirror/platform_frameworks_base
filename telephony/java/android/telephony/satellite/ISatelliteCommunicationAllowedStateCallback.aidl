@@ -16,6 +16,8 @@
 
 package android.telephony.satellite;
 
+import android.telephony.satellite.SatelliteAccessConfiguration;
+
 /**
  * Interface for satellite communication allowed state callback.
  * @hide
@@ -29,4 +31,14 @@ oneway interface ISatelliteCommunicationAllowedStateCallback {
      * @param allowed whether satellite communication state or not
      */
     void onSatelliteCommunicationAllowedStateChanged(in boolean isAllowed);
+
+    /**
+     * Callback method invoked when the satellite access configuration changes
+     *
+     * @param The satellite access configuration associated with the current location.
+     * When satellite is not allowed at the current location,
+     * {@code satelliteRegionalConfiguration} will be null.
+     */
+    void onSatelliteAccessConfigurationChanged(in SatelliteAccessConfiguration
+        satelliteAccessConfiguration);
 }

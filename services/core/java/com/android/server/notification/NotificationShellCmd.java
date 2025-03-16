@@ -80,6 +80,7 @@ public class NotificationShellCmd extends ShellCommand {
             + "  get <notification-key>\n"
             + "  snooze --for <msec> <notification-key>\n"
             + "  unsnooze <notification-key>\n"
+            + "  set_exempt_th_force_grouping [true|false]\n"
             ;
 
     private static final String NOTIFY_USAGE =
@@ -426,6 +427,13 @@ public class NotificationShellCmd extends ShellCommand {
                         pw.println("error: invalid value for --" + subflag + ": " + flagarg);
                         return 1;
                     }
+                    break;
+                }
+                case "set_exempt_th_force_grouping": {
+                    String arg = getNextArgRequired();
+                    final boolean exemptTestHarnessFromForceGrouping =
+                            "true".equals(arg) || "1".equals(arg);
+                    mDirectService.setTestHarnessExempted(exemptTestHarnessFromForceGrouping);
                     break;
                 }
                 default:

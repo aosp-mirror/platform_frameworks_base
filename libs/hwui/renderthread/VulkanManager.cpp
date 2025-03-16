@@ -44,7 +44,7 @@ namespace uirenderer {
 namespace renderthread {
 
 // Not all of these are strictly required, but are all enabled if present.
-static std::array<std::string_view, 21> sEnableExtensions{
+static std::array<std::string_view, 23> sEnableExtensions{
         VK_KHR_BIND_MEMORY_2_EXTENSION_NAME,
         VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME,
         VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
@@ -65,6 +65,8 @@ static std::array<std::string_view, 21> sEnableExtensions{
         VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME,
         VK_KHR_ANDROID_SURFACE_EXTENSION_NAME,
         VK_EXT_GLOBAL_PRIORITY_EXTENSION_NAME,
+        VK_EXT_GLOBAL_PRIORITY_QUERY_EXTENSION_NAME,
+        VK_KHR_GLOBAL_PRIORITY_EXTENSION_NAME,
         VK_EXT_DEVICE_FAULT_EXTENSION_NAME,
 };
 
@@ -206,7 +208,7 @@ void VulkanManager::setupDevice(skgpu::VulkanExtensions& grExtensions,
     GET_INST_PROC(GetPhysicalDeviceFeatures2);
     GET_INST_PROC(GetPhysicalDeviceImageFormatProperties2);
     GET_INST_PROC(GetPhysicalDeviceProperties);
-    GET_INST_PROC(GetPhysicalDeviceQueueFamilyProperties);
+    GET_INST_PROC(GetPhysicalDeviceQueueFamilyProperties2);
 
     uint32_t gpuCount;
     LOG_ALWAYS_FATAL_IF(mEnumeratePhysicalDevices(mInstance, &gpuCount, nullptr));
@@ -225,21 +227,30 @@ void VulkanManager::setupDevice(skgpu::VulkanExtensions& grExtensions,
 
     // query to get the initial queue props size
     uint32_t queueCount = 0;
-    mGetPhysicalDeviceQueueFamilyProperties(mPhysicalDevice, &queueCount, nullptr);
+    mGetPhysicalDeviceQueueFamilyProperties2(mPhysicalDevice, &queueCount, nullptr);
     LOG_ALWAYS_FATAL_IF(!queueCount);
 
     // now get the actual queue props
-    std::unique_ptr<VkQueueFamilyProperties[]> queueProps(new VkQueueFamilyProperties[queueCount]);
-    mGetPhysicalDeviceQueueFamilyProperties(mPhysicalDevice, &queueCount, queueProps.get());
+    std::unique_ptr<VkQueueFamilyProperties2[]>
+            queueProps(new VkQueueFamilyProperties2[queueCount]);
+    // query the global priority, this ignored if VK_EXT_global_priority isn't supported
+    std::vector<VkQueueFamilyGlobalPriorityPropertiesEXT> queuePriorityProps(queueCount);
+    for (uint32_t i = 0; i < queueCount; i++) {
+        queuePriorityProps[i].sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_GLOBAL_PRIORITY_PROPERTIES_EXT;
+        queuePriorityProps[i].pNext = nullptr;
+        queueProps[i].pNext = &queuePriorityProps[i];
+    }
+    mGetPhysicalDeviceQueueFamilyProperties2(mPhysicalDevice, &queueCount, queueProps.get());
 
     constexpr auto kRequestedQueueCount = 2;
 
     // iterate to find the graphics queue
     mGraphicsQueueIndex = queueCount;
     for (uint32_t i = 0; i < queueCount; i++) {
-        if (queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+        if (queueProps[i].queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             mGraphicsQueueIndex = i;
-            LOG_ALWAYS_FATAL_IF(queueProps[i].queueCount < kRequestedQueueCount);
+            LOG_ALWAYS_FATAL_IF(
+                    queueProps[i].queueFamilyProperties.queueCount < kRequestedQueueCount);
             break;
         }
     }
@@ -327,6 +338,15 @@ void VulkanManager::setupDevice(skgpu::VulkanExtensions& grExtensions,
         tailPNext = &formatFeatures->pNext;
     }
 
+    VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT* globalPriorityQueryFeatures =
+            new VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT;
+    globalPriorityQueryFeatures->sType =
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GLOBAL_PRIORITY_QUERY_FEATURES_EXT;
+    globalPriorityQueryFeatures->pNext = nullptr;
+    globalPriorityQueryFeatures->globalPriorityQuery = false;
+    *tailPNext = globalPriorityQueryFeatures;
+    tailPNext = &globalPriorityQueryFeatures->pNext;
+
     // query to get the physical device features
     mGetPhysicalDeviceFeatures2(mPhysicalDevice, &features);
     // this looks like it would slow things down,
@@ -341,24 +361,59 @@ void VulkanManager::setupDevice(skgpu::VulkanExtensions& grExtensions,
 
     if (Properties::contextPriority != 0 &&
         grExtensions.hasExtension(VK_EXT_GLOBAL_PRIORITY_EXTENSION_NAME, 2)) {
-        memset(&queuePriorityCreateInfo, 0, sizeof(VkDeviceQueueGlobalPriorityCreateInfoEXT));
-        queuePriorityCreateInfo.sType =
-                VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO_EXT;
-        queuePriorityCreateInfo.pNext = nullptr;
+        VkQueueGlobalPriorityEXT globalPriority;
         switch (Properties::contextPriority) {
             case EGL_CONTEXT_PRIORITY_LOW_IMG:
-                queuePriorityCreateInfo.globalPriority = VK_QUEUE_GLOBAL_PRIORITY_LOW_EXT;
+                globalPriority = VK_QUEUE_GLOBAL_PRIORITY_LOW_EXT;
                 break;
             case EGL_CONTEXT_PRIORITY_MEDIUM_IMG:
-                queuePriorityCreateInfo.globalPriority = VK_QUEUE_GLOBAL_PRIORITY_MEDIUM_EXT;
+                globalPriority = VK_QUEUE_GLOBAL_PRIORITY_MEDIUM_EXT;
                 break;
             case EGL_CONTEXT_PRIORITY_HIGH_IMG:
-                queuePriorityCreateInfo.globalPriority = VK_QUEUE_GLOBAL_PRIORITY_HIGH_EXT;
+                globalPriority = VK_QUEUE_GLOBAL_PRIORITY_HIGH_EXT;
                 break;
             default:
                 LOG_ALWAYS_FATAL("Unsupported context priority");
         }
-        queueNextPtr = &queuePriorityCreateInfo;
+
+        // check if the requested priority is reported by the query
+        bool attachGlobalPriority = false;
+        if (uirenderer::Properties::queryGlobalPriority &&
+            globalPriorityQueryFeatures->globalPriorityQuery) {
+            for (uint32_t i = 0; i < queuePriorityProps[mGraphicsQueueIndex].priorityCount; i++) {
+                if (queuePriorityProps[mGraphicsQueueIndex].priorities[i] == globalPriority) {
+                    attachGlobalPriority = true;
+                    break;
+                }
+            }
+        } else {
+            // Querying is not supported so attempt queue creation with requested priority anyways
+            // If the priority turns out not to be supported, the driver *may* fail with
+            // VK_ERROR_NOT_PERMITTED_KHR
+            attachGlobalPriority = true;
+        }
+
+        if (attachGlobalPriority) {
+            memset(&queuePriorityCreateInfo, 0, sizeof(VkDeviceQueueGlobalPriorityCreateInfoEXT));
+            queuePriorityCreateInfo.sType =
+                    VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO_EXT;
+            queuePriorityCreateInfo.pNext = nullptr;
+            queuePriorityCreateInfo.globalPriority = globalPriority;
+            queueNextPtr = &queuePriorityCreateInfo;
+        } else {
+            // If globalPriorityQuery is enabled, attempting queue creation with an unsupported
+            // priority will return VK_ERROR_INITIALIZATION_FAILED.
+            //
+            // SysUI and Launcher will request HIGH when SF has RT but it is a known issue that
+            // upstream drm drivers currently lack a way to grant them the granular privileges
+            // they need for HIGH (but not RT) so they will fail queue creation.
+            // For now, drop the unsupported global priority request so that queue creation
+            // succeeds.
+            //
+            // Once that is fixed, this should probably be a fatal error indicating an improper
+            // request or an app needs to get the correct privileges.
+            ALOGW("Requested context priority is not supported by the queue");
+        }
     }
 
     const VkDeviceQueueCreateInfo queueInfo = {

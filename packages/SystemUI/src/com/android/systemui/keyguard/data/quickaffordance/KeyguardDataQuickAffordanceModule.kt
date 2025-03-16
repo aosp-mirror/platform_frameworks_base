@@ -26,7 +26,7 @@ import dagger.multibindings.ElementsIntoSet
 interface KeyguardDataQuickAffordanceModule {
     @Binds
     fun providerClientFactory(
-        impl: KeyguardQuickAffordanceProviderClientFactoryImpl,
+        impl: KeyguardQuickAffordanceProviderClientFactoryImpl
     ): KeyguardQuickAffordanceProviderClientFactory
 
     companion object {
@@ -36,6 +36,7 @@ interface KeyguardDataQuickAffordanceModule {
             camera: CameraQuickAffordanceConfig,
             doNotDisturb: DoNotDisturbQuickAffordanceConfig,
             flashlight: FlashlightQuickAffordanceConfig,
+            glanceableHub: GlanceableHubQuickAffordanceConfig,
             home: HomeControlsKeyguardQuickAffordanceConfig,
             mute: MuteQuickAffordanceConfig,
             quickAccessWallet: QuickAccessWalletKeyguardQuickAffordanceConfig,
@@ -46,6 +47,7 @@ interface KeyguardDataQuickAffordanceModule {
                 camera,
                 doNotDisturb,
                 flashlight,
+                glanceableHub,
                 home,
                 mute,
                 quickAccessWallet,

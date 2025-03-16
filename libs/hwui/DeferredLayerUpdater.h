@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <SkBlendMode.h>
 #include <SkColorFilter.h>
 #include <SkImage.h>
@@ -24,9 +26,9 @@
 #include <android/surface_texture.h>
 #include <cutils/compiler.h>
 #include <utils/Errors.h>
+#include <utils/Timers.h>
 
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
+#include <chrono>
 #include <map>
 #include <memory>
 
@@ -154,6 +156,9 @@ private:
     bool mGLContextAttached;
     bool mUpdateTexImage;
     int mCurrentSlot = -1;
+    android_dataspace mDataspace = HAL_DATASPACE_UNKNOWN;
+    std::chrono::steady_clock::time_point mFirstTimeForDataspace =
+            std::chrono::steady_clock::time_point::min();
 
     Layer* mLayer;
 };

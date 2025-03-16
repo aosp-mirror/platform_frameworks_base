@@ -30,9 +30,11 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
@@ -42,8 +44,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
@@ -57,7 +61,7 @@ class AodBurnInViewModel
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val burnInInteractor: BurnInInteractor,
-    private val configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
@@ -114,6 +118,9 @@ constructor(
                                 emit(0f)
                             },
                             aodToLockscreenTransitionViewModel
+                                .translationX(params.translationX)
+                                .onStart { emit(StateToValue()) },
+                            aodToLockscreenTransitionViewModel
                                 .translationY(params.translationY)
                                 .onStart { emit(StateToValue()) },
                         ) { flows ->
@@ -123,11 +130,12 @@ constructor(
                             val goneToAodTranslationX = flows[3] as StateToValue
                             val lockscreenToAodTranslationX = flows[4] as StateToValue
                             val occludedToLockscreen = flows[5] as Float
-                            val aodToLockscreen = flows[6] as StateToValue
+                            val aodToLockscreenTranslationX = flows[6] as StateToValue
+                            val aodToLockscreenTranslationY = flows[7] as StateToValue
 
                             val translationY =
-                                if (aodToLockscreen.transitionState.isTransitioning()) {
-                                    aodToLockscreen.value ?: 0f
+                                if (aodToLockscreenTranslationY.transitionState.isTransitioning()) {
+                                    aodToLockscreenTranslationY.value ?: 0f
                                 } else if (
                                     goneToAodTranslationY.transitionState.isTransitioning()
                                 ) {
@@ -138,9 +146,13 @@ constructor(
                                         keyguardTranslationY
                                 }
                             val translationX =
-                                burnInModel.translationX +
-                                    (goneToAodTranslationX.value ?: 0f) +
-                                    (lockscreenToAodTranslationX.value ?: 0f)
+                                if (aodToLockscreenTranslationX.transitionState.isTransitioning()) {
+                                    aodToLockscreenTranslationX.value ?: 0f
+                                } else {
+                                    burnInModel.translationX +
+                                        (goneToAodTranslationX.value ?: 0f) +
+                                        (lockscreenToAodTranslationX.value ?: 0f)
+                                }
                             burnInModel.copy(
                                 translationX = translationX.toInt(),
                                 translationY = translationY.toInt(),
@@ -156,9 +168,17 @@ constructor(
 
     private fun burnIn(params: BurnInParameters): Flow<BurnInModel> {
         return combine(
-            keyguardTransitionInteractor.transitionValue(KeyguardState.AOD).map {
-                Interpolators.FAST_OUT_SLOW_IN.getInterpolation(it)
-            },
+            merge(
+                    keyguardTransitionInteractor.transition(Edge.create(to = KeyguardState.AOD)),
+                    keyguardTransitionInteractor
+                        .transition(Edge.create(from = KeyguardState.AOD))
+                        .map { it.copy(value = 1f - it.value) },
+                    keyguardTransitionInteractor
+                        .transition(Edge.create(to = KeyguardState.LOCKSCREEN))
+                        .filter { it.from != KeyguardState.AOD }
+                        .map { it.copy(value = 0f) },
+                )
+                .map { Interpolators.FAST_OUT_SLOW_IN.getInterpolation(it.value) },
             burnInInteractor.burnIn(
                 xDimenResourceId = R.dimen.burn_in_prevention_offset_x,
                 yDimenResourceId = R.dimen.burn_in_prevention_offset_y,
@@ -198,6 +218,8 @@ data class BurnInParameters(
     val minViewY: Int = Int.MAX_VALUE,
     /** The current y translation of the view */
     val translationY: () -> Float? = { null },
+    /** The current x translation of the view */
+    val translationX: () -> Float? = { null },
 )
 
 /**

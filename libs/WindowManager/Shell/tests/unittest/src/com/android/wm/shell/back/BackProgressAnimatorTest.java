@@ -53,9 +53,8 @@ public class BackProgressAnimatorTest {
         return new BackMotionEvent(
                 /* touchX = */ touchX,
                 /* touchY = */ 0,
+                /* frameTime = */ 0,
                 /* progress = */ progress,
-                /* velocityX = */ 0,
-                /* velocityY = */ 0,
                 /* triggerBack = */ false,
                 /* swipeEdge = */ BackEvent.EDGE_LEFT,
                 /* departingAnimationTarget = */ null);
@@ -63,6 +62,8 @@ public class BackProgressAnimatorTest {
 
     @Before
     public void setUp() throws Exception {
+        mTargetProgressCalled = new CountDownLatch(1);
+        mTargetProgress = 0.5f;
         mMainThreadHandler = new Handler(Looper.getMainLooper());
         final BackMotionEvent backEvent = backMotionEventFrom(0, 0);
         mMainThreadHandler.post(

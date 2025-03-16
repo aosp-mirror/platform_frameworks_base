@@ -290,6 +290,10 @@ final class AppCompatConfiguration {
     // is enabled and activity is connected to the camera in fullscreen.
     private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
 
+    // Which aspect ratio to use when camera compat treatment is enabled and an activity eligible
+    // for treatment is connected to the camera.
+    private float mCameraCompatAspectRatio;
+
     // Whether activity "refresh" in camera compatibility treatment is enabled.
     // See RefreshCallbackItem for context.
     private boolean mIsCameraCompatTreatmentRefreshEnabled = true;
@@ -299,6 +303,11 @@ final class AppCompatConfiguration {
     // cycle by default due to higher success rate confirmed with app compatibility testing.
     // See RefreshCallbackItem for context.
     private boolean mIsCameraCompatRefreshCycleThroughStopEnabled = true;
+
+    // Whether camera compat freeform treatment should be enabled for all eligible activities.
+    // This has the same effect as enabling the per-app override
+    // ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT for every app.
+    private boolean mIsCameraCompatFreeformWindowingTreatmentEnabled = false;
 
     // Whether should ignore app requested orientation in response to an app
     // calling Activity#setRequestedOrientation. See
@@ -363,6 +372,8 @@ final class AppCompatConfiguration {
                         .config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled);
         mIsCameraCompatSplitScreenAspectRatioEnabled = mContext.getResources().getBoolean(
                 R.bool.config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled);
+        mCameraCompatAspectRatio = mContext.getResources().getFloat(
+                R.dimen.config_windowManagerCameraCompatAspectRatio);
         mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled);
 
@@ -1317,6 +1328,55 @@ final class AppCompatConfiguration {
      */
     void resetCameraCompatRefreshCycleThroughStopEnabled() {
         mIsCameraCompatRefreshCycleThroughStopEnabled = true;
+    }
+
+    /**
+     * Overrides aspect ratio to use when camera compat treatment is enabled and an activity
+     * eligible for treatment is connected to the camera.
+     */
+    void setCameraCompatAspectRatio(float aspectRatio) {
+        mCameraCompatAspectRatio = aspectRatio;
+    }
+
+    /**
+     * Which aspect ratio to use when camera compat treatment is enabled and an activity eligible
+     * for treatment is connected to the camera.
+     */
+    float getCameraCompatAspectRatio() {
+        return mCameraCompatAspectRatio;
+    }
+
+    /**
+     * Resets aspect ratio to use when camera compat treatment is enabled and an activity eligible
+     * for treatment is connected to the camera.
+     */
+    void resetCameraCompatAspectRatio() {
+        mCameraCompatAspectRatio = mContext.getResources().getFloat(R.dimen
+                .config_windowManagerCameraCompatAspectRatio);
+    }
+
+    /**
+     * Sets whether the camera compatibility treatment in freeform windowing mode is enabled for
+     * all fixed-orientation apps when using camera.
+     */
+    void setIsCameraCompatFreeformWindowingTreatmentEnabled(boolean enabled) {
+        mIsCameraCompatFreeformWindowingTreatmentEnabled = enabled;
+    }
+
+    /**
+     * Whether the camera compatibility treatment in freeform windowing mode is enabled for all
+     * fixed-orientation apps when using camera.
+     */
+    boolean isCameraCompatFreeformWindowingTreatmentEnabled() {
+        return mIsCameraCompatFreeformWindowingTreatmentEnabled;
+    }
+
+    /**
+     * Resets whether the camera compatibility treatment in freeform windowing mode is enabled for
+     * all fixed-orientation apps when using camera.
+     */
+    void resetIsCameraCompatFreeformWindowingTreatmentEnabled() {
+        mIsCameraCompatFreeformWindowingTreatmentEnabled = false;
     }
 
     /**

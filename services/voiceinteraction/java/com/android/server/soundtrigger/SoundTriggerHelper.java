@@ -842,7 +842,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
 
-        model.setRequested(config.allowMultipleTriggers);
+        model.setRequested(config.isMultipleTriggersAllowed());
         // TODO: Remove this block if the lower layer supports multiple triggers.
         if (model.isRequested()) {
             updateRecognitionLocked(model, true);
@@ -964,7 +964,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         RecognitionConfig config = modelData.getRecognitionConfig();
         if (config != null) {
             // Whether we should continue by starting this again.
-            modelData.setRequested(config.allowMultipleTriggers);
+            modelData.setRequested(config.isMultipleTriggersAllowed());
         }
         // TODO: Remove this block if the lower layer supports multiple triggers.
         if (modelData.isRequested()) {

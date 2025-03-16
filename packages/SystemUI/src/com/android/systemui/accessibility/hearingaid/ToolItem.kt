@@ -23,4 +23,5 @@ data class ToolItem(
     var toolName: String = "",
     var toolIcon: Drawable,
     var toolIntent: Intent,
+    var isCustomIcon: Boolean,
 )

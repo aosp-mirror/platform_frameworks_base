@@ -21,18 +21,19 @@
  * header                     := magic version target_crc overlay_crc fulfilled_policies
  *                               enforce_overlayable target_path overlay_path overlay_name
  *                               debug_info
- * data                       := data_header target_entry* target_inline_entry*
-                                 target_inline_entry_value* config* overlay_entry* string_pool
+ * data                       := data_header target_entries target_inline_entries
+                                 target_inline_entry_value* config* overlay_entries string_pool
  * data_header                := target_entry_count target_inline_entry_count
                                  target_inline_entry_value_count config_count overlay_entry_count
  *                               string_pool_index
- * target_entry               := target_id overlay_id
- * target_inline_entry        := target_id start_value_index value_count
+ * target_entries             := target_id* overlay_id*
+ * target_inline_entries      := target_id* target_inline_value_header*
+ * target_inline_value_header := start_value_index value_count
  * target_inline_entry_value  := config_index Res_value::size padding(1) Res_value::type
  *                               Res_value::value
  * config                     := target_id Res_value::size padding(1) Res_value::type
  *                               Res_value::value
- * overlay_entry              := overlay_id target_id
+ * overlay_entries            := overlay_id* target_id*
  *
  * debug_info                       := string
  * enforce_overlayable              := <uint32_t>

@@ -16,6 +16,10 @@
 
 package com.android.settingslib.spa.widget.preference
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessAlarm
 import androidx.compose.material.icons.outlined.MusicNote
@@ -27,30 +31,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.EntryHighlight
 import com.android.settingslib.spa.widget.ui.SettingsSlider
 
-/**
- * The widget model for [SliderPreference] widget.
- */
+/** The widget model for [SliderPreference] widget. */
 interface SliderPreferenceModel {
-    /**
-     * The title of this [SliderPreference].
-     */
+    /** The title of this [SliderPreference]. */
     val title: String
 
-    /**
-     * The initial position of the [SliderPreference].
-     */
+    /** The initial position of the [SliderPreference]. */
     val initValue: Int
 
-    /**
-     * The value range for this [SliderPreference].
-     */
+    /** The value range for this [SliderPreference]. */
     val valueRange: IntRange
         get() = 0..100
 
@@ -69,15 +68,23 @@ interface SliderPreferenceModel {
         get() = null
 
     /**
-     * The icon image for [SliderPreference]. If not specified, the slider hides the icon by default.
+     * The start icon image for [SliderPreference]. If not specified, the slider hides the icon by
+     * default.
      */
-    val icon: ImageVector?
+    val iconStart: ImageVector?
         get() = null
 
     /**
-     * Indicates whether to show step marks. If show step marks, when user finish sliding,
-     * the slider will automatically jump to the nearest step mark. Otherwise, the slider hides
-     * the step marks by default.
+     * The end icon image for [SliderPreference]. If not specified, the slider hides the icon by
+     * default.
+     */
+    val iconEnd: ImageVector?
+        get() = null
+
+    /**
+     * Indicates whether to show step marks. If show step marks, when user finish sliding, the
+     * slider will automatically jump to the nearest step mark. Otherwise, the slider hides the step
+     * marks by default.
      *
      * The step is fixed to 1.
      */
@@ -99,7 +106,8 @@ fun SliderPreference(model: SliderPreferenceModel) {
             valueRange = model.valueRange,
             onValueChange = model.onValueChange,
             onValueChangeFinished = model.onValueChangeFinished,
-            icon = model.icon,
+            iconStart = model.iconStart,
+            iconEnd = model.iconEnd,
             showSteps = model.showSteps,
         )
     }
@@ -113,25 +121,43 @@ internal fun SliderPreference(
     valueRange: IntRange = 0..100,
     onValueChange: ((value: Int) -> Unit)? = null,
     onValueChangeFinished: (() -> Unit)? = null,
-    icon: ImageVector? = null,
+    iconStart: ImageVector? = null,
+    iconEnd: ImageVector? = null,
     showSteps: Boolean = false,
 ) {
+
     BaseLayout(
         title = title,
         subTitle = {
-            SettingsSlider(
-                initValue,
-                modifier,
-                valueRange,
-                onValueChange,
-                onValueChangeFinished,
-                showSteps
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (iconStart != null) {
+                    SliderIcon(icon = iconStart)
+                    Spacer(Modifier.padding(SettingsDimension.paddingSmall))
+                }
+                Box(Modifier.weight(1f)) {
+                    SettingsSlider(
+                        initValue,
+                        modifier,
+                        valueRange,
+                        onValueChange,
+                        onValueChangeFinished,
+                        showSteps,
+                    )
+                }
+                if (iconEnd != null) {
+                    Spacer(Modifier.padding(SettingsDimension.paddingSmall))
+                    SliderIcon(icon = iconEnd)
+                }
+            }
         },
-        icon = if (icon != null) ({
-            Icon(imageVector = icon, contentDescription = null)
-        }) else null,
     )
+}
+
+@Composable
+fun SliderIcon(icon: ImageVector) {
+    Box(modifier = Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
+        Icon(imageVector = icon, contentDescription = null)
+    }
 }
 
 @Preview
@@ -147,7 +173,7 @@ private fun SliderPreferencePreview() {
             onValueChangeFinished = {
                 println("onValueChangeFinished: the value is $sliderPosition")
             },
-            icon = Icons.Outlined.AccessAlarm,
+            iconStart = Icons.Outlined.AccessAlarm,
         )
     }
 }
@@ -163,7 +189,22 @@ private fun SliderPreferenceIconChangePreview() {
             onValueChange = { it: Int ->
                 icon = if (it > 0) Icons.Outlined.MusicNote else Icons.Outlined.MusicOff
             },
-            icon = icon,
+            iconEnd = icon,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SliderPreferenceTwoIconPreview() {
+    SettingsTheme {
+        val iconStart by remember { mutableStateOf(Icons.Outlined.MusicNote) }
+        val iconEnd by remember { mutableStateOf(Icons.Outlined.MusicOff) }
+        SliderPreference(
+            title = "Media Volume",
+            initValue = 40,
+            iconStart = iconStart,
+            iconEnd = iconEnd,
         )
     }
 }
@@ -172,11 +213,6 @@ private fun SliderPreferenceIconChangePreview() {
 @Composable
 private fun SliderPreferenceStepsPreview() {
     SettingsTheme {
-        SliderPreference(
-            title = "Display Text",
-            initValue = 2,
-            valueRange = 1..5,
-            showSteps = true,
-        )
+        SliderPreference(title = "Display Text", initValue = 2, valueRange = 1..5, showSteps = true)
     }
 }

@@ -96,12 +96,6 @@ class TaskFragmentContainer {
             new ArrayList<>();
 
     /**
-     * Individual associated activity tokens in different containers that should be finished on
-     * exit.
-     */
-    private final List<IBinder> mActivitiesToFinishOnExit = new ArrayList<>();
-
-    /**
      * The launch options that was used to create this container. Must not {@link Bundle#isEmpty()}
      * for {@link #isOverlay()} container.
      */
@@ -114,7 +108,6 @@ class TaskFragmentContainer {
     /**
      * Windowing mode that was requested last via {@link android.window.WindowContainerTransaction}.
      */
-    // TODO(b/289875940): review this and other field that might need to be moved in the base class.
     @WindowingMode
     private int mLastRequestedWindowingMode = WINDOWING_MODE_UNDEFINED;
 
@@ -443,7 +436,7 @@ class TaskFragmentContainer {
             // Remove the activity now because there can be a delay before the server callback.
             mInfo.getActivities().remove(activityToken);
         }
-        mActivitiesToFinishOnExit.remove(activityToken);
+        mParcelableData.mActivitiesToFinishOnExit.remove(activityToken);
         finishSelfWithActivityIfNeeded(wct, activityToken);
     }
 
@@ -624,7 +617,20 @@ class TaskFragmentContainer {
         if (mIsFinished) {
             return;
         }
-        mActivitiesToFinishOnExit.add(activityToFinish.getActivityToken());
+        mParcelableData.mActivitiesToFinishOnExit.add(activityToFinish.getActivityToken());
+    }
+
+    /**
+     * Returns {@code true} if an Activity from the given {@code container} was added to be
+     * finished on exit. Otherwise, return {@code false}.
+     */
+    boolean hasActivityToFinishOnExit(@NonNull TaskFragmentContainer container) {
+        for (IBinder activity : mParcelableData.mActivitiesToFinishOnExit) {
+            if (container.hasActivity(activity)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -634,7 +640,7 @@ class TaskFragmentContainer {
         if (mIsFinished) {
             return;
         }
-        mActivitiesToFinishOnExit.remove(activityToRemove.getActivityToken());
+        mParcelableData.mActivitiesToFinishOnExit.remove(activityToRemove.getActivityToken());
     }
 
     /** Removes all dependencies that should be finished when this container is finished. */
@@ -643,7 +649,7 @@ class TaskFragmentContainer {
             return;
         }
         mContainersToFinishOnExit.clear();
-        mActivitiesToFinishOnExit.clear();
+        mParcelableData.mActivitiesToFinishOnExit.clear();
     }
 
     /**
@@ -721,7 +727,7 @@ class TaskFragmentContainer {
         mContainersToFinishOnExit.clear();
 
         // Finish associated activities
-        for (IBinder activityToken : mActivitiesToFinishOnExit) {
+        for (IBinder activityToken : mParcelableData.mActivitiesToFinishOnExit) {
             final Activity activity = mController.getActivity(activityToken);
             if (activity == null || activity.isFinishing()
                     || controller.shouldRetainAssociatedActivity(this, activity)) {
@@ -729,7 +735,7 @@ class TaskFragmentContainer {
             }
             wct.finishActivity(activity.getActivityToken());
         }
-        mActivitiesToFinishOnExit.clear();
+        mParcelableData.mActivitiesToFinishOnExit.clear();
     }
 
     @GuardedBy("mController.mLock")
@@ -1082,7 +1088,7 @@ class TaskFragmentContainer {
                 + " pendingAppearedActivities=" + mPendingAppearedActivities
                 + (includeContainersToFinishOnExit ? " containersToFinishOnExit="
                 + containersToFinishOnExitToString() : "")
-                + " activitiesToFinishOnExit=" + mActivitiesToFinishOnExit
+                + " activitiesToFinishOnExit=" + mParcelableData.mActivitiesToFinishOnExit
                 + " info=" + mInfo
                 + "}";
     }

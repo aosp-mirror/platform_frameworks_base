@@ -37,11 +37,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -51,8 +53,11 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.PlatformIconButton
 import com.android.compose.PlatformSliderColors
 import com.android.compose.modifiers.padding
+import com.android.compose.modifiers.thenIf
+import com.android.systemui.Flags
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderViewModel
 
@@ -78,15 +83,17 @@ fun ColumnVolumeSliders(
 ) {
     require(viewModels.isNotEmpty())
     Column(modifier = modifier) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
             val sliderViewModel: SliderViewModel = viewModels.first()
             val sliderState by viewModels.first().slider.collectAsStateWithLifecycle()
             val sliderPadding by topSliderPadding(isExpandable)
 
             VolumeSlider(
-                modifier = Modifier.padding(end = { sliderPadding.roundToPx() }).fillMaxWidth(),
+                modifier =
+                    Modifier.thenIf(!Flags.volumeRedesign()) {
+                            Modifier.padding(end = { sliderPadding.roundToPx() })
+                        }
+                        .fillMaxWidth(),
                 state = sliderState,
                 onValueChange = { newValue: Float ->
                     sliderViewModel.onValueChanged(sliderState, newValue)
@@ -94,15 +101,30 @@ fun ColumnVolumeSliders(
                 onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                 onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                 sliderColors = sliderColors,
+                hapticsViewModelFactory = sliderViewModel.getSliderHapticsViewModelFactory(),
+                button =
+                    if (Flags.volumeRedesign()) {
+                        {
+                            ExpandButton(
+                                isExpanded = isExpanded,
+                                isExpandable = isExpandable,
+                                onExpandedChanged = onExpandedChanged,
+                            )
+                        }
+                    } else {
+                        null
+                    },
             )
 
-            ExpandButton(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                isExpanded = isExpanded,
-                isExpandable = isExpandable,
-                onExpandedChanged = onExpandedChanged,
-                sliderColors = sliderColors,
-            )
+            if (!Flags.volumeRedesign()) {
+                ExpandButtonLegacy(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    isExpanded = isExpanded,
+                    isExpandable = isExpandable,
+                    onExpandedChanged = onExpandedChanged,
+                    sliderColors = sliderColors,
+                )
+            }
         }
         AnimatedVisibility(
             visible = isExpanded || !isExpandable,
@@ -143,6 +165,8 @@ fun ColumnVolumeSliders(
                             onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                             onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                             sliderColors = sliderColors,
+                            hapticsViewModelFactory =
+                                sliderViewModel.getSliderHapticsViewModelFactory(),
                         )
                     }
                 }
@@ -152,7 +176,7 @@ fun ColumnVolumeSliders(
 }
 
 @Composable
-private fun ExpandButton(
+private fun ExpandButtonLegacy(
     isExpanded: Boolean,
     isExpandable: Boolean,
     onExpandedChanged: (Boolean) -> Unit,
@@ -181,7 +205,7 @@ private fun ExpandButton(
             colors =
                 IconButtonDefaults.filledIconButtonColors(
                     containerColor = sliderColors.indicatorColor,
-                    contentColor = sliderColors.iconColor
+                    contentColor = sliderColors.iconColor,
                 ),
         ) {
             Icon(
@@ -199,6 +223,48 @@ private fun ExpandButton(
     }
 }
 
+@Composable
+private fun ExpandButton(
+    isExpanded: Boolean,
+    isExpandable: Boolean,
+    onExpandedChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val expandButtonStateDescription =
+        if (isExpanded) {
+            stringResource(R.string.volume_panel_expanded_sliders)
+        } else {
+            stringResource(R.string.volume_panel_collapsed_sliders)
+        }
+    AnimatedVisibility(
+        modifier = modifier,
+        visible = isExpandable,
+        enter = expandButtonEnterTransition(),
+        exit = expandButtonExitTransition(),
+    ) {
+        PlatformIconButton(
+            modifier =
+                Modifier.size(width = 48.dp, height = 40.dp).semantics {
+                    role = Role.Switch
+                    stateDescription = expandButtonStateDescription
+                },
+            onClick = { onExpandedChanged(!isExpanded) },
+            colors =
+                IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+            iconResource =
+                if (isExpanded) {
+                    R.drawable.ic_arrow_down_24dp
+                } else {
+                    R.drawable.ic_arrow_up_24dp
+                },
+            contentDescription = null,
+        )
+    }
+}
+
 private fun enterTransition(index: Int, totalCount: Int): EnterTransition {
     val enterDelay = ((totalCount - index + 1) * 10).coerceAtLeast(0)
     val enterDuration = (EXPAND_DURATION_MILLIS - enterDelay).coerceAtLeast(100)
@@ -211,9 +277,7 @@ private fun enterTransition(index: Int, totalCount: Int): EnterTransition {
             animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay),
             clip = false,
         ) +
-        fadeIn(
-            animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay),
-        )
+        fadeIn(animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay))
 }
 
 private fun exitTransition(index: Int, totalCount: Int): ExitTransition {
@@ -286,6 +350,6 @@ private fun topSliderPadding(isExpandable: Boolean): State<Dp> {
                 0.dp
             },
         animationSpec = animationSpec,
-        label = "TopVolumeSliderPadding"
+        label = "TopVolumeSliderPadding",
     )
 }

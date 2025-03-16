@@ -44,7 +44,7 @@ interface IBubbles {
 
     oneway void showUserEducation(in int positionX, in int positionY) = 8;
 
-    oneway void setBubbleBarLocation(in BubbleBarLocation location) = 9;
+    oneway void setBubbleBarLocation(in BubbleBarLocation location, in int source) = 9;
 
     oneway void updateBubbleBarTopOnScreen(in int topOnScreen) = 10;
 

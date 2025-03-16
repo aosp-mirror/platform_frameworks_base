@@ -1,5 +1,6 @@
 package com.android.wm.shell.desktopmode
 
+import android.animation.AnimatorTestRule
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
@@ -24,6 +25,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
+import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.Companion.DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS
 import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -38,6 +40,7 @@ import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
@@ -58,6 +61,9 @@ import org.mockito.quality.Strictness
 @RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 class DragToDesktopTransitionHandlerTest : ShellTestCase() {
+    @JvmField
+    @Rule
+    val mAnimatorTestRule = AnimatorTestRule(this)
 
     @Mock private lateinit var transitions: Transitions
     @Mock private lateinit var taskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
@@ -267,16 +273,36 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    fun cancelDragToDesktop_startWasReady_cancel() {
-        startDrag(defaultHandler)
+    fun cancelDragToDesktop_startWasReady_cancel_merged() {
+        val startToken = startDrag(defaultHandler)
 
         // Then user cancelled after it had already started.
-        defaultHandler.cancelDragToDesktopTransition(
-            DragToDesktopTransitionHandler.CancelState.STANDARD_CANCEL
-        )
+        val cancelToken = cancelDragToDesktopTransition(
+            defaultHandler, DragToDesktopTransitionHandler.CancelState.STANDARD_CANCEL)
+        defaultHandler.mergeAnimation(
+            cancelToken,
+            TransitionInfo(TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP, 0),
+            mock<SurfaceControl.Transaction>(),
+            startToken,
+            mock<Transitions.TransitionFinishCallback>())
 
         // Cancel animation should run since it had already started.
         verify(dragAnimator).cancelAnimator()
+        assertFalse("Drag should not be in progress after cancelling", defaultHandler.inProgress)
+    }
+
+    @Test
+    fun cancelDragToDesktop_startWasReady_cancel_aborted() {
+        val startToken = startDrag(defaultHandler)
+
+        // Then user cancelled after it had already started.
+        val cancelToken = cancelDragToDesktopTransition(
+            defaultHandler, DragToDesktopTransitionHandler.CancelState.STANDARD_CANCEL)
+        defaultHandler.onTransitionConsumed(cancelToken, aborted = true, null)
+
+        // Cancel animation should run since it had already started.
+        verify(dragAnimator).cancelAnimator()
+        assertFalse("Drag should not be in progress after cancelling", defaultHandler.inProgress)
     }
 
     @Test
@@ -581,7 +607,24 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                 )
             )
             .thenReturn(token)
-        handler.startDragToDesktopTransition(task.taskId, dragAnimator)
+        handler.startDragToDesktopTransition(task, dragAnimator)
+        return token
+    }
+
+    private fun cancelDragToDesktopTransition(
+        handler: DragToDesktopTransitionHandler,
+        cancelState: DragToDesktopTransitionHandler.CancelState): IBinder {
+        val token = mock<IBinder>()
+        whenever(
+                transitions.startTransition(
+                    eq(TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP),
+                    any(),
+                    eq(handler)
+                )
+            )
+            .thenReturn(token)
+        handler.cancelDragToDesktopTransition(cancelState)
+        mAnimatorTestRule.advanceTimeBy(DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS)
         return token
     }
 
@@ -618,6 +661,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         return TestRunningTaskInfoBuilder()
             .setActivityType(if (isHome) ACTIVITY_TYPE_HOME else ACTIVITY_TYPE_STANDARD)
             .setWindowingMode(windowingMode)
+            .setUserId(mContext.userId)
             .build()
             .also {
                 whenever(splitScreenController.isTaskInSplitScreen(it.taskId))

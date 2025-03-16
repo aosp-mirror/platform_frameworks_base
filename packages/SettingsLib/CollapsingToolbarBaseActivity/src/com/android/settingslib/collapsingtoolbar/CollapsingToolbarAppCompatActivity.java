@@ -27,6 +27,8 @@ import android.widget.Toolbar;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.settingslib.widget.SettingsThemeHelper;
+
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.color.DynamicColors;
@@ -69,7 +71,10 @@ public class CollapsingToolbarAppCompatActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             DynamicColors.applyToActivityIfAvailable(this);
         }
-        setTheme(com.android.settingslib.widget.theme.R.style.Theme_SubSettingsBase);
+        int resId = SettingsThemeHelper.isExpressiveTheme(this)
+                ? com.android.settingslib.widget.theme.R.style.Theme_SubSettingsBase_Expressive
+                : com.android.settingslib.widget.theme.R.style.Theme_SubSettingsBase;
+        setTheme(resId);
 
         if (mCustomizeLayoutResId > 0 && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             super.setContentView(mCustomizeLayoutResId);

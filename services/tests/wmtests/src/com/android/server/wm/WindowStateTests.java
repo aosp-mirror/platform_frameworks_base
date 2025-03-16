@@ -71,6 +71,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -84,12 +85,14 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import android.content.ContentResolver;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.RemoteException;
@@ -97,6 +100,7 @@ import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.Gravity;
@@ -353,6 +357,29 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDestroySurface() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
+        win.mHasSurface = win.mAnimatingExit = true;
+        win.mWinAnimator.mSurfaceControl = mock(SurfaceControl.class);
+        win.onExitAnimationDone();
+
+        assertFalse("Case 1 destroySurface no-op",
+                win.destroySurface(false /* cleanupOnResume */, false /* appStopped */));
+        assertTrue(win.mHasSurface);
+        assertTrue(win.mDestroying);
+
+        assertFalse("Case 2 destroySurface no-op",
+                win.destroySurface(true /* cleanupOnResume */, false /* appStopped */));
+        assertTrue(win.mHasSurface);
+        assertTrue(win.mDestroying);
+
+        assertTrue("Case 3 destroySurface destroys surface",
+                win.destroySurface(false /* cleanupOnResume */, true /* appStopped */));
+        assertFalse(win.mDestroying);
+        assertFalse(win.mHasSurface);
+    }
+
+    @Test
     public void testPrepareWindowToDisplayDuringRelayout() {
         // Call prepareWindowToDisplayDuringRelayout for a window without FLAG_TURN_SCREEN_ON before
         // calling setCurrentLaunchCanTurnScreenOn for windows with flag in the same activity.
@@ -406,11 +433,11 @@ public class WindowStateTests extends WindowTestsBase {
         final var powerManager = mWm.mPowerManager;
         clearInvocations(powerManager);
         firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString(), anyInt());
 
         clearInvocations(powerManager);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString(), anyInt());
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(WindowState appWindow,
@@ -420,9 +447,9 @@ public class WindowStateTests extends WindowTestsBase {
         appWindow.prepareWindowToDisplayDuringRelayout(false /* wasVisible */);
 
         if (expectedWakeupCalled) {
-            verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager).wakeUp(anyLong(), anyInt(), anyString(), anyInt());
         } else {
-            verify(powerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager, never()).wakeUp(anyLong(), anyInt(), anyString(), anyInt());
         }
         // If wakeup is expected to be called, the currentLaunchCanTurnScreenOn should be false
         // because the state will be consumed.
@@ -481,6 +508,32 @@ public class WindowStateTests extends WindowTestsBase {
                 .updateClientVisibility(app, null /* statsToken */);
         waitUntilHandlersIdle();
         assertFalse(statusBar.isVisible());
+    }
+
+    /**
+     * Verifies that the InsetsSourceProvider frame cannot be updated by WindowState before
+     * relayout is called.
+     */
+    @SetupWindows(addWindows = { W_STATUS_BAR })
+    @Test
+    public void testUpdateSourceFrameBeforeRelayout() {
+        final WindowState statusBar = mStatusBarWindow;
+        statusBar.mHasSurface = true;
+        assertTrue(statusBar.isVisible());
+        final int statusBarId = InsetsSource.createId(null, 0, statusBars());
+        final var statusBarProvider = mDisplayContent.getInsetsStateController()
+                .getOrCreateSourceProvider(statusBarId, statusBars());
+        statusBarProvider.setWindowContainer(statusBar, null /* frameProvider */,
+                        null /* imeFrameProvider */);
+
+        statusBar.updateSourceFrame(new Rect(0, 0, 500, 200));
+        assertTrue("InsetsSourceProvider frame should not be updated before relayout",
+                statusBarProvider.getSourceFrame().isEmpty());
+
+        makeWindowVisible(statusBar);
+        statusBar.updateSourceFrame(new Rect(0, 0, 500, 100));
+        assertEquals("InsetsSourceProvider frame should be updated after relayout",
+                new Rect(0, 0, 500, 100), statusBarProvider.getSourceFrame());
     }
 
     @Test
@@ -1505,6 +1558,57 @@ public class WindowStateTests extends WindowTestsBase {
 
         verify(immi).setHasVisibleImeLayeringOverlay(false /* hasVisibleOverlay */,
                 mDisplayContent.getDisplayId());
+    }
+
+    @Test
+    public void testIsSecureLocked_flagSecureSet() {
+        WindowState window = createWindow(null /* parent */, TYPE_APPLICATION, "test-window",
+                1 /* ownerId */);
+        window.mAttrs.flags |= WindowManager.LayoutParams.FLAG_SECURE;
+
+        assertTrue(window.isSecureLocked());
+    }
+
+    @Test
+    public void testIsSecureLocked_flagSecureNotSet() {
+        WindowState window = createWindow(null /* parent */, TYPE_APPLICATION, "test-window",
+                1 /* ownerId */);
+
+        assertFalse(window.isSecureLocked());
+    }
+
+    @Test
+    public void testIsSecureLocked_disableSecureWindows() {
+        assumeTrue(Build.IS_DEBUGGABLE);
+
+        WindowState window = createWindow(null /* parent */, TYPE_APPLICATION, "test-window",
+                1 /* ownerId */);
+        window.mAttrs.flags |= WindowManager.LayoutParams.FLAG_SECURE;
+        ContentResolver cr = useFakeSettingsProvider();
+
+        // isSecureLocked should return false when DISABLE_SECURE_WINDOWS is set to 1
+        Settings.Secure.putString(cr, Settings.Secure.DISABLE_SECURE_WINDOWS, "1");
+        mWm.mSettingsObserver.onChange(false /* selfChange */,
+                Settings.Secure.getUriFor(Settings.Secure.DISABLE_SECURE_WINDOWS));
+        assertFalse(window.isSecureLocked());
+
+        // isSecureLocked should return true if DISABLE_SECURE_WINDOWS is set to 0.
+        Settings.Secure.putString(cr, Settings.Secure.DISABLE_SECURE_WINDOWS, "0");
+        mWm.mSettingsObserver.onChange(false /* selfChange */,
+                Settings.Secure.getUriFor(Settings.Secure.DISABLE_SECURE_WINDOWS));
+        assertTrue(window.isSecureLocked());
+
+        // Disable secure windows again.
+        Settings.Secure.putString(cr, Settings.Secure.DISABLE_SECURE_WINDOWS, "1");
+        mWm.mSettingsObserver.onChange(false /* selfChange */,
+                Settings.Secure.getUriFor(Settings.Secure.DISABLE_SECURE_WINDOWS));
+        assertFalse(window.isSecureLocked());
+
+        // isSecureLocked should return true if DISABLE_SECURE_WINDOWS is deleted.
+        Settings.Secure.putString(cr, Settings.Secure.DISABLE_SECURE_WINDOWS, null);
+        mWm.mSettingsObserver.onChange(false /* selfChange */,
+                Settings.Secure.getUriFor(Settings.Secure.DISABLE_SECURE_WINDOWS));
+        assertTrue(window.isSecureLocked());
     }
 
     @Test

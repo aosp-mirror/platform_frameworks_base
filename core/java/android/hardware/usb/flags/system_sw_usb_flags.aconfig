@@ -43,3 +43,10 @@ flag {
     description: "Enable usb state update based on udc sysfs"
     bug: "339241080"
 }
+
+flag {
+    name: "enable_usb_data_signal_staking_internal"
+    namespace: "preload_safety"
+    description: "Enables signal API with staking for internal local service callers"
+    bug: "369382558"
+}

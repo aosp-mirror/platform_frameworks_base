@@ -23,6 +23,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.FalsingManager.Penalty
 import javax.inject.Inject
 
 /**
@@ -63,12 +64,22 @@ constructor(
      * Inserts the given [result] into the falsing system, affecting future runs of the classifier
      * as if this was a result that had organically happened before.
      */
-    fun updateFalseConfidence(
-        result: FalsingClassifier.Result,
-    ) = collector.updateFalseConfidence(result)
+    fun updateFalseConfidence(result: FalsingClassifier.Result) =
+        collector.updateFalseConfidence(result)
 
     /** Returns `true` if the gesture should be rejected. */
-    fun isFalseTouch(
-        @Classifier.InteractionType interactionType: Int,
-    ): Boolean = manager.isFalseTouch(interactionType)
+    fun isFalseTouch(@Classifier.InteractionType interactionType: Int): Boolean =
+        manager.isFalseTouch(interactionType)
+
+    /** Returns `true` if the tap gesture should be rejected */
+    fun isFalseTap(@Penalty penalty: Int): Boolean = manager.isFalseTap(penalty)
+}
+
+inline fun FalsingInteractor.runIfNotFalseTap(
+    penalty: Int = FalsingManager.LOW_PENALTY,
+    action: () -> Unit,
+) {
+    if (!isFalseTap(penalty)) {
+        action()
+    }
 }

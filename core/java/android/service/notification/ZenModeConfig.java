@@ -24,12 +24,12 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_RULES;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static android.service.notification.ZenAdapters.peopleTypeToPrioritySenders;
 import static android.service.notification.ZenAdapters.prioritySendersToPeopleType;
 import static android.service.notification.ZenAdapters.zenPolicyConversationSendersToNotificationPolicy;
-import static android.service.notification.ZenModeConfig.EventInfo.REPLY_YES_OR_MAYBE;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_STARRED;
 import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_ALARMS;
 import static android.service.notification.ZenPolicy.PRIORITY_CATEGORY_CALLS;
@@ -56,6 +56,7 @@ import android.app.AutomaticZenRule;
 import android.app.Flags;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
+import android.app.backup.BackupRestoreEventLogger;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -957,8 +958,9 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
-    public static ZenModeConfig readXml(TypedXmlPullParser parser)
-            throws XmlPullParserException, IOException {
+    public static ZenModeConfig readXml(TypedXmlPullParser parser,
+            @Nullable BackupRestoreEventLogger logger) throws XmlPullParserException, IOException {
+        int readRuleCount = 0;
         int type = parser.getEventType();
         if (type != XmlPullParser.START_TAG) return null;
         String tag = parser.getName();
@@ -1048,6 +1050,8 @@ public class ZenModeConfig implements Parcelable {
                     readManualRule = true;
                     if (rt.manualRule.zenPolicy == null) {
                         readManualRuleWithoutPolicy = true;
+                    } else {
+                        readRuleCount++;
                     }
                 } else if (AUTOMATIC_TAG.equals(tag)
                         || (Flags.modesApi() && AUTOMATIC_DELETED_TAG.equals(tag))) {
@@ -1062,6 +1066,7 @@ public class ZenModeConfig implements Parcelable {
                             }
                         } else if (AUTOMATIC_TAG.equals(tag)) {
                             rt.automaticRules.put(id, automaticRule);
+                            readRuleCount++;
                         }
                     }
                 } else if (STATE_TAG.equals(tag)) {
@@ -1079,10 +1084,22 @@ public class ZenModeConfig implements Parcelable {
                         // in ensureManualZenRule() and setManualZenMode().
                         rt.manualRule.pkg = PACKAGE_ANDROID;
                         rt.manualRule.type = AutomaticZenRule.TYPE_OTHER;
-                        rt.manualRule.condition = new Condition(
-                                rt.manualRule.conditionId != null ? rt.manualRule.conditionId
-                                        : Uri.EMPTY, "", Condition.STATE_TRUE);
+                        // conditionId in rule must match condition.id to pass isValidManualRule().
+                        if (rt.manualRule.conditionId == null) {
+                            rt.manualRule.conditionId = Uri.EMPTY;
+                        }
+                        rt.manualRule.condition = new Condition(rt.manualRule.conditionId, "",
+                                Condition.STATE_TRUE);
+                        readRuleCount++;
                     }
+                }
+
+                if (!Flags.modesUi()){
+                    readRuleCount++;
+                }
+
+                if (logger != null) {
+                    logger.logItemsRestored(DATA_TYPE_ZEN_RULES, readRuleCount);
                 }
                 return rt;
             }
@@ -1107,8 +1124,9 @@ public class ZenModeConfig implements Parcelable {
      * @throws IOException
      */
 
-    public void writeXml(TypedXmlSerializer out, Integer version, boolean forBackup)
-            throws IOException {
+    public void writeXml(TypedXmlSerializer out, Integer version, boolean forBackup,
+            @Nullable BackupRestoreEventLogger logger) throws IOException {
+        int writtenRuleCount = 0;
         int xmlVersion = getCurrentXmlVersion();
         out.startTag(null, ZEN_TAG);
         out.attribute(null, ZEN_ATT_VERSION, version == null
@@ -1144,6 +1162,7 @@ public class ZenModeConfig implements Parcelable {
             writeRuleXml(manualRule, out, forBackup);
             out.endTag(null, MANUAL_TAG);
         }
+        writtenRuleCount++;
         final int N = automaticRules.size();
         for (int i = 0; i < N; i++) {
             final String id = automaticRules.keyAt(i);
@@ -1152,6 +1171,7 @@ public class ZenModeConfig implements Parcelable {
             out.attribute(null, RULE_ATT_ID, id);
             writeRuleXml(automaticRule, out, forBackup);
             out.endTag(null, AUTOMATIC_TAG);
+            writtenRuleCount++;
         }
         if (Flags.modesApi() && !forBackup) {
             for (int i = 0; i < deletedRules.size(); i++) {
@@ -1168,6 +1188,9 @@ public class ZenModeConfig implements Parcelable {
         out.endTag(null, STATE_TAG);
 
         out.endTag(null, ZEN_TAG);
+        if (logger != null) {
+            logger.logItemsBackedUp(DATA_TYPE_ZEN_RULES, writtenRuleCount);
+        }
     }
 
     @NonNull
@@ -2509,7 +2532,7 @@ public class ZenModeConfig implements Parcelable {
 
     /** Returns whether the rule id corresponds to an implicit rule. */
     public static boolean isImplicitRuleId(@NonNull String ruleId) {
-        return ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
+        return ruleId != null && ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
     }
 
     private static int[] tryParseHourAndMinute(String value) {

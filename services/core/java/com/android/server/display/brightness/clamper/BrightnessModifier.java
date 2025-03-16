@@ -16,6 +16,8 @@
 
 package com.android.server.display.brightness.clamper;
 
+import static com.android.server.display.DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
+
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 
@@ -50,10 +52,12 @@ abstract class BrightnessModifier implements BrightnessStateModifier {
             }
             if (!mApplied) {
                 stateBuilder.setIsSlowChange(false);
+                stateBuilder.setCustomAnimationRate(CUSTOM_ANIMATION_RATE_NOT_SET);
             }
             mApplied = true;
         } else if (mApplied) {
             stateBuilder.setIsSlowChange(false);
+            stateBuilder.setCustomAnimationRate(CUSTOM_ANIMATION_RATE_NOT_SET);
             mApplied = false;
         }
     }

@@ -242,6 +242,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
                                 op.getUid(),
                                 op.getPackageName(),
                                 /* attributionTag= */ attributedOpEntry.getKey(),
+                                Context.DEVICE_ID_DEFAULT,
                                 /* active= */ true,
                                 // AppOpsManager doesn't have a way to fetch attribution flags or
                                 // chain ID given an op entry, so default them to none.
@@ -319,7 +320,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             if (item == null && active) {
                 item = new AppOpItem(code, uid, packageName, mClock.elapsedRealtime());
                 if (isOpMicrophone(code)) {
-                    item.setDisabled(isAnyRecordingPausedLocked(uid));
+                    item.setDisabled(isAllRecordingPausedLocked(uid));
                 } else if (isOpCamera(code)) {
                     item.setDisabled(mCameraDisabled);
                 }
@@ -440,14 +441,14 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
      * Required to override, delegate to other. Should not be called.
      */
     public void onOpActiveChanged(String op, int uid, String packageName, boolean active) {
-        onOpActiveChanged(op, uid, packageName, null, active,
+        onOpActiveChanged(op, uid, packageName, null, Context.DEVICE_ID_DEFAULT, active,
                 AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
     }
 
     // Get active app ops, and check if their attributions are trusted
     @Override
     public void onOpActiveChanged(String op, int uid, String packageName, String attributionTag,
-            boolean active, int attributionFlags, int attributionChainId) {
+            int virtualDeviceId, boolean active, int attributionFlags, int attributionChainId) {
         int code = AppOpsManager.strOpToOp(op);
         if (DEBUG) {
             Log.w(TAG, String.format("onActiveChanged(%d,%d,%s,%s,%d,%d)", code, uid, packageName,
@@ -521,18 +522,21 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
 
     }
 
-    private boolean isAnyRecordingPausedLocked(int uid) {
+    // TODO(b/365843152) remove AudioRecordingConfiguration listening
+    private boolean isAllRecordingPausedLocked(int uid) {
         if (mMicMuted) {
             return true;
         }
         List<AudioRecordingConfiguration> configs = mRecordingsByUid.get(uid);
         if (configs == null) return false;
+        // If we are aware of AudioRecordConfigs, suppress the indicator if all of them are known
+        // to be silenced.
         int configsNum = configs.size();
         for (int i = 0; i < configsNum; i++) {
             AudioRecordingConfiguration config = configs.get(i);
-            if (config.isClientSilenced()) return true;
+            if (!config.isClientSilenced()) return false;
         }
-        return false;
+        return true;
     }
 
     private void updateSensorDisabledStatus() {
@@ -543,7 +547,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
 
                 boolean paused = false;
                 if (isOpMicrophone(item.getCode())) {
-                    paused = isAnyRecordingPausedLocked(item.getUid());
+                    paused = isAllRecordingPausedLocked(item.getUid());
                 } else if (isOpCamera(item.getCode())) {
                     paused = mCameraDisabled;
                 }

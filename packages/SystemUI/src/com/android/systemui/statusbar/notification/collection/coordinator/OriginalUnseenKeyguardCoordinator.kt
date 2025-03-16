@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.annotation.SuppressLint
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
@@ -35,9 +36,8 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
-import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.headsUpEvents
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.headsUpEvents
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.indentIfPossible
 import java.io.PrintWriter
@@ -51,10 +51,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
 /**
@@ -87,7 +85,6 @@ constructor(
     private var unseenFilterEnabled = false
 
     override fun attach(pipeline: NotifPipeline) {
-        NotificationMinimalismPrototype.assertInLegacyMode()
         pipeline.addFinalizeFilter(unseenNotifFilter)
         pipeline.addCollectionListener(collectionListener)
         scope.launch { trackUnseenFilterSettingChanges() }
@@ -126,7 +123,7 @@ constructor(
                     unseenNotifications.removeAll(notificationsSeenWhileLocked)
                     logger.logAllMarkedSeenOnUnlock(
                         seenCount = notificationsSeenWhileLocked.size,
-                        remainingUnseenCount = unseenNotifications.size
+                        remainingUnseenCount = unseenNotifications.size,
                     )
                     notificationsSeenWhileLocked.clear()
                 }
@@ -143,7 +140,7 @@ constructor(
      * been "seen" while the device is on the keyguard.
      */
     private suspend fun trackSeenNotificationsWhileLocked(
-        notificationsSeenWhileLocked: MutableSet<NotificationEntry>,
+        notificationsSeenWhileLocked: MutableSet<NotificationEntry>
     ) = coroutineScope {
         // Remove removed notifications from the set
         launch {
@@ -253,10 +250,6 @@ constructor(
     }
 
     private fun unseenFeatureEnabled(): Flow<Boolean> {
-        if (NotificationMinimalismPrototype.isEnabled) {
-            // TODO(b/330387368): should this really just be turned off? If so, hide the setting.
-            return flowOf(false)
-        }
         return seenNotificationsInteractor.isLockScreenShowOnlyUnseenNotificationsEnabled()
     }
 

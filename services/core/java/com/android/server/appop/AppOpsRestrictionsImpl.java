@@ -65,27 +65,31 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
 
     @Override
     public boolean setGlobalRestriction(Object clientToken, int code, boolean restricted) {
+        boolean changed;
         if (restricted) {
             if (!mGlobalRestrictions.containsKey(clientToken)) {
                 mGlobalRestrictions.put(clientToken, new SparseBooleanArray());
             }
             SparseBooleanArray restrictedCodes = mGlobalRestrictions.get(clientToken);
             Objects.requireNonNull(restrictedCodes);
-            boolean changed = !restrictedCodes.get(code);
+            changed = !restrictedCodes.get(code);
             restrictedCodes.put(code, true);
-            return changed;
         } else {
             SparseBooleanArray restrictedCodes = mGlobalRestrictions.get(clientToken);
             if (restrictedCodes == null) {
                 return false;
             }
-            boolean changed = restrictedCodes.get(code);
+            changed = restrictedCodes.get(code);
             restrictedCodes.delete(code);
             if (restrictedCodes.size() == 0) {
                 mGlobalRestrictions.remove(clientToken);
             }
-            return changed;
         }
+
+        if (changed) {
+            AppOpsManager.invalidateAppOpModeCache();
+        }
+        return changed;
     }
 
     @Override
@@ -104,7 +108,11 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
 
     @Override
     public boolean clearGlobalRestrictions(Object clientToken) {
-        return mGlobalRestrictions.remove(clientToken) != null;
+        boolean changed = mGlobalRestrictions.remove(clientToken) != null;
+        if (changed) {
+            AppOpsManager.invalidateAppOpModeCache();
+        }
+        return changed;
     }
 
     @RequiresPermission(anyOf = {
@@ -121,6 +129,9 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
             changed |= putUserRestriction(clientToken, userIds[i], code, restricted);
             changed |= putUserRestrictionExclusions(clientToken, userIds[i],
                     excludedPackageTags);
+        }
+        if (changed) {
+            AppOpsManager.invalidateAppOpModeCache();
         }
         return changed;
     }
@@ -191,6 +202,9 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
         changed |= mUserRestrictions.remove(clientToken) != null;
         changed |= mUserRestrictionExcludedPackageTags.remove(clientToken) != null;
         notifyAllUserRestrictions(allUserRestrictedCodes);
+        if (changed) {
+            AppOpsManager.invalidateAppOpModeCache();
+        }
         return changed;
     }
 
@@ -244,6 +258,9 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
             }
         }
 
+        if (changed) {
+            AppOpsManager.invalidateAppOpModeCache();
+        }
         return changed;
     }
 

@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.bluetooth.AudioInputControl;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -45,6 +46,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -247,5 +249,17 @@ public class VolumeControlProfileTest {
 
         verify(mService).isVolumeOffsetAvailable(mBluetoothDevice);
         assertThat(available).isFalse();
+    }
+
+    @Test
+    public void getAudioInputControlServices_verifyIsCalledAndReturnNonNullList() {
+        mServiceListener.onServiceConnected(BluetoothProfile.VOLUME_CONTROL, mService);
+        when(mService.getAudioInputControlServices(mBluetoothDevice)).thenReturn(new ArrayList<>());
+
+        final List<AudioInputControl> controls = mProfile.getAudioInputControlServices(
+                mBluetoothDevice);
+
+        verify(mService).getAudioInputControlServices(mBluetoothDevice);
+        assertThat(controls).isNotNull();
     }
 }

@@ -85,15 +85,9 @@ class SceneTransitionLayoutTest {
 
     /** The content under test. */
     @Composable
-    private fun TestContent(enableInterruptions: Boolean = true) {
+    private fun TestContent() {
         coroutineScope = rememberCoroutineScope()
-        layoutState = remember {
-            MutableSceneTransitionLayoutState(
-                SceneA,
-                EmptyTestTransitions,
-                enableInterruptions = enableInterruptions,
-            )
-        }
+        layoutState = remember { MutableSceneTransitionLayoutState(SceneA, EmptyTestTransitions) }
 
         SceneTransitionLayout(state = layoutState, modifier = Modifier.size(LayoutSize)) {
             scene(SceneA, userActions = mapOf(Back to SceneB)) {
@@ -205,7 +199,7 @@ class SceneTransitionLayoutTest {
 
     @Test
     fun testSharedElement() {
-        rule.setContent { TestContent(enableInterruptions = false) }
+        rule.setContent { TestContent() }
 
         // In scene A, the shared element SharedFoo() is at the top end of the layout and has a size
         // of 50.dp.
@@ -252,6 +246,9 @@ class SceneTransitionLayoutTest {
         assertThat(sharedFoo.onChild().offsetRelativeTo(sharedFoo))
             .isWithin(DpOffsetSubject.DefaultTolerance)
             .of(DpOffset(25.dp, 25.dp))
+
+        // Finish the transition.
+        rule.mainClock.advanceTimeBy(TestTransitionDuration / 2)
 
         // Animate to scene C, let the animation start then go to the middle of the transition.
         currentScene = SceneC

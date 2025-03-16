@@ -19,25 +19,27 @@ package com.android.systemui.deviceentry.domain.interactor
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
 import com.android.systemui.flags.fakeSystemPropertiesHelper
-import com.android.systemui.flags.systemPropertiesHelper
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.trustInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 
 val Kosmos.deviceUnlockedInteractor by Fixture {
     DeviceUnlockedInteractor(
-        applicationScope = applicationCoroutineScope,
-        authenticationInteractor = authenticationInteractor,
-        deviceEntryRepository = deviceEntryRepository,
-        trustInteractor = trustInteractor,
-        faceAuthInteractor = deviceEntryFaceAuthInteractor,
-        fingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
-        powerInteractor = powerInteractor,
-        biometricSettingsInteractor = deviceEntryBiometricSettingsInteractor,
-        systemPropertiesHelper = fakeSystemPropertiesHelper,
-        keyguardTransitionInteractor = keyguardTransitionInteractor,
-    )
+            authenticationInteractor = authenticationInteractor,
+            repository = deviceEntryRepository,
+            trustInteractor = trustInteractor,
+            faceAuthInteractor = deviceEntryFaceAuthInteractor,
+            fingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
+            powerInteractor = powerInteractor,
+            biometricSettingsInteractor = deviceEntryBiometricSettingsInteractor,
+            systemPropertiesHelper = fakeSystemPropertiesHelper,
+            userAwareSecureSettingsRepository = userAwareSecureSettingsRepository,
+            keyguardInteractor = keyguardInteractor,
+        )
+        .apply { activateIn(testScope) }
 }

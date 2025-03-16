@@ -15,27 +15,26 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
+import android.annotation.NonNull;
+
 import java.util.Arrays;
 
-/**
- * This performs a spline interpolation in multiple dimensions
- *
- *
- */
-public class MonotonicCurveFit  {
+/** This performs a spline interpolation in multiple dimensions */
+public class MonotonicCurveFit {
     private static final String TAG = "MonotonicCurveFit";
-    private double[] mT;
-    private double[][] mY;
-    private double[][] mTangent;
+    @NonNull private final double[] mT;
+    @NonNull private final double[][] mY;
+    @NonNull private final double[][] mTangent;
     private boolean mExtrapolate = true;
-    double[] mSlopeTemp;
+    @NonNull final double[] mSlopeTemp;
 
     /**
      * create a collection of curves
+     *
      * @param time the point along the curve
      * @param y the parameter at those points
      */
-    public MonotonicCurveFit(double[] time, double[][] y) {
+    public MonotonicCurveFit(@NonNull double[] time, @NonNull double[][] y) {
         final int n = time.length;
         final int dim = y[0].length;
         mSlopeTemp = new double[dim];
@@ -78,10 +77,11 @@ public class MonotonicCurveFit  {
 
     /**
      * Get the position of all curves at time t
+     *
      * @param t
      * @param v
      */
-    public void getPos(double t, double[] v) {
+    public void getPos(double t, @NonNull double[] v) {
         final int n = mT.length;
         final int dim = mY[0].length;
         if (mExtrapolate) {
@@ -137,10 +137,11 @@ public class MonotonicCurveFit  {
 
     /**
      * Get the position of all curves at time t
+     *
      * @param t
      * @param v
      */
-    public void getPos(double t, float[] v) {
+    public void getPos(double t, @NonNull float[] v) {
         final int n = mT.length;
         final int dim = mY[0].length;
         if (mExtrapolate) {
@@ -196,6 +197,7 @@ public class MonotonicCurveFit  {
 
     /**
      * Get the position of the jth curve at time t
+     *
      * @param t
      * @param j
      * @return
@@ -230,7 +232,6 @@ public class MonotonicCurveFit  {
                 double t1 = mTangent[i][j];
                 double t2 = mTangent[i + 1][j];
                 return interpolate(h, x, y1, y2, t1, t2);
-
             }
         }
         return 0; // should never reach here
@@ -238,10 +239,11 @@ public class MonotonicCurveFit  {
 
     /**
      * Get the slope of all the curves at position t
+     *
      * @param t
      * @param v
      */
-    public void getSlope(double t, double[] v) {
+    public void getSlope(double t, @NonNull double[] v) {
         final int n = mT.length;
         int dim = mY[0].length;
         if (t <= mT[0]) {
@@ -264,11 +266,11 @@ public class MonotonicCurveFit  {
                 break;
             }
         }
-        return;
     }
 
     /**
      * Get the slope of the j curve at position t
+     *
      * @param t
      * @param j
      * @return
@@ -295,39 +297,44 @@ public class MonotonicCurveFit  {
         return 0; // should never reach here
     }
 
-    public double[] getTimePoints() {
+    public @NonNull double[] getTimePoints() {
         return mT;
     }
 
-    /**
-     * Cubic Hermite spline
-     */
-    private static double interpolate(double h,
-                                      double x,
-                                      double y1,
-                                      double y2,
-                                      double t1,
-                                      double t2) {
+    /** Cubic Hermite spline */
+    private static double interpolate(
+            double h, double x, double y1, double y2, double t1, double t2) {
         double x2 = x * x;
         double x3 = x2 * x;
-        return -2 * x3 * y2 + 3 * x2 * y2 + 2 * x3 * y1 - 3 * x2 * y1 + y1
-                + h * t2 * x3 + h * t1 * x3 - h * t2 * x2 - 2 * h * t1 * x2
+        return -2 * x3 * y2
+                + 3 * x2 * y2
+                + 2 * x3 * y1
+                - 3 * x2 * y1
+                + y1
+                + h * t2 * x3
+                + h * t1 * x3
+                - h * t2 * x2
+                - 2 * h * t1 * x2
                 + h * t1 * x;
     }
 
-    /**
-     * Cubic Hermite spline slope differentiated
-     */
+    /** Cubic Hermite spline slope differentiated */
     private static double diff(double h, double x, double y1, double y2, double t1, double t2) {
         double x2 = x * x;
-        return -6 * x2 * y2 + 6 * x * y2 + 6 * x2 * y1 - 6 * x * y1 + 3 * h * t2 * x2
-                + 3 * h * t1 * x2 - 2 * h * t2 * x - 4 * h * t1 * x + h * t1;
+        return -6 * x2 * y2
+                + 6 * x * y2
+                + 6 * x2 * y1
+                - 6 * x * y1
+                + 3 * h * t2 * x2
+                + 3 * h * t1 * x2
+                - 2 * h * t2 * x
+                - 4 * h * t1 * x
+                + h * t1;
     }
 
-    /**
-     * This builds a monotonic spline to be used as a wave function
-     */
-    public static MonotonicCurveFit buildWave(String configString) {
+    /** This builds a monotonic spline to be used as a wave function */
+    @NonNull
+    public static MonotonicCurveFit buildWave(@NonNull String configString) {
         // done this way for efficiency
         String str = configString;
         double[] values = new double[str.length() / 2];
@@ -346,7 +353,8 @@ public class MonotonicCurveFit  {
         return buildWave(Arrays.copyOf(values, count));
     }
 
-    private static MonotonicCurveFit buildWave(double[] values) {
+    @NonNull
+    private static MonotonicCurveFit buildWave(@NonNull double[] values) {
         int length = values.length * 3 - 2;
         int len = values.length - 1;
         double gap = 1.0 / len;

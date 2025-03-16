@@ -52,6 +52,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -272,6 +273,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         public String getPackageName() {
             return SYSTEM_PACKAGE_NAME;
+        }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mContentResolver;
         }
     }
 
@@ -665,6 +671,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected ServiceContext mServiceContext;
     protected ClientContext mClientContext;
+    protected ContentResolver mContentResolver;
 
     protected ShortcutServiceTestable mService;
     protected ShortcutManagerTestable mManager;
@@ -861,6 +868,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         mServiceContext = spy(new ServiceContext());
         mClientContext = new ClientContext();
+        mContentResolver = mock(ContentResolver.class);
 
         mMockPackageManager = mock(PackageManager.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
@@ -982,6 +990,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     }
                     return userProperties;
                 });
+        when(mMockUserManagerInternal.getUserInfos()).thenReturn(
+                mUserInfos.values().toArray(new UserInfo[0]));
 
         // User 0 and P0 are always running
         mRunningUsers.put(USER_0, true);

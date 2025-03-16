@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.PopupType
 import com.android.systemui.res.R
@@ -112,7 +111,7 @@ constructor(
             offset = IntOffset(0, 40),
             onDismissRequest = onDismissRequest,
         ) {
-            val colors = LocalAndroidColorScheme.current
+            val colors = MaterialTheme.colorScheme
             Button(
                 modifier =
                     Modifier.height(56.dp)
@@ -182,7 +181,7 @@ constructor(
             offset = IntOffset(0, 40),
             onDismissRequest = onDismissRequest
         ) {
-            val colors = LocalAndroidColorScheme.current
+            val colors = MaterialTheme.colorScheme
             Row(
                 modifier =
                     Modifier.height(56.dp)

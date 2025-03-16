@@ -16,6 +16,14 @@
 
 package com.android.systemui.display.data.repository
 
+import android.hardware.devicestate.DeviceState.PROPERTY_EMULATED_ONLY
+import android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT
+import android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY
+import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY
+import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY
+import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED
+import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN
+import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN
 import android.hardware.devicestate.DeviceStateManager
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -40,6 +48,8 @@ import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.whenever
+import android.hardware.devicestate.DeviceState as PlatformDeviceState
 
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
@@ -59,15 +69,33 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
     @Before
     fun setup() {
         mContext.orCreateTestableResources.apply {
-            addOverride(R.array.config_foldedDeviceStates, listOf(TEST_FOLDED).toIntArray())
-            addOverride(R.array.config_halfFoldedDeviceStates, TEST_HALF_FOLDED.toIntArray())
-            addOverride(R.array.config_openDeviceStates, TEST_UNFOLDED.toIntArray())
-            addOverride(R.array.config_rearDisplayDeviceStates, TEST_REAR_DISPLAY.toIntArray())
+            addOverride(
+                R.array.config_foldedDeviceStates,
+                listOf(TEST_FOLDED.identifier).toIntArray()
+            )
+            addOverride(
+                R.array.config_halfFoldedDeviceStates,
+                TEST_HALF_FOLDED.identifier.toIntArray()
+            )
+            addOverride(R.array.config_openDeviceStates, TEST_UNFOLDED.identifier.toIntArray())
+            addOverride(
+                R.array.config_rearDisplayDeviceStates,
+                TEST_REAR_DISPLAY.identifier.toIntArray()
+            )
             addOverride(
                 R.array.config_concurrentDisplayDeviceStates,
-                TEST_CONCURRENT_DISPLAY.toIntArray()
+                TEST_CONCURRENT_DISPLAY.identifier.toIntArray()
             )
         }
+        whenever(deviceStateManager.supportedDeviceStates).thenReturn(
+            listOf(
+                TEST_FOLDED,
+                TEST_HALF_FOLDED,
+                TEST_UNFOLDED,
+                TEST_REAR_DISPLAY,
+                TEST_CONCURRENT_DISPLAY
+            )
+        )
         deviceStateRepository =
             DeviceStateRepositoryImpl(
                 mContext,
@@ -85,9 +113,7 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onDeviceStateChanged(
-                getDeviceStateForIdentifier(TEST_FOLDED)
-            )
+            deviceStateManagerListener.value.onDeviceStateChanged(TEST_FOLDED)
 
             assertThat(state()).isEqualTo(DeviceState.FOLDED)
         }
@@ -97,9 +123,7 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onDeviceStateChanged(
-                getDeviceStateForIdentifier(TEST_HALF_FOLDED)
-            )
+            deviceStateManagerListener.value.onDeviceStateChanged(TEST_HALF_FOLDED)
 
             assertThat(state()).isEqualTo(DeviceState.HALF_FOLDED)
         }
@@ -109,9 +133,7 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onDeviceStateChanged(
-                getDeviceStateForIdentifier(TEST_UNFOLDED)
-            )
+            deviceStateManagerListener.value.onDeviceStateChanged(TEST_UNFOLDED)
 
             assertThat(state()).isEqualTo(DeviceState.UNFOLDED)
         }
@@ -121,9 +143,7 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onDeviceStateChanged(
-                getDeviceStateForIdentifier(TEST_REAR_DISPLAY)
-            )
+            deviceStateManagerListener.value.onDeviceStateChanged(TEST_REAR_DISPLAY)
 
             assertThat(state()).isEqualTo(DeviceState.REAR_DISPLAY)
         }
@@ -133,9 +153,7 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onDeviceStateChanged(
-                getDeviceStateForIdentifier(TEST_CONCURRENT_DISPLAY)
-            )
+            deviceStateManagerListener.value.onDeviceStateChanged(TEST_CONCURRENT_DISPLAY)
 
             assertThat(state()).isEqualTo(DeviceState.CONCURRENT_DISPLAY)
         }
@@ -164,9 +182,9 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
 
     private fun Int.toIntArray() = listOf(this).toIntArray()
 
-    private fun getDeviceStateForIdentifier(id: Int): android.hardware.devicestate.DeviceState {
-        return android.hardware.devicestate.DeviceState(
-            android.hardware.devicestate.DeviceState.Configuration.Builder(id, /* name= */ "")
+    private fun getDeviceStateForIdentifier(id: Int): PlatformDeviceState {
+        return PlatformDeviceState(
+            PlatformDeviceState.Configuration.Builder(id, /* name= */ "")
                 .build()
         )
     }
@@ -174,10 +192,68 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
     private companion object {
         // Used to fake the ids in the test. Note that there is no guarantees different devices will
         // have the same ids (that's why the ones in this test start from 41)
-        const val TEST_FOLDED = 41
-        const val TEST_HALF_FOLDED = 42
-        const val TEST_UNFOLDED = 43
-        const val TEST_REAR_DISPLAY = 44
-        const val TEST_CONCURRENT_DISPLAY = 45
+        val TEST_FOLDED =
+            PlatformDeviceState(
+                PlatformDeviceState.Configuration.Builder(41, "FOLDED")
+                    .setSystemProperties(
+                        setOf(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)
+                    )
+                    .setPhysicalProperties(
+                        setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)
+                    )
+                    .build()
+            )
+        val TEST_HALF_FOLDED =
+            PlatformDeviceState(
+                PlatformDeviceState.Configuration.Builder(42, "HALF_FOLDED")
+                    .setSystemProperties(
+                        setOf(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY)
+                    )
+                    .setPhysicalProperties(
+                        setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN)
+                    )
+                    .build()
+            )
+        val TEST_UNFOLDED =
+            PlatformDeviceState(
+                PlatformDeviceState.Configuration.Builder(43, "UNFOLDED")
+                    .setSystemProperties(
+                        setOf(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY)
+                    )
+                    .setPhysicalProperties(
+                        setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN)
+                    )
+                    .build()
+            )
+        val TEST_REAR_DISPLAY =
+            PlatformDeviceState(
+                PlatformDeviceState.Configuration.Builder(44, "REAR_DISPLAY")
+                    .setSystemProperties(
+                        setOf(
+                            PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                            PROPERTY_FEATURE_REAR_DISPLAY,
+                            PROPERTY_EMULATED_ONLY
+                        )
+                    )
+                    .setPhysicalProperties(
+                        setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN)
+                    )
+                    .build()
+            )
+        val TEST_CONCURRENT_DISPLAY =
+            PlatformDeviceState(
+                PlatformDeviceState.Configuration.Builder(45, "CONCURRENT_DISPLAY")
+                    .setSystemProperties(
+                        setOf(
+                            PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+                            PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT,
+                            PROPERTY_EMULATED_ONLY
+                        )
+                    )
+                    .setPhysicalProperties(
+                        setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN)
+                    )
+                    .build()
+            )
     }
 }

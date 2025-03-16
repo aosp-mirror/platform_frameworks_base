@@ -15,28 +15,26 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+import android.annotation.NonNull;
+
 import java.util.Arrays;
 
-/**
- * Utilities for string manipulation
- */
+/** Utilities for string manipulation */
 public class StringUtils {
     /**
-     * Converts a float into a string.
-     * Providing a defined number of characters before and after the
+     * Converts a float into a string. Providing a defined number of characters before and after the
      * decimal point.
      *
-     * @param value              The value to convert to string
+     * @param value The value to convert to string
      * @param beforeDecimalPoint digits before the decimal point
-     * @param afterDecimalPoint  digits after the decimal point
-     * @param pre                character to pad width 0 = no pad typically ' ' or '0'
-     * @param post               character to pad width 0 = no pad typically ' ' or '0'
+     * @param afterDecimalPoint digits after the decimal point
+     * @param pre character to pad width 0 = no pad typically ' ' or '0'
+     * @param post character to pad width 0 = no pad typically ' ' or '0'
      * @return
      */
-    public static String floatToString(float value,
-                                       int beforeDecimalPoint,
-                                       int afterDecimalPoint,
-                                       char pre, char post) {
+    @NonNull
+    public static String floatToString(
+            float value, int beforeDecimalPoint, int afterDecimalPoint, char pre, char post) {
 
         int integerPart = (int) value;
         float fractionalPart = value % 1;
@@ -51,7 +49,6 @@ public class StringUtils {
                 Arrays.fill(pad, pre);
                 integerPartString = new String(pad) + integerPartString;
             }
-
 
         } else if (iLen > beforeDecimalPoint) {
             integerPartString = integerPartString.substring(iLen - beforeDecimalPoint);
@@ -68,7 +65,7 @@ public class StringUtils {
         fractionalPart = Math.round(fractionalPart);
 
         for (int i = 0; i < afterDecimalPoint; i++) {
-            fractionalPart *= .1;
+            fractionalPart *= .1F;
         }
 
         String fact = Float.toString(fractionalPart);
@@ -92,5 +89,4 @@ public class StringUtils {
 
         return integerPartString + "." + fact;
     }
-
 }

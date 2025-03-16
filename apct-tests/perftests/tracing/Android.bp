@@ -22,6 +22,7 @@ android_test {
         "apct-perftests-utils",
         "collector-device-lib",
         "platform-test-annotations",
+        "perfetto_trace_java_protos",
     ],
     test_suites: [
         "device-tests",

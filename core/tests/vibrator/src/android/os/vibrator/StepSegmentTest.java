@@ -213,7 +213,13 @@ public class StepSegmentTest {
 
     @Test
     public void testDuration() {
+        VibratorInfo infoWithSupport = createVibInfoForAmplitude(/* hasAmplitudeControl= */ true);
+        VibratorInfo infoWithoutSupport =
+                createVibInfoForAmplitude(/* hasAmplitudeControl= */ false);
+
         assertEquals(5, new StepSegment(0, 0, 5).getDuration());
+        assertEquals(5, new StepSegment(0, 0, 5).getDuration(infoWithSupport));
+        assertEquals(5, new StepSegment(0, 0, 5).getDuration(infoWithoutSupport));
     }
 
     @Test

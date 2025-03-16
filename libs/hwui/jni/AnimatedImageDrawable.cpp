@@ -276,6 +276,18 @@ static void AnimatedImageDrawable_nSetBounds(JNIEnv* env, jobject /*clazz*/, jlo
     drawable->setStagingBounds(rect);
 }
 
+static jboolean AnimatedImageDrawable_nSetFilterBitmap(JNIEnv* env, jobject /*clazz*/,
+                                                       jlong nativePtr, jboolean filterBitmap) {
+    auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
+    return drawable->setFilterBitmap(filterBitmap);
+}
+
+static jboolean AnimatedImageDrawable_nGetFilterBitmap(JNIEnv* env, jobject /*clazz*/,
+                                                       jlong nativePtr) {
+    auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
+    return drawable->getFilterBitmap();
+}
+
 static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
         {"nCreate", "(JLandroid/graphics/ImageDecoder;IIJZLandroid/graphics/Rect;)J",
          (void*)AnimatedImageDrawable_nCreate},
@@ -294,6 +306,8 @@ static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
         {"nNativeByteSize", "(J)J", (void*)AnimatedImageDrawable_nNativeByteSize},
         {"nSetMirrored", "(JZ)V", (void*)AnimatedImageDrawable_nSetMirrored},
         {"nSetBounds", "(JLandroid/graphics/Rect;)V", (void*)AnimatedImageDrawable_nSetBounds},
+        {"nSetFilterBitmap", "(JZ)Z", (void*)AnimatedImageDrawable_nSetFilterBitmap},
+        {"nGetFilterBitmap", "(J)Z", (void*)AnimatedImageDrawable_nGetFilterBitmap},
 };
 
 int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv* env) {

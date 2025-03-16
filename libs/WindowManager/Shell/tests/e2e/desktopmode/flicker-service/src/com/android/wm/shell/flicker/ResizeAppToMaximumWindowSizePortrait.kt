@@ -23,7 +23,7 @@ import android.tools.flicker.config.FlickerConfig
 import android.tools.flicker.config.FlickerServiceConfig
 import android.tools.flicker.junit.FlickerServiceJUnit4ClassRunner
 import com.android.wm.shell.flicker.DesktopModeFlickerScenarios.Companion.CORNER_RESIZE_TO_MAXIMUM_SIZE
-import com.android.wm.shell.scenarios.ResizeAppWithCornerResize
+import com.android.wm.shell.scenarios.MaximiseAppWithCornerResize
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
  * Assert that the maximum window size constraint is maintained.
  */
 @RunWith(FlickerServiceJUnit4ClassRunner::class)
-class ResizeAppToMaximumWindowSizePortrait : ResizeAppWithCornerResize() {
+class ResizeAppToMaximumWindowSizePortrait : MaximiseAppWithCornerResize() {
     @ExpectedScenarios(["CORNER_RESIZE_TO_MAXIMUM_SIZE"])
     @Test
     override fun resizeAppWithCornerResizeToMaximumSize() =

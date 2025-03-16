@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.os.Build.IS_USER;
 import static android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED;
 
@@ -30,6 +33,7 @@ import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_RE
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
 
+import android.app.WindowConfiguration;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -157,6 +161,12 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runReset(pw);
                 case "disable-blur":
                     return runSetBlurDisabled(pw);
+                case "reset-freeze-recent-tasks":
+                    return runResetFreezeRecentTaskListReordering(pw);
+                case "set-display-windowing-mode":
+                    return runSetDisplayWindowingMode(pw);
+                case "get-display-windowing-mode":
+                    return runGetDisplayWindowingMode(pw);
                 case "shell":
                     return runWmShellCommand(pw);
                 default:
@@ -264,6 +274,11 @@ public class WindowManagerShellCommand extends ShellCommand {
         Settings.Global.putInt(mInternal.mContext.getContentResolver(),
                 Settings.Global.DISABLE_WINDOW_BLURS, disableBlur ? 1 : 0);
 
+        return 0;
+    }
+
+    private int runResetFreezeRecentTaskListReordering(PrintWriter pw) throws RemoteException {
+        mInternal.resetFreezeRecentTaskListReordering();
         return 0;
     }
 
@@ -1038,6 +1053,25 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetCameraCompatAspectRatio(PrintWriter pw) throws RemoteException {
+        final float aspectRatio;
+        try {
+            String arg = getNextArgRequired();
+            aspectRatio = Float.parseFloat(arg);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: bad aspect ratio format " + e);
+            return -1;
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println(
+                    "Error: aspect ratio should be provided as an argument " + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mAppCompatConfiguration.setCameraCompatAspectRatio(aspectRatio);
+        }
+        return 0;
+    }
+
     private int runSetLetterboxStyle(PrintWriter pw) throws RemoteException {
         if (peekNextArg() == null) {
             getErrPrintWriter().println("Error: No arguments provided.");
@@ -1129,6 +1163,13 @@ public class WindowManagerShellCommand extends ShellCommand {
                     runSetBooleanFlag(pw,
                             mAppCompatConfiguration::setCameraCompatRefreshCycleThroughStopEnabled);
                     break;
+                case "--cameraCompatAspectRatio":
+                    runSetCameraCompatAspectRatio(pw);
+                    break;
+                case "--isCameraCompatFreeformWindowingTreatmentEnabled":
+                    runSetBooleanFlag(pw, mAppCompatConfiguration
+                            ::setIsCameraCompatFreeformWindowingTreatmentEnabled);
+                    break;
                 default:
                     getErrPrintWriter().println(
                             "Error: Unrecognized letterbox style option: " + arg);
@@ -1219,6 +1260,13 @@ public class WindowManagerShellCommand extends ShellCommand {
                     case "isCameraCompatRefreshCycleThroughStopEnabled":
                         mAppCompatConfiguration
                                 .resetCameraCompatRefreshCycleThroughStopEnabled();
+                        break;
+                    case "cameraCompatAspectRatio":
+                        mAppCompatConfiguration.resetCameraCompatAspectRatio();
+                        break;
+                    case "isCameraCompatFreeformWindowingTreatmentEnabled":
+                        mAppCompatConfiguration
+                                .resetIsCameraCompatFreeformWindowingTreatmentEnabled();
                         break;
                     default:
                         getErrPrintWriter().println(
@@ -1330,6 +1378,8 @@ public class WindowManagerShellCommand extends ShellCommand {
             mAppCompatConfiguration.resetUserAppAspectRatioFullscreenEnabled();
             mAppCompatConfiguration.resetCameraCompatRefreshEnabled();
             mAppCompatConfiguration.resetCameraCompatRefreshCycleThroughStopEnabled();
+            mAppCompatConfiguration.resetCameraCompatAspectRatio();
+            mAppCompatConfiguration.resetIsCameraCompatFreeformWindowingTreatmentEnabled();
         }
     }
 
@@ -1404,7 +1454,40 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mAppCompatConfiguration.isUserAppAspectRatioSettingsEnabled());
             pw.println("Is the fullscreen option in user aspect ratio settings enabled: "
                     + mAppCompatConfiguration.isUserAppAspectRatioFullscreenEnabled());
+            pw.println("Default aspect ratio for camera compat freeform: "
+                    + mAppCompatConfiguration.getCameraCompatAspectRatio());
+            pw.println("Is camera compatibility freeform treatment enabled for all apps: "
+                    + mAppCompatConfiguration.isCameraCompatFreeformWindowingTreatmentEnabled());
         }
+        return 0;
+    }
+
+    private int runSetDisplayWindowingMode(PrintWriter pw) throws RemoteException {
+        int displayId = Display.DEFAULT_DISPLAY;
+        String arg = getNextArgRequired();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+            arg = getNextArgRequired();
+        }
+
+        final int windowingMode = Integer.parseInt(arg);
+        mInterface.setWindowingMode(displayId, windowingMode);
+
+        return 0;
+    }
+
+    private int runGetDisplayWindowingMode(PrintWriter pw) throws RemoteException {
+        int displayId = Display.DEFAULT_DISPLAY;
+        final String arg = getNextArg();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+        }
+
+        final int windowingMode = mInterface.getWindowingMode(displayId);
+        pw.println("display windowing mode="
+                + WindowConfiguration.windowingModeToString(windowingMode) + " for displayId="
+                + displayId);
+
         return 0;
     }
 
@@ -1486,6 +1569,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         // set-multi-window-config
         runResetMultiWindowConfig();
 
+        // set-display-windowing-mode
+        mInternal.setWindowingMode(displayId, WINDOWING_MODE_UNDEFINED);
+
         pw.println("Reset all settings for displayId=" + displayId);
         return 0;
     }
@@ -1525,6 +1611,14 @@ public class WindowManagerShellCommand extends ShellCommand {
 
         printLetterboxHelp(pw);
         printMultiWindowConfigHelp(pw);
+
+        pw.println("  reset-freeze-recent-tasks");
+        pw.println("    Resets the spatial ordering of the recent tasks list");
+        pw.println("  set-display-windowing-mode [-d DISPLAY_ID] [mode_id]");
+        pw.println("    As mode_id, use " + WINDOWING_MODE_UNDEFINED + " for undefined, "
+                + WINDOWING_MODE_FREEFORM + " for freeform, " + WINDOWING_MODE_FULLSCREEN + " for"
+                + " fullscreen");
+        pw.println("  get-display-windowing-mode [-d DISPLAY_ID]");
 
         pw.println("  reset [-d DISPLAY_ID]");
         pw.println("    Reset all override settings.");
@@ -1619,6 +1713,14 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        Whether activity \"refresh\" in camera compatibility treatment should");
         pw.println("        happen using the \"stopped -> resumed\" cycle rather than");
         pw.println("        \"paused -> resumed\" cycle.");
+        pw.println("      --cameraCompatAspectRatio aspectRatio");
+        pw.println("        Aspect ratio of letterbox for fixed-orientation camera apps, during");
+        pw.println("        freeform camera compat mode. If aspectRatio <= "
+                + AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO);
+        pw.println("        it will be ignored.");
+        pw.println("      --isCameraCompatFreeformWindowingTreatmentEnabled [true|1|false|0]");
+        pw.println("        Whether camera compat treatment is enabled in freeform mode for all");
+        pw.println("        eligible apps.");
         pw.println("  reset-letterbox-style [aspectRatio|cornerRadius|backgroundType");
         pw.println("      |backgroundColor|wallpaperBlurRadius|wallpaperDarkScrimAlpha");
         pw.println("      |horizontalPositionMultiplier|verticalPositionMultiplier");
@@ -1627,7 +1729,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      |isTranslucentLetterboxingEnabled|isUserAppAspectRatioSettingsEnabled");
         pw.println("      |persistentPositionMultiplierForHorizontalReachability");
         pw.println("      |persistentPositionMultiplierForVerticalReachability");
-        pw.println("      |defaultPositionMultiplierForVerticalReachability]");
+        pw.println("      |defaultPositionMultiplierForVerticalReachability");
+        pw.println("      |cameraCompatAspectRatio");
+        pw.println("      |isCameraCompatFreeformWindowingTreatmentEnabled]");
         pw.println("    Resets overrides to default values for specified properties separated");
         pw.println("    by space, e.g. 'reset-letterbox-style aspectRatio cornerRadius'.");
         pw.println("    If no arguments provided, all values will be reset.");

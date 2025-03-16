@@ -15,12 +15,11 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.measure;
 
-/**
- * Basic data class representing a component size, used during layout computations.
- */
+/** Basic data class representing a component size, used during layout computations. */
 public class Size {
     float mWidth;
     float mHeight;
+
     public Size(float width, float height) {
         this.mWidth = width;
         this.mHeight = height;

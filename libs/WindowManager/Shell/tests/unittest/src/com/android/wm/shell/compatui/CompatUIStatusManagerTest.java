@@ -16,6 +16,10 @@
 
 package com.android.wm.shell.compatui;
 
+import static com.android.wm.shell.compatui.CompatUIStatusManager.COMPAT_UI_EDUCATION_HIDDEN;
+
+import static junit.framework.Assert.assertEquals;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -24,7 +28,6 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
-
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,13 +66,75 @@ public class CompatUIStatusManagerTest extends ShellTestCase {
         assertFalse(mStatusManager.isEducationVisible());
     }
 
+    @Test
+    public void valuesAreCached() {
+        // At the beginning the value is not read or written because
+        // we access the reader in lazy way.
+        mTestState.assertReaderInvocations(0);
+        mTestState.assertWriterInvocations(0);
+
+        // We read the value when we start. Initial value is hidden.
+        assertFalse(mStatusManager.isEducationVisible());
+        mTestState.assertReaderInvocations(1);
+        mTestState.assertWriterInvocations(0);
+
+        // We send the event for the same state which is not written.
+        mStatusManager.onEducationHidden();
+        assertFalse(mStatusManager.isEducationVisible());
+        mTestState.assertReaderInvocations(1);
+        mTestState.assertWriterInvocations(0);
+
+        // We send the event for the different state which is written but
+        // not read again.
+        mStatusManager.onEducationShown();
+        assertTrue(mStatusManager.isEducationVisible());
+        mTestState.assertReaderInvocations(1);
+        mTestState.assertWriterInvocations(1);
+
+        // We read multiple times and we don't read the value again
+        mStatusManager.isEducationVisible();
+        mStatusManager.isEducationVisible();
+        mStatusManager.isEducationVisible();
+        mTestState.assertReaderInvocations(1);
+        mTestState.assertWriterInvocations(1);
+
+        // We write different values. Writer  is only accessed when
+        // the value changes.
+        mStatusManager.onEducationHidden(); // change
+        mStatusManager.onEducationHidden();
+        mStatusManager.onEducationShown(); // change
+        mStatusManager.onEducationShown();
+        mStatusManager.onEducationHidden(); // change
+        mStatusManager.onEducationShown(); // change
+        mTestState.assertReaderInvocations(1);
+        mTestState.assertWriterInvocations(5);
+    }
+
     static class FakeCompatUIStatusManagerTest {
 
-        int mCurrentStatus = 0;
+        int mCurrentStatus = COMPAT_UI_EDUCATION_HIDDEN;
 
-        final IntSupplier mReader = () -> mCurrentStatus;
+        int mReaderInvocations;
 
-        final IntConsumer mWriter = newStatus -> mCurrentStatus = newStatus;
+        int mWriterInvocations;
+
+        final IntSupplier mReader = () -> {
+            mReaderInvocations++;
+            return mCurrentStatus;
+        };
+
+        final IntConsumer mWriter = newStatus -> {
+            mWriterInvocations++;
+            mCurrentStatus = newStatus;
+        };
+
+        void assertWriterInvocations(int expected) {
+            assertEquals(expected, mWriterInvocations);
+        }
+
+        void assertReaderInvocations(int expected) {
+            assertEquals(expected, mReaderInvocations);
+        }
 
     }
 }

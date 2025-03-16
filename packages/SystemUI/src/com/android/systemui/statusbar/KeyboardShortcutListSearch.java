@@ -20,7 +20,6 @@ import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 
 import static com.android.systemui.Flags.fetchBookmarksXmlKeyboardShortcuts;
-import static com.android.systemui.Flags.validateKeyboardShortcutHelperIconUri;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -428,9 +427,7 @@ public final class KeyboardShortcutListSearch {
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
             } else {
                 mCurrentAppPackageName = result.get(0).getPackageName();
-                if (validateKeyboardShortcutHelperIconUri()) {
-                    KeyboardShortcuts.sanitiseShortcuts(result);
-                }
+                KeyboardShortcuts.sanitiseShortcuts(result);
                 mSpecificAppGroup.addAll(
                         reMapToKeyboardShortcutMultiMappingGroup(result));
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
@@ -446,9 +443,7 @@ public final class KeyboardShortcutListSearch {
         // Add specific Ime shortcuts
         if (result != null) {
             if (!result.isEmpty()) {
-                if (validateKeyboardShortcutHelperIconUri()) {
-                    KeyboardShortcuts.sanitiseShortcuts(result);
-                }
+                KeyboardShortcuts.sanitiseShortcuts(result);
                 mInputGroup.addAll(
                         reMapToKeyboardShortcutMultiMappingGroup(result));
             }
@@ -768,8 +763,6 @@ public final class KeyboardShortcutListSearch {
                     Intent.CATEGORY_APP_EMAIL,
                     Intent.CATEGORY_APP_CALENDAR,
                     Intent.CATEGORY_APP_MAPS,
-                    Intent.CATEGORY_APP_MUSIC,
-                    Intent.CATEGORY_APP_MESSAGING,
                     Intent.CATEGORY_APP_CALCULATOR,
             };
             String[] shortcutLabels = {
@@ -778,19 +771,15 @@ public final class KeyboardShortcutListSearch {
                     mContext.getString(R.string.keyboard_shortcut_group_applications_email),
                     mContext.getString(R.string.keyboard_shortcut_group_applications_calendar),
                     mContext.getString(R.string.keyboard_shortcut_group_applications_maps),
-                    mContext.getString(R.string.keyboard_shortcut_group_applications_music),
-                    mContext.getString(R.string.keyboard_shortcut_group_applications_sms),
                     mContext.getString(R.string.keyboard_shortcut_group_applications_calculator)
             };
 
             int[] keyCodes = {
                 KeyEvent.KEYCODE_B,
-                KeyEvent.KEYCODE_C,
-                KeyEvent.KEYCODE_E,
-                KeyEvent.KEYCODE_K,
-                KeyEvent.KEYCODE_M,
                 KeyEvent.KEYCODE_P,
-                KeyEvent.KEYCODE_S,
+                KeyEvent.KEYCODE_E,
+                KeyEvent.KEYCODE_C,
+                KeyEvent.KEYCODE_M,
                 KeyEvent.KEYCODE_U,
             };
 

@@ -33,4 +33,50 @@
     <!-- Style the scrollbars accoridngly. -->
     <drawable name="config_scrollbarThumbVertical">@drawable/scrollbar_vertical_thumb</drawable>
     <drawable name="config_scrollbarTrackVertical">@drawable/scrollbar_vertical_track</drawable>
+
+    <!--
+         Material motion physics configs
+         values from https://carbon.googleplex.com/wear-m3/pages/motion/tokens-and-specs/40358758-8b8c-4d46-9391-a8fff2d91197#15087d76-8a5a-4d52-a210-efc2cd479a66
+     -->
+    <!-- standard -->
+    <item name="config_motionStandardFastSpatialDamping" format="float" type="dimen">1.0</item>
+    <integer name="config_motionStandardFastSpatialStiffness">1400</integer>
+    <item name="config_motionStandardFastEffectDamping" format="float" type="dimen">1.0</item>
+    <integer name="config_motionStandardFastEffectStiffness">1400</integer>
+
+    <item name="config_motionStandardDefaultSpatialDamping" format="float" type="dimen">1.0</item>
+    <integer name="config_motionStandardDefaultSpatialStiffness">500</integer>
+    <item name="config_motionStandardDefaultEffectDamping" format="float" type="dimen">1.0</item>
+    <integer name="config_motionStandardDefaultEffectStiffness">500</integer>
+
+    <item name="config_motionStandardSlowSpatialDamping" format="float" type="dimen">1.0</item>
+    <integer name="config_motionStandardSlowSpatialStiffness">260</integer>
+    <item name="config_motionStandardSlowEffectDamping" format="float" type="dimen">1.0</item>
+    <integer name="config_motionStandardSlowEffectStiffness">260</integer>
+
+    <!-- expressive -->
+    <item name="config_motionExpressiveFastSpatialDamping" format="float" type="dimen">0.7</item>
+    <integer name="config_motionExpressiveFastSpatialStiffness">800</integer>
+    <item name="config_motionExpressiveFastEffectDamping" format="float" type="dimen">1.0</item>
+    <integer name="config_motionExpressiveFastEffectStiffness">1400</integer>
+
+    <item name="config_motionExpressiveDefaultSpatialDamping" format="float" type="dimen">0.75</item>
+    <integer name="config_motionExpressiveDefaultSpatialStiffness">350</integer>
+    <item name="config_motionExpressiveDefaultEffectDamping" format="float" type="dimen">1.0</item>
+    <integer name="config_motionExpressiveDefaultEffectStiffness">500</integer>
+
+    <item name="config_motionExpressiveSlowSpatialDamping" format="float" type="dimen">0.8</item>
+    <integer name="config_motionExpressiveSlowSpatialStiffness">200</integer>
+    <item name="config_motionExpressiveSlowEffectDamping" format="float" type="dimen">1.0</item>
+    <integer name="config_motionExpressiveSlowEffectStiffness">260</integer>
+
+    <!--
+        Material rounded corner configs
+        Values from https://carbon.googleplex.com/wear-m3/tokens/designSystems/70fbaa4f7722a3d1/tokenSets/4fa2518eaeaf65eb
+    -->
+    <dimen name="config_shapeCornerRadiusXsmall">4dp</dimen>
+    <dimen name="config_shapeCornerRadiusSmall">8dp</dimen>
+    <dimen name="config_shapeCornerRadiusMedium">18dp</dimen>
+    <dimen name="config_shapeCornerRadiusLarge">26dp</dimen>
+    <dimen name="config_shapeCornerRadiusXlarge">36dp</dimen>
 </resources>

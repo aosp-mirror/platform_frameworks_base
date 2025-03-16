@@ -28,6 +28,8 @@ import java.io.StringReader
 import java.util.ArrayList
 import com.android.statementservice.retriever.WebAsset
 import com.android.statementservice.retriever.AndroidAppAsset
+import com.android.statementservice.retriever.DynamicAppLinkComponent
+import org.json.JSONObject
 
 /**
  * Parses JSON from the Digital Asset Links specification. For examples, see [WebAsset],
@@ -37,6 +39,11 @@ object StatementParser {
 
     private const val FIELD_NOT_STRING_FORMAT_STRING = "Expected %s to be string."
     private const val FIELD_NOT_ARRAY_FORMAT_STRING = "Expected %s to be array."
+    private const val COMMENTS_NAME = "comments"
+    private const val EXCLUDE_NAME = "exclude"
+    private const val FRAGMENT_NAME = "#"
+    private const val QUERY_NAME = "?"
+    private const val PATH_NAME = "/"
 
     /**
      * Parses a JSON array of statements.
@@ -97,12 +104,42 @@ object StatementParser {
                 FIELD_NOT_ARRAY_FORMAT_STRING.format(StatementUtils.ASSET_DESCRIPTOR_FIELD_RELATION)
             )
         val target = AssetFactory.create(targetObject)
+        val dynamicAppLinkComponents = parseDynamicAppLinkComponents(statement)
 
         val statements = (0 until relations.length())
             .map { relations.getString(it) }
             .map(Relation::create)
-            .map { Statement.create(source, target, it) }
+            .map { Statement.create(source, target, it, dynamicAppLinkComponents) }
         return Result.Success(ParsedStatement(statements, listOfNotNull(delegate)))
+    }
+
+    private fun parseDynamicAppLinkComponents(
+        statement: JSONObject?
+    ): List<DynamicAppLinkComponent> {
+        val relationExtensions = statement?.optJSONObject(
+            StatementUtils.ASSET_DESCRIPTOR_FIELD_RELATION_EXTENSIONS
+        ) ?: return emptyList()
+        val handleAllUrlsRelationExtension = relationExtensions.optJSONObject(
+            StatementUtils.RELATION.toString()
+        ) ?: return emptyList()
+        val components = handleAllUrlsRelationExtension.optJSONArray(
+            StatementUtils.RELATION_EXTENSION_FIELD_DAL_COMPONENTS
+        ) ?: return emptyList()
+
+        return (0 until components.length())
+            .map { components.getJSONObject(it) }
+            .map { parseComponent(it) }
+    }
+
+    private fun parseComponent(component: JSONObject): DynamicAppLinkComponent {
+        val query = component.optJSONObject(QUERY_NAME)
+        return DynamicAppLinkComponent.create(
+            component.optBoolean(EXCLUDE_NAME, false),
+            if (component.has(FRAGMENT_NAME)) component.getString(FRAGMENT_NAME) else null,
+            if (component.has(PATH_NAME)) component.getString(PATH_NAME) else null,
+            query?.keys()?.asSequence()?.associateWith { query.getString(it) },
+            component.optString(COMMENTS_NAME)
+        )
     }
 
     data class ParsedStatement(val statements: List<Statement>, val delegates: List<String>)

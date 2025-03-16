@@ -30,7 +30,7 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.VISIBLE
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
-import com.android.systemui.customization.R as custR
+import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
@@ -44,6 +44,8 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceLayout
 import com.android.systemui.res.R
+import com.android.systemui.shade.LargeScreenHeaderHelper
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.R as sharedR
 import com.android.systemui.util.ui.value
 import dagger.Lazy
@@ -56,11 +58,11 @@ internal fun ConstraintSet.setVisibility(views: Iterable<View>, visibility: Int)
 internal fun ConstraintSet.setAlpha(views: Iterable<View>, alpha: Float) =
     views.forEach { view -> this.setAlpha(view.id, alpha) }
 
-internal fun ConstraintSet.setScaleX(views: Iterable<View>, alpha: Float) =
-    views.forEach { view -> this.setScaleX(view.id, alpha) }
+internal fun ConstraintSet.setScaleX(views: Iterable<View>, scaleX: Float) =
+    views.forEach { view -> this.setScaleX(view.id, scaleX) }
 
-internal fun ConstraintSet.setScaleY(views: Iterable<View>, alpha: Float) =
-    views.forEach { view -> this.setScaleY(view.id, alpha) }
+internal fun ConstraintSet.setScaleY(views: Iterable<View>, scaleY: Float) =
+    views.forEach { view -> this.setScaleY(view.id, scaleY) }
 
 @SysUISingleton
 class ClockSection
@@ -68,11 +70,12 @@ class ClockSection
 constructor(
     private val clockInteractor: KeyguardClockInteractor,
     protected val keyguardClockViewModel: KeyguardClockViewModel,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     val smartspaceViewModel: KeyguardSmartspaceViewModel,
     val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
     private val rootViewModel: KeyguardRootViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
+    private val largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
 ) : KeyguardSection() {
     private var disposableHandle: DisposableHandle? = null
 
@@ -151,7 +154,7 @@ constructor(
                 R.id.weather_clock_bc_smartspace_bottom,
                 Barrier.BOTTOM,
                 getDimen(ENHANCED_SMARTSPACE_HEIGHT),
-                (custR.id.weather_clock_time),
+                (customR.id.weather_clock_time),
             )
             if (
                 rootViewModel.isNotifIconContainerVisible.value.value &&
@@ -177,45 +180,78 @@ constructor(
         }
     }
 
-    open fun applyDefaultConstraints(constraints: ConstraintSet) {
+    fun applyDefaultConstraints(constraints: ConstraintSet) {
         val guideline =
             if (keyguardClockViewModel.clockShouldBeCentered.value) PARENT_ID
             else R.id.split_shade_guideline
         constraints.apply {
-            connect(R.id.lockscreen_clock_view_large, START, PARENT_ID, START)
-            connect(R.id.lockscreen_clock_view_large, END, guideline, END)
-            connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.device_entry_icon_view, TOP)
+            connect(customR.id.lockscreen_clock_view_large, START, PARENT_ID, START)
+            connect(customR.id.lockscreen_clock_view_large, END, guideline, END)
+            connect(
+                customR.id.lockscreen_clock_view_large,
+                BOTTOM,
+                R.id.device_entry_icon_view,
+                TOP,
+            )
             val largeClockTopMargin =
                 keyguardClockViewModel.getLargeClockTopMargin() +
                     getDimen(DATE_WEATHER_VIEW_HEIGHT) +
                     getDimen(ENHANCED_SMARTSPACE_HEIGHT)
-            connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
-            constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            connect(
+                customR.id.lockscreen_clock_view_large,
+                TOP,
+                PARENT_ID,
+                TOP,
+                largeClockTopMargin,
+            )
+            constrainWidth(customR.id.lockscreen_clock_view_large, WRAP_CONTENT)
 
             // The following two lines make lockscreen_clock_view_large is constrained to available
             // height when it goes beyond constraints; otherwise, it use WRAP_CONTENT
-            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
-            constrainMaxHeight(R.id.lockscreen_clock_view_large, 0)
-            constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
+            constrainHeight(customR.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            constrainMaxHeight(customR.id.lockscreen_clock_view_large, 0)
+            constrainWidth(customR.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
-                R.id.lockscreen_clock_view,
-                context.resources.getDimensionPixelSize(custR.dimen.small_clock_height),
+                customR.id.lockscreen_clock_view,
+                context.resources.getDimensionPixelSize(customR.dimen.small_clock_height),
             )
             connect(
-                R.id.lockscreen_clock_view,
+                customR.id.lockscreen_clock_view,
                 START,
                 PARENT_ID,
                 START,
-                context.resources.getDimensionPixelSize(custR.dimen.clock_padding_start) +
-                    context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal),
+                context.resources.getDimensionPixelSize(customR.dimen.clock_padding_start) +
+                    context.resources.getDimensionPixelSize(
+                        customR.dimen.status_view_margin_horizontal
+                    ),
             )
             val smallClockTopMargin = keyguardClockViewModel.getSmallClockTopMargin()
             create(R.id.small_clock_guideline_top, ConstraintSet.HORIZONTAL_GUIDELINE)
             setGuidelineBegin(R.id.small_clock_guideline_top, smallClockTopMargin)
-            connect(R.id.lockscreen_clock_view, TOP, R.id.small_clock_guideline_top, BOTTOM)
+            connect(customR.id.lockscreen_clock_view, TOP, R.id.small_clock_guideline_top, BOTTOM)
 
             // Explicitly clear pivot to force recalculate pivot instead of using legacy value
-            setTransformPivot(R.id.lockscreen_clock_view_large, Float.NaN, Float.NaN)
+            setTransformPivot(customR.id.lockscreen_clock_view_large, Float.NaN, Float.NaN)
+
+            val smallClockBottom =
+                keyguardClockViewModel.getSmallClockTopMargin() +
+                    context.resources.getDimensionPixelSize(customR.dimen.small_clock_height)
+            val dateWeatherSmartspaceHeight = getDimen(context, DATE_WEATHER_VIEW_HEIGHT).toFloat()
+            val marginBetweenSmartspaceAndNotification =
+                context.resources.getDimensionPixelSize(
+                    R.dimen.keyguard_status_view_bottom_margin
+                ) +
+                    if (context.resources.getBoolean(R.bool.config_use_large_screen_shade_header)) {
+                        largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
+                    } else {
+                        0
+                    }
+
+            clockInteractor.setNotificationStackDefaultTop(
+                smallClockBottom +
+                    dateWeatherSmartspaceHeight +
+                    marginBetweenSmartspaceAndNotification
+            )
         }
 
         constrainWeatherClockDateIconsBarrier(constraints)

@@ -271,6 +271,38 @@ public class TvInteractiveAppView extends ViewGroup {
         }
     }
 
+    /**
+     * Controls whether the TvInteractiveAppView's surface is placed on top of other regular surface
+     * views in the window (but still behind the window itself).
+     *
+     * <p>Calling this overrides any previous call to {@link #setZOrderOnTop}.
+     *
+     * @param isMediaOverlay {@code true} to be on top of another regular surface, {@code false}
+     *            otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+    public void setZOrderMediaOverlay(boolean isMediaOverlay) {
+        if (mSurfaceView != null) {
+            mSurfaceView.setZOrderOnTop(false);
+            mSurfaceView.setZOrderMediaOverlay(isMediaOverlay);
+        }
+    }
+
+    /**
+     * Controls whether the TvInterActiveAppView's surface is placed on top of its window.
+     *
+     * <p>Calling this overrides any previous call to {@link #setZOrderMediaOverlay}.
+     *
+     * @param onTop {@code true} to be on top of its window, {@code false} otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+    public void setZOrderOnTop(boolean onTop) {
+        if (mSurfaceView != null) {
+            mSurfaceView.setZOrderMediaOverlay(false);
+            mSurfaceView.setZOrderOnTop(onTop);
+        }
+    }
+
     private void resetSurfaceView() {
         if (mSurfaceView != null) {
             mSurfaceView.getHolder().removeCallback(mSurfaceHolderCallback);

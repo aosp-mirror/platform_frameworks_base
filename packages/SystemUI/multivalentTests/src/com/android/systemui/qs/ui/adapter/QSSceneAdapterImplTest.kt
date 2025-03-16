@@ -26,7 +26,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.domain.interactor.displayStateInteractor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.display.data.repository.displayStateRepository
 import com.android.systemui.dump.DumpManager
@@ -101,7 +101,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
 
     private val fakeConfigurationRepository =
         FakeConfigurationRepository().apply { onConfigurationChange(configuration) }
-    private val configurationInteractor = ConfigurationInteractor(fakeConfigurationRepository)
+    private val configurationInteractor = ConfigurationInteractorImpl(fakeConfigurationRepository)
 
     private val mockAsyncLayoutInflater =
         mock<AsyncLayoutInflater>() {
@@ -151,10 +151,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             inOrder.verify(qsImpl!!).onCreate(nullable())
             inOrder
                 .verify(qsImpl!!)
-                .onComponentCreated(
-                    eq(qsSceneComponentFactory.components[0]),
-                    any(),
-                )
+                .onComponentCreated(eq(qsSceneComponentFactory.components[0]), any())
         }
 
     @Test
@@ -422,10 +419,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             inOrder.verify(newQSImpl).onCreate(nullable())
             inOrder
                 .verify(newQSImpl)
-                .onComponentCreated(
-                    qsSceneComponentFactory.components[1],
-                    bundleArgCaptor.value,
-                )
+                .onComponentCreated(qsSceneComponentFactory.components[1], bundleArgCaptor.value)
         }
 
     @Test

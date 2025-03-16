@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.chips.casttootherdevice.domain.interactor
 
+import android.media.projection.StopReason
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.mediarouter.data.repository.MediaRouterRepository
+import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.casttootherdevice.domain.model.MediaRouterCastModel
 import com.android.systemui.statusbar.policy.CastDevice
@@ -64,10 +66,12 @@ constructor(
 
     /** Stops the currently active MediaRouter cast. */
     fun stopCasting() {
-        activeCastDevice.value?.let { mediaRouterRepository.stopCasting(it) }
+        activeCastDevice.value?.let {
+            mediaRouterRepository.stopCasting(it, StopReason.STOP_PRIVACY_CHIP)
+        }
     }
 
     companion object {
-        private const val TAG = "MediaRouter"
+        private val TAG = "MediaRouter".pad()
     }
 }

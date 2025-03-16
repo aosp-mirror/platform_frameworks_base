@@ -128,7 +128,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"输入设备"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"互联网连接"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"允许访问通讯录和通话记录"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"信息将用于来电通知等用途"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"这些信息将用于来电通知等用途"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"共享互联网连接"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"短信"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM 卡访问权限"</string>
@@ -586,13 +586,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"这部手机"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"这部平板电脑"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"此计算机（内部）"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"麦克风（内部）"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"此电视"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"基座音箱"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部设备"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"连接的设备"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"这部手机"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"模拟"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"辅助"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"无法在此设备上播放"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"升级账号后才能切换"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"无法在此设备上播放下载的内容"</string>
@@ -605,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"已通过 ARC 连接"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"已通过 eARC 连接"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"电视默认设置"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI 输出"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"内置扬声器"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"内置扬声器"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"电视音频"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
     <string name="help_label" msgid="3528360748637781274">"帮助和反馈"</string>
@@ -690,10 +690,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"已启用"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"设备必须重新启动才能应用此更改。您可以立即重新启动或取消。"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"有线耳机"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"头戴式耳机"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB 音箱"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"麦克风插孔"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB 麦克风"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"有线音频"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB 音频"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"有线麦克风"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB 麦克风"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"蓝牙麦克风"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"开启"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"关闭"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"运营商网络正在更改"</string>

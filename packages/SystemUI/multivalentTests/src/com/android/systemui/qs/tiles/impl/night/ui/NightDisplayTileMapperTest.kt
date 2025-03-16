@@ -73,7 +73,7 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
         val expectedState =
             createNightDisplayTileState(
                 QSTileState.ActivationState.INACTIVE,
-                context.resources.getStringArray(R.array.tile_states_night)[Tile.STATE_INACTIVE]
+                context.resources.getStringArray(R.array.tile_states_night)[Tile.STATE_INACTIVE],
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -88,7 +88,7 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
         val expectedState =
             createNightDisplayTileState(
                 QSTileState.ActivationState.INACTIVE,
-                context.resources.getStringArray(R.array.tile_states_night)[Tile.STATE_INACTIVE]
+                context.resources.getStringArray(R.array.tile_states_night)[Tile.STATE_INACTIVE],
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -102,7 +102,7 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
         val expectedState =
             createNightDisplayTileState(
                 QSTileState.ActivationState.ACTIVE,
-                context.resources.getStringArray(R.array.tile_states_night)[Tile.STATE_ACTIVE]
+                context.resources.getStringArray(R.array.tile_states_night)[Tile.STATE_ACTIVE],
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -116,7 +116,7 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
         val expectedState =
             createNightDisplayTileState(
                 QSTileState.ActivationState.ACTIVE,
-                context.resources.getStringArray(R.array.tile_states_night)[Tile.STATE_ACTIVE]
+                context.resources.getStringArray(R.array.tile_states_night)[Tile.STATE_ACTIVE],
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -140,7 +140,7 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
         val expectedState =
             createNightDisplayTileState(
                 QSTileState.ActivationState.ACTIVE,
-                context.getString(R.string.quick_settings_night_secondary_label_until_sunrise)
+                context.getString(R.string.quick_settings_night_secondary_label_until_sunrise),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -154,7 +154,7 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
         val expectedState =
             createNightDisplayTileState(
                 QSTileState.ActivationState.INACTIVE,
-                context.getString(R.string.quick_settings_night_secondary_label_on_at_sunset)
+                context.getString(R.string.quick_settings_night_secondary_label_on_at_sunset),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -181,8 +181,8 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
                 QSTileState.ActivationState.INACTIVE,
                 context.getString(
                     R.string.quick_settings_night_secondary_label_on_at,
-                    formatter24Hour.format(testStartTime)
-                )
+                    formatter24Hour.format(testStartTime),
+                ),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -199,8 +199,8 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
                 QSTileState.ActivationState.INACTIVE,
                 context.getString(
                     R.string.quick_settings_night_secondary_label_on_at,
-                    formatter12Hour.format(testStartTime)
-                )
+                    formatter12Hour.format(testStartTime),
+                ),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -218,8 +218,8 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
                 QSTileState.ActivationState.INACTIVE,
                 context.getString(
                     R.string.quick_settings_night_secondary_label_on_at,
-                    formatter12Hour.format(testStartTime)
-                )
+                    formatter12Hour.format(testStartTime),
+                ),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -235,8 +235,8 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
                 QSTileState.ActivationState.ACTIVE,
                 context.getString(
                     R.string.quick_settings_secondary_label_until,
-                    formatter24Hour.format(testEndTime)
-                )
+                    formatter24Hour.format(testEndTime),
+                ),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -252,8 +252,8 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
                 QSTileState.ActivationState.ACTIVE,
                 context.getString(
                     R.string.quick_settings_secondary_label_until,
-                    formatter12Hour.format(testEndTime)
-                )
+                    formatter12Hour.format(testEndTime),
+                ),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -270,15 +270,15 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
                 QSTileState.ActivationState.ACTIVE,
                 context.getString(
                     R.string.quick_settings_secondary_label_until,
-                    formatter24Hour.format(testEndTime)
-                )
+                    formatter24Hour.format(testEndTime),
+                ),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
 
     private fun createNightDisplayTileState(
         activationState: QSTileState.ActivationState,
-        secondaryLabel: String?
+        secondaryLabel: String?,
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_night_display_label)
         val iconRes =
@@ -289,7 +289,7 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
             if (TextUtils.isEmpty(secondaryLabel)) label
             else TextUtils.concat(label, ", ", secondaryLabel)
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -299,7 +299,7 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 

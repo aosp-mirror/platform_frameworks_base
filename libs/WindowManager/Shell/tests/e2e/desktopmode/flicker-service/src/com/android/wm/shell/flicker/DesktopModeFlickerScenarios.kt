@@ -23,8 +23,11 @@ import android.tools.flicker.assertors.assertions.AppLayerIncreasesInSize
 import android.tools.flicker.assertors.assertions.AppLayerIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
-import android.tools.flicker.assertors.assertions.AppWindowBecomesVisible
 import android.tools.flicker.assertors.assertions.AppWindowAlignsWithOnlyOneDisplayCornerAtEnd
+import android.tools.flicker.assertors.assertions.AppWindowBecomesInvisible
+import android.tools.flicker.assertors.assertions.AppWindowBecomesPinned
+import android.tools.flicker.assertors.assertions.AppWindowBecomesTopWindow
+import android.tools.flicker.assertors.assertions.AppWindowBecomesVisible
 import android.tools.flicker.assertors.assertions.AppWindowCoversLeftHalfScreenAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowCoversRightHalfScreenAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowHasDesktopModeInitialBoundsAtTheEnd
@@ -44,9 +47,11 @@ import android.tools.flicker.assertors.assertions.LauncherWindowReplacesAppAsTop
 import android.tools.flicker.config.AssertionTemplates
 import android.tools.flicker.config.FlickerConfigEntry
 import android.tools.flicker.config.ScenarioId
+import android.tools.flicker.config.common.Components.LAUNCHER
 import android.tools.flicker.config.desktopmode.Components.DESKTOP_MODE_APP
 import android.tools.flicker.config.desktopmode.Components.DESKTOP_WALLPAPER
 import android.tools.flicker.config.desktopmode.Components.NON_RESIZABLE_APP
+import android.tools.flicker.config.desktopmode.Components.SIMPLE_APP
 import android.tools.flicker.extractors.ITransitionMatcher
 import android.tools.flicker.extractors.ShellTransitionScenarioExtractor
 import android.tools.flicker.extractors.TaggedCujTransitionMatcher
@@ -57,6 +62,14 @@ import android.tools.traces.wm.TransitionType
 
 class DesktopModeFlickerScenarios {
     companion object {
+        // In DesktopMode, window snap can be done with just a single window. In this case, the
+        // divider tiling between left and right window won't be shown, and hence its states are not
+        // obtainable in test.
+        // As the test should just focus on ensuring window goes to one side of the screen, an
+        // acceptable approach is to ensure snapped window still fills > 95% of either side of the
+        // screen.
+        private const val SNAP_WINDOW_MAX_DIFF_THRESHOLD_RATIO = 0.05
+
         val END_DRAG_TO_DESKTOP =
             FlickerConfigEntry(
                 scenarioId = ScenarioId("END_DRAG_TO_DESKTOP"),
@@ -154,6 +167,7 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
+                // TODO(373638597) Add AppLayerIncreasesInSize assertion
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS
             )
 
@@ -208,7 +222,7 @@ class DesktopModeFlickerScenarios {
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
-                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            // TODO(373638597) Add AppLayerIncreasesInSize assertion
                             AppWindowHasMaxDisplayHeight(DESKTOP_MODE_APP),
                             AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
@@ -224,9 +238,11 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
-                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
-                        listOf(AppWindowCoversLeftHalfScreenAtEnd(DESKTOP_MODE_APP))
-                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS + listOf(
+                    AppWindowCoversLeftHalfScreenAtEnd(
+                        DESKTOP_MODE_APP, SNAP_WINDOW_MAX_DIFF_THRESHOLD_RATIO
+                    )
+                ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
         val SNAP_RESIZE_RIGHT_WITH_BUTTON =
@@ -239,9 +255,11 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
-                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
-                        listOf(AppWindowCoversRightHalfScreenAtEnd(DESKTOP_MODE_APP))
-                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS + listOf(
+                    AppWindowCoversRightHalfScreenAtEnd(
+                        DESKTOP_MODE_APP, SNAP_WINDOW_MAX_DIFF_THRESHOLD_RATIO
+                    )
+                ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
         val SNAP_RESIZE_LEFT_WITH_DRAG =
@@ -254,9 +272,11 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
-                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
-                        listOf(AppWindowCoversLeftHalfScreenAtEnd(DESKTOP_MODE_APP))
-                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS + listOf(
+                    AppWindowCoversLeftHalfScreenAtEnd(
+                        DESKTOP_MODE_APP, SNAP_WINDOW_MAX_DIFF_THRESHOLD_RATIO
+                    )
+                ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
         val SNAP_RESIZE_RIGHT_WITH_DRAG =
@@ -269,9 +289,11 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
-                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
-                        listOf(AppWindowCoversRightHalfScreenAtEnd(DESKTOP_MODE_APP))
-                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS + listOf(
+                    AppWindowCoversRightHalfScreenAtEnd(
+                        DESKTOP_MODE_APP, SNAP_WINDOW_MAX_DIFF_THRESHOLD_RATIO
+                    )
+                ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
         val SNAP_RESIZE_WITH_DRAG_NON_RESIZABLE =
@@ -297,12 +319,18 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("MAXIMIZE_APP"),
                 extractor =
-                TaggedScenarioExtractorBuilder()
-                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
-                    .setTransitionMatcher(
-                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
-                    )
-                    .build(),
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            return transitions.filter {
+                                it.type == TransitionType.DESKTOP_MODE_TOGGLE_RESIZE
+                            }
+                        }
+                    }
+                ),
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
                             AppLayerIncreasesInSize(DESKTOP_MODE_APP),
@@ -315,12 +343,18 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("MAXIMIZE_APP_NON_RESIZABLE"),
                 extractor =
-                TaggedScenarioExtractorBuilder()
-                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
-                    .setTransitionMatcher(
-                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
-                    )
-                    .build(),
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            return transitions.filter {
+                                it.type == TransitionType.DESKTOP_MODE_TOGGLE_RESIZE
+                            }
+                        }
+                    }
+                ),
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(
@@ -328,6 +362,30 @@ class DesktopModeFlickerScenarios {
                             AppWindowMaintainsAspectRatioAlways(DESKTOP_MODE_APP),
                             AppWindowHasMaxBoundsInOnlyOneDimension(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val BRING_APPS_TO_FRONT =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("BRING_APPS_TO_FRONT"),
+                extractor =
+                    ShellTransitionScenarioExtractor(
+                        transitionMatcher =
+                            object : ITransitionMatcher {
+                                override fun findAll(
+                                    transitions: Collection<Transition>
+                                ): Collection<Transition> {
+                                    return transitions.filter {
+                                        it.type == TransitionType.TO_FRONT
+                                    }
+                                }
+                            }
+                    ),
+                assertions =
+                    AssertionTemplates.COMMON_ASSERTIONS +
+                            listOf(
+                                AppWindowBecomesTopWindow(DESKTOP_MODE_APP),
+                                AppWindowOnTopAtEnd(DESKTOP_MODE_APP),
+                            ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
             )
 
         val CASCADE_APP =
@@ -351,6 +409,98 @@ class DesktopModeFlickerScenarios {
                             AppWindowBecomesVisible(DESKTOP_MODE_APP),
                             AppWindowAlignsWithOnlyOneDisplayCornerAtEnd(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val MINIMIZE_APP =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("MINIMIZE_APP"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            return transitions
+                                .filter { it.type == TransitionType.MINIMIZE }
+                                .sortedByDescending { it.id }
+                                .drop(1)
+                        }
+                    }
+                ),
+                assertions =
+                AssertionTemplates.COMMON_ASSERTIONS +
+                    listOf(
+                        AppWindowOnTopAtStart(DESKTOP_MODE_APP),
+                        AppWindowBecomesInvisible(DESKTOP_MODE_APP),
+                    ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
+            )
+
+        val MINIMIZE_LAST_APP =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("MINIMIZE_LAST_APP"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            val lastTransition =
+                                transitions
+                                .filter { it.type == TransitionType.MINIMIZE }
+                                .maxByOrNull { it.id }!!
+                            return listOf(lastTransition)
+                        }
+                    }
+                ),
+                assertions =
+                AssertionTemplates.COMMON_ASSERTIONS +
+                    listOf(
+                        AppWindowOnTopAtStart(DESKTOP_MODE_APP),
+                        AppWindowBecomesInvisible(DESKTOP_MODE_APP),
+                        AppWindowOnTopAtEnd(LAUNCHER),
+                    ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
+            )
+        val OPEN_UNLIMITED_APPS =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("OPEN_UNLIMITED_APPS"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                                return transitions.filter { it.type == TransitionType.OPEN }
+                        }
+                    }
+                ),
+                assertions =
+                        listOf(
+                            AppWindowBecomesVisible(DESKTOP_MODE_APP),
+                            AppWindowIsVisibleAlways(SIMPLE_APP)
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val MINIMIZE_AUTO_PIP_APP =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("MINIMIZE_AUTO_PIP_APP"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> =
+                            transitions.filter { it.type == TransitionType.PIP }
+                    }
+                ),
+                assertions =
+                AssertionTemplates.COMMON_ASSERTIONS +
+                    listOf(
+                        AppWindowBecomesPinned(DESKTOP_MODE_APP),
+                    ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
             )
     }
 }

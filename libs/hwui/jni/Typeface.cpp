@@ -80,7 +80,8 @@ static jlong Typeface_createFromTypefaceWithVariation(JNIEnv* env, jobject, jlon
         AxisHelper axis(env, axisObject);
         variations.push_back(minikin::FontVariation(axis.getTag(), axis.getStyleValue()));
     }
-    return toJLong(Typeface::createFromTypefaceWithVariation(toTypeface(familyHandle), variations));
+    return toJLong(Typeface::createFromTypefaceWithVariation(
+            toTypeface(familyHandle), minikin::VariationSettings(variations, false /* sorted */)));
 }
 
 static jlong Typeface_createWeightAlias(JNIEnv* env, jobject, jlong familyHandle, jint weight) {
@@ -273,7 +274,7 @@ void MinikinFontSkiaFactory::write(minikin::BufferWriter* writer,
     const std::string& path = typeface->GetFontPath();
     writer->writeString(path);
     writer->write<int>(typeface->GetFontIndex());
-    const std::vector<minikin::FontVariation>& axes = typeface->GetAxes();
+    const minikin::VariationSettings& axes = typeface->GetAxes();
     writer->writeArray<minikin::FontVariation>(axes.data(), axes.size());
     bool hasVerity = getVerity(path);
     writer->write<int8_t>(static_cast<int8_t>(hasVerity));

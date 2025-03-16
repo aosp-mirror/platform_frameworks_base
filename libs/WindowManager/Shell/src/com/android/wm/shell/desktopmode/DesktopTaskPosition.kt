@@ -22,16 +22,14 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.view.Gravity
 import com.android.internal.annotations.VisibleForTesting
+import com.android.wm.shell.R
 import com.android.wm.shell.desktopmode.DesktopTaskPosition.BottomLeft
 import com.android.wm.shell.desktopmode.DesktopTaskPosition.BottomRight
 import com.android.wm.shell.desktopmode.DesktopTaskPosition.Center
 import com.android.wm.shell.desktopmode.DesktopTaskPosition.TopLeft
 import com.android.wm.shell.desktopmode.DesktopTaskPosition.TopRight
-import com.android.wm.shell.R
 
-/**
- * The position of a task window in desktop mode.
- */
+/** The position of a task window in desktop mode. */
 sealed class DesktopTaskPosition {
     data object Center : DesktopTaskPosition() {
         private const val WINDOW_HEIGHT_PROPORTION = 0.375
@@ -89,8 +87,8 @@ sealed class DesktopTaskPosition {
     }
 
     /**
-     * Returns the top left coordinates for the window to be placed in the given
-     * DesktopTaskPosition in the frame.
+     * Returns the top left coordinates for the window to be placed in the given DesktopTaskPosition
+     * in the frame.
      */
     abstract fun getTopLeftCoordinates(frame: Rect, window: Rect): Point
 
@@ -98,8 +96,8 @@ sealed class DesktopTaskPosition {
 }
 
 /**
- * If the app has specified horizontal or vertical gravity layout, don't change the
- * task position for cascading effect.
+ * If the app has specified horizontal or vertical gravity layout, don't change the task position
+ * for cascading effect.
  */
 fun canChangeTaskPosition(taskInfo: TaskInfo): Boolean {
     taskInfo.topActivityInfo?.windowLayout?.let {
@@ -110,9 +108,7 @@ fun canChangeTaskPosition(taskInfo: TaskInfo): Boolean {
     return true
 }
 
-/**
- * Returns the current DesktopTaskPosition for a given window in the frame.
- */
+/** Returns the current DesktopTaskPosition for a given window in the frame. */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 fun Rect.getDesktopTaskPosition(bounds: Rect): DesktopTaskPosition {
     return when {
@@ -140,8 +136,8 @@ internal fun cascadeWindow(res: Resources, frame: Rect, prev: Rect, dest: Rect) 
 
 internal fun prevBoundsMovedAboveThreshold(res: Resources, prev: Rect, newBounds: Rect): Boolean {
     // This is the required minimum dp for a task to be touchable.
-    val moveThresholdPx = res.getDimensionPixelSize(
-        R.dimen.freeform_required_visible_empty_space_in_header)
+    val moveThresholdPx =
+        res.getDimensionPixelSize(R.dimen.freeform_required_visible_empty_space_in_header)
     val leftFar = newBounds.left - prev.left > moveThresholdPx
     val topFar = newBounds.top - prev.top > moveThresholdPx
     val rightFar = prev.right - newBounds.right > moveThresholdPx

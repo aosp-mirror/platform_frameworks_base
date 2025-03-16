@@ -41,11 +41,14 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.media.tv.flags.Flags;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.stats.hdmi.HdmiStatsEnums;
 
 import androidx.test.InstrumentationRegistry;
@@ -54,6 +57,7 @@ import androidx.test.filters.SmallTest;
 import com.android.server.SystemService;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -82,6 +86,9 @@ public class HdmiCecAtomLoggingTest {
     private HdmiPortInfo[] mHdmiPortInfo;
     private HdmiEarcController mHdmiEarcController;
     private FakeEarcNativeWrapper mEarcNativeWrapper;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() throws RemoteException {
@@ -232,7 +239,8 @@ public class HdmiCecAtomLoggingTest {
                         HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
                         HdmiStatsEnums.VOLUME_MUTE,
                         HdmiCecAtomWriter.FEATURE_ABORT_OPCODE_UNKNOWN,
-                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN);
+                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN,
+                        HdmiCecAtomWriter.PHYSICAL_ADDRESS_INVALID);
     }
 
     @Test
@@ -258,7 +266,8 @@ public class HdmiCecAtomLoggingTest {
                         HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
                         HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN,
                         HdmiCecAtomWriter.FEATURE_ABORT_OPCODE_UNKNOWN,
-                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN);
+                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN,
+                        HdmiCecAtomWriter.PHYSICAL_ADDRESS_INVALID);
     }
 
     @Test
@@ -285,7 +294,8 @@ public class HdmiCecAtomLoggingTest {
                         HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
                         HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN,
                         Constants.MESSAGE_RECORD_ON,
-                        HdmiStatsEnums.UNRECOGNIZED_OPCODE);
+                        HdmiStatsEnums.UNRECOGNIZED_OPCODE,
+                        HdmiCecAtomWriter.PHYSICAL_ADDRESS_INVALID);
     }
 
     @Test
@@ -311,7 +321,8 @@ public class HdmiCecAtomLoggingTest {
                         HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
                         HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN,
                         HdmiCecAtomWriter.FEATURE_ABORT_OPCODE_UNKNOWN,
-                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN);
+                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN,
+                        HdmiCecAtomWriter.PHYSICAL_ADDRESS_INVALID);
     }
 
     @Test
@@ -334,6 +345,59 @@ public class HdmiCecAtomLoggingTest {
         verify(mHdmiCecAtomWriterSpy, times(1))
                 .dsmStatusChanged(eq(false), eq(true),
                         eq(HdmiStatsEnums.LOG_REASON_DSM_SETTING_TOGGLED));
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_HDMI_CONTROL_COLLECT_PHYSICAL_ADDRESS})
+    public void testMessageReported_writesAtom_reportPhysicalAddress() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                ADDR_PLAYBACK_1, 0x1234, HdmiDeviceInfo.DEVICE_PLAYBACK);
+
+        mHdmiCecAtomWriterSpy.messageReported(
+                message,
+                HdmiStatsEnums.INCOMING,
+                1234);
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .writeHdmiCecMessageReportedAtom(
+                        1234,
+                        HdmiStatsEnums.INCOMING,
+                        Constants.ADDR_PLAYBACK_1,
+                        Constants.ADDR_BROADCAST,
+                        Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,
+                        HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
+                        HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN,
+                        HdmiCecAtomWriter.FEATURE_ABORT_OPCODE_UNKNOWN,
+                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN,
+                        0x1234);
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_HDMI_CONTROL_COLLECT_PHYSICAL_ADDRESS})
+    public void testMessageReported_writesAtom_reportPhysicalAddress_noParams() {
+        HdmiCecMessage message = HdmiCecMessage.build(
+                Constants.ADDR_PLAYBACK_1,
+                Constants.ADDR_BROADCAST,
+                Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,
+                new byte[0]);
+
+        mHdmiCecAtomWriterSpy.messageReported(
+                message,
+                HdmiStatsEnums.INCOMING,
+                1234);
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .writeHdmiCecMessageReportedAtom(
+                        1234,
+                        HdmiStatsEnums.INCOMING,
+                        Constants.ADDR_PLAYBACK_1,
+                        Constants.ADDR_BROADCAST,
+                        Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,
+                        HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN,
+                        HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN,
+                        HdmiCecAtomWriter.FEATURE_ABORT_OPCODE_UNKNOWN,
+                        HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN,
+                        HdmiCecAtomWriter.PHYSICAL_ADDRESS_INVALID);
     }
 
     @Test
@@ -368,5 +432,22 @@ public class HdmiCecAtomLoggingTest {
         verify(mHdmiCecAtomWriterSpy, never())
                 .dsmStatusChanged(anyBoolean(), anyBoolean(),
                         eq(HdmiStatsEnums.LOG_REASON_DSM_SETTING_TOGGLED));
+    }
+
+    @Test
+    public void testPowerStateChangeOnActiveSourceLostToggled_writesAtom_logReasonSetting() {
+        mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
+        Mockito.clearInvocations(mHdmiCecAtomWriterSpy);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.writePowerStateChangeOnActiveSourceLostAtom(true);
+        mTestLooper.dispatchAll();
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .powerStateChangeOnActiveSourceLostChanged(eq(true),
+                        eq(HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_SETTING), anyString(), anyInt(), anyInt());
+        verify(mHdmiCecAtomWriterSpy, never())
+                .powerStateChangeOnActiveSourceLostChanged(eq(true),
+                        eq(HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_POP_UP), anyString(), anyInt(), anyInt());
     }
 }

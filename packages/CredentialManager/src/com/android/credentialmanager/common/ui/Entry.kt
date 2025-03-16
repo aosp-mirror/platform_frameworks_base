@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.runtime.Composable
@@ -52,7 +53,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.ui.theme.Shapes
 
@@ -172,7 +172,7 @@ fun Entry(
                             // Decorative purpose only.
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
-                            tint = LocalAndroidColorScheme.current.onSurfaceVariant,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -186,7 +186,7 @@ fun Entry(
                         Icon(
                             modifier = iconSize,
                             bitmap = iconImageBitmap,
-                            tint = LocalAndroidColorScheme.current.onSurfaceVariant,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             // Decorative purpose only.
                             contentDescription = null,
                         )
@@ -210,7 +210,7 @@ fun Entry(
                     Icon(
                         modifier = iconSize,
                         imageVector = iconImageVector,
-                        tint = LocalAndroidColorScheme.current.onSurfaceVariant,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         // Decorative purpose only.
                         contentDescription = null,
                     )
@@ -222,7 +222,7 @@ fun Entry(
                     Icon(
                         modifier = iconSize,
                         painter = iconPainter,
-                        tint = LocalAndroidColorScheme.current.onSurfaceVariant,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         // Decorative purpose only.
                         contentDescription = null,
                     )
@@ -233,9 +233,9 @@ fun Entry(
         },
         border = null,
         colors = SuggestionChipDefaults.suggestionChipColors(
-            containerColor = LocalAndroidColorScheme.current.surfaceContainerHigh,
-            labelColor = LocalAndroidColorScheme.current.onSurfaceVariant,
-            iconContentColor = LocalAndroidColorScheme.current.onSurfaceVariant,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            iconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
     )
 }
@@ -338,7 +338,7 @@ fun MoreOptionTopAppBar(
                         imageVector = navigationIcon,
                         contentDescription = navigationIconContentDescription,
                         modifier = Modifier.size(24.dp).autoMirrored(),
-                        tint = LocalAndroidColorScheme.current.onSurfaceVariant,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

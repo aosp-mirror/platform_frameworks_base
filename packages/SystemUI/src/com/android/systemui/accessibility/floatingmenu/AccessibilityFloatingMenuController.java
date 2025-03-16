@@ -226,7 +226,11 @@ public class AccessibilityFloatingMenuController implements
             mBtnTargets =
                     mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
             mHandler.post(
-                    () -> handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets));
+                    () -> {
+                        // Force a refresh by destroying the menu if it exists.
+                        destroyFloatingMenu();
+                        handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
+                    });
         }
     }
 }

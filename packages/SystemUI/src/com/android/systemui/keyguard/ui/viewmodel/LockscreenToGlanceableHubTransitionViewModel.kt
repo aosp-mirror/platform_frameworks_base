@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,7 +46,7 @@ import kotlinx.coroutines.flow.map
 class LockscreenToGlanceableHubTransitionViewModel
 @Inject
 constructor(
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     private val transitionAnimation =
@@ -54,9 +55,7 @@ constructor(
                 duration = FromLockscreenTransitionInteractor.TO_GLANCEABLE_HUB_DURATION,
                 edge = Edge.create(from = LOCKSCREEN, to = Scenes.Communal),
             )
-            .setupWithoutSceneContainer(
-                edge = Edge.create(from = LOCKSCREEN, to = GLANCEABLE_HUB),
-            )
+            .setupWithoutSceneContainer(edge = Edge.create(from = LOCKSCREEN, to = GLANCEABLE_HUB))
 
     val keyguardAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
@@ -74,7 +73,7 @@ constructor(
         configurationInteractor
             .directionalDimensionPixelSize(
                 LayoutDirection.LTR,
-                R.dimen.lockscreen_to_hub_transition_lockscreen_translation_x
+                R.dimen.lockscreen_to_hub_transition_lockscreen_translation_x,
             )
             .flatMapLatest { translatePx: Int ->
                 transitionAnimation.sharedFlowWithState(
@@ -86,13 +85,15 @@ constructor(
                     onFinish = { 0f },
                     onCancel = { 0f },
                     interpolator = EMPHASIZED,
-                    name = "LOCKSCREEN->GLANCEABLE_HUB: keyguardTranslationX"
+                    name = "LOCKSCREEN->GLANCEABLE_HUB: keyguardTranslationX",
                 )
             }
 
     val notificationAlpha: Flow<Float> = keyguardAlpha
 
     val shortcutsAlpha: Flow<Float> = keyguardAlpha
+
+    val statusBarAlpha: Flow<Float> = keyguardAlpha
 
     val notificationTranslationX: Flow<Float> =
         keyguardTranslationX.map { it.value }.filterNotNull()

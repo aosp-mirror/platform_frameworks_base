@@ -26,6 +26,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -34,6 +36,12 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.graphics.Insets;
 import android.graphics.Point;
+import android.os.Looper;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.view.IWindowManager;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -47,6 +55,7 @@ import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -61,11 +70,16 @@ import java.util.concurrent.Executor;
  */
 @SmallTest
 public class DisplayImeControllerTest extends ShellTestCase {
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock
     private SurfaceControl.Transaction mT;
     @Mock
     private ShellInit mShellInit;
+    @Mock
+    private IWindowManager mWm;
+    private DisplayImeController mDisplayImeController;
     private DisplayImeController.PerDisplay mPerDisplay;
     private Executor mExecutor;
 
@@ -73,7 +87,8 @@ public class DisplayImeControllerTest extends ShellTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mExecutor = spy(Runnable::run);
-        mPerDisplay = new DisplayImeController(null, mShellInit, null, null, new TransactionPool() {
+        mDisplayImeController = new DisplayImeController(mWm, mShellInit, null, null,
+                new TransactionPool() {
             @Override
             public SurfaceControl.Transaction acquire() {
                 return mT;
@@ -84,8 +99,10 @@ public class DisplayImeControllerTest extends ShellTestCase {
             }
         }, mExecutor) {
             @Override
-            void removeImeSurface(int displayId) { }
-        }.new PerDisplay(DEFAULT_DISPLAY, ROTATION_0);
+            void removeImeSurface(int displayId) {
+            }
+        };
+        mPerDisplay = mDisplayImeController.new PerDisplay(DEFAULT_DISPLAY, ROTATION_0);
     }
 
     @Test
@@ -95,12 +112,14 @@ public class DisplayImeControllerTest extends ShellTestCase {
 
     @Test
     public void insetsControlChanged_schedulesNoWorkOnExecutor() {
+        Looper.prepare();
         mPerDisplay.insetsControlChanged(insetsStateWithIme(false), insetsSourceControl());
         verifyZeroInteractions(mExecutor);
     }
 
     @Test
     public void insetsChanged_schedulesNoWorkOnExecutor() {
+        Looper.prepare();
         mPerDisplay.insetsChanged(insetsStateWithIme(false));
         verifyZeroInteractions(mExecutor);
     }
@@ -117,7 +136,10 @@ public class DisplayImeControllerTest extends ShellTestCase {
         verifyZeroInteractions(mExecutor);
     }
 
+    // With the refactor, the control's isInitiallyVisible is used to apply to the IME, therefore
+    // this test is obsolete
     @Test
+    @RequiresFlagsDisabled(android.view.inputmethod.Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void reappliesVisibilityToChangedLeash() {
         verifyZeroInteractions(mT);
         mPerDisplay.mImeShowing = false;
@@ -136,11 +158,25 @@ public class DisplayImeControllerTest extends ShellTestCase {
 
     @Test
     public void insetsControlChanged_updateImeSourceControl() {
+        Looper.prepare();
         mPerDisplay.insetsControlChanged(insetsStateWithIme(false), insetsSourceControl());
         assertNotNull(mPerDisplay.mImeSourceControl);
 
         mPerDisplay.insetsControlChanged(new InsetsState(), new InsetsSourceControl[]{});
         assertNull(mPerDisplay.mImeSourceControl);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.inputmethod.Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
+    public void setImeInputTargetRequestedVisibility_invokeOnImeRequested() {
+        var mockPp = mock(DisplayImeController.ImePositionProcessor.class);
+        mDisplayImeController.addPositionProcessor(mockPp);
+
+        mPerDisplay.setImeInputTargetRequestedVisibility(true, null /* statsToken */);
+        verify(mockPp).onImeRequested(anyInt(), eq(true));
+
+        mPerDisplay.setImeInputTargetRequestedVisibility(false, null /* statsToken */);
+        verify(mockPp).onImeRequested(anyInt(), eq(false));
     }
 
     private InsetsSourceControl[] insetsSourceControl() {

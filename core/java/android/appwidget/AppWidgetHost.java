@@ -306,6 +306,38 @@ public class AppWidgetHost {
     }
 
     /**
+     * Returns an {@link IntentSender} for starting the configuration activity for the widget.
+     *
+     * @return The {@link IntentSender} or null if service is currently unavailable
+     *
+     * @throws android.content.ActivityNotFoundException If configuration activity is not found.
+     *
+     * @see #startAppWidgetConfigureActivityForResult
+     *
+     * @hide
+     */
+    @Nullable
+    public final IntentSender getIntentSenderForConfigureActivity(int appWidgetId,
+            int intentFlags)  {
+        if (sService == null) {
+            return null;
+        }
+
+        IntentSender intentSender;
+        try {
+            intentSender = sService.createAppWidgetConfigIntentSender(mContextOpPackageName,
+                    appWidgetId, intentFlags);
+        } catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+
+        if (intentSender == null) {
+            throw new ActivityNotFoundException();
+        }
+        return intentSender;
+    }
+
+    /**
      * Starts an app widget provider configure activity for result on behalf of the caller.
      * Use this method if the provider is in another profile as you are not allowed to start
      * an activity in another profile. You can optionally provide a request code that is
@@ -330,18 +362,11 @@ public class AppWidgetHost {
             return;
         }
         try {
-            IntentSender intentSender = sService.createAppWidgetConfigIntentSender(
-                    mContextOpPackageName, appWidgetId, intentFlags);
-            if (intentSender != null) {
-                activity.startIntentSenderForResult(intentSender, requestCode, null, 0, 0, 0,
-                        options);
-            } else {
-                throw new ActivityNotFoundException();
-            }
+            IntentSender intentSender = getIntentSenderForConfigureActivity(appWidgetId,
+                    intentFlags);
+            activity.startIntentSenderForResult(intentSender, requestCode, null, 0, 0, 0, options);
         } catch (IntentSender.SendIntentException e) {
             throw new ActivityNotFoundException();
-        } catch (RemoteException e) {
-            throw new RuntimeException("system server dead?", e);
         }
     }
 

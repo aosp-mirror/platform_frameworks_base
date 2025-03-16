@@ -124,10 +124,12 @@ public final class ApkAssets {
 
     @Nullable
     @GuardedBy("this")
-    private final StringBlock mStringBlock;  // null or closed if mNativePtr = 0.
+    private StringBlock mStringBlock;  // null or closed if mNativePtr = 0.
 
     @PropertyFlags
     private final int mFlags;
+
+    private final boolean mIsOverlay;
 
     @Nullable
     private final AssetsProvider mAssets;
@@ -302,40 +304,43 @@ public final class ApkAssets {
 
     private ApkAssets(@FormatType int format, @NonNull String path, @PropertyFlags int flags,
             @Nullable AssetsProvider assets) throws IOException {
+        this(format, flags, assets);
         Objects.requireNonNull(path, "path");
-        mFlags = flags;
         mNativePtr = nativeLoad(format, path, flags, assets);
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
-        mAssets = assets;
     }
 
     private ApkAssets(@FormatType int format, @NonNull FileDescriptor fd,
             @NonNull String friendlyName, @PropertyFlags int flags, @Nullable AssetsProvider assets)
             throws IOException {
+        this(format, flags, assets);
         Objects.requireNonNull(fd, "fd");
         Objects.requireNonNull(friendlyName, "friendlyName");
-        mFlags = flags;
         mNativePtr = nativeLoadFd(format, fd, friendlyName, flags, assets);
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
-        mAssets = assets;
     }
 
     private ApkAssets(@FormatType int format, @NonNull FileDescriptor fd,
             @NonNull String friendlyName, long offset, long length, @PropertyFlags int flags,
             @Nullable AssetsProvider assets) throws IOException {
+        this(format, flags, assets);
         Objects.requireNonNull(fd, "fd");
         Objects.requireNonNull(friendlyName, "friendlyName");
-        mFlags = flags;
         mNativePtr = nativeLoadFdOffsets(format, fd, friendlyName, offset, length, flags, assets);
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
-        mAssets = assets;
     }
 
     private ApkAssets(@PropertyFlags int flags, @Nullable AssetsProvider assets) {
-        mFlags = flags;
+        this(FORMAT_APK, flags, assets);
         mNativePtr = nativeLoadEmpty(flags, assets);
         mStringBlock = null;
+    }
+
+    private ApkAssets(@FormatType int format, @PropertyFlags int flags,
+            @Nullable AssetsProvider assets) {
+        mFlags = flags;
         mAssets = assets;
+        mIsOverlay = format == FORMAT_IDMAP;
     }
 
     @UnsupportedAppUsage
@@ -423,6 +428,18 @@ public final class ApkAssets {
         synchronized (this) {
             return nativeIsUpToDate(mNativePtr);
         }
+    }
+
+    public boolean isSystem() {
+        return (mFlags & PROPERTY_SYSTEM) != 0;
+    }
+
+    public boolean isSharedLib() {
+        return (mFlags & PROPERTY_DYNAMIC) != 0;
+    }
+
+    public boolean isOverlay() {
+        return mIsOverlay;
     }
 
     @Override

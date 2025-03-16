@@ -959,9 +959,10 @@ public class BatterySaverStateMachine {
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .putExtra(EXTRA_SHOW_FRAGMENT_TITLE, highlightBundle);
 
-        PendingIntent batterySaverIntent = PendingIntent.getActivity(
+        PendingIntent batterySaverIntent = PendingIntent.getActivityAsUser(
                 mContext, 0 /* requestCode */, intent,
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
+                null /* options */, UserHandle.CURRENT);
         final String title = res.getString(titleId);
         final String summary = res.getString(summaryId);
 

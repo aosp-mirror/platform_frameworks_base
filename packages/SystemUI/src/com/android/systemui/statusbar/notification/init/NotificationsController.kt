@@ -38,6 +38,8 @@ interface NotificationsController {
     )
 
     fun resetUserExpandedStates()
+
     fun setNotificationSnoozed(sbn: StatusBarNotification, snoozeOption: SnoozeOption)
+
     fun getActiveNotificationsCount(): Int
 }

@@ -16,7 +16,7 @@
 
 package android.widget;
 
-import static android.view.flags.Flags.enableTouchScrollFeedback;
+import static android.view.flags.Flags.enableScrollFeedbackForTouch;
 import static android.view.flags.Flags.viewVelocityApi;
 
 import android.annotation.ColorInt;
@@ -909,7 +909,7 @@ public class ScrollView extends FrameLayout {
                 }
 
                 // TODO: b/360198915 - Add unit tests.
-                if (enableTouchScrollFeedback()) {
+                if (enableScrollFeedbackForTouch()) {
                     if (hitTopLimit || hitBottomLimit) {
                         initHapticScrollFeedbackProviderIfNotExists();
                         mHapticScrollFeedbackProvider.onScrollLimit(vtev.getDeviceId(),

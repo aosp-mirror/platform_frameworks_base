@@ -261,12 +261,20 @@ public class MessagingGroup extends NotificationOptimizedLinearLayout implements
         MessagingGroup createdGroup = sInstancePool.acquire();
         if (createdGroup == null) {
             createdGroup = (MessagingGroup) LayoutInflater.from(layout.getContext()).inflate(
-                    R.layout.notification_template_messaging_group, layout,
+                    getMessagingGroupLayoutResource(), layout,
                     false);
             createdGroup.addOnLayoutChangeListener(MessagingLayout.MESSAGING_PROPERTY_ANIMATOR);
         }
         layout.addView(createdGroup);
         return createdGroup;
+    }
+
+    private static int getMessagingGroupLayoutResource() {
+        if (Flags.notificationsRedesignTemplates()) {
+            return R.layout.notification_2025_messaging_group;
+        } else {
+            return R.layout.notification_template_messaging_group;
+        }
     }
 
     public void removeMessage(MessagingMessage messagingMessage,

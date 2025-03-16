@@ -28,13 +28,14 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 /**
  * Singleton controller to manage the attached {@link WindowTokenClient}s, and to dispatch
@@ -50,9 +51,9 @@ public class WindowTokenClientController {
     private final IApplicationThread mAppThread = ActivityThread.currentActivityThread()
             .getApplicationThread();
 
-    /** Mapping from a client defined token to the {@link WindowTokenClient} it represents. */
+    /** Attached {@link WindowTokenClient}. */
     @GuardedBy("mLock")
-    private final ArrayMap<IBinder, WindowTokenClient> mWindowTokenClientMap = new ArrayMap<>();
+    private final ArraySet<WindowTokenClient> mWindowTokenClients = new ArraySet<>();
 
     /** Gets the singleton controller. */
     @NonNull
@@ -85,11 +86,15 @@ public class WindowTokenClientController {
     /** Gets the {@link WindowContext} instance for the token. */
     @Nullable
     public Context getWindowContext(@NonNull IBinder clientToken) {
-        final WindowTokenClient windowTokenClient;
-        synchronized (mLock) {
-            windowTokenClient = mWindowTokenClientMap.get(clientToken);
+        if (!(clientToken instanceof WindowTokenClient windowTokenClient)) {
+            return null;
         }
-        return windowTokenClient != null ? windowTokenClient.getContext() : null;
+        synchronized (mLock) {
+            if (!mWindowTokenClients.contains(windowTokenClient)) {
+                return null;
+            }
+        }
+        return windowTokenClient.getContext();
     }
 
     /**
@@ -126,8 +131,16 @@ public class WindowTokenClientController {
      */
     public boolean attachToDisplayContent(@NonNull WindowTokenClient client, int displayId) {
         final IWindowManager wms = getWindowManagerService();
-        // #createSystemUiContext may call this method before WindowManagerService is initialized.
         if (wms == null) {
+            // #createSystemUiContext may call this method before WindowManagerService is
+            // initialized.
+            // Regardless of whether or not it is ready, keep track of the token so that when WMS
+            // is initialized later, the SystemUiContext will start reporting from
+            // DisplayContent#registerSystemUiContext, and WindowTokenClientController can report
+            // the Configuration to the correct client.
+            if (Flags.trackSystemUiContextBeforeWms()) {
+                recordWindowContextToken(client);
+            }
             return false;
         }
         final WindowContextInfo info;
@@ -170,12 +183,33 @@ public class WindowTokenClientController {
     /** Detaches a {@link WindowTokenClient} from associated WindowContainer if there's one. */
     public void detachIfNeeded(@NonNull WindowTokenClient client) {
         synchronized (mLock) {
-            if (mWindowTokenClientMap.remove(client) == null) {
+            if (!mWindowTokenClients.remove(client)) {
                 return;
             }
         }
+        final IWindowManager wms = getWindowManagerService();
+        if (wms == null) {
+            // #createSystemUiContext may call this method before WindowManagerService is
+            // initialized. If it is GC'ed before WMS is initialized, skip calling into WMS.
+            return;
+        }
         try {
-            getWindowManagerService().detachWindowContext(client);
+            wms.detachWindowContext(client);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reparents a {@link WindowTokenClient} and its associated WindowContainer if there's one.
+     */
+    public void reparentToDisplayArea(@NonNull WindowTokenClient client, int displayId) {
+        try {
+            if (!getWindowManagerService().reparentWindowContextToDisplayArea(mAppThread, client,
+                    displayId)) {
+                Log.e(TAG,
+                        "Didn't succeed reparenting of " + client + " to displayId=" + displayId);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -183,9 +217,7 @@ public class WindowTokenClientController {
 
     private void onWindowContextTokenAttached(@NonNull WindowTokenClient client,
             @NonNull WindowContextInfo info, boolean shouldReportConfigChange) {
-        synchronized (mLock) {
-            mWindowTokenClientMap.put(client, client);
-        }
+        recordWindowContextToken(client);
         if (shouldReportConfigChange) {
             // Should trigger an #onConfigurationChanged callback to the WindowContext. Post the
             // dispatch in the next loop to prevent the callback from being dispatched before
@@ -199,10 +231,16 @@ public class WindowTokenClientController {
         }
     }
 
+    private void recordWindowContextToken(@NonNull WindowTokenClient client) {
+        synchronized (mLock) {
+            mWindowTokenClients.add(client);
+        }
+    }
+
     /** Called when receives {@link WindowContextInfoChangeItem}. */
     public void onWindowContextInfoChanged(@NonNull IBinder clientToken,
             @NonNull WindowContextInfo info) {
-        final WindowTokenClient windowTokenClient = getWindowTokenClient(clientToken);
+        final WindowTokenClient windowTokenClient = getWindowTokenClientIfAttached(clientToken);
         if (windowTokenClient != null) {
             windowTokenClient.onConfigurationChanged(info.getConfiguration(), info.getDisplayId());
         }
@@ -210,20 +248,23 @@ public class WindowTokenClientController {
 
     /** Called when receives {@link WindowContextWindowRemovalItem}. */
     public void onWindowContextWindowRemoved(@NonNull IBinder clientToken) {
-        final WindowTokenClient windowTokenClient = getWindowTokenClient(clientToken);
+        final WindowTokenClient windowTokenClient = getWindowTokenClientIfAttached(clientToken);
         if (windowTokenClient != null) {
             windowTokenClient.onWindowTokenRemoved();
         }
     }
 
     @Nullable
-    private WindowTokenClient getWindowTokenClient(@NonNull IBinder clientToken) {
-        final WindowTokenClient windowTokenClient;
-        synchronized (mLock) {
-            windowTokenClient = mWindowTokenClientMap.get(clientToken);
+    private WindowTokenClient getWindowTokenClientIfAttached(@NonNull IBinder clientToken) {
+        if (!(clientToken instanceof WindowTokenClient windowTokenClient)) {
+            Log.e(TAG, "getWindowTokenClient failed for non-window token " + clientToken);
+            return null;
         }
-        if (windowTokenClient == null) {
-            Log.w(TAG, "Can't find attached WindowTokenClient for " + clientToken);
+        synchronized (mLock) {
+            if (!mWindowTokenClients.contains(windowTokenClient)) {
+                Log.w(TAG, "Can't find attached WindowTokenClient for " + clientToken);
+                return null;
+            }
         }
         return windowTokenClient;
     }

@@ -32,6 +32,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -53,6 +54,7 @@ import org.mockito.kotlin.isNull
 @RunWith(AndroidJUnit4::class)
 class KeyguardKeyEventInteractorTest : SysuiTestCase() {
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
+    private val kosmos = testKosmos()
 
     private val actionDownVolumeDownKeyEvent =
         KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_DOWN)
@@ -85,6 +87,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
                 mediaSessionLegacyHelperWrapper,
                 backActionInteractor,
                 powerInteractor,
+                kosmos.keyguardMediaKeyInteractor,
             )
     }
 

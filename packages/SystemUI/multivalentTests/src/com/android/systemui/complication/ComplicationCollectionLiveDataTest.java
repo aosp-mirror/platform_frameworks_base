@@ -67,7 +67,6 @@ public class ComplicationCollectionLiveDataTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS, true);
         mStateController = new DreamOverlayStateController(
                 mExecutor,
-                /* overlayEnabled= */ true,
                 mFeatureFlags,
                 FakeLogBuffer.Factory.Companion.create(),
                 new FakeWeakReferenceFactory());

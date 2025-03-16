@@ -304,16 +304,16 @@ class PendingReports {
             denyReportBeforeAddingRec(listener, callingPackage);
             return;
         }
+        AttributionSource attributionSource =
+                    new AttributionSource.Builder(callingUid)
+                            .setPackageName(callingPackage)
+                            .build();
 
         // Only with userdebug/eng build: it could check capture consentless bugreport permission
         // and approve the report when it's granted.
         boolean captureConsentlessBugreportOnUserdebugBuildGranted = false;
         if ((Build.IS_USERDEBUG || Build.IS_ENG)
                 && (flags & IncidentManager.FLAG_ALLOW_CONSENTLESS_BUGREPORT) != 0) {
-            AttributionSource attributionSource =
-                    new AttributionSource.Builder(callingUid)
-                            .setPackageName(callingPackage)
-                            .build();
             captureConsentlessBugreportOnUserdebugBuildGranted =
                     mPermissionManager.checkPermissionForDataDelivery(
                             Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
@@ -321,12 +321,28 @@ class PendingReports {
                             /* message= */ null)
                             == PERMISSION_GRANTED;
         }
-        if (captureConsentlessBugreportOnUserdebugBuildGranted) {
+
+        // Allow system apps to skip the consent dialog and use their in-built consent mechanism
+        // instead.
+        boolean captureConsentlessBugreportDelegatedConsentGranted =
+                mPermissionManager.checkPermissionForDataDelivery(
+                        Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT,
+                        attributionSource,
+                        /* message= */ null)
+                        == PERMISSION_GRANTED;
+
+        if (captureConsentlessBugreportOnUserdebugBuildGranted
+                || captureConsentlessBugreportDelegatedConsentGranted) {
             try {
                 PendingReportRec rec =
                         new PendingReportRec(
                                 callingPackage, receiverClass, reportId, flags, listener);
-                Log.d(TAG, "approving consentless report: " + rec.getUri());
+                if (captureConsentlessBugreportOnUserdebugBuildGranted) {
+                    Log.d(TAG, "approving consentless report: " + rec.getUri());
+                }
+                if (captureConsentlessBugreportDelegatedConsentGranted) {
+                    Log.d(TAG, "delegating consent for report: " + rec.getUri());
+                }
                 listener.onReportApproved();
                 return;
             } catch (RemoteException e) {

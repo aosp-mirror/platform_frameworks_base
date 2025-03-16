@@ -17,14 +17,21 @@ package {
 }
 
 aconfig_declarations {
-    name: "android-sdk-flags",
+    name: "android.sdk.flags-aconfig",
     package: "android.sdk",
     container: "system",
     srcs: ["flags.aconfig"],
 }
 
 java_aconfig_library {
-    name: "android-sdk-flags-java",
-    aconfig_declarations: "android-sdk-flags",
+    name: "android.sdk.flags-aconfig-java",
+    aconfig_declarations: "android.sdk.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.sdk.flags-aconfig-java-host",
+    aconfig_declarations: "android.sdk.flags-aconfig",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

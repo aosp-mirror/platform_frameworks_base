@@ -22,8 +22,8 @@
     <string name="use_password_title" msgid="4655101984031246476">"क्या आपको पासवर्ड का इस्तेमाल करना है?"</string>
     <string name="dialog_dismiss_button" msgid="989567669882005067">"खारिज करें"</string>
     <string name="dialog_continue_button" msgid="8630290044077052145">"जारी रखें"</string>
-    <string name="dialog_sign_in_options_button" msgid="448002958902615054">"साइन इन करने के विकल्प"</string>
-    <string name="sign_in_options_title" msgid="6720572645638986680">"साइन इन करने के विकल्प"</string>
+    <string name="dialog_sign_in_options_button" msgid="448002958902615054">"साइन-इन करने के विकल्प"</string>
+    <string name="sign_in_options_title" msgid="6720572645638986680">"साइन-इन करने के विकल्प"</string>
     <string name="provider_list_title" msgid="6803918216129492212">"साइन-इन क्रेडेंशियल मैनेज करें"</string>
     <string name="choose_sign_in_title" msgid="3616025924746872202">"साइन इन करने का कोई तरीका चुनें"</string>
     <string name="choose_passkey_title" msgid="8459270617632817465">"कोई पासकी चुनें"</string>

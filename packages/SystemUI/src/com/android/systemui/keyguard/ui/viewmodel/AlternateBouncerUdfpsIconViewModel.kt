@@ -24,6 +24,7 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.recents.utilities.Utilities.clamp
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,8 +41,8 @@ import kotlinx.coroutines.flow.onStart
 class AlternateBouncerUdfpsIconViewModel
 @Inject
 constructor(
-    val context: Context,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware val context: Context,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     deviceEntryBackgroundViewModel: DeviceEntryBackgroundViewModel,
     fingerprintPropertyInteractor: FingerprintPropertyInteractor,
@@ -85,10 +86,7 @@ constructor(
             }
     private val fgIconPadding: Flow<Int> = udfpsOverlayInteractor.iconPadding
     val fgViewModel: Flow<DeviceEntryForegroundViewModel.ForegroundIconViewModel> =
-        combine(
-            fgIconColor,
-            fgIconPadding,
-        ) { color, padding ->
+        combine(fgIconColor, fgIconPadding) { color, padding ->
             DeviceEntryForegroundViewModel.ForegroundIconViewModel(
                 type = DeviceEntryIconView.IconType.FINGERPRINT,
                 useAodVariant = false,
@@ -100,12 +98,7 @@ constructor(
     val bgColor: Flow<Int> = deviceEntryBackgroundViewModel.color
     val bgAlpha: Flow<Float> = flowOf(1f)
 
-    data class IconLocation(
-        val left: Int,
-        val top: Int,
-        val right: Int,
-        val bottom: Int,
-    ) {
+    data class IconLocation(val left: Int, val top: Int, val right: Int, val bottom: Int) {
         val width = right - left
         val height = bottom - top
     }

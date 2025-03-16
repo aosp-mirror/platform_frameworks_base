@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.satellite.data.prod
 
+import android.content.res.Resources
 import android.os.OutcomeReceiver
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
@@ -27,14 +28,17 @@ import android.telephony.satellite.SatelliteModemStateCallback
 import android.telephony.satellite.SatelliteProvisionStateCallback
 import android.telephony.satellite.SatelliteSupportedStateCallback
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.MessageInitializer
 import com.android.systemui.log.core.MessagePrinter
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.dagger.DeviceBasedSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.dagger.VerboseDeviceBasedSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.data.RealDeviceBasedSatelliteRepository
@@ -66,7 +70,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 
@@ -146,9 +149,13 @@ constructor(
     @DeviceBasedSatelliteInputLog private val logBuffer: LogBuffer,
     @VerboseDeviceBasedSatelliteInputLog private val verboseLogBuffer: LogBuffer,
     private val systemClock: SystemClock,
+    @Main resources: Resources,
 ) : RealDeviceBasedSatelliteRepository {
 
     private val satelliteManager: SatelliteManager?
+
+    override val isOpportunisticSatelliteIconEnabled: Boolean =
+        resources.getBoolean(R.bool.config_showOpportunisticSatelliteIcon)
 
     // Some calls into satellite manager will throw exceptions if it is not supported.
     // This is never expected to change after boot, but may need to be retried in some cases
@@ -182,7 +189,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                TelephonyManager.RADIO_POWER_UNAVAILABLE
+                TelephonyManager.RADIO_POWER_UNAVAILABLE,
             )
 
     /**
@@ -265,9 +272,10 @@ constructor(
 
                 var registered = false
                 try {
+                    logBuffer.i { "registerForCommunicationAllowedStateChanged" }
                     sm.registerForCommunicationAllowedStateChanged(
                         bgDispatcher.asExecutor(),
-                        callback
+                        callback,
                     )
                     registered = true
                 } catch (e: Exception) {
@@ -276,6 +284,7 @@ constructor(
 
                 awaitClose {
                     if (registered) {
+                        logBuffer.i { "unRegisterForCommunicationAllowedStateChanged" }
                         sm.unregisterForCommunicationAllowedStateChanged(callback)
                     }
                 }
@@ -321,9 +330,10 @@ constructor(
 
                 var registered = false
                 try {
+                    logBuffer.i { "registerForSupportedStateChanged" }
                     satelliteManager.registerForSupportedStateChanged(
                         bgDispatcher.asExecutor(),
-                        callback
+                        callback,
                     )
                     registered = true
                 } catch (e: Exception) {
@@ -332,6 +342,7 @@ constructor(
 
                 awaitClose {
                     if (registered) {
+                        logBuffer.i { "unregisterForSupportedStateChanged" }
                         satelliteManager.unregisterForSupportedStateChanged(callback)
                     }
                 }
@@ -366,10 +377,7 @@ constructor(
                 var registered = false
                 try {
                     logBuffer.i { "registerForProvisionStateChanged" }
-                    sm.registerForProvisionStateChanged(
-                        bgDispatcher.asExecutor(),
-                        callback,
-                    )
+                    sm.registerForProvisionStateChanged(bgDispatcher.asExecutor(), callback)
                     registered = true
                 } catch (e: Exception) {
                     logBuffer.e("error registering for provisioning state callback", e)
@@ -377,6 +385,7 @@ constructor(
 
                 awaitClose {
                     if (registered) {
+                        logBuffer.i { "unregisterForProvisionStateChanged" }
                         sm.unregisterForProvisionStateChanged(callback)
                     }
                 }
@@ -526,17 +535,10 @@ constructor(
             uptime - (clock.uptimeMillis() - android.os.Process.getStartUptimeMillis())
 
         /** A couple of convenience logging methods rather than a whole class */
-        private fun LogBuffer.i(
-            initializer: MessageInitializer = {},
-            printer: MessagePrinter,
-        ) = this.log(TAG, LogLevel.INFO, initializer, printer)
+        private fun LogBuffer.i(initializer: MessageInitializer = {}, printer: MessagePrinter) =
+            this.log(TAG, LogLevel.INFO, initializer, printer)
 
         private fun LogBuffer.e(message: String, exception: Throwable? = null) =
-            this.log(
-                tag = TAG,
-                level = LogLevel.ERROR,
-                message = message,
-                exception = exception,
-            )
+            this.log(tag = TAG, level = LogLevel.ERROR, message = message, exception = exception)
     }
 }

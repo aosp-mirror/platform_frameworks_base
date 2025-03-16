@@ -36,12 +36,15 @@ import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerR
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.util.kotlin.FlowDumperImpl
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -55,7 +58,7 @@ import kotlinx.coroutines.flow.stateIn
 class KeyguardQuickAffordanceRepository
 @Inject
 constructor(
-    @Application private val appContext: Context,
+    @ShadeDisplayAware private val appContext: Context,
     @Application private val scope: CoroutineScope,
     private val localUserSelectionManager: KeyguardQuickAffordanceLocalUserSelectionManager,
     private val remoteUserSelectionManager: KeyguardQuickAffordanceRemoteUserSelectionManager,
@@ -64,7 +67,14 @@ constructor(
     configs: Set<@JvmSuppressWildcards KeyguardQuickAffordanceConfig>,
     dumpManager: DumpManager,
     userHandle: UserHandle,
-) {
+) : FlowDumperImpl(dumpManager) {
+    /**
+     * Whether a quick affordance is being launched. Quick Affordances are interactive lockscreen UI
+     * elements that allow the user to perform quick actions without unlocking their device.
+     */
+    val launchingAffordance: MutableStateFlow<Boolean> =
+        MutableStateFlow(false).dumpValue("launchingAffordance")
+
     // Configs for all keyguard quick affordances, mapped by the quick affordance ID as key
     private val configsByAffordanceId: Map<String, KeyguardQuickAffordanceConfig> =
         configs.associateBy { it.key }
@@ -112,11 +122,7 @@ constructor(
                     }
                 }
             }
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.Eagerly,
-                initialValue = emptyMap(),
-            )
+            .stateIn(scope = scope, started = SharingStarted.Eagerly, initialValue = emptyMap())
 
     init {
         legacySettingSyncer.startSyncing()
@@ -144,14 +150,8 @@ constructor(
      * Updates the IDs of affordances to show at the slot with the given ID. The order of affordance
      * IDs should be descending priority order.
      */
-    fun setSelections(
-        slotId: String,
-        affordanceIds: List<String>,
-    ) {
-        selectionManager.value.setSelections(
-            slotId = slotId,
-            affordanceIds = affordanceIds,
-        )
+    fun setSelections(slotId: String, affordanceIds: List<String>) {
+        selectionManager.value.setSelections(slotId = slotId, affordanceIds = affordanceIds)
     }
 
     /**
@@ -222,10 +222,7 @@ constructor(
             val (slotId, slotCapacity) = parseSlot(unparsedSlot)
             check(!seenSlotIds.contains(slotId)) { "Duplicate slot \"$slotId\"!" }
             seenSlotIds.add(slotId)
-            KeyguardSlotPickerRepresentation(
-                id = slotId,
-                maxSelectedAffordances = slotCapacity,
-            )
+            KeyguardSlotPickerRepresentation(id = slotId, maxSelectedAffordances = slotCapacity)
         }
     }
 

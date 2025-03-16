@@ -506,8 +506,7 @@ bool WritePng(const Image* image, const NinePatch* nine_patch, OutputStream* out
   // Set up the write functions which write to our custom data sources.
   png_set_write_fn(write_ptr, (png_voidp)out, WriteDataToStream, nullptr);
 
-  // We want small files and can take the performance hit to achieve this goal.
-  png_set_compression_level(write_ptr, Z_BEST_COMPRESSION);
+  png_set_compression_level(write_ptr, options.compression_level);
 
   // Begin analysis of the image data.
   // Scan the entire image and determine if:

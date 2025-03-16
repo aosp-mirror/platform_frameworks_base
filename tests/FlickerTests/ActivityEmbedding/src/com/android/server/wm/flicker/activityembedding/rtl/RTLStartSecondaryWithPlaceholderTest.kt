@@ -37,7 +37,7 @@ import org.junit.runners.Parameterized
  * PlaceholderPrimary, which is configured to launch with PlaceholderSecondary in RTL. Expect split
  * PlaceholderSecondary|PlaceholderPrimary covering split B|A.
  *
- * To run this test: `atest FlickerTestsOther:RTLStartSecondaryWithPlaceholderTest`
+ * To run this test: `atest FlickerTestsActivityEmbedding:RTLStartSecondaryWithPlaceholderTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

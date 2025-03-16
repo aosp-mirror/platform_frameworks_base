@@ -18,24 +18,27 @@ package com.android.systemui.notifications.ui.composable
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.layoutId
 import com.android.compose.animation.scene.ContentScope
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.ui.composable.blueprint.rememberBurnIn
+import com.android.systemui.keyguard.ui.composable.section.DefaultClockSection
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeOverlayActionsViewModel
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeOverlayContentViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.composable.Overlay
-import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
+import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
+import com.android.systemui.shade.ui.composable.SingleShadeMeasurePolicy
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
@@ -54,6 +57,8 @@ constructor(
     private val statusBarIconController: StatusBarIconController,
     private val shadeSession: SaveableSession,
     private val stackScrollView: Lazy<NotificationScrollView>,
+    private val clockSection: DefaultClockSection,
+    private val clockInteractor: KeyguardClockInteractor,
 ) : Overlay {
 
     override val key = Overlays.NotificationsShade
@@ -69,9 +74,7 @@ constructor(
     }
 
     @Composable
-    override fun ContentScope.Content(
-        modifier: Modifier,
-    ) {
+    override fun ContentScope.Content(modifier: Modifier) {
         val viewModel =
             rememberViewModel("NotificationsShadeOverlay-viewModel") {
                 contentViewModelFactory.create()
@@ -81,18 +84,30 @@ constructor(
                 viewModel.notificationsPlaceholderViewModelFactory.create()
             }
 
-        OverlayShade(
-            modifier = modifier,
-            onScrimClicked = viewModel::onScrimClicked,
-        ) {
+        OverlayShade(modifier = modifier, onScrimClicked = viewModel::onScrimClicked) {
             Column {
-                ExpandedShadeHeader(
-                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                    createTintedIconManager = tintedIconManagerFactory::create,
-                    createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
-                    statusBarIconController = statusBarIconController,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                )
+                if (viewModel.showHeader) {
+                    val burnIn = rememberBurnIn(clockInteractor)
+
+                    CollapsedShadeHeader(
+                        viewModelFactory = viewModel.shadeHeaderViewModelFactory,
+                        createTintedIconManager = tintedIconManagerFactory::create,
+                        createBatteryMeterViewController =
+                            batteryMeterViewControllerFactory::create,
+                        statusBarIconController = statusBarIconController,
+                        modifier =
+                            Modifier.element(NotificationsShade.Elements.StatusBar)
+                                .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
+                    )
+
+                    with(clockSection) {
+                        SmallClock(
+                            burnInParams = burnIn.parameters,
+                            onTopChanged = burnIn.onSmallClockTopChanged,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
 
                 NotificationScrollingStack(
                     shadeSession = shadeSession,
@@ -102,7 +117,8 @@ constructor(
                     shouldPunchHoleBehindScrim = false,
                     shouldFillMaxSize = false,
                     shouldReserveSpaceForNavBar = false,
-                    shadeMode = ShadeMode.Dual,
+                    shouldShowScrim = false,
+                    supportNestedScrolling = false,
                     modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -113,5 +129,11 @@ constructor(
                 )
             }
         }
+    }
+}
+
+object NotificationsShade {
+    object Elements {
+        val StatusBar = ElementKey("NotificationsShadeStatusBar")
     }
 }

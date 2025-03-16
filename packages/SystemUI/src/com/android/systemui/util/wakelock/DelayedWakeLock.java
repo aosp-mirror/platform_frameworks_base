@@ -19,11 +19,8 @@ package com.android.systemui.util.wakelock;
 import android.content.Context;
 import android.os.Handler;
 
-import com.android.systemui.Flags;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.Main;
 
-import dagger.Lazy;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -40,13 +37,11 @@ public class DelayedWakeLock implements WakeLock {
     private final WakeLock mInner;
 
     @AssistedInject
-    public DelayedWakeLock(@Background Lazy<Handler> bgHandler,
-                           @Main Lazy<Handler> mainHandler,
+    public DelayedWakeLock(@Background Handler bgHandler,
                            Context context, WakeLockLogger logger,
             @Assisted String tag) {
         mInner = WakeLock.createPartial(context, logger, tag);
-        mHandler = Flags.delayedWakelockReleaseOnBackgroundThread() ? bgHandler.get()
-                : mainHandler.get();
+        mHandler = bgHandler;
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.data.repository
 
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
 import kotlinx.coroutines.flow.StateFlow
 
@@ -31,6 +32,6 @@ interface HeadsUpRowRepository : HeadsUpRowKey {
     /** A key to identify this row in the view hierarchy. */
     val elementKey: Any
 
-    /** Whether this notification is "pinned", meaning that it should stay on top of the screen. */
-    val isPinned: StateFlow<Boolean>
+    /** This notification's pinning status. */
+    val pinnedStatus: StateFlow<PinnedStatus>
 }

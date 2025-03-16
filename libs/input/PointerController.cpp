@@ -138,15 +138,16 @@ std::mutex& PointerController::getLock() const {
     return mDisplayInfoListener->mLock;
 }
 
-void PointerController::move(float deltaX, float deltaY) {
+vec2 PointerController::move(float deltaX, float deltaY) {
     const ui::LogicalDisplayId displayId = mCursorController.getDisplayId();
-    vec2 transformed;
+    ui::Transform transform;
     {
         std::scoped_lock lock(getLock());
-        const auto& transform = getTransformForDisplayLocked(displayId);
-        transformed = transformWithoutTranslation(transform, {deltaX, deltaY});
+        transform = getTransformForDisplayLocked(displayId);
     }
-    mCursorController.move(transformed.x, transformed.y);
+
+    const vec2 transformed = transformWithoutTranslation(transform, {deltaX, deltaY});
+    return transformWithoutTranslation(transform.inverse(), mCursorController.move(transformed));
 }
 
 void PointerController::setPosition(float x, float y) {
@@ -157,16 +158,15 @@ void PointerController::setPosition(float x, float y) {
         const auto& transform = getTransformForDisplayLocked(displayId);
         transformed = transform.transform(x, y);
     }
-    mCursorController.setPosition(transformed.x, transformed.y);
+    mCursorController.setPosition(transformed);
 }
 
-FloatPoint PointerController::getPosition() const {
+vec2 PointerController::getPosition() const {
     const ui::LogicalDisplayId displayId = mCursorController.getDisplayId();
     const auto p = mCursorController.getPosition();
     {
         std::scoped_lock lock(getLock());
-        const auto& transform = getTransformForDisplayLocked(displayId);
-        return FloatPoint{transform.inverse().transform(p.x, p.y)};
+        return getTransformForDisplayLocked(displayId).inverse().transform(p.x, p.y);
     }
 }
 
@@ -293,6 +293,11 @@ void PointerController::clearSkipScreenshotFlags() {
     std::scoped_lock lock(getLock());
     mLocked.displaysToSkipScreenshot.clear();
     mCursorController.setSkipScreenshot(false);
+}
+
+ui::Transform PointerController::getDisplayTransform() const {
+    std::scoped_lock lock(getLock());
+    return getTransformForDisplayLocked(mLocked.pointerDisplayId);
 }
 
 void PointerController::doInactivityTimeout() {

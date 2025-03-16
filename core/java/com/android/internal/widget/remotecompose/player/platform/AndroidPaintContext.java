@@ -15,6 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.player.platform;
 
+import android.annotation.NonNull;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
@@ -26,6 +27,8 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.RenderEffect;
+import android.graphics.RenderNode;
 import android.graphics.RuntimeShader;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
@@ -43,14 +46,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An implementation of PaintContext for the Android Canvas.
- * This is used to play the RemoteCompose operations on Android.
+ * An implementation of PaintContext for the Android Canvas. This is used to play the RemoteCompose
+ * operations on Android.
  */
 public class AndroidPaintContext extends PaintContext {
     Paint mPaint = new Paint();
     List<Paint> mPaintList = new ArrayList<>();
     Canvas mCanvas;
     Rect mTmpRect = new Rect(); // use in calculation of bounds
+    RenderNode mNode = null;
+    Canvas mPreviousCanvas = null;
 
     public AndroidPaintContext(RemoteContext context, Canvas canvas) {
         super(context);
@@ -83,37 +88,36 @@ public class AndroidPaintContext extends PaintContext {
     /**
      * Draw an image onto the canvas
      *
-     * @param imageId   the id of the image
-     * @param srcLeft   left coordinate of the source area
-     * @param srcTop    top coordinate of the source area
-     * @param srcRight  right coordinate of the source area
+     * @param imageId the id of the image
+     * @param srcLeft left coordinate of the source area
+     * @param srcTop top coordinate of the source area
+     * @param srcRight right coordinate of the source area
      * @param srcBottom bottom coordinate of the source area
-     * @param dstLeft   left coordinate of the destination area
-     * @param dstTop    top coordinate of the destination area
-     * @param dstRight  right coordinate of the destination area
+     * @param dstLeft left coordinate of the destination area
+     * @param dstTop top coordinate of the destination area
+     * @param dstRight right coordinate of the destination area
      * @param dstBottom bottom coordinate of the destination area
      */
-
     @Override
-    public void drawBitmap(int imageId,
-                           int srcLeft,
-                           int srcTop,
-                           int srcRight,
-                           int srcBottom,
-                           int dstLeft,
-                           int dstTop,
-                           int dstRight,
-                           int dstBottom,
-                           int cdId) {
+    public void drawBitmap(
+            int imageId,
+            int srcLeft,
+            int srcTop,
+            int srcRight,
+            int srcBottom,
+            int dstLeft,
+            int dstTop,
+            int dstRight,
+            int dstBottom,
+            int cdId) {
         AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
         if (androidContext.mRemoteComposeState.containsId(imageId)) {
-            Bitmap bitmap = (Bitmap) androidContext.mRemoteComposeState
-                    .getFromId(imageId);
+            Bitmap bitmap = (Bitmap) androidContext.mRemoteComposeState.getFromId(imageId);
             mCanvas.drawBitmap(
                     bitmap,
                     new Rect(srcLeft, srcTop, srcRight, srcBottom),
-                    new Rect(dstLeft, dstTop, dstRight, dstBottom), mPaint
-            );
+                    new Rect(dstLeft, dstTop, dstRight, dstBottom),
+                    mPaint);
         }
     }
 
@@ -123,33 +127,75 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
+    public void startGraphicsLayer(int w, int h) {
+        mNode = new RenderNode("layer");
+        mNode.setPosition(0, 0, w, h);
+        mPreviousCanvas = mCanvas;
+        mCanvas = mNode.beginRecording();
+    }
+
+    @Override
+    public void setGraphicsLayer(
+            float scaleX,
+            float scaleY,
+            float rotationX,
+            float rotationY,
+            float rotationZ,
+            float shadowElevation,
+            float transformOriginX,
+            float transformOriginY,
+            float alpha,
+            int renderEffectId) {
+        if (mNode == null) {
+            return;
+        }
+        mNode.setScaleX(scaleX);
+        mNode.setScaleY(scaleY);
+        mNode.setRotationX(rotationX);
+        mNode.setRotationY(rotationY);
+        mNode.setRotationZ(rotationZ);
+        mNode.setPivotX(transformOriginX * mNode.getWidth());
+        mNode.setPivotY(transformOriginY * mNode.getHeight());
+        mNode.setAlpha(alpha);
+        if (renderEffectId == 1) {
+
+            RenderEffect effect = RenderEffect.createBlurEffect(8f, 8f, Shader.TileMode.CLAMP);
+            mNode.setRenderEffect(effect);
+        }
+    }
+
+    @Override
+    public void endGraphicsLayer() {
+        mNode.endRecording();
+        mCanvas = mPreviousCanvas;
+        mCanvas.drawRenderNode(mNode);
+        // node.discardDisplayList();
+        mNode = null;
+    }
+
+    @Override
     public void translate(float translateX, float translateY) {
         mCanvas.translate(translateX, translateY);
     }
 
     @Override
-    public void drawArc(float left,
-                        float top,
-                        float right,
-                        float bottom,
-                        float startAngle,
-                        float sweepAngle) {
-        mCanvas.drawArc(left, top, right, bottom, startAngle,
-                sweepAngle, true, mPaint);
+    public void drawArc(
+            float left, float top, float right, float bottom, float startAngle, float sweepAngle) {
+        mCanvas.drawArc(left, top, right, bottom, startAngle, sweepAngle, false, mPaint);
     }
 
     @Override
-    public void drawBitmap(int id,
-                           float left,
-                           float top,
-                           float right,
-                           float bottom) {
+    public void drawSector(
+            float left, float top, float right, float bottom, float startAngle, float sweepAngle) {
+        mCanvas.drawArc(left, top, right, bottom, startAngle, sweepAngle, true, mPaint);
+    }
+
+    @Override
+    public void drawBitmap(int id, float left, float top, float right, float bottom) {
         AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
         if (androidContext.mRemoteComposeState.containsId(id)) {
-            Bitmap bitmap =
-                    (Bitmap) androidContext.mRemoteComposeState.getFromId(id);
-            Rect src = new Rect(0, 0,
-                    bitmap.getWidth(), bitmap.getHeight());
+            Bitmap bitmap = (Bitmap) androidContext.mRemoteComposeState.getFromId(id);
+            Rect src = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
             RectF dst = new RectF(left, top, right, bottom);
             mCanvas.drawBitmap(bitmap, src, dst, mPaint);
         }
@@ -191,55 +237,64 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
-    public void drawRoundRect(float left,
-                              float top,
-                              float right,
-                              float bottom,
-                              float radiusX,
-                              float radiusY) {
-        mCanvas.drawRoundRect(left, top, right, bottom,
-                radiusX, radiusY, mPaint);
+    public void drawRoundRect(
+            float left, float top, float right, float bottom, float radiusX, float radiusY) {
+        mCanvas.drawRoundRect(left, top, right, bottom, radiusX, radiusY, mPaint);
     }
 
     @Override
-    public void drawTextOnPath(int textId,
-                               int pathId,
-                               float hOffset,
-                               float vOffset) {
+    public void drawTextOnPath(int textId, int pathId, float hOffset, float vOffset) {
         mCanvas.drawTextOnPath(getText(textId), getPath(pathId, 0, 1), hOffset, vOffset, mPaint);
     }
 
     @Override
-    public void getTextBounds(int textId, int start, int end, boolean monospace, float[] bounds) {
+    public void getTextBounds(int textId, int start, int end, int flags, @NonNull float[] bounds) {
         String str = getText(textId);
-        if (end == -1) {
+        if (end == -1 || end > str.length()) {
             end = str.length();
         }
 
+        Paint.FontMetrics metrics = mPaint.getFontMetrics();
         mPaint.getTextBounds(str, start, end, mTmpRect);
 
         bounds[0] = mTmpRect.left;
-        bounds[1] = mTmpRect.top;
-        bounds[2] = monospace ? (mPaint.measureText(str, start, end) - mTmpRect.left)
-                : mTmpRect.right;
-        bounds[3] = mTmpRect.bottom;
+
+        if ((flags & PaintContext.TEXT_MEASURE_MONOSPACE_WIDTH) != 0) {
+            bounds[2] = mPaint.measureText(str, start, end) - mTmpRect.left;
+        } else {
+            bounds[2] = mTmpRect.right;
+        }
+
+        if ((flags & PaintContext.TEXT_MEASURE_FONT_HEIGHT) != 0) {
+            bounds[1] = Math.round(metrics.ascent);
+            bounds[3] = Math.round(metrics.bottom);
+        } else {
+            bounds[1] = mTmpRect.top;
+            bounds[3] = mTmpRect.bottom;
+        }
     }
 
     @Override
-    public void drawTextRun(int textID,
-                            int start,
-                            int end,
-                            int contextStart,
-                            int contextEnd,
-                            float x,
-                            float y,
-                            boolean rtl) {
+    public void drawTextRun(
+            int textID,
+            int start,
+            int end,
+            int contextStart,
+            int contextEnd,
+            float x,
+            float y,
+            boolean rtl) {
 
         String textToPaint = getText(textID);
+        if (textToPaint == null) {
+            return;
+        }
         if (end == -1) {
             if (start != 0) {
                 textToPaint = textToPaint.substring(start);
             }
+        } else if (end > textToPaint.length()) {
+            textToPaint = textToPaint.substring(start);
         } else {
             textToPaint = textToPaint.substring(start, end);
         }
@@ -248,11 +303,7 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
-    public void drawTweenPath(int path1Id,
-                              int path2Id,
-                              float tween,
-                              float start,
-                              float end) {
+    public void drawTweenPath(int path1Id, int path2Id, float tween, float start, float end) {
         mCanvas.drawPath(getPath(path1Id, path2Id, tween, start, end), mPaint);
     }
 
@@ -367,224 +418,226 @@ public class AndroidPaintContext extends PaintContext {
     /**
      * This applies paint changes to the current paint
      *
-     * @param mPaintData the list change to the paint
+     * @param paintData the list change to the paint
      */
     @Override
-    public void applyPaint(PaintBundle mPaintData) {
-        mPaintData.applyPaintChange((PaintContext) this, new PaintChanges() {
-            @Override
-            public void setTextSize(float size) {
-                mPaint.setTextSize(size);
-            }
-
-            @Override
-            public void setTypeFace(int fontType, int weight, boolean italic) {
-                int[] type = new int[]{Typeface.NORMAL, Typeface.BOLD,
-                        Typeface.ITALIC, Typeface.BOLD_ITALIC};
-
-                switch (fontType) {
-                    case PaintBundle.FONT_TYPE_DEFAULT: {
-                        if (weight == 400 && !italic) { // for normal case
-                            mPaint.setTypeface(Typeface.DEFAULT);
-                        } else {
-                            mPaint.setTypeface(Typeface.create(Typeface.DEFAULT,
-                                    weight, italic));
-                        }
-                        break;
+    public void applyPaint(@NonNull PaintBundle paintData) {
+        paintData.applyPaintChange(
+                (PaintContext) this,
+                new PaintChanges() {
+                    @Override
+                    public void setTextSize(float size) {
+                        mPaint.setTextSize(size);
                     }
-                    case PaintBundle.FONT_TYPE_SERIF: {
-                        if (weight == 400 && !italic) { // for normal case
-                            mPaint.setTypeface(Typeface.SERIF);
-                        } else {
-                            mPaint.setTypeface(Typeface.create(Typeface.SERIF,
-                                    weight, italic));
-                        }
-                        break;
-                    }
-                    case PaintBundle.FONT_TYPE_SANS_SERIF: {
-                        if (weight == 400 && !italic) { //  for normal case
-                            mPaint.setTypeface(Typeface.SANS_SERIF);
-                        } else {
-                            mPaint.setTypeface(
-                                    Typeface.create(Typeface.SANS_SERIF,
-                                            weight, italic));
-                        }
-                        break;
-                    }
-                    case PaintBundle.FONT_TYPE_MONOSPACE: {
-                        if (weight == 400 && !italic) { //  for normal case
-                            mPaint.setTypeface(Typeface.MONOSPACE);
-                        } else {
-                            mPaint.setTypeface(
-                                    Typeface.create(Typeface.MONOSPACE,
-                                            weight, italic));
-                        }
 
-                        break;
-                    }
-                }
+                    @Override
+                    public void setTypeFace(int fontType, int weight, boolean italic) {
+                        int[] type =
+                                new int[] {
+                                    Typeface.NORMAL,
+                                    Typeface.BOLD,
+                                    Typeface.ITALIC,
+                                    Typeface.BOLD_ITALIC
+                                };
 
-            }
+                        switch (fontType) {
+                            case PaintBundle.FONT_TYPE_DEFAULT:
+                                if (weight == 400 && !italic) { // for normal case
+                                    mPaint.setTypeface(Typeface.DEFAULT);
+                                } else {
+                                    mPaint.setTypeface(
+                                            Typeface.create(Typeface.DEFAULT, weight, italic));
+                                }
+                                break;
+                            case PaintBundle.FONT_TYPE_SERIF:
+                                if (weight == 400 && !italic) { // for normal case
+                                    mPaint.setTypeface(Typeface.SERIF);
+                                } else {
+                                    mPaint.setTypeface(
+                                            Typeface.create(Typeface.SERIF, weight, italic));
+                                }
+                                break;
+                            case PaintBundle.FONT_TYPE_SANS_SERIF:
+                                if (weight == 400 && !italic) { //  for normal case
+                                    mPaint.setTypeface(Typeface.SANS_SERIF);
+                                } else {
+                                    mPaint.setTypeface(
+                                            Typeface.create(Typeface.SANS_SERIF, weight, italic));
+                                }
+                                break;
+                            case PaintBundle.FONT_TYPE_MONOSPACE:
+                                if (weight == 400 && !italic) { //  for normal case
+                                    mPaint.setTypeface(Typeface.MONOSPACE);
+                                } else {
+                                    mPaint.setTypeface(
+                                            Typeface.create(Typeface.MONOSPACE, weight, italic));
+                                }
 
-            @Override
-            public void setStrokeWidth(float width) {
-                mPaint.setStrokeWidth(width);
-            }
-
-            @Override
-            public void setColor(int color) {
-                mPaint.setColor(color);
-            }
-
-            @Override
-            public void setStrokeCap(int cap) {
-                mPaint.setStrokeCap(Paint.Cap.values()[cap]);
-            }
-
-            @Override
-            public void setStyle(int style) {
-                mPaint.setStyle(Paint.Style.values()[style]);
-            }
-
-            @Override
-            public void setShader(int shaderId) {
-                // TODO this stuff should check the shader creation
-                if (shaderId == 0) {
-                    mPaint.setShader(null);
-                    return;
-                }
-                ShaderData data = getShaderData(shaderId);
-                RuntimeShader shader = new RuntimeShader(getText(data.getShaderTextId()));
-                String[] names = data.getUniformFloatNames();
-                for (int i = 0; i < names.length; i++) {
-                    String name = names[i];
-                    float[] val = data.getUniformFloats(name);
-                    shader.setFloatUniform(name, val);
-                }
-                names = data.getUniformIntegerNames();
-                for (int i = 0; i < names.length; i++) {
-                    String name = names[i];
-                    int[] val = data.getUniformInts(name);
-                    shader.setIntUniform(name, val);
-                }
-                names = data.getUniformBitmapNames();
-                for (int i = 0; i < names.length; i++) {
-                    String name = names[i];
-                    int val = data.getUniformBitmapId(name);
-                }
-                mPaint.setShader(shader);
-            }
-
-            @Override
-            public void setImageFilterQuality(int quality) {
-                Utils.log(" quality =" + quality);
-            }
-
-            @Override
-            public void setBlendMode(int mode) {
-                mPaint.setBlendMode(origamiToBlendMode(mode));
-            }
-
-            @Override
-            public void setAlpha(float a) {
-                mPaint.setAlpha((int) (255 * a));
-            }
-
-            @Override
-            public void setStrokeMiter(float miter) {
-                mPaint.setStrokeMiter(miter);
-            }
-
-            @Override
-            public void setStrokeJoin(int join) {
-                mPaint.setStrokeJoin(Paint.Join.values()[join]);
-            }
-
-            @Override
-            public void setFilterBitmap(boolean filter) {
-                mPaint.setFilterBitmap(filter);
-            }
-
-            @Override
-            public void setAntiAlias(boolean aa) {
-                mPaint.setAntiAlias(aa);
-            }
-
-            @Override
-            public void clear(long mask) {
-                if (true) return;
-                long m = mask;
-                int k = 1;
-                while (m > 0) {
-                    if ((m & 1) == 1L) {
-                        switch (k) {
-
-                            case PaintBundle.COLOR_FILTER:
-                                mPaint.setColorFilter(null);
                                 break;
                         }
                     }
-                    k++;
-                    m = m >> 1;
-                }
-            }
 
-            Shader.TileMode[] mTileModes = new Shader.TileMode[]{
-                    Shader.TileMode.CLAMP,
-                    Shader.TileMode.REPEAT,
-                    Shader.TileMode.MIRROR};
+                    @Override
+                    public void setStrokeWidth(float width) {
+                        mPaint.setStrokeWidth(width);
+                    }
 
-            @Override
-            public void setLinearGradient(int[] colors,
-                                          float[] stops,
-                                          float startX,
-                                          float startY,
-                                          float endX,
-                                          float endY,
-                                          int tileMode) {
-                mPaint.setShader(new LinearGradient(startX,
-                        startY,
-                        endX,
-                        endY, colors, stops, mTileModes[tileMode]));
+                    @Override
+                    public void setColor(int color) {
+                        mPaint.setColor(color);
+                    }
 
-            }
+                    @Override
+                    public void setStrokeCap(int cap) {
+                        mPaint.setStrokeCap(Paint.Cap.values()[cap]);
+                    }
 
-            @Override
-            public void setRadialGradient(int[] colors,
-                                          float[] stops,
-                                          float centerX,
-                                          float centerY,
-                                          float radius,
-                                          int tileMode) {
-                mPaint.setShader(new RadialGradient(centerX, centerY, radius,
-                        colors, stops, mTileModes[tileMode]));
-            }
+                    @Override
+                    public void setStyle(int style) {
+                        mPaint.setStyle(Paint.Style.values()[style]);
+                    }
 
-            @Override
-            public void setSweepGradient(int[] colors,
-                                         float[] stops,
-                                         float centerX,
-                                         float centerY) {
-                mPaint.setShader(new SweepGradient(centerX, centerY, colors, stops));
+                    @Override
+                    public void setShader(int shaderId) {
+                        // TODO this stuff should check the shader creation
+                        if (shaderId == 0) {
+                            mPaint.setShader(null);
+                            return;
+                        }
+                        ShaderData data = getShaderData(shaderId);
+                        if (data == null) {
+                            return;
+                        }
+                        RuntimeShader shader = new RuntimeShader(getText(data.getShaderTextId()));
+                        String[] names = data.getUniformFloatNames();
+                        for (int i = 0; i < names.length; i++) {
+                            String name = names[i];
+                            float[] val = data.getUniformFloats(name);
+                            shader.setFloatUniform(name, val);
+                        }
+                        names = data.getUniformIntegerNames();
+                        for (int i = 0; i < names.length; i++) {
+                            String name = names[i];
+                            int[] val = data.getUniformInts(name);
+                            shader.setIntUniform(name, val);
+                        }
+                        names = data.getUniformBitmapNames();
+                        for (int i = 0; i < names.length; i++) {
+                            String name = names[i];
+                            int val = data.getUniformBitmapId(name);
+                        }
+                        mPaint.setShader(shader);
+                    }
 
-            }
+                    @Override
+                    public void setImageFilterQuality(int quality) {
+                        Utils.log(" quality =" + quality);
+                        mPaint.setFilterBitmap(quality == 1);
+                    }
 
-            @Override
-            public void setColorFilter(int color, int mode) {
-                PorterDuff.Mode pmode = origamiToPorterDuffMode(mode);
-                if (pmode != null) {
-                    mPaint.setColorFilter(
-                            new PorterDuffColorFilter(color, pmode));
-                }
-            }
-        });
+                    @Override
+                    public void setBlendMode(int mode) {
+                        mPaint.setBlendMode(origamiToBlendMode(mode));
+                    }
+
+                    @Override
+                    public void setAlpha(float a) {
+                        mPaint.setAlpha((int) (255 * a));
+                    }
+
+                    @Override
+                    public void setStrokeMiter(float miter) {
+                        mPaint.setStrokeMiter(miter);
+                    }
+
+                    @Override
+                    public void setStrokeJoin(int join) {
+                        mPaint.setStrokeJoin(Paint.Join.values()[join]);
+                    }
+
+                    @Override
+                    public void setFilterBitmap(boolean filter) {
+                        mPaint.setFilterBitmap(filter);
+                    }
+
+                    @Override
+                    public void setAntiAlias(boolean aa) {
+                        mPaint.setAntiAlias(aa);
+                    }
+
+                    @Override
+                    public void clear(long mask) {
+                        if ((mask & (1L << PaintBundle.COLOR_FILTER)) != 0) {
+                            mPaint.setColorFilter(null);
+                        }
+                    }
+
+                    Shader.TileMode[] mTileModes =
+                            new Shader.TileMode[] {
+                                Shader.TileMode.CLAMP,
+                                Shader.TileMode.REPEAT,
+                                Shader.TileMode.MIRROR
+                            };
+
+                    @Override
+                    public void setLinearGradient(
+                            @NonNull int[] colors,
+                            @NonNull float[] stops,
+                            float startX,
+                            float startY,
+                            float endX,
+                            float endY,
+                            int tileMode) {
+                        mPaint.setShader(
+                                new LinearGradient(
+                                        startX,
+                                        startY,
+                                        endX,
+                                        endY,
+                                        colors,
+                                        stops,
+                                        mTileModes[tileMode]));
+                    }
+
+                    @Override
+                    public void setRadialGradient(
+                            @NonNull int[] colors,
+                            @NonNull float[] stops,
+                            float centerX,
+                            float centerY,
+                            float radius,
+                            int tileMode) {
+                        mPaint.setShader(
+                                new RadialGradient(
+                                        centerX,
+                                        centerY,
+                                        radius,
+                                        colors,
+                                        stops,
+                                        mTileModes[tileMode]));
+                    }
+
+                    @Override
+                    public void setSweepGradient(
+                            @NonNull int[] colors,
+                            @NonNull float[] stops,
+                            float centerX,
+                            float centerY) {
+                        mPaint.setShader(new SweepGradient(centerX, centerY, colors, stops));
+                    }
+
+                    @Override
+                    public void setColorFilter(int color, int mode) {
+                        PorterDuff.Mode pmode = origamiToPorterDuffMode(mode);
+                        if (pmode != null) {
+                            mPaint.setColorFilter(new PorterDuffColorFilter(color, pmode));
+                        }
+                    }
+                });
     }
 
     @Override
-    public void matrixScale(float scaleX,
-                            float scaleY,
-                            float centerX,
-                            float centerY) {
+    public void matrixScale(float scaleX, float scaleY, float centerX, float centerY) {
         if (Float.isNaN(centerX)) {
             mCanvas.scale(scaleX, scaleY);
         } else {
@@ -608,7 +661,6 @@ public class AndroidPaintContext extends PaintContext {
             mCanvas.rotate(rotate);
         } else {
             mCanvas.rotate(rotate, pivotX, pivotY);
-
         }
     }
 
@@ -628,15 +680,27 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
-    public void roundedClipRect(float width, float height,
-                                float topStart, float topEnd,
-                                float bottomStart, float bottomEnd) {
+    public void roundedClipRect(
+            float width,
+            float height,
+            float topStart,
+            float topEnd,
+            float bottomStart,
+            float bottomEnd) {
         Path roundedPath = new Path();
-        float[] radii = new float[] { topStart, topStart,
-                topEnd, topEnd, bottomEnd, bottomEnd, bottomStart, bottomStart};
+        float[] radii =
+                new float[] {
+                    topStart,
+                    topStart,
+                    topEnd,
+                    topEnd,
+                    bottomEnd,
+                    bottomEnd,
+                    bottomStart,
+                    bottomStart
+                };
 
-        roundedPath.addRoundRect(0f, 0f, width, height,
-                radii, android.graphics.Path.Direction.CW);
+        roundedPath.addRoundRect(0f, 0f, width, height, radii, android.graphics.Path.Direction.CW);
         mCanvas.clipPath(roundedPath);
     }
 
@@ -646,8 +710,15 @@ public class AndroidPaintContext extends PaintContext {
         if (regionOp == ClipPath.DIFFERENCE) {
             mCanvas.clipOutPath(path); // DIFFERENCE
         } else {
-            mCanvas.clipPath(path);  // INTERSECT
+            mCanvas.clipPath(path); // INTERSECT
         }
+    }
+
+    @Override
+    public void tweenPath(int out, int path1, int path2, float tween) {
+        float[] p = getPathArray(path1, path2, tween);
+        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
+        androidContext.mRemoteComposeState.putPathData(out, p);
     }
 
     @Override
@@ -655,22 +726,21 @@ public class AndroidPaintContext extends PaintContext {
         mPaint.reset();
     }
 
-    private Path getPath(int path1Id,
-                         int path2Id,
-                         float tween,
-                         float start,
-                         float end) {
+    private Path getPath(int path1Id, int path2Id, float tween, float start, float end) {
+        return getPath(getPathArray(path1Id, path2Id, tween), start, end);
+    }
+
+    private float[] getPathArray(int path1Id, int path2Id, float tween) {
+        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
         if (tween == 0.0f) {
-            return getPath(path1Id, start, end);
+            return androidContext.mRemoteComposeState.getPathData(path1Id);
         }
         if (tween == 1.0f) {
-            return getPath(path2Id, start, end);
+            return androidContext.mRemoteComposeState.getPathData(path2Id);
         }
-        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
-        float[] data1 =
-                (float[]) androidContext.mRemoteComposeState.getFromId(path1Id);
-        float[] data2 =
-                (float[]) androidContext.mRemoteComposeState.getFromId(path2Id);
+
+        float[] data1 = androidContext.mRemoteComposeState.getPathData(path1Id);
+        float[] data2 = androidContext.mRemoteComposeState.getPathData(path2Id);
         float[] tmp = new float[data2.length];
         for (int i = 0; i < tmp.length; i++) {
             if (Float.isNaN(data1[i]) || Float.isNaN(data2[i])) {
@@ -679,6 +749,10 @@ public class AndroidPaintContext extends PaintContext {
                 tmp[i] = (data2[i] - data1[i]) * tween + data1[i];
             }
         }
+        return tmp;
+    }
+
+    private Path getPath(float[] tmp, float start, float end) {
         Path path = new Path();
         FloatsToPath.genPath(path, tmp, start, end);
         return path;
@@ -686,12 +760,17 @@ public class AndroidPaintContext extends PaintContext {
 
     private Path getPath(int id, float start, float end) {
         AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
-        Path path = new Path();
-        if (androidContext.mRemoteComposeState.containsId(id)) {
-            float[] data =
-                    (float[]) androidContext.mRemoteComposeState.getFromId(id);
-            FloatsToPath.genPath(path, data, start, end);
+        Path p = (Path) androidContext.mRemoteComposeState.getPath(id);
+        if (p != null) {
+            return p;
         }
+        Path path = new Path();
+        float[] pathData = androidContext.mRemoteComposeState.getPathData(id);
+        if (pathData != null) {
+            FloatsToPath.genPath(path, pathData, start, end);
+            androidContext.mRemoteComposeState.putPath(id, path);
+        }
+
         return path;
     }
 
@@ -703,4 +782,3 @@ public class AndroidPaintContext extends PaintContext {
         return (ShaderData) mContext.mRemoteComposeState.getFromId(id);
     }
 }
-

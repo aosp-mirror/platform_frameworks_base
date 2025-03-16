@@ -22,7 +22,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.ShadeCarrierGroupMobileIconViewModel
 import com.android.systemui.util.AutoMarqueeTextView
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 object ShadeCarrierBinder {
     /** Binds the view to the view-model, continuing to update the former based on the latter */

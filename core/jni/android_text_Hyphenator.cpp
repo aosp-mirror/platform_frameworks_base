@@ -18,10 +18,17 @@
 #include <cutils/trace.h>
 #include <fcntl.h>
 #include <minikin/Hyphenator.h>
+#ifdef __ANDROID__
 #include <sys/mman.h>
+#else
+#include <android-base/mapped_file.h>
+#include <android-base/properties.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef __ANDROID__
 #include <tracing_perfetto.h>
+#endif
 #include <unicode/uloc.h>
 #include <unistd.h>
 
@@ -30,7 +37,12 @@
 namespace android {
 
 static std::string buildFileName(const std::string& locale) {
+#ifdef __ANDROID__
     constexpr char SYSTEM_HYPHENATOR_PREFIX[] = "/system/usr/hyphen-data/hyph-";
+#else
+    std::string hyphenPath = base::GetProperty("ro.hyphen.data.dir", "/system/usr/hyphen-data");
+    std::string SYSTEM_HYPHENATOR_PREFIX = hyphenPath + "/hyph-";
+#endif
     constexpr char SYSTEM_HYPHENATOR_SUFFIX[] = ".hyb";
     std::string lowerLocale;
     lowerLocale.reserve(locale.size());
@@ -51,11 +63,22 @@ static std::pair<const uint8_t*, size_t> mmapPatternFile(const std::string& loca
         return std::make_pair(nullptr, 0);
     }
 
+#ifdef __ANDROID__
     void* ptr = mmap(nullptr, st.st_size, PROT_READ, MAP_SHARED, fd, 0 /* offset */);
     close(fd);
     if (ptr == MAP_FAILED) {
         return std::make_pair(nullptr, 0);
     }
+#else
+    std::unique_ptr<base::MappedFile> patternFile =
+            base::MappedFile::FromFd(fd, 0, st.st_size, PROT_READ);
+    close(fd);
+    if (patternFile == nullptr) {
+        return std::make_pair(nullptr, 0);
+    }
+    auto* mappedPtr = new base::MappedFile(std::move(*patternFile));
+    char* ptr = mappedPtr->data();
+#endif
     return std::make_pair(reinterpret_cast<const uint8_t*>(ptr), st.st_size);
 }
 
@@ -210,9 +233,13 @@ static void init() {
     addHyphenatorAlias("und-Taml", "ta");  // Tamil
     addHyphenatorAlias("und-Telu", "te");  // Telugu
 
+#ifdef __ANDROID__
     tracing_perfetto::traceBegin(ATRACE_TAG_VIEW, "CacheUnicodeExtensionSubtagsKeyMap");
+#endif
     cacheUnicodeExtensionSubtagsKeyMap();
+#ifdef __ANDROID__
     tracing_perfetto::traceEnd(ATRACE_TAG_VIEW); // CacheUnicodeExtensionSubtagsKeyMap
+#endif
 }
 
 static const JNINativeMethod gMethods[] = {

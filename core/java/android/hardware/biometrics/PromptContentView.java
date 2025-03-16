@@ -16,13 +16,8 @@
 
 package android.hardware.biometrics;
 
-import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
-
-import android.annotation.FlaggedApi;
-
 /**
  * Contains the information of the template of content view for Biometric Prompt.
  */
-@FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public interface PromptContentView {
 }

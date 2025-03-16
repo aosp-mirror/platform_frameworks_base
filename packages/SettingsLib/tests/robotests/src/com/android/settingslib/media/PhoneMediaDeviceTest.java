@@ -17,7 +17,9 @@
 package com.android.settingslib.media;
 
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_USB_ACCESSORY;
 import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
+import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
@@ -120,28 +122,79 @@ public class PhoneMediaDeviceTest {
 
     @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
     @Test
-    public void getName_returnCorrectName_desktop() {
+    public void getName_returnCorrectName_desktop_wiredHeadphones() {
         ShadowSystemProperties.override("ro.build.characteristics", "desktop");
 
         when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
+        // Even if the MediaRoute2Info reports a name, the default string should still be displayed,
+        // since the MediaRoute2Info name is only used for USB devices.
+        when(mInfo.getName()).thenReturn("WIRED_HEADPHONES");
 
         assertThat(mPhoneMediaDevice.getName())
                 .isEqualTo(mContext.getString(R.string.media_transfer_headphone_name));
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getName_returnCorrectName_desktop_wiredHeadset() {
+        ShadowSystemProperties.override("ro.build.characteristics", "desktop");
 
         when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADSET);
+        // Even if the MediaRoute2Info reports a name, the default string should still be displayed,
+        // since the MediaRoute2Info name is only used for USB devices.
+        when(mInfo.getName()).thenReturn("WIRED_HEADSET");
 
         assertThat(mPhoneMediaDevice.getName())
                 .isEqualTo(mContext.getString(R.string.media_transfer_headphone_name));
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getName_returnCorrectName_desktop_usbDevice() {
+        ShadowSystemProperties.override("ro.build.characteristics", "desktop");
 
         when(mInfo.getType()).thenReturn(TYPE_USB_DEVICE);
+        final String mediaRoute2InfoName = "USB-Audio - My Device";
+        when(mInfo.getName()).thenReturn(mediaRoute2InfoName);
 
-        assertThat(mPhoneMediaDevice.getName())
-                .isEqualTo(mContext.getString(R.string.media_transfer_usb_speaker_name));
+        assertThat(mPhoneMediaDevice.getName()).isEqualTo(mediaRoute2InfoName);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getName_returnCorrectName_desktop_usbHeadset() {
+        ShadowSystemProperties.override("ro.build.characteristics", "desktop");
+
+        when(mInfo.getType()).thenReturn(TYPE_USB_HEADSET);
+        final String mediaRoute2InfoName = "USB-Audio - My Headset";
+        when(mInfo.getName()).thenReturn(mediaRoute2InfoName);
+
+        assertThat(mPhoneMediaDevice.getName()).isEqualTo(mediaRoute2InfoName);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getName_returnCorrectName_desktop_usbAccessory() {
+        ShadowSystemProperties.override("ro.build.characteristics", "desktop");
+
+        when(mInfo.getType()).thenReturn(TYPE_USB_ACCESSORY);
+        final String mediaRoute2InfoName = "USB-Audio - My Accessory";
+        when(mInfo.getName()).thenReturn(mediaRoute2InfoName);
+
+        assertThat(mPhoneMediaDevice.getName()).isEqualTo(mediaRoute2InfoName);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getName_returnCorrectName_desktop_builtinSpeaker() {
+        ShadowSystemProperties.override("ro.build.characteristics", "desktop");
 
         when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+        // Even if the MediaRoute2Info reports a name, the default string should still be displayed,
+        // since the MediaRoute2Info name is only used for USB devices.
+        when(mInfo.getName()).thenReturn("Phone");
 
-        assertThat(mPhoneMediaDevice.getName())
-                .isEqualTo(getMediaTransferThisDeviceName(mContext));
+        assertThat(mPhoneMediaDevice.getName()).isEqualTo(getMediaTransferThisDeviceName(mContext));
     }
 
     @EnableFlags(Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)

@@ -26,10 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
 
 @Composable
-fun EditMode(
-    viewModel: EditModeViewModel,
-    modifier: Modifier = Modifier,
-) {
+fun EditMode(viewModel: EditModeViewModel, modifier: Modifier = Modifier) {
     val gridLayout by viewModel.gridLayout.collectAsStateWithLifecycle()
     val tiles by viewModel.tiles.collectAsStateWithLifecycle(emptyList())
 
@@ -44,6 +41,7 @@ fun EditMode(
             viewModel::addTile,
             viewModel::removeTile,
             viewModel::setTiles,
+            viewModel::stopEditing,
         )
     }
 }

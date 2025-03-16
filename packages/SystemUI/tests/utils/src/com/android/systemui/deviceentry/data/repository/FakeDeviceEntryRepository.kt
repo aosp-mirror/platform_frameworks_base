@@ -16,6 +16,7 @@
 package com.android.systemui.deviceentry.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
@@ -34,6 +35,9 @@ class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
     override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled
 
     private var pendingLockscreenEnabled = _isLockscreenEnabled.value
+
+    override val deviceUnlockStatus =
+        MutableStateFlow(DeviceUnlockStatus(isUnlocked = false, deviceUnlockSource = null))
 
     override suspend fun isLockscreenEnabled(): Boolean {
         _isLockscreenEnabled.value = pendingLockscreenEnabled

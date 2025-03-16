@@ -20,6 +20,8 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeOverlayContentViewModel
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModelFactory
 
 val Kosmos.notificationsShadeOverlayContentViewModel:
@@ -28,5 +30,7 @@ val Kosmos.notificationsShadeOverlayContentViewModel:
         shadeHeaderViewModelFactory = shadeHeaderViewModelFactory,
         notificationsPlaceholderViewModelFactory = notificationsPlaceholderViewModelFactory,
         sceneInteractor = sceneInteractor,
+        shadeInteractor = shadeInteractor,
+        activeNotificationsInteractor = activeNotificationsInteractor,
     )
 }

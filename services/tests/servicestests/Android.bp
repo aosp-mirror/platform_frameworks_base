@@ -49,8 +49,10 @@ android_test {
         "services.credentials",
         "services.devicepolicy",
         "services.flags",
+        "com.android.server.flags.services-aconfig-java",
         "services.net",
         "services.people",
+        "services.supervision",
         "services.usage",
         "service-permission.stubs.system_server",
         "guava",
@@ -62,6 +64,7 @@ android_test {
         "androidx.test.ext.junit",
         "cts-wm-util",
         "platform-compat-test-rules",
+        "platform-parametric-runner-lib",
         "mockito-target-minus-junit4",
         "mockito-kotlin2",
         "platform-test-annotations",
@@ -77,6 +80,7 @@ android_test {
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
+        "flag-junit",
         "junit",
         "junit-params",
         "ActivityContext",
@@ -89,7 +93,10 @@ android_test {
         "CtsVirtualDeviceCommonLib",
         "com_android_server_accessibility_flags_lib",
         "locksettings_flags_lib",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": ["service-crashrecovery-pre-jarjar"],
+        default: [],
+    }),
 
     libs: [
         "android.hardware.power-V1-java",
@@ -884,16 +891,6 @@ test_module_config {
         "device-tests",
     ],
     include_filters: ["com.android.server.om"],
-}
-
-test_module_config {
-    name: "FrameworksServicesTests_server_accessibility",
-    base: "FrameworksServicesTests",
-    test_suites: [
-        "automotive-tests",
-        "device-tests",
-    ],
-    include_filters: ["com.android.server.accessibility"],
 }
 
 test_module_config {

@@ -40,9 +40,12 @@ public class ComposeShader extends Shader {
      * @param mode     The mode that combines the colors from the two shaders. If mode
      *                 is null, then SRC_OVER is assumed.
      */
+    //TODO(358126864): allow a ComposeShader to accept a RuntimeXfermode
     @Deprecated
     public ComposeShader(@NonNull Shader shaderA, @NonNull Shader shaderB, @NonNull Xfermode mode) {
-        this(shaderA, shaderB, mode.porterDuffMode);
+        this(shaderA, shaderB,
+                mode instanceof PorterDuffXfermode ? ((PorterDuffXfermode) mode).porterDuffMode
+                : BlendMode.SRC_OVER.getXfermode().porterDuffMode);
     }
 
     /**

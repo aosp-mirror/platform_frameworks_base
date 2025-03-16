@@ -18,14 +18,19 @@ package com.android.systemui.communal.widgets
 
 import android.app.Activity
 import android.app.ActivityOptions
-import android.content.ActivityNotFoundException
+import android.content.IntentSender
+import android.os.OutcomeReceiver
 import android.window.SplashScreen
 import androidx.activity.ComponentActivity
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.nullableAtomicReference
+import dagger.Lazy
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.util.concurrent.Executor
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -38,13 +43,24 @@ class WidgetConfigurationController
 @AssistedInject
 constructor(
     @Assisted private val activity: ComponentActivity,
-    private val appWidgetHost: CommunalAppWidgetHost,
-    @Background private val bgDispatcher: CoroutineDispatcher
-) : WidgetConfigurator {
+    private val appWidgetHostLazy: Lazy<CommunalAppWidgetHost>,
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    private val glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper,
+    private val glanceableHubWidgetManagerLazy: Lazy<GlanceableHubWidgetManager>,
+    @Main private val mainExecutor: Executor,
+) : WidgetConfigurator, OutcomeReceiver<IntentSender?, Throwable> {
     @AssistedFactory
     fun interface Factory {
         fun create(activity: ComponentActivity): WidgetConfigurationController
     }
+
+    private val activityOptions: ActivityOptions
+        get() =
+            ActivityOptions.makeBasic().apply {
+                pendingIntentBackgroundActivityStartMode =
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                splashScreenStyle = SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR
+            }
 
     private var result: CompletableDeferred<Boolean>? by nullableAtomicReference()
 
@@ -54,28 +70,63 @@ constructor(
                 throw IllegalStateException("There is already a pending configuration")
             }
             result = CompletableDeferred()
-            val options =
-                ActivityOptions.makeBasic().apply {
-                    pendingIntentBackgroundActivityStartMode =
-                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                    splashScreenStyle = SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR
-                }
 
             try {
-                appWidgetHost.startAppWidgetConfigureActivityForResult(
-                    activity,
-                    appWidgetId,
-                    0,
-                    REQUEST_CODE,
-                    options.toBundle()
-                )
-            } catch (e: ActivityNotFoundException) {
+                if (
+                    !glanceableHubMultiUserHelper.glanceableHubHsumFlagEnabled ||
+                        !glanceableHubMultiUserHelper.isInHeadlessSystemUser()
+                ) {
+                    // Start configuration activity directly if we're running in a foreground user
+                    with(appWidgetHostLazy.get()) {
+                        startAppWidgetConfigureActivityForResult(
+                            activity,
+                            appWidgetId,
+                            0,
+                            REQUEST_CODE,
+                            activityOptions.toBundle(),
+                        )
+                    }
+                } else {
+                    with(glanceableHubWidgetManagerLazy.get()) {
+                        // Use service to get intent sender and start configuration activity
+                        // locally if running in a headless system user
+                        getIntentSenderForConfigureActivity(
+                            appWidgetId,
+                            outcomeReceiver = this@WidgetConfigurationController,
+                            mainExecutor,
+                        )
+                    }
+                }
+            } catch (_: Exception) {
                 setConfigurationResult(Activity.RESULT_CANCELED)
             }
-            val value = result?.await() ?: false
+            val value = result?.await() == true
             result = null
             return@withContext value
         }
+
+    // Called when an intent sender is returned, and the configuration activity should be started.
+    override fun onResult(intentSender: IntentSender?) {
+        if (intentSender == null) {
+            setConfigurationResult(Activity.RESULT_CANCELED)
+            return
+        }
+
+        activity.startIntentSenderForResult(
+            intentSender,
+            REQUEST_CODE,
+            /* fillInIntent = */ null,
+            /* flagsMask = */ 0,
+            /* flagsValues = */ 0,
+            /* extraFlags = */ 0,
+            activityOptions.toBundle(),
+        )
+    }
+
+    // Called when there is an error getting the intent sender.
+    override fun onError(e: Throwable) {
+        setConfigurationResult(Activity.RESULT_CANCELED)
+    }
 
     fun setConfigurationResult(resultCode: Int) {
         result?.complete(resultCode == Activity.RESULT_OK)

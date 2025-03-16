@@ -19,5 +19,7 @@ package com.android.systemui.statusbar
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.notificationRemoteInputManager by
+val Kosmos.mockNotificationRemoteInputManager by
     Kosmos.Fixture { mock<NotificationRemoteInputManager>() }
+
+var Kosmos.notificationRemoteInputManager by Kosmos.Fixture { mockNotificationRemoteInputManager }

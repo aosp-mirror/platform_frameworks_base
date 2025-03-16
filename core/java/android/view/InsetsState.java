@@ -38,7 +38,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
+import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -296,8 +296,8 @@ public class InsetsState implements Parcelable {
             @SoftInputModeFlags int softInputMode, int windowFlags) {
         final int softInputAdjustMode = softInputMode & SOFT_INPUT_MASK_ADJUST;
         final int visibleInsetsTypes = softInputAdjustMode != SOFT_INPUT_ADJUST_NOTHING
-                ? systemBars() | ime()
-                : systemBars();
+                ? systemBars() | displayCutout() | ime()
+                : systemBars() | displayCutout();
         @InsetsType int forceConsumingTypes = 0;
         Insets insets = Insets.NONE;
         for (int i = mSources.size() - 1; i >= 0; i--) {

@@ -33,6 +33,23 @@ oneway interface IMediaRoute2ProviderService {
 
     void requestCreateSession(long requestId, String packageName, String routeId,
             in @nullable Bundle sessionHints);
+    /**
+     * Requests the creation of a system media routing session.
+     *
+     * @param requestId The id of the request.
+     * @param uid The uid of the package whose media to route, or
+     *     {@link android.os.Process#INVALID_UID} if routing should not be restricted to a specific
+     *     uid.
+     * @param packageName The name of the package whose media to route.
+     * @param routeId The id of the route to be initially selected.
+     * @param sessionHints An optional bundle with parameters.
+     */
+    void requestCreateSystemMediaSession(
+            long requestId,
+            int uid,
+            String packageName,
+            String routeId,
+            in @nullable Bundle sessionHints);
     void selectRoute(long requestId, String sessionId, String routeId);
     void deselectRoute(long requestId, String sessionId, String routeId);
     void transferToRoute(long requestId, String sessionId, String routeId);

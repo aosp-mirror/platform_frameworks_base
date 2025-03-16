@@ -19,7 +19,7 @@ package com.android.wm.shell.shared.desktopmode;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.SystemProperties;
-import android.window.flags.DesktopModeFlags;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -91,6 +91,9 @@ public class DesktopModeStatus {
     /** The maximum override density allowed for tasks inside the desktop. */
     private static final int DESKTOP_DENSITY_MAX = 1000;
 
+    /** The number of [WindowDecorViewHost] instances to warm up on system start. */
+    private static final int WINDOW_DECOR_PRE_WARM_SIZE = 2;
+
     /**
      * Sysprop declaring whether to enters desktop mode by default when the windowing mode of the
      * display's root TaskDisplayArea is set to WINDOWING_MODE_FREEFORM.
@@ -102,6 +105,15 @@ public class DesktopModeStatus {
             "persist.wm.debug.enter_desktop_by_default_on_freeform_display";
 
     /**
+     * Sysprop declaring whether to enable drag-to-maximize for desktop windows.
+     *
+     * <p>If it is not defined, then {@code R.integer.config_dragToMaximizeInDesktopMode}
+     * is used.
+     */
+    public static final String ENABLE_DRAG_TO_MAXIMIZE_SYS_PROP =
+            "persist.wm.debug.enable_drag_to_maximize";
+
+    /**
      * Sysprop declaring the maximum number of Tasks to show in Desktop Mode at any one time.
      *
      * <p>If it is not defined, then {@code R.integer.config_maxDesktopWindowingActiveTasks} is
@@ -111,6 +123,14 @@ public class DesktopModeStatus {
      * recording window, or Bluetooth pairing window).
      */
     private static final String MAX_TASK_LIMIT_SYS_PROP = "persist.wm.debug.desktop_max_task_limit";
+
+    /**
+     * Sysprop declaring the number of [WindowDecorViewHost] instances to warm up on system start.
+     *
+     * <p>If it is not defined, then [WINDOW_DECOR_PRE_WARM_SIZE] is used.
+     */
+    private static final String WINDOW_DECOR_PRE_WARM_SIZE_SYS_PROP =
+            "persist.wm.debug.desktop_window_decor_pre_warm_size";
 
     /**
      * Return {@code true} if veiled resizing is active. If false, fluid resizing is used.
@@ -153,6 +173,27 @@ public class DesktopModeStatus {
     }
 
     /**
+     * Return the maximum size of the window decoration surface control view host pool, or zero if
+     * there should be no pooling.
+     */
+    public static int getWindowDecorScvhPoolSize(@NonNull Context context) {
+        if (!Flags.enableDesktopWindowingScvhCacheBugFix()) return 0;
+        final int maxTaskLimit = getMaxTaskLimit(context);
+        if (maxTaskLimit > 0) {
+            return maxTaskLimit;
+        }
+        // TODO: b/368032552 - task limit equal to 0 means unlimited. Figure out what the pool
+        //  size should be in that case.
+        return 0;
+    }
+
+    /** The number of [WindowDecorViewHost] instances to warm up on system start. */
+    public static int getWindowDecorPreWarmSize() {
+        return SystemProperties.getInt(WINDOW_DECOR_PRE_WARM_SIZE_SYS_PROP,
+                WINDOW_DECOR_PRE_WARM_SIZE);
+    }
+
+    /**
      * Return {@code true} if the current device supports desktop mode.
      */
     @VisibleForTesting
@@ -179,6 +220,23 @@ public class DesktopModeStatus {
         if (!isDeviceEligibleForDesktopMode(context)) return false;
 
         return DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE.isTrue();
+    }
+
+    /**
+     * @return {@code true} if this device is requesting to show the app handle despite non
+     * necessarily enabling desktop mode
+     */
+    public static boolean overridesShowAppHandle(@NonNull Context context) {
+        return Flags.showAppHandleLargeScreens()
+                && context.getResources().getBoolean(R.bool.config_enableAppHandle);
+    }
+
+    /**
+     * @return {@code true} if the app handle should be shown because desktop mode is enabled or
+     * the device is overriding {@code R.bool.config_enableAppHandle}
+     */
+    public static boolean canEnterDesktopModeOrShowAppHandle(@NonNull Context context) {
+        return canEnterDesktopMode(context) || overridesShowAppHandle(context);
     }
 
     /**
@@ -230,6 +288,18 @@ public class DesktopModeStatus {
                         R.bool.config_enterDesktopByDefaultOnFreeformDisplay));
     }
 
+    /**
+     * Return {@code true} if a window should be maximized when it's dragged to the top edge of the
+     * screen.
+     */
+    public static boolean shouldMaximizeWhenDragToTopEdge(@NonNull Context context) {
+        if (!Flags.enableDragToMaximize()) {
+            return false;
+        }
+        return SystemProperties.getBoolean(ENABLE_DRAG_TO_MAXIMIZE_SYS_PROP,
+                context.getResources().getBoolean(R.bool.config_dragToMaximizeInDesktopMode));
+    }
+
     /** Dumps DesktopModeStatus flags and configs. */
     public static void dump(PrintWriter pw, String prefix, Context context) {
         String innerPrefix = prefix + "  ";
@@ -243,5 +313,8 @@ public class DesktopModeStatus {
         SystemProperties.Handle maxTaskLimitHandle = SystemProperties.find(MAX_TASK_LIMIT_SYS_PROP);
         pw.print(innerPrefix); pw.print("maxTaskLimit sysprop=");
         pw.println(maxTaskLimitHandle == null ? "null" : maxTaskLimitHandle.getInt(/* def= */ -1));
+
+        pw.print(innerPrefix); pw.print("showAppHandle config override=");
+        pw.print(context.getResources().getBoolean(R.bool.config_enableAppHandle));
     }
 }

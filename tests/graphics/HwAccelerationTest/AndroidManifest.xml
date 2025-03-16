@@ -24,7 +24,7 @@
     <uses-feature android:name="android.hardware.camera"/>
     <uses-feature android:name="android.hardware.camera.autofocus"/>
 
-    <uses-sdk android:minSdkVersion="21"/>
+    <uses-sdk android:minSdkVersion="21" />
 
     <application android:label="HwUi"
          android:theme="@android:style/Theme.Material.Light">
@@ -403,6 +403,24 @@
         <activity android:name="MovingSurfaceViewActivity"
              android:label="SurfaceView/Animated Movement"
              android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="ScrollingZAboveSurfaceView"
+            android:label="SurfaceView/Z-Above scrolling"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="ScrollingZAboveScaledSurfaceView"
+            android:label="SurfaceView/Z-Above scrolling, scaled surface"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="com.android.test.hwui.TEST"/>

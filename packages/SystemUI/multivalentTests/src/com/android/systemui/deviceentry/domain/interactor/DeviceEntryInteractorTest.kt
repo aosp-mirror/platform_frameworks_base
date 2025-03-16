@@ -43,7 +43,6 @@ import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Scenes
@@ -72,7 +71,6 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     private val trustRepository by lazy { kosmos.fakeTrustRepository }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
-    private val sceneBackInteractor by lazy { kosmos.sceneBackInteractor }
     private val sceneContainerStartable by lazy { kosmos.sceneContainerStartable }
     private val sysuiStatusBarStateController by lazy { kosmos.sysuiStatusBarStateController }
     private lateinit var underTest: DeviceEntryInteractor
@@ -437,7 +435,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun isDeviceEntered_unlockedWhileOnShade_emitsTrue() =
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
+            val isDeviceEnteredDirectly by collectLastValue(underTest.isDeviceEnteredDirectly)
             assertThat(isDeviceEntered).isFalse()
+            assertThat(isDeviceEnteredDirectly).isFalse()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
@@ -445,19 +445,20 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             switchToScene(Scenes.Shade)
             assertThat(currentScene).isEqualTo(Scenes.Shade)
             // Simulating a "leave it open when the keyguard is hidden" which means the bouncer will
-            // be
-            // shown and successful authentication should take the user back to where they are, the
-            // shade scene.
+            // be shown and successful authentication should take the user back to where they are,
+            // the shade scene.
             sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
             switchToScene(Scenes.Bouncer)
             assertThat(currentScene).isEqualTo(Scenes.Bouncer)
 
             assertThat(isDeviceEntered).isFalse()
+            assertThat(isDeviceEnteredDirectly).isFalse()
             // Authenticate with PIN to unlock and dismiss the lockscreen:
             authenticationInteractor.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
             runCurrent()
 
             assertThat(isDeviceEntered).isTrue()
+            assertThat(isDeviceEnteredDirectly).isFalse()
         }
 
     private fun TestScope.switchToScene(sceneKey: SceneKey) {

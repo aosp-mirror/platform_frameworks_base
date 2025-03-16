@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import com.android.systemui.common.ui.ConfigurationState
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder.IconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder.bindIcons
@@ -30,7 +31,7 @@ class NotificationIconContainerShelfViewBinder
 @Inject
 constructor(
     private val viewModel: NotificationIconContainerShelfViewModel,
-    private val configuration: ConfigurationState,
+    @ShadeDisplayAware private val configuration: ConfigurationState,
     private val systemBarUtilsState: SystemBarUtilsState,
     private val failureTracker: StatusBarIconViewBindingFailureTracker,
     private val viewStore: ShelfNotificationIconViewStore,

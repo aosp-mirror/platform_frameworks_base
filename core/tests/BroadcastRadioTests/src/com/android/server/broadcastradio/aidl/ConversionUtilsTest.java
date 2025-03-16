@@ -20,13 +20,26 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyLong;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 
+import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
+import android.hardware.broadcastradio.Alert;
+import android.hardware.broadcastradio.AlertArea;
+import android.hardware.broadcastradio.AlertCategory;
+import android.hardware.broadcastradio.AlertCertainty;
+import android.hardware.broadcastradio.AlertInfo;
+import android.hardware.broadcastradio.AlertMessageType;
+import android.hardware.broadcastradio.AlertSeverity;
+import android.hardware.broadcastradio.AlertStatus;
+import android.hardware.broadcastradio.AlertUrgency;
 import android.hardware.broadcastradio.AmFmBandRange;
 import android.hardware.broadcastradio.AmFmRegionConfig;
 import android.hardware.broadcastradio.ConfigFlag;
+import android.hardware.broadcastradio.Coordinate;
 import android.hardware.broadcastradio.DabTableEntry;
+import android.hardware.broadcastradio.Geocode;
 import android.hardware.broadcastradio.IdentifierType;
 import android.hardware.broadcastradio.Metadata;
+import android.hardware.broadcastradio.Polygon;
 import android.hardware.broadcastradio.ProgramFilter;
 import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
@@ -37,10 +50,13 @@ import android.hardware.radio.Announcement;
 import android.hardware.radio.Flags;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
+import android.hardware.radio.RadioAlert;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.ServiceSpecificException;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -148,6 +164,9 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     private static final ProgramIdentifier TEST_HAL_HD_STATION_LOCATION_ID =
             AidlTestUtils.makeHalIdentifier(IdentifierType.HD_STATION_LOCATION,
                     TEST_HD_LOCATION_VALUE);
+    private static final ProgramIdentifier TEST_HAL_HD_FM_FREQUENCY_ID =
+            AidlTestUtils.makeHalIdentifier(IdentifierType.AMFM_FREQUENCY_KHZ,
+                    TEST_HD_FREQUENCY_VALUE);
 
     private static final UniqueProgramIdentifier TEST_DAB_UNIQUE_ID = new UniqueProgramIdentifier(
             TEST_DAB_SELECTOR);
@@ -172,6 +191,57 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     private static final Metadata TEST_HAL_ALBUM_ART = Metadata.albumArt(TEST_ALBUM_ART);
     private static final Metadata TEST_HAL_HD_SUBCHANNELS = Metadata.hdSubChannelsAvailable(
             TEST_HD_SUBCHANNELS);
+
+    private static final int TEST_STATUS = RadioAlert.STATUS_ACTUAL;
+    private static final int TEST_HAL_STATUS = AlertStatus.ACTUAL;
+    private static final int TEST_TYPE = RadioAlert.MESSAGE_TYPE_ALERT;
+    private static final int TEST_HAL_TYPE = AlertMessageType.ALERT;
+    private static final int[] TEST_CATEGORY_ARRAY = new int[]{RadioAlert.CATEGORY_CBRNE,
+            RadioAlert.CATEGORY_GEO};
+    private static final int[] TEST_HAL_CATEGORY_LIST = new int[]{AlertCategory.CBRNE,
+            AlertCategory.GEO};
+    private static final int TEST_URGENCY = RadioAlert.URGENCY_FUTURE;
+    private static final int TEST_HAL_URGENCY = AlertUrgency.FUTURE;
+    private static final int TEST_SEVERITY = RadioAlert.SEVERITY_MINOR;
+    private static final int TEST_HAL_SEVERITY = AlertSeverity.MINOR;
+    private static final int TEST_CERTAINTY = RadioAlert.CERTAINTY_UNLIKELY;
+    private static final int TEST_HAL_CERTAINTY = AlertCertainty.UNLIKELY;
+    private static final String TEST_DESCRIPTION_MESSAGE = "Test Alert Description Message.";
+    private static final String TEST_GEOCODE_VALUE_NAME = "ZIP";
+    private static final String TEST_GEOCODE_VALUE_1 = "10001";
+    private static final String TEST_GEOCODE_VALUE_2 = "10002";
+    private static final double TEST_POLYGON_LATITUDE_START = -38.47;
+    private static final double TEST_POLYGON_LONGITUDE_START = -120.14;
+    private static final RadioAlert.Coordinate TEST_POLYGON_COORDINATE_START =
+            new RadioAlert.Coordinate(TEST_POLYGON_LATITUDE_START, TEST_POLYGON_LONGITUDE_START);
+    private static final List<RadioAlert.Coordinate> TEST_COORDINATES = List.of(
+            TEST_POLYGON_COORDINATE_START, new RadioAlert.Coordinate(38.34, -119.95),
+            new RadioAlert.Coordinate(38.52, -119.74), new RadioAlert.Coordinate(38.62, -119.89),
+            TEST_POLYGON_COORDINATE_START);
+    private static final RadioAlert.Polygon TEST_POLYGON = new RadioAlert.Polygon(TEST_COORDINATES);
+    private static final Polygon TEST_HAL_POLYGON = createHalPolygon(TEST_COORDINATES);
+    private static final RadioAlert.Geocode TEST_GEOCODE_1 = new RadioAlert.Geocode(
+            TEST_GEOCODE_VALUE_NAME, TEST_GEOCODE_VALUE_1);
+    private static final RadioAlert.Geocode TEST_GEOCODE_2 = new RadioAlert.Geocode(
+            TEST_GEOCODE_VALUE_NAME, TEST_GEOCODE_VALUE_2);
+    private static final RadioAlert.AlertArea TEST_AREA = new RadioAlert.AlertArea(
+            List.of(TEST_POLYGON), List.of(TEST_GEOCODE_1, TEST_GEOCODE_2));
+    private static final AlertArea TEST_HAL_ALERT_AREA = createHalAlertArea(
+            new Polygon[]{TEST_HAL_POLYGON}, new Geocode[]{
+                    createHalGeocode(TEST_GEOCODE_VALUE_NAME, TEST_GEOCODE_VALUE_1),
+                    createHalGeocode(TEST_GEOCODE_VALUE_NAME, TEST_GEOCODE_VALUE_2)});
+    private static final String TEST_LANGUAGE = "en-US";
+
+    private static final RadioAlert.AlertInfo TEST_ALERT_INFO_1 = new RadioAlert.AlertInfo(
+            TEST_CATEGORY_ARRAY, TEST_URGENCY, TEST_SEVERITY, TEST_CERTAINTY,
+            TEST_DESCRIPTION_MESSAGE, List.of(TEST_AREA), TEST_LANGUAGE);
+    private static final AlertInfo TEST_HAL_ALERT_INFO = createHalAlertInfo(
+            TEST_HAL_CATEGORY_LIST, TEST_HAL_URGENCY, TEST_HAL_SEVERITY, TEST_HAL_CERTAINTY,
+            TEST_DESCRIPTION_MESSAGE, new AlertArea[]{TEST_HAL_ALERT_AREA}, TEST_LANGUAGE);
+    private static final RadioAlert TEST_ALERT = new RadioAlert(TEST_STATUS, TEST_TYPE,
+            List.of(TEST_ALERT_INFO_1));
+    private static final Alert TEST_HAL_ALERT = createHalAlert(TEST_HAL_STATUS, TEST_HAL_TYPE,
+            new AlertInfo[]{TEST_HAL_ALERT_INFO});
 
     @Rule
     public final Expect expect = Expect.create();
@@ -576,6 +646,42 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void programInfoFromHalProgramInfo_withAlertMessageAndFlagEnabled() {
+        android.hardware.broadcastradio.ProgramSelector halHdSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_HD_STATION_EXT_ID,
+                        new ProgramIdentifier[]{});
+        ProgramInfo halHdProgramInfo = AidlTestUtils.makeHalProgramInfo(halHdSelector,
+                TEST_HAL_HD_STATION_EXT_ID, TEST_HAL_HD_FM_FREQUENCY_ID, TEST_SIGNAL_QUALITY,
+                new ProgramIdentifier[]{}, new Metadata[]{});
+        halHdProgramInfo.emergencyAlert = TEST_HAL_ALERT;
+
+        RadioManager.ProgramInfo programInfo =
+                ConversionUtils.programInfoFromHalProgramInfo(halHdProgramInfo);
+
+        expect.withMessage("Alert of converted HD program info with alert and enabled flag")
+                .that(programInfo.getAlert()).isEqualTo(TEST_ALERT);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void programInfoFromHalProgramInfo_withAlertMessageAndFlagDisabled() {
+        android.hardware.broadcastradio.ProgramSelector halHdSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_HD_STATION_EXT_ID,
+                        new ProgramIdentifier[]{});
+        ProgramInfo halHdProgramInfo = AidlTestUtils.makeHalProgramInfo(halHdSelector,
+                TEST_HAL_HD_STATION_EXT_ID, TEST_HAL_HD_FM_FREQUENCY_ID, TEST_SIGNAL_QUALITY,
+                new ProgramIdentifier[]{}, new Metadata[]{});
+        halHdProgramInfo.emergencyAlert = TEST_HAL_ALERT;
+
+        RadioManager.ProgramInfo programInfo =
+                ConversionUtils.programInfoFromHalProgramInfo(halHdProgramInfo);
+
+        expect.withMessage("Alert of converted HD program info with alert and disabled flag")
+                .that(programInfo.getAlert()).isNull();
+    }
+
+    @Test
     public void tunedProgramInfoFromHalProgramInfo_withInvalidDabProgramInfo() {
         android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
                 AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
@@ -851,7 +957,7 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void radioMetadataFromHalMetadata_withHdMedatadataAndFlagEnabled() {
+    public void radioMetadataFromHalMetadata_withHdMetadataAndFlagEnabled() {
         mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         String genreValue = "genreTest";
         String commentShortDescriptionValue = "commentShortDescriptionTest";
@@ -973,6 +1079,57 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 .isEmpty();
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void radioAlertFromHalAlert() {
+        RadioAlert convertedAlert = ConversionUtils.radioAlertFromHalAlert(TEST_HAL_ALERT);
+
+        expect.withMessage("Converted alert").that(convertedAlert)
+                .isEqualTo(TEST_ALERT);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void radioAlertFromHalAlert_withLowThanFourCoordinates() {
+        Polygon invalidPolygon = createHalPolygon(List.of(
+                TEST_POLYGON_COORDINATE_START, new RadioAlert.Coordinate(38.34, -119.95),
+                TEST_POLYGON_COORDINATE_START));
+        AlertInfo halAlertInfo = createHalAlertInfo(TEST_HAL_CATEGORY_LIST, TEST_HAL_URGENCY,
+                TEST_HAL_SEVERITY, TEST_HAL_CERTAINTY, TEST_DESCRIPTION_MESSAGE,
+                new AlertArea[]{createHalAlertArea(new Polygon[]{invalidPolygon},
+                        new Geocode[]{})}, TEST_LANGUAGE);
+        Alert halAlert = createHalAlert(TEST_HAL_STATUS, TEST_HAL_TYPE,
+                new AlertInfo[]{halAlertInfo });
+
+        RadioAlert convertedAlert = ConversionUtils.radioAlertFromHalAlert(halAlert);
+
+        expect.withMessage("Empty polygon list with less than 4 coordinates")
+                .that(convertedAlert.getInfoList().get(0).getAreas().get(0).getPolygons())
+                .isEmpty();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+    public void radioAlertFromHalAlert_withDifferentFirstAndLastCoordinate() {
+        Polygon invalidPolygon = createHalPolygon(List.of(
+                TEST_POLYGON_COORDINATE_START, new RadioAlert.Coordinate(38.34, -119.95),
+                new RadioAlert.Coordinate(38.52, -119.74),
+                new RadioAlert.Coordinate(38.62, -119.89),
+                new RadioAlert.Coordinate(38.42, -120.14)));
+        AlertInfo halAlertInfo = createHalAlertInfo(TEST_HAL_CATEGORY_LIST, TEST_HAL_URGENCY,
+                TEST_HAL_SEVERITY, TEST_HAL_CERTAINTY, TEST_DESCRIPTION_MESSAGE,
+                new AlertArea[]{createHalAlertArea(new Polygon[]{invalidPolygon},
+                        new Geocode[]{})}, TEST_LANGUAGE);
+        Alert halAlert = createHalAlert(TEST_HAL_STATUS, TEST_HAL_TYPE,
+                new AlertInfo[]{halAlertInfo});
+
+        RadioAlert convertedAlert = ConversionUtils.radioAlertFromHalAlert(halAlert);
+
+        expect.withMessage("Empty polygon list with different first and last coordinates")
+                .that(convertedAlert.getInfoList().get(0).getAreas().get(0).getPolygons())
+                .isEmpty();
+    }
+
     private static RadioManager.ModuleProperties createModuleProperties() {
         AmFmRegionConfig amFmConfig = createAmFmRegionConfig();
         DabTableEntry[] dabTableEntries = new DabTableEntry[]{
@@ -1028,14 +1185,62 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
         return halProperties;
     }
 
-    private ProgramSelector.Identifier createHdStationLocationIdWithFlagEnabled() {
+    private static ProgramSelector.Identifier createHdStationLocationIdWithFlagEnabled() {
         return new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_HD_STATION_LOCATION,
                 TEST_HD_LOCATION_VALUE);
     }
 
-    private ProgramSelector createHdSelectorWithFlagEnabled() {
+    private static ProgramSelector createHdSelectorWithFlagEnabled() {
         return new ProgramSelector(ProgramSelector.PROGRAM_TYPE_FM_HD, TEST_HD_STATION_EXT_ID,
                 new ProgramSelector.Identifier[]{createHdStationLocationIdWithFlagEnabled()},
                 /* vendorIds= */ null);
+    }
+
+    private static Alert createHalAlert(int status, int messageType, AlertInfo[] alertInfos) {
+        Alert halAlert = new Alert();
+        halAlert.status = status;
+        halAlert.messageType = messageType;
+        halAlert.infoArray = alertInfos;
+        return halAlert;
+    }
+
+    private static AlertInfo createHalAlertInfo(int[] categoryArray, int urgency, int severity,
+            int certainty, String description, AlertArea[] areas, @Nullable String language) {
+        AlertInfo info = new AlertInfo();
+        info.categoryArray = categoryArray;
+        info.urgency = urgency;
+        info.severity = severity;
+        info.certainty = certainty;
+        info.description = description;
+        info.areas = areas;
+        info.language = language;
+        return info;
+    }
+
+    private static AlertArea createHalAlertArea(Polygon[] polygons, Geocode[] geocodes) {
+        AlertArea area = new AlertArea();
+        area.polygons = polygons;
+        area.geocodes = geocodes;
+        return area;
+    }
+
+    private static Polygon createHalPolygon(List<RadioAlert.Coordinate> coordinates) {
+        Coordinate[] halCoordinates = new Coordinate[coordinates.size()];
+        for (int idx = 0; idx < coordinates.size(); idx++) {
+            Coordinate halCoordinate = new Coordinate();
+            halCoordinate.latitude = coordinates.get(idx).getLatitude();
+            halCoordinate.longitude = coordinates.get(idx).getLongitude();
+            halCoordinates[idx] = halCoordinate;
+        }
+        Polygon polygon = new Polygon();
+        polygon.coordinates = halCoordinates;
+        return polygon;
+    }
+
+    private static Geocode createHalGeocode(String valueName, String value) {
+        Geocode halGeocode = new Geocode();
+        halGeocode.valueName = valueName;
+        halGeocode.value = value;
+        return halGeocode;
     }
 }

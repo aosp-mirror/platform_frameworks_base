@@ -20,7 +20,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.fragments.FragmentService
 import com.android.systemui.qs.QSFragmentStartable
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -37,7 +37,7 @@ class CollapsedStatusBarFragmentStartable
 @Inject
 constructor(
     private val fragmentService: FragmentService,
-    private val collapsedstatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>
+    private val collapsedstatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>,
 ) : CoreStartable {
     override fun start() {
         fragmentService.addFragmentInstantiationProvider(
@@ -47,7 +47,7 @@ constructor(
     }
 }
 
-@Module(subcomponents = [StatusBarFragmentComponent::class])
+@Module(subcomponents = [HomeStatusBarComponent::class])
 interface CollapsedStatusBarFragmentStartableModule {
     @Binds
     @IntoMap

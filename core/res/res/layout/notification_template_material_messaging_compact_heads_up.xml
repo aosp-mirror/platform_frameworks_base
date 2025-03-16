@@ -34,12 +34,14 @@
         android:maxDrawableWidth="@dimen/notification_icon_circle_size"
         android:maxDrawableHeight="@dimen/notification_icon_circle_size"
         />
-    <com.android.internal.widget.NotificationRowIconView
+    <com.android.internal.widget.CachingIconView
         android:id="@+id/conversation_icon"
         android:layout_width="@dimen/notification_icon_circle_size"
         android:layout_height="@dimen/notification_icon_circle_size"
         android:layout_gravity="center_vertical|start"
         android:layout_marginStart="@dimen/notification_icon_circle_start"
+        android:background="@drawable/notification_icon_circle"
+        android:clipToOutline="true"
         android:maxDrawableWidth="@dimen/notification_icon_circle_size"
         android:maxDrawableHeight="@dimen/notification_icon_circle_size"
         android:scaleType="centerCrop"

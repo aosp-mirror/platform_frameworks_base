@@ -73,11 +73,15 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
 
     private static final int MESSAGE_MOVE_MOUSE_POINTER = 1;
     private static final int MESSAGE_SCROLL_MOUSE_POINTER = 2;
-    private static final float MOUSE_POINTER_MOVEMENT_STEP = 1.8f;
     private static final int KEY_NOT_SET = -1;
 
     /** Time interval after which mouse action will be repeated */
     private static final int INTERVAL_MILLIS = 10;
+
+    @VisibleForTesting
+    public static final float MOUSE_POINTER_MOVEMENT_STEP = 1.8f;
+    @VisibleForTesting
+    public static final float MOUSE_SCROLL_STEP = 0.2f;
 
     private final AccessibilityManagerService mAms;
     private final Handler mHandler;
@@ -134,8 +138,8 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
         DIAGONAL_UP_LEFT_MOVE(KeyEvent.KEYCODE_7),
         UP_MOVE_OR_SCROLL(KeyEvent.KEYCODE_8),
         DIAGONAL_UP_RIGHT_MOVE(KeyEvent.KEYCODE_9),
-        LEFT_MOVE(KeyEvent.KEYCODE_U),
-        RIGHT_MOVE(KeyEvent.KEYCODE_O),
+        LEFT_MOVE_OR_SCROLL(KeyEvent.KEYCODE_U),
+        RIGHT_MOVE_OR_SCROLL(KeyEvent.KEYCODE_O),
         DIAGONAL_DOWN_LEFT_MOVE(KeyEvent.KEYCODE_J),
         DOWN_MOVE_OR_SCROLL(KeyEvent.KEYCODE_K),
         DIAGONAL_DOWN_RIGHT_MOVE(KeyEvent.KEYCODE_L),
@@ -263,6 +267,16 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
         );
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    private void sendVirtualMouseScrollEvent(float x, float y) {
+        waitForVirtualMouseCreation();
+        mVirtualMouse.sendScrollEvent(new VirtualMouseScrollEvent.Builder()
+                .setXAxisMovement(x)
+                .setYAxisMovement(y)
+                .build()
+        );
+    }
+
     /**
      * Performs a mouse scroll action based on the provided key code.
      * The scroll action will only be performed if the scroll toggle is on.
@@ -280,19 +294,31 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
     private void performMouseScrollAction(int keyCode) {
         MouseKeyEvent mouseKeyEvent = MouseKeyEvent.from(
                 keyCode, mActiveInputDeviceId, mDeviceKeyCodeMap);
-        float y = switch (mouseKeyEvent) {
-            case UP_MOVE_OR_SCROLL -> 1.0f;
-            case DOWN_MOVE_OR_SCROLL -> -1.0f;
-            default -> 0.0f;
-        };
-        waitForVirtualMouseCreation();
-        mVirtualMouse.sendScrollEvent(new VirtualMouseScrollEvent.Builder()
-                .setYAxisMovement(y)
-                .build()
-        );
+        float x = 0f;
+        float y = 0f;
+
+        switch (mouseKeyEvent) {
+            case UP_MOVE_OR_SCROLL -> {
+                y = MOUSE_SCROLL_STEP;
+            }
+            case DOWN_MOVE_OR_SCROLL -> {
+                y = -MOUSE_SCROLL_STEP;
+            }
+            case LEFT_MOVE_OR_SCROLL -> {
+                x = MOUSE_SCROLL_STEP;
+            }
+            case RIGHT_MOVE_OR_SCROLL -> {
+                x = -MOUSE_SCROLL_STEP;
+            }
+            default -> {
+                x = 0.0f;
+                y = 0.0f;
+            }
+        }
+        sendVirtualMouseScrollEvent(x, y);
         if (DEBUG) {
             Slog.d(LOG_TAG, "Performed mouse key event: " + mouseKeyEvent.name()
-                    + " for scroll action with axis movement (y=" + y + ")");
+                    + " for scroll action with axis movement (x=" + x + ", y=" + y + ")");
         }
     }
 
@@ -340,8 +366,8 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
      * The method calculates the relative movement of the mouse pointer
      * and sends the corresponding event to the virtual mouse.
      *
-     * The UP and DOWN pointer actions will only take place for their respective keys
-     * if the scroll toggle is off.
+     * The UP, DOWN, LEFT, RIGHT  pointer actions will only take place for their
+     * respective keys if the scroll toggle is off.
      *
      * @param keyCode The key code representing the direction or button press.
      *                Supported keys are:
@@ -349,8 +375,8 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
      *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DIAGONAL_DOWN_LEFT_MOVE}
      *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DOWN_MOVE_OR_SCROLL}
      *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DIAGONAL_DOWN_RIGHT_MOVE}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#LEFT_MOVE}
-     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#RIGHT_MOVE}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#LEFT_MOVE_OR_SCROLL}
+     *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#RIGHT_MOVE_OR_SCROLL}
      *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DIAGONAL_UP_LEFT_MOVE}
      *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#UP_MOVE_OR_SCROLL}
      *                  <li>{@link MouseKeysInterceptor.MouseKeyEvent#DIAGONAL_UP_RIGHT_MOVE}
@@ -377,10 +403,10 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
                 x = MOUSE_POINTER_MOVEMENT_STEP / sqrt(2);
                 y = MOUSE_POINTER_MOVEMENT_STEP / sqrt(2);
             }
-            case LEFT_MOVE -> {
+            case LEFT_MOVE_OR_SCROLL -> {
                 x = -MOUSE_POINTER_MOVEMENT_STEP;
             }
-            case RIGHT_MOVE -> {
+            case RIGHT_MOVE_OR_SCROLL -> {
                 x = MOUSE_POINTER_MOVEMENT_STEP;
             }
             case DIAGONAL_UP_LEFT_MOVE -> {
@@ -420,7 +446,9 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
 
     private boolean isMouseScrollKey(int keyCode, InputDevice inputDevice) {
         return keyCode == MouseKeyEvent.UP_MOVE_OR_SCROLL.getKeyCode(inputDevice)
-                || keyCode == MouseKeyEvent.DOWN_MOVE_OR_SCROLL.getKeyCode(inputDevice);
+                || keyCode == MouseKeyEvent.DOWN_MOVE_OR_SCROLL.getKeyCode(inputDevice)
+                || keyCode == MouseKeyEvent.LEFT_MOVE_OR_SCROLL.getKeyCode(inputDevice)
+                || keyCode == MouseKeyEvent.RIGHT_MOVE_OR_SCROLL.getKeyCode(inputDevice);
     }
 
     /**
@@ -597,7 +625,9 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
         });
 
         mHandler.removeCallbacksAndMessages(null);
-        mVirtualDevice.close();
+        if (mVirtualDevice != null) {
+            mVirtualDevice.close();
+        }
     }
 
     @Override

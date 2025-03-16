@@ -22,7 +22,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 
 import com.android.internal.os.PowerStats;
-import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.UsageBasedPowerEstimator;
 import com.android.server.power.stats.format.BinaryStatePowerStatsLayout;
 
@@ -45,7 +44,6 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
     }
 
     private final int mPowerComponentId;
-    private final PowerStatsUidResolver mUidResolver;
     private final UsageBasedPowerEstimator mUsageBasedPowerEstimator;
     private boolean mEnergyConsumerSupported;
     private int mInitiatingUid = Process.INVALID_UID;
@@ -60,18 +58,14 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
     private long[] mTmpDeviceStatsArray;
     private long[] mTmpUidStatsArray;
 
-    BinaryStatePowerStatsProcessor(int powerComponentId,
-            PowerStatsUidResolver uidResolver, double averagePowerMilliAmp) {
-        this(powerComponentId, uidResolver, averagePowerMilliAmp,
-                new BinaryStatePowerStatsLayout());
+    BinaryStatePowerStatsProcessor(int powerComponentId, double averagePowerMilliAmp) {
+        this(powerComponentId, averagePowerMilliAmp, new BinaryStatePowerStatsLayout());
     }
 
-    BinaryStatePowerStatsProcessor(int powerComponentId,
-            PowerStatsUidResolver uidResolver, double averagePowerMilliAmp,
+    BinaryStatePowerStatsProcessor(int powerComponentId, double averagePowerMilliAmp,
             BinaryStatePowerStatsLayout statsLayout) {
         mPowerComponentId = powerComponentId;
         mUsageBasedPowerEstimator = new UsageBasedPowerEstimator(averagePowerMilliAmp);
-        mUidResolver = uidResolver;
         mStatsLayout = statsLayout;
     }
 
@@ -115,13 +109,13 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
         if (state == STATE_ON) {
             if (item.eventCode == (BatteryStats.HistoryItem.EVENT_STATE_CHANGE
                     | BatteryStats.HistoryItem.EVENT_FLAG_START)) {
-                mInitiatingUid = mUidResolver.mapUid(item.eventTag.uid);
+                mInitiatingUid = item.eventTag.uid;
             }
         } else {
             if (mInitiatingUid == Process.INVALID_UID) {
                 if (item.eventCode == (BatteryStats.HistoryItem.EVENT_STATE_CHANGE
                         | BatteryStats.HistoryItem.EVENT_FLAG_FINISH)) {
-                    mInitiatingUid = mUidResolver.mapUid(item.eventTag.uid);
+                    mInitiatingUid = item.eventTag.uid;
                 }
             }
             recordUsageDuration(mPowerStats, mInitiatingUid, item.time);

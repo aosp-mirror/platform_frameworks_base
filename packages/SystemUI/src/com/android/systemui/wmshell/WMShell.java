@@ -48,7 +48,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -60,8 +59,9 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.wm.shell.dagger.WMComponent;
 import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -271,6 +271,12 @@ public final class WMShell implements
                         // No op.
                     }
                 }, mSysUiMainExecutor);
+        pip.addOnIsInPipStateChangedListener((isInPip) -> {
+            if (!isInPip) {
+                mSysUiState.setFlag(SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING, false)
+                        .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+            }
+        });
         mSysUiState.addCallback(sysUiStateFlag -> {
             mIsSysUiStateValid = (sysUiStateFlag & INVALID_SYSUI_STATE_MASK) == 0;
             pip.onSystemUiStateChanged(mIsSysUiStateValid, sysUiStateFlag);
@@ -281,13 +287,13 @@ public final class WMShell implements
     void initSplitScreen(SplitScreen splitScreen) {
         mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
             @Override
-            public void onFinishedWakingUp() {
-                splitScreen.onFinishedWakingUp();
+            public void onStartedGoingToSleep() {
+                splitScreen.onStartedGoingToSleep();
             }
 
             @Override
-            public void onStartedGoingToSleep() {
-                splitScreen.onStartedGoingToSleep();
+            public void onStartedWakingUp() {
+                splitScreen.onStartedWakingUp();
             }
         });
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
@@ -393,7 +399,7 @@ public final class WMShell implements
 
     void initDesktopMode(DesktopMode desktopMode) {
         desktopMode.addVisibleTasksListener(
-                new DesktopModeTaskRepository.VisibleTasksListener() {
+                new DesktopRepository.VisibleTasksListener() {
                     @Override
                     public void onTasksVisibilityChanged(int displayId, int visibleTasksCount) {
                         if (displayId == Display.DEFAULT_DISPLAY) {

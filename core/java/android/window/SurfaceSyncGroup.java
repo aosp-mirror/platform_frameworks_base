@@ -839,6 +839,16 @@ public final class SurfaceSyncGroup {
     }
 
     /**
+     * Returns true if the SurfaceSyncGroup has completed its sync.
+     * @hide
+     */
+    public boolean isComplete() {
+        synchronized (mLock) {
+            return mFinished;
+        }
+    }
+
+    /**
      * A frame callback that is used to synchronize SurfaceViews. The owner of the SurfaceView must
      * implement onFrameStarted when trying to sync the SurfaceView. This is to ensure the sync
      * knows when the frame is ready to add to the sync.

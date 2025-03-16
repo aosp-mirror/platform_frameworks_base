@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
 /**
  * Test quick switching to last opened app from launcher
  *
- * To run this test: `atest FlickerTests:QuickSwitchFromLauncherTest`
+ * To run this test: `atest FlickerTestsQuickswitch:QuickSwitchFromLauncherTest`
  *
  * Actions:
  * ```

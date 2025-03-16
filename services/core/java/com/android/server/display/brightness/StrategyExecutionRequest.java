@@ -32,11 +32,15 @@ public final class StrategyExecutionRequest {
     // Represents if the user set screen brightness was changed or not.
     private boolean mUserSetBrightnessChanged;
 
+    private boolean mIsStylusBeingUsed;
+
     public StrategyExecutionRequest(DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
-            float currentScreenBrightness, boolean userSetBrightnessChanged) {
+            float currentScreenBrightness, boolean userSetBrightnessChanged,
+            boolean isStylusBeingUsed) {
         mDisplayPowerRequest = displayPowerRequest;
         mCurrentScreenBrightness = currentScreenBrightness;
         mUserSetBrightnessChanged = userSetBrightnessChanged;
+        mIsStylusBeingUsed = isStylusBeingUsed;
     }
 
     public DisplayManagerInternal.DisplayPowerRequest getDisplayPowerRequest() {
@@ -51,6 +55,10 @@ public final class StrategyExecutionRequest {
         return mUserSetBrightnessChanged;
     }
 
+    public boolean isStylusBeingUsed() {
+        return mIsStylusBeingUsed;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof StrategyExecutionRequest)) {
@@ -59,12 +67,13 @@ public final class StrategyExecutionRequest {
         StrategyExecutionRequest other = (StrategyExecutionRequest) obj;
         return Objects.equals(mDisplayPowerRequest, other.getDisplayPowerRequest())
                 && mCurrentScreenBrightness == other.getCurrentScreenBrightness()
-                && mUserSetBrightnessChanged == other.isUserSetBrightnessChanged();
+                && mUserSetBrightnessChanged == other.isUserSetBrightnessChanged()
+                && mIsStylusBeingUsed == other.isStylusBeingUsed();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mDisplayPowerRequest, mCurrentScreenBrightness,
-                mUserSetBrightnessChanged);
+                mUserSetBrightnessChanged, mIsStylusBeingUsed);
     }
 }

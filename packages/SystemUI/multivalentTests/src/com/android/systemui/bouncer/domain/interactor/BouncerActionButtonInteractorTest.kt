@@ -27,6 +27,7 @@ import com.android.internal.util.emergencyAffordanceManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
@@ -34,7 +35,8 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fake
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -77,13 +79,13 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
+        mobileConnectionsRepository = kosmos.mobileConnectionsRepository.fake
 
         overrideResource(R.string.lockscreen_emergency_call, MESSAGE_EMERGENCY_CALL)
         overrideResource(R.string.lockscreen_return_to_call, MESSAGE_RETURN_TO_CALL)
         overrideResource(
             R.bool.config_enable_emergency_call_while_sim_locked,
-            ENABLE_EMERGENCY_CALL_WHILE_SIM_LOCKED
+            ENABLE_EMERGENCY_CALL_WHILE_SIM_LOCKED,
         )
         whenever(selectedUserInteractor.getSelectedUserId()).thenReturn(currentUserId)
         whenever(emergencyAffordanceManager.needsEmergencyAffordance())
@@ -123,11 +125,11 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
             kosmos.fakeTelephonyRepository.setIsInCall(true)
 
             assertThat(actionButton).isNotNull()
-            assertThat(actionButton?.label).isEqualTo(MESSAGE_RETURN_TO_CALL)
-            assertThat(actionButton?.onClick).isNotNull()
-            assertThat(actionButton?.onLongClick).isNull()
+            assertThat(actionButton?.labelResId).isEqualTo(R.string.lockscreen_return_to_call)
+            assertThat(actionButton)
+                .isInstanceOf(BouncerActionButtonModel.ReturnToCallButtonModel::class.java)
 
-            actionButton?.onClick?.invoke()
+            underTest.onReturnToCallButtonClicked()
             runCurrent()
 
             assertThat(metricsLogger.logs.size).isEqualTo(1)
@@ -150,11 +152,11 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
             kosmos.fakeTelephonyRepository.setIsInCall(false)
 
             assertThat(actionButton).isNotNull()
-            assertThat(actionButton?.label).isEqualTo(MESSAGE_EMERGENCY_CALL)
-            assertThat(actionButton?.onClick).isNotNull()
-            assertThat(actionButton?.onLongClick).isNotNull()
+            assertThat(actionButton?.labelResId).isEqualTo(R.string.lockscreen_emergency_call)
+            assertThat(actionButton)
+                .isInstanceOf(BouncerActionButtonModel.EmergencyButtonModel::class.java)
 
-            actionButton?.onClick?.invoke()
+            underTest.onEmergencyButtonClicked()
             runCurrent()
 
             assertThat(metricsLogger.logs.size).isEqualTo(1)
@@ -167,12 +169,12 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
             //  ActivityStarter interface here.
             verify(emergencyAffordanceManager, never()).performEmergencyCall()
 
-            actionButton?.onLongClick?.invoke()
+            underTest.onEmergencyButtonLongClicked()
             verify(emergencyAffordanceManager).performEmergencyCall()
         }
 
     @Test
-    fun noCall_insecureAuthMethodButSecureSim_emergencyCallButton() =
+    fun noCall_insecureAuthMethodButSecureSim_emergencyCallButtonIsActionButton() =
         testScope.runTest {
             val underTest = kosmos.bouncerActionButtonInteractor
             val actionButton by collectLastValue(underTest.actionButton)
@@ -184,9 +186,9 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(actionButton).isNotNull()
-            assertThat(actionButton?.label).isEqualTo(MESSAGE_EMERGENCY_CALL)
-            assertThat(actionButton?.onClick).isNotNull()
-            assertThat(actionButton?.onLongClick).isNotNull()
+            assertThat(actionButton?.labelResId).isEqualTo(R.string.lockscreen_emergency_call)
+            assertThat(actionButton)
+                .isInstanceOf(BouncerActionButtonModel.EmergencyButtonModel::class.java)
         }
 
     @Test

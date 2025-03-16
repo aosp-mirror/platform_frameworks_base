@@ -19,11 +19,13 @@ package com.android.wm.shell.scenarios
 import android.app.Instrumentation
 import android.tools.NavBar
 import android.tools.Rotation
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
+import com.android.server.wm.flicker.helpers.DesktopModeAppHelper.AppProperty
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.window.flags.Flags
@@ -63,8 +65,9 @@ abstract class ResizeAppWithCornerResize(
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         tapl.setEnableRotation(true)
+        ChangeDisplayOrientationRule.setRotation(rotation)
         tapl.setExpectedRotation(rotation.value)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
     }
 
     @Test
@@ -78,34 +81,8 @@ abstract class ResizeAppWithCornerResize(
         )
     }
 
-    @Test
-    open fun resizeAppWithCornerResizeToMaximumSize() {
-        val maxResizeChange = 3000
-        testApp.cornerResize(
-            wmHelper,
-            device,
-            DesktopModeAppHelper.Corners.RIGHT_TOP,
-            maxResizeChange,
-            -maxResizeChange
-        )
-        testApp.cornerResize(
-            wmHelper,
-            device,
-            DesktopModeAppHelper.Corners.LEFT_BOTTOM,
-            -maxResizeChange,
-            maxResizeChange
-        )
-    }
-
     @After
     fun teardown() {
         testApp.exit(wmHelper)
-    }
-
-    companion object {
-        enum class AppProperty {
-            STANDARD,
-            NON_RESIZABLE
-        }
     }
 }

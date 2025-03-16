@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2024 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+    <style name="SettingsLibCollapsingToolbarLayoutStyle">
+        <item name="expandedTitleTextAppearance">@style/SettingsLibCollapsingToolbarTitle.Expanded</item>
+        <item name="collapsedTitleTextAppearance">@style/SettingsLibCollapsingToolbarTitle.Collapsed</item>
+        <item name="expandedTitleMarginStart">@dimen/settingslib_expressive_space_small4</item>
+        <item name="expandedTitleMarginEnd">@dimen/settingslib_expressive_space_small4</item>
+        <item name="expandedTitleMarginBottom">@dimen/settingslib_expressive_space_medium1</item>
+        <item name="maxLines">3</item>
+        <item name="scrimVisibleHeightTrigger">@dimen/settingslib_scrim_visible_height_trigger</item>
+        <item name="contentScrim">@color/settingslib_materialColorSurfaceVariant</item>
+        <item name="statusBarScrim">@null</item>
+        <item name="scrimAnimationDuration">50</item>
+        <item name="collapsedTitleTextColor">@color/settingslib_materialColorOnSurface</item>
+        <item name="expandedTitleTextColor">@color/settingslib_materialColorOnSurface</item>
+    </style>
+    <style name="SettingsLibCollapsingToolbarLayoutStyle.Expressive">
+        <item name="contentScrim">@color/settingslib_materialColorSurfaceContainer</item>
+    </style>
+
+    <style name="SettingsLibCollapsingToolbarTitle.Collapsed" parent="@android:style/TextAppearance.DeviceDefault.Headline">
+        <!--set dp because we don't want size adjust when font size change-->
+        <item name="android:textSize">20dp</item>
+    </style>
+
+    <style name="SettingsLibCollapsingToolbarTitle.Expanded" parent="CollapsingToolbarTitle.Collapsed">
+        <item name="android:textSize">36dp</item>
+    </style>
+</resources>
