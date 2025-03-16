@@ -21,41 +21,47 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.view.ViewGroup
+import android.widget.DateTimeView
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder.IconViewStore
 
 /** Binder for ongoing activity chip views. */
 object OngoingActivityChipBinder {
     /** Binds the given [chipModel] data to the given [chipView]. */
-    fun bind(chipModel: OngoingActivityChipModel, chipView: View) {
+    fun bind(chipModel: OngoingActivityChipModel, chipView: View, iconViewStore: IconViewStore?) {
         val chipContext = chipView.context
         val chipDefaultIconView: ImageView =
             chipView.requireViewById(R.id.ongoing_activity_chip_icon)
         val chipTimeView: ChipChronometer =
             chipView.requireViewById(R.id.ongoing_activity_chip_time)
         val chipTextView: TextView = chipView.requireViewById(R.id.ongoing_activity_chip_text)
+        val chipShortTimeDeltaView: DateTimeView =
+            chipView.requireViewById(R.id.ongoing_activity_chip_short_time_delta)
         val chipBackgroundView: ChipBackgroundContainer =
             chipView.requireViewById(R.id.ongoing_activity_chip_background)
 
         when (chipModel) {
             is OngoingActivityChipModel.Shown -> {
                 // Data
-                setChipIcon(chipModel, chipBackgroundView, chipDefaultIconView)
-                setChipMainContent(chipModel, chipTextView, chipTimeView)
+                setChipIcon(chipModel, chipBackgroundView, chipDefaultIconView, iconViewStore)
+                setChipMainContent(chipModel, chipTextView, chipTimeView, chipShortTimeDeltaView)
                 chipView.setOnClickListener(chipModel.onClickListener)
                 updateChipPadding(
                     chipModel,
                     chipBackgroundView,
                     chipTextView,
                     chipTimeView,
+                    chipShortTimeDeltaView,
                 )
 
                 // Accessibility
@@ -65,6 +71,7 @@ object OngoingActivityChipBinder {
                 val textColor = chipModel.colors.text(chipContext)
                 chipTimeView.setTextColor(textColor)
                 chipTextView.setTextColor(textColor)
+                chipShortTimeDeltaView.setTextColor(textColor)
                 (chipBackgroundView.background as GradientDrawable).color =
                     chipModel.colors.background(chipContext)
             }
@@ -80,6 +87,7 @@ object OngoingActivityChipBinder {
         chipModel: OngoingActivityChipModel.Shown,
         backgroundView: ChipBackgroundContainer,
         defaultIconView: ImageView,
+        iconViewStore: IconViewStore?,
     ) {
         // Always remove any previously set custom icon. If we have a new custom icon, we'll re-add
         // it.
@@ -97,44 +105,68 @@ object OngoingActivityChipBinder {
                 defaultIconView.tintView(iconTint)
             }
             is OngoingActivityChipModel.ChipIcon.FullColorAppIcon -> {
-                StatusBarRonChips.assertInNewMode()
+                StatusBarNotifChips.assertInNewMode()
                 IconViewBinder.bind(icon.impl, defaultIconView)
                 defaultIconView.visibility = View.VISIBLE
                 defaultIconView.untintView()
             }
             is OngoingActivityChipModel.ChipIcon.StatusBarView -> {
-                // Hide the default icon since we'll show this custom icon instead.
-                defaultIconView.visibility = View.GONE
-
-                // Add the new custom icon:
-                // 1. Set up the right visual params.
-                val iconView = icon.impl
-                with(iconView) {
-                    id = CUSTOM_ICON_VIEW_ID
-                    // TODO(b/354930838): Update the content description to not include "phone" and
-                    // maybe include the app name.
-                    contentDescription =
-                        context.resources.getString(R.string.ongoing_phone_call_content_description)
-                    tintView(iconTint)
+                StatusBarConnectedDisplays.assertInLegacyMode()
+                setStatusBarIconView(defaultIconView, icon.impl, iconTint, backgroundView)
+            }
+            is OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon -> {
+                StatusBarConnectedDisplays.assertInNewMode()
+                val iconView = fetchStatusBarIconView(iconViewStore, icon)
+                if (iconView == null) {
+                    // This means that the notification key doesn't exist anymore.
+                    return
                 }
-
-                // 2. If we just reinflated the view, we may need to detach the icon view from the
-                // old chip before we reattach it to the new one.
-                // See also: NotificationIconContainerViewBinder#bindIcons.
-                val currentParent = iconView.parent as? ViewGroup
-                if (currentParent != null && currentParent != backgroundView) {
-                    currentParent.removeView(iconView)
-                    currentParent.removeTransientView(iconView)
-                }
-
-                // 3: Add the icon as the starting view.
-                backgroundView.addView(
-                    iconView,
-                    /* index= */ 0,
-                    generateCustomIconLayoutParams(iconView),
-                )
+                setStatusBarIconView(defaultIconView, iconView, iconTint, backgroundView)
             }
         }
+    }
+
+    private fun fetchStatusBarIconView(
+        iconViewStore: IconViewStore?,
+        icon: OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon,
+    ): StatusBarIconView? {
+        StatusBarConnectedDisplays.assertInNewMode()
+        if (iconViewStore == null) {
+            throw IllegalStateException("Store should always be non-null when flag is enabled.")
+        }
+        return iconViewStore.iconView(icon.notificationKey)
+    }
+
+    private fun setStatusBarIconView(
+        defaultIconView: ImageView,
+        iconView: StatusBarIconView,
+        iconTint: Int,
+        backgroundView: ChipBackgroundContainer,
+    ) {
+        // Hide the default icon since we'll show this custom icon instead.
+        defaultIconView.visibility = View.GONE
+
+        // 1. Set up the right visual params.
+        with(iconView) {
+            id = CUSTOM_ICON_VIEW_ID
+            // TODO(b/354930838): Update the content description to not include "phone" and maybe
+            // include the app name.
+            contentDescription =
+                context.resources.getString(R.string.ongoing_phone_call_content_description)
+            tintView(iconTint)
+        }
+
+        // 2. If we just reinflated the view, we may need to detach the icon view from the old chip
+        // before we reattach it to the new one.
+        // See also: NotificationIconContainerViewBinder#bindIcons.
+        val currentParent = iconView.parent as? ViewGroup
+        if (currentParent != null && currentParent != backgroundView) {
+            currentParent.removeView(iconView)
+            currentParent.removeTransientView(iconView)
+        }
+
+        // 3: Add the icon as the starting view.
+        backgroundView.addView(iconView, /* index= */ 0, generateCustomIconLayoutParams(iconView))
     }
 
     private fun View.getCustomIconView(): StatusBarIconView? {
@@ -161,6 +193,7 @@ object OngoingActivityChipBinder {
         chipModel: OngoingActivityChipModel.Shown,
         chipTextView: TextView,
         chipTimeView: ChipChronometer,
+        chipShortTimeDeltaView: DateTimeView,
     ) {
         when (chipModel) {
             is OngoingActivityChipModel.Shown.Countdown -> {
@@ -168,21 +201,39 @@ object OngoingActivityChipBinder {
                 chipTextView.visibility = View.VISIBLE
 
                 chipTimeView.hide()
+                chipShortTimeDeltaView.visibility = View.GONE
             }
             is OngoingActivityChipModel.Shown.Text -> {
                 chipTextView.text = chipModel.text
                 chipTextView.visibility = View.VISIBLE
 
                 chipTimeView.hide()
+                chipShortTimeDeltaView.visibility = View.GONE
             }
             is OngoingActivityChipModel.Shown.Timer -> {
                 ChipChronometerBinder.bind(chipModel.startTimeMs, chipTimeView)
                 chipTimeView.visibility = View.VISIBLE
 
                 chipTextView.visibility = View.GONE
+                chipShortTimeDeltaView.visibility = View.GONE
+            }
+            is OngoingActivityChipModel.Shown.ShortTimeDelta -> {
+                chipShortTimeDeltaView.setTime(chipModel.time)
+                chipShortTimeDeltaView.visibility = View.VISIBLE
+                chipShortTimeDeltaView.isShowRelativeTime = true
+                chipShortTimeDeltaView.setRelativeTimeDisambiguationTextMask(
+                    DateTimeView.DISAMBIGUATION_TEXT_PAST
+                )
+                chipShortTimeDeltaView.setRelativeTimeUnitDisplayLength(
+                    DateTimeView.UNIT_DISPLAY_LENGTH_MEDIUM
+                )
+
+                chipTextView.visibility = View.GONE
+                chipTimeView.hide()
             }
             is OngoingActivityChipModel.Shown.IconOnly -> {
                 chipTextView.visibility = View.GONE
+                chipShortTimeDeltaView.visibility = View.GONE
                 chipTimeView.hide()
             }
         }
@@ -200,6 +251,7 @@ object OngoingActivityChipBinder {
         backgroundView: View,
         chipTextView: TextView,
         chipTimeView: ChipChronometer,
+        chipShortTimeDeltaView: DateTimeView,
     ) {
         if (chipModel.icon != null) {
             if (chipModel.icon is OngoingActivityChipModel.ChipIcon.StatusBarView) {
@@ -209,15 +261,18 @@ object OngoingActivityChipBinder {
                 backgroundView.setBackgroundPaddingForEmbeddedPaddingIcon()
                 chipTextView.setTextPaddingForEmbeddedPaddingIcon()
                 chipTimeView.setTextPaddingForEmbeddedPaddingIcon()
+                chipShortTimeDeltaView.setTextPaddingForEmbeddedPaddingIcon()
             } else {
                 backgroundView.setBackgroundPaddingForNormalIcon()
                 chipTextView.setTextPaddingForNormalIcon()
                 chipTimeView.setTextPaddingForNormalIcon()
+                chipShortTimeDeltaView.setTextPaddingForNormalIcon()
             }
         } else {
             backgroundView.setBackgroundPaddingForNoIcon()
             chipTextView.setTextPaddingForNoIcon()
             chipTimeView.setTextPaddingForNoIcon()
+            chipShortTimeDeltaView.setTextPaddingForNoIcon()
         }
     }
 
@@ -258,23 +313,13 @@ object OngoingActivityChipBinder {
             context.resources.getDimensionPixelSize(
                 R.dimen.ongoing_activity_chip_side_padding_for_embedded_padding_icon
             )
-        setPaddingRelative(
-            sidePadding,
-            paddingTop,
-            sidePadding,
-            paddingBottom,
-        )
+        setPaddingRelative(sidePadding, paddingTop, sidePadding, paddingBottom)
     }
 
     private fun View.setBackgroundPaddingForNormalIcon() {
         val sidePadding =
             context.resources.getDimensionPixelSize(R.dimen.ongoing_activity_chip_side_padding)
-        setPaddingRelative(
-            sidePadding,
-            paddingTop,
-            sidePadding,
-            paddingBottom,
-        )
+        setPaddingRelative(sidePadding, paddingTop, sidePadding, paddingBottom)
     }
 
     private fun View.setBackgroundPaddingForNoIcon() {

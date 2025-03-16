@@ -173,7 +173,7 @@ public class DeviceIconUtilTest {
     public void getIconResIdFromMediaRouteType_tv_builtinSpeaker_isTv() {
         assertThat(new DeviceIconUtil(/* isTv */ true)
                 .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_BUILTIN_SPEAKER))
-                .isEqualTo(R.drawable.ic_tv);
+                .isAnyOf(R.drawable.ic_tv, R.drawable.ic_tv_box_internal_speaker);
     }
 
     @Test
@@ -331,7 +331,7 @@ public class DeviceIconUtilTest {
     public void getIconResIdFromAudioDeviceType_tv_builtinSpeaker_isTv() {
         assertThat(new DeviceIconUtil(/* isTv */ true)
                 .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER))
-                .isEqualTo(R.drawable.ic_tv);
+                .isAnyOf(R.drawable.ic_tv, R.drawable.ic_tv_box_internal_speaker);
     }
 
     @Test

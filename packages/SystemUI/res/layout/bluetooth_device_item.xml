@@ -27,8 +27,8 @@
 
     <ImageView
         android:id="@+id/bluetooth_device_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -36,8 +36,8 @@
 
     <TextView
         android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:id="@+id/bluetooth_device_name"
-        style="@style/BluetoothTileDialog.DeviceName"
         android:textDirection="locale"
         android:textAlignment="gravity"
         android:paddingStart="20dp"
@@ -54,8 +54,8 @@
 
     <TextView
         android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:id="@+id/bluetooth_device_summary"
-        style="@style/BluetoothTileDialog.DeviceSummary"
         android:paddingStart="20dp"
         android:paddingEnd="10dp"
         android:paddingBottom="15dp"
@@ -65,7 +65,8 @@
         app:layout_constraintStart_toEndOf="@+id/bluetooth_device_icon"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:gravity="center_vertical" />
+        android:gravity="center_vertical"
+        android:textSize="14sp" />
 
     <androidx.constraintlayout.widget.Guideline
         android:layout_width="wrap_content"

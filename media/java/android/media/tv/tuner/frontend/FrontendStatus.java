@@ -16,11 +16,13 @@
 
 package android.media.tv.tuner.frontend;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.media.tv.flags.Flags;
 import android.media.tv.tuner.Lnb;
 import android.media.tv.tuner.TunerVersionChecker;
 
@@ -61,7 +63,7 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_DVBT_CELL_IDS, FRONTEND_STATUS_TYPE_ATSC3_ALL_PLP_INFO,
             FRONTEND_STATUS_TYPE_IPTV_CONTENT_URL, FRONTEND_STATUS_TYPE_IPTV_PACKETS_LOST,
             FRONTEND_STATUS_TYPE_IPTV_PACKETS_RECEIVED, FRONTEND_STATUS_TYPE_IPTV_WORST_JITTER_MS,
-            FRONTEND_STATUS_TYPE_IPTV_AVERAGE_JITTER_MS})
+            FRONTEND_STATUS_TYPE_IPTV_AVERAGE_JITTER_MS, FRONTEND_STATUS_TYPE_STANDARD_EXTENSION})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -311,6 +313,13 @@ public class FrontendStatus {
     public static final int FRONTEND_STATUS_TYPE_ATSC3_ALL_PLP_INFO =
             android.hardware.tv.tuner.FrontendStatusType.ATSC3_ALL_PLP_INFO;
 
+    /**
+     * Standard extension.
+     */
+    @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
+    public static final int FRONTEND_STATUS_TYPE_STANDARD_EXTENSION =
+            android.hardware.tv.tuner.FrontendStatusType.STANDARD_EXT;
+
     /** @hide */
     @IntDef(value = {
             AtscFrontendSettings.MODULATION_UNDEFINED,
@@ -558,6 +567,7 @@ public class FrontendStatus {
     private Long mIptvPacketsReceived;
     private Integer mIptvWorstJitterMs;
     private Integer mIptvAverageJitterMs;
+    private StandardExtension mStandardExtension;
 
     // Constructed and fields set by JNI code.
     private FrontendStatus() {
@@ -1272,5 +1282,28 @@ public class FrontendStatus {
             throw new IllegalStateException("IptvAverageJitterMs status is empty");
         }
         return mIptvAverageJitterMs;
+    }
+    /**
+     * Gets the standard extension.
+     *
+     * <p>The tuner standard DVB-T has the extension DVB-T2, and the standard DVB-S has the
+     * extensions DVB-S2 and DVB-S2X. This method returns the current standard extension within the
+     * same standard series. This frontend status is reported when the standard extension
+     * transitions to another during playback.
+     *
+     * <p>This query is supported only by Tuner HAL 4.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * @return The current standard extension.
+     */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
+    public StandardExtension getStandardExtension() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_4_0, "StandardExtension status");
+        if (mStandardExtension == null) {
+            throw new IllegalStateException("StandardExtension status is empty");
+        }
+        return mStandardExtension;
     }
 }

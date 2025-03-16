@@ -453,7 +453,7 @@ status_t _FileAsset::openChunk(incfs::IncFsFileMap&& dataMap, base::unique_fd fd
 {
     assert(mFp == NULL);    // no reopen
     assert(!mMap.has_value());
-    assert(dataMap != NULL);
+    assert(dataMap.data());
 
     mMap = std::move(dataMap);
     mStart = -1;            // not used
@@ -798,7 +798,7 @@ status_t _CompressedAsset::openChunk(incfs::IncFsFileMap&& dataMap, size_t uncom
 {
     assert(mFd < 0);        // no re-open
     assert(!mMap.has_value());
-    assert(dataMap != NULL);
+    assert(dataMap.data());
 
     mMap = std::move(dataMap);
     mStart = -1;        // not used

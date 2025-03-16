@@ -22,6 +22,7 @@ import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
 
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
@@ -214,6 +215,7 @@ public abstract class TvPipModule {
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenControllerOptional,
             Optional<PipPerfHintController> pipPerfHintControllerOptional,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -221,8 +223,9 @@ public abstract class TvPipModule {
                 syncTransactionQueue, pipTransitionState, tvPipBoundsState, pipDisplayLayoutState,
                 tvPipBoundsAlgorithm, tvPipMenuController, pipAnimationController,
                 pipSurfaceTransactionHelper, tvPipTransition, pipParamsChangedForwarder,
-                splitScreenControllerOptional, pipPerfHintControllerOptional, displayController,
-                pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+                splitScreenControllerOptional, pipPerfHintControllerOptional,
+                rootTaskDisplayAreaOrganizer, displayController, pipUiEventLogger,
+                shellTaskOrganizer, mainExecutor);
     }
 
     @WMSingleton

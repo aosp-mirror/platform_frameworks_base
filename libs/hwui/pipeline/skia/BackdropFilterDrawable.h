@@ -37,23 +37,10 @@ public:
     BackdropFilterDrawable(RenderNode* renderNode, SkCanvas* canvas)
             : mTargetRenderNode(renderNode), mBounds(canvas->getLocalClipBounds()) {}
 
-    ~BackdropFilterDrawable();
+    ~BackdropFilterDrawable() = default;
 
 private:
     RenderNode* mTargetRenderNode;
-    SkPaint mPaint;
-
-    SkRect mDstBounds;
-    SkRect mImageSubset;
-    SkIRect mOutSubset;
-    SkIPoint mOutOffset;
-
-    /**
-     * Check all necessary properties before actual drawing.
-     * Return true if ready to draw.
-     */
-    bool prepareToDraw(SkCanvas* canvas, const RenderProperties& properties, int backdropImageWidth,
-                       int backdropImageHeight);
 
 protected:
     void onDraw(SkCanvas* canvas) override;

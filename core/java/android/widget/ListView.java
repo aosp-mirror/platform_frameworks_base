@@ -72,7 +72,7 @@ import java.util.function.Predicate;
 
 /**
  * <p>Displays a vertically-scrollable collection of views, where each view is positioned
- * immediatelybelow the previous view in the list.  For a more modern, flexible, and performant
+ * immediately below the previous view in the list.  For a more modern, flexible, and performant
  * approach to displaying lists, use {@link androidx.recyclerview.widget.RecyclerView}.</p>
  *
  * <p>To display a list, you can include a list view in your layout XML file:</p>

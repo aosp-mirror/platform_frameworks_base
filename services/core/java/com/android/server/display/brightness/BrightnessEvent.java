@@ -44,6 +44,7 @@ public final class BrightnessEvent {
     public static final int FLAG_DOZE_SCALE = 0x4;
     public static final int FLAG_USER_SET = 0x8;
     public static final int FLAG_LOW_POWER_MODE = 0x20;
+    public static final int FLAG_EVEN_DIMMER = 0x40;
 
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
@@ -492,6 +493,7 @@ public final class BrightnessEvent {
                 + ((mFlags & FLAG_RBC) != 0 ? "rbc " : "")
                 + ((mFlags & FLAG_INVALID_LUX) != 0 ? "invalid_lux " : "")
                 + ((mFlags & FLAG_DOZE_SCALE) != 0 ? "doze_scale " : "")
-                + ((mFlags & FLAG_LOW_POWER_MODE) != 0 ? "low_power_mode " : "");
+                + ((mFlags & FLAG_LOW_POWER_MODE) != 0 ? "low_power_mode " : "")
+                + ((mFlags & FLAG_EVEN_DIMMER) != 0 ? "even_dimmer " : "");
     }
 }

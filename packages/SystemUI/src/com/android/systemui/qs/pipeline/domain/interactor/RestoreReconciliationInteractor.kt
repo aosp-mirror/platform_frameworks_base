@@ -15,7 +15,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Interactor in charge of triggering reconciliation after QS Secure Settings are restored. For a
@@ -42,7 +42,7 @@ constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun start() {
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             qsSettingsRestoredRepository.restoreData
                 .flatMapConcat { data ->
                     autoAddRepository.autoAddedTiles(data.userId).take(1).map { tiles ->

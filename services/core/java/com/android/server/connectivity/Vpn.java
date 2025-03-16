@@ -1113,7 +1113,11 @@ public class Vpn {
             }
             // Remove always-on VPN if it's not supported.
             if (!isAlwaysOnPackageSupported(alwaysOnPackage)) {
-                setAlwaysOnPackage(null, false, null);
+                // Do not remove the always-on setting due to the restricted ability in safe mode.
+                // The always-on VPN can then start after the device reboots to normal mode.
+                if (!mContext.getPackageManager().isSafeMode()) {
+                    setAlwaysOnPackage(null, false, null);
+                }
                 return false;
             }
             // Skip if the service is already established. This isn't bulletproof: it's not bound

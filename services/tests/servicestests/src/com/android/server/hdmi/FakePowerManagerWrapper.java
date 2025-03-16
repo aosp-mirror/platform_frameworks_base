@@ -26,6 +26,7 @@ final class FakePowerManagerWrapper extends PowerManagerWrapper {
     private boolean mInteractive;
     private WakeLockWrapper mWakeLock;
     private boolean mWasWakeLockInstanceCreated = false;
+    private boolean mIsLowPowerStandbyEnabled = false;
 
 
     FakePowerManagerWrapper(@NonNull Context context) {
@@ -57,6 +58,15 @@ final class FakePowerManagerWrapper extends PowerManagerWrapper {
     void goToSleep(long time, int reason, int flags) {
         mInteractive = false;
         return;
+    }
+
+    @Override
+    boolean isLowPowerStandbyEnabled() {
+        return mIsLowPowerStandbyEnabled;
+    }
+
+    void setIsLowPowerStandbyEnabled(boolean isLowPowerStandbyEnabled) {
+        mIsLowPowerStandbyEnabled = isLowPowerStandbyEnabled;
     }
 
     @Override

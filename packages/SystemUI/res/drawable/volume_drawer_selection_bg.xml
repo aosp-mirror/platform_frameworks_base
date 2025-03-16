@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,10 +14,11 @@
   ~ limitations under the License.
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-            android:paddingMode="stack" >
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:paddingMode="stack" >
     <size
-        android:height="@dimen/volume_ringer_drawer_item_size"
-        android:width="@dimen/volume_ringer_drawer_item_size" />
-    <solid android:color="?android:attr/colorAccent" />
-    <corners android:radius="@dimen/volume_ringer_drawer_item_size_half" />
+        android:height="@dimen/volume_dialog_ringer_drawer_button_size"
+        android:width="@dimen/volume_dialog_ringer_drawer_button_size" />
+    <solid android:color="?androidprv:attr/materialColorPrimary" />
+    <corners android:radius="@dimen/volume_dialog_ringer_selected_button_background_radius" />
 </shape>

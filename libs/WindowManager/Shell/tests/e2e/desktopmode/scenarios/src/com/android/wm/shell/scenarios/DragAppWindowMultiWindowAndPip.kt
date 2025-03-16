@@ -45,9 +45,9 @@ open class DragAppWindowMultiWindowAndPip : DragAppWindowScenarioTestBase()
     @Before
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
+        testApp.enterDesktopMode(wmHelper, device)
         // Set string extra to ensure the app is on PiP mode at launch
         pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = mapOf("enter_pip" to "true"))
-        testApp.enterDesktopWithDrag(wmHelper, device)
         mailApp.launchViaIntent(wmHelper)
         newTasksApp.launchViaIntent(wmHelper)
         imeApp.launchViaIntent(wmHelper)

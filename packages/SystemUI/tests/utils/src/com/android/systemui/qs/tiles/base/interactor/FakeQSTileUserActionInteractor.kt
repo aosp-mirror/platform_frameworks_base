@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles.base.interactor
 
+import com.android.systemui.plugins.qs.TileDetailsViewModel
+import com.android.systemui.qs.FakeTileDetailsViewModel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -31,4 +33,7 @@ class FakeQSTileUserActionInteractor<T> : QSTileUserActionInteractor<T> {
     override suspend fun handleInput(input: QSTileInput<T>) {
         mutex.withLock { mutableInputs.add(input) }
     }
+
+    override var detailsViewModel: TileDetailsViewModel? =
+        FakeTileDetailsViewModel("FakeQSTileUserActionInteractor")
 }

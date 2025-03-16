@@ -397,7 +397,7 @@ final class DeletePackageHelper {
 
         try {
             executeDeletePackageLIF(action, packageName, deleteCodeAndResources,
-                    allUserHandles, writeSettings);
+                    allUserHandles, writeSettings, /* keepArtProfile= */ false);
         } catch (SystemDeleteException e) {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: system deletion failure", e);
             return false;
@@ -433,11 +433,11 @@ final class DeletePackageHelper {
     }
 
     public void executeDeletePackage(DeletePackageAction action, String packageName,
-            boolean deleteCodeAndResources, @NonNull int[] allUserHandles, boolean writeSettings)
-            throws SystemDeleteException {
+            boolean deleteCodeAndResources, @NonNull int[] allUserHandles, boolean writeSettings,
+            boolean keepArtProfile)  throws SystemDeleteException {
         try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             executeDeletePackageLIF(action, packageName, deleteCodeAndResources, allUserHandles,
-                    writeSettings);
+                    writeSettings, keepArtProfile);
         }
     }
 
@@ -445,11 +445,14 @@ final class DeletePackageHelper {
     @GuardedBy("mPm.mInstallLock")
     private void executeDeletePackageLIF(DeletePackageAction action,
             String packageName, boolean deleteCodeAndResources,
-            @NonNull int[] allUserHandles, boolean writeSettings) throws SystemDeleteException {
+            @NonNull int[] allUserHandles, boolean writeSettings, boolean keepArtProfile)
+            throws SystemDeleteException {
         final PackageSetting ps = action.mDeletingPs;
         final PackageRemovedInfo outInfo = action.mRemovedInfo;
         final UserHandle user = action.mUser;
-        final int flags = action.mFlags;
+        final int flags =
+                keepArtProfile ? action.mFlags | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES
+                        : action.mFlags;
         final boolean systemApp = PackageManagerServiceUtils.isSystemApp(ps);
 
         // We need to get the permission state before package state is (potentially) destroyed.

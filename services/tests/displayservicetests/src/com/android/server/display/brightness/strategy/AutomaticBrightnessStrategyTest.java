@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.res.Resources;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
@@ -75,6 +76,9 @@ public class AutomaticBrightnessStrategyTest {
 
     @Mock
     private DisplayManagerFlags mDisplayManagerFlags;
+
+    @Mock
+    private Resources mMockResources;
 
     private BrightnessConfiguration mBrightnessConfiguration;
     private float mDefaultScreenAutoBrightnessAdjustment;
@@ -123,7 +127,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
-                lastUserSetBrightness, userSetBrightnessChanged);
+                lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController)
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED,
                         mBrightnessConfiguration,
@@ -150,7 +155,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
-                lastUserSetBrightness, userSetBrightnessChanged);
+                lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController)
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE,
                         mBrightnessConfiguration,
@@ -177,7 +183,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
-                lastUserSetBrightness, userSetBrightnessChanged);
+                lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController)
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE,
                         mBrightnessConfiguration,
@@ -204,7 +211,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
-                lastUserSetBrightness, userSetBrightnessChanged);
+                lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController)
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED,
                         mBrightnessConfiguration,
@@ -233,7 +241,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
-                lastUserSetBrightness, userSetBrightnessChanged);
+                lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController)
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED,
                         mBrightnessConfiguration,
@@ -261,7 +270,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE, lastUserSetBrightness,
-                userSetBrightnessChanged);
+                userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController)
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE,
                         mBrightnessConfiguration,
@@ -290,7 +300,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
-                lastUserSetBrightness, userSetBrightnessChanged);
+                lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController)
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED,
                         mBrightnessConfiguration,
@@ -319,7 +330,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE, lastUserSetBrightness,
-                userSetBrightnessChanged);
+                userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController)
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE,
                         mBrightnessConfiguration,
@@ -352,7 +364,8 @@ public class AutomaticBrightnessStrategyTest {
         when(mAutomaticBrightnessController.isInIdleMode()).thenReturn(true);
         mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
-                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged);
+                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController, never())
                 .switchMode(anyInt(), /* sendUpdate= */ anyBoolean());
 
@@ -361,21 +374,24 @@ public class AutomaticBrightnessStrategyTest {
         when(mAutomaticBrightnessController.isInIdleMode()).thenReturn(false);
         mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
-                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged);
+                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         verify(mAutomaticBrightnessController).switchMode(
                 AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT,
                 /* sendUpdate= */ false);
 
         reset(mAutomaticBrightnessController);
         when(mAutomaticBrightnessController.isInIdleMode()).thenReturn(false);
-        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)).thenReturn(
+                true);
         policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
 
         // Validate interaction when automaticBrightnessController is in non-idle mode, display
         // state is DOZE, policy is DOZE and useNormalBrightnessForDoze is false.
         mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_DOZE,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
-                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged);
+                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         // 1st AUTO_BRIGHTNESS_MODE_DOZE
         verify(mAutomaticBrightnessController).switchMode(
                 AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE,
@@ -385,7 +401,8 @@ public class AutomaticBrightnessStrategyTest {
         // state is ON, policy is DOZE and useNormalBrightnessForDoze is false.
         mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
-                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged);
+                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
         // 2nd AUTO_BRIGHTNESS_MODE_DOZE
         verify(mAutomaticBrightnessController, times(2)).switchMode(
                 AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE,
@@ -396,20 +413,52 @@ public class AutomaticBrightnessStrategyTest {
         // state is DOZE, policy is DOZE and useNormalBrightnessForDoze is true.
         mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_DOZE,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
-                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged);
-        // 1st AUTO_BRIGHTNESS_MODE_DEFAULT
-        verify(mAutomaticBrightnessController).switchMode(
-                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT,
+                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
+        // 3rd AUTO_BRIGHTNESS_MODE_DOZE
+        verify(mAutomaticBrightnessController, times(3)).switchMode(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE,
                 /* sendUpdate= */ false);
 
         // Validate interaction when automaticBrightnessController is in non-idle mode, display
         // state is ON, policy is DOZE and useNormalBrightnessForDoze is true.
         mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
-                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged);
-        // 2nd AUTO_BRIGHTNESS_MODE_DEFAULT
+                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ false);
+        // AUTO_BRIGHTNESS_MODE_DEFAULT
+        verify(mAutomaticBrightnessController).switchMode(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT,
+                /* sendUpdate= */ false);
+
+        // Wear Bedtime autobrightness mode feature disabled.
+        when(mDisplayManagerFlags.isAutoBrightnessModeBedtimeWearEnabled()).thenReturn(false);
+        mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON,
+                allowAutoBrightnessWhileDozing, brightnessReason, policy,
+                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ true);
         verify(mAutomaticBrightnessController, times(2)).switchMode(
                 AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT,
+                /* sendUpdate= */ false);
+
+        // Wear Bedtime autobrightness mode feature enabled.
+        when(mDisplayManagerFlags.isAutoBrightnessModeBedtimeWearEnabled()).thenReturn(true);
+        mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON,
+                allowAutoBrightnessWhileDozing, brightnessReason, policy,
+                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ true);
+        verify(mAutomaticBrightnessController).switchMode(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+                /* sendUpdate= */ false);
+
+        // Wear bedtime mode enabled, keep bedtime curve even though doze is requested.
+        mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_DOZE,
+                allowAutoBrightnessWhileDozing, brightnessReason,
+                DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE,
+                useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged,
+                /* isBedtimeModeWearEnabled= */ true);
+        verify(mAutomaticBrightnessController, times(2)).switchMode(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
                 /* sendUpdate= */ false);
     }
 
@@ -429,14 +478,14 @@ public class AutomaticBrightnessStrategyTest {
         setTemporaryAutoBrightnessAdjustment(temporaryAutoBrightnessAdjustments);
         mAutomaticBrightnessStrategy.accommodateUserBrightnessChanges(userSetBrightnessChanged,
                 lastUserSetScreenBrightness, policy, targetDisplayState,
-                        DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
+                DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
                 brightnessConfiguration, autoBrightnessState);
         verify(mAutomaticBrightnessController).configure(autoBrightnessState,
                 brightnessConfiguration,
                 lastUserSetScreenBrightness,
                 userSetBrightnessChanged, temporaryAutoBrightnessAdjustments,
                 /* userChangedAutoBrightnessAdjustment= */ false, policy, targetDisplayState,
-                        DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
+                DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
                 /* shouldResetShortTermModel= */ true);
         assertTrue(mAutomaticBrightnessStrategy.isTemporaryAutoBrightnessAdjustmentApplied());
         assertFalse(mAutomaticBrightnessStrategy.shouldResetShortTermModel());
@@ -447,7 +496,7 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setShouldResetShortTermModel(true);
         mAutomaticBrightnessStrategy.accommodateUserBrightnessChanges(userSetBrightnessChanged,
                 lastUserSetScreenBrightness, policy, targetDisplayState,
-                        DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
+                DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE,
                 brightnessConfiguration, autoBrightnessState);
         assertFalse(mAutomaticBrightnessStrategy.isTemporaryAutoBrightnessAdjustmentApplied());
         assertTrue(mAutomaticBrightnessStrategy.shouldResetShortTermModel());
@@ -572,7 +621,7 @@ public class AutomaticBrightnessStrategyTest {
                 BrightnessReason.REASON_UNKNOWN,
                 DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE, /* lastUserSetScreenBrightness= */ 0.1f,
-                /* userSetBrightnessChanged= */ false);
+                /* userSetBrightnessChanged= */ false,   /* isBedtimeModeWearEnabled= */ false);
         when(mAutomaticBrightnessController.getAutomaticScreenBrightness(null))
                 .thenReturn(Float.NaN);
         assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessValid());
@@ -589,7 +638,7 @@ public class AutomaticBrightnessStrategyTest {
                 BrightnessReason.REASON_UNKNOWN,
                 DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT,
                 DEFAULT_USE_NORMAL_BRIGHTNESS_FOR_DOZE, /* lastUserSetScreenBrightness= */ 0.1f,
-                /* userSetBrightnessChanged= */ false);
+                /* userSetBrightnessChanged= */ false,   /* isBedtimeModeWearEnabled= */ false);
         when(mAutomaticBrightnessController.getAutomaticScreenBrightness(null))
                 .thenReturn(0.2f);
         assertTrue(mAutomaticBrightnessStrategy.isAutoBrightnessValid());
@@ -637,7 +686,7 @@ public class AutomaticBrightnessStrategyTest {
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
                 .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
-                        /* userSetBrightnessChanged= */ true));
+                        /* userSetBrightnessChanged= */ true, /* isStylusBeingUsed */ false));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 
@@ -686,7 +735,7 @@ public class AutomaticBrightnessStrategyTest {
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
                 .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
-                        /* userSetBrightnessChanged= */ true));
+                        /* userSetBrightnessChanged= */ true, /* isStylusBeingUsed */ false));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 
@@ -725,7 +774,7 @@ public class AutomaticBrightnessStrategyTest {
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
                 .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
-                        /* userSetBrightnessChanged= */ true));
+                        /* userSetBrightnessChanged= */ true, /* isStylusBeingUsed */ false));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 
@@ -764,7 +813,7 @@ public class AutomaticBrightnessStrategyTest {
                 .build();
         DisplayBrightnessState actualDisplayBrightnessState = mAutomaticBrightnessStrategy
                 .updateBrightness(new StrategyExecutionRequest(displayPowerRequest, 0.6f,
-                        /* userSetBrightnessChanged= */ true));
+                        /* userSetBrightnessChanged= */ true, /* isStylusBeingUsed */ false));
         assertEquals(expectedDisplayBrightnessState, actualDisplayBrightnessState);
     }
 

@@ -109,7 +109,7 @@ public class AutomaticBrightnessStrategy2 {
     public void setAutoBrightnessState(int targetDisplayState,
             boolean allowAutoBrightnessWhileDozingConfig, int brightnessReason, int policy,
             boolean useNormalBrightnessForDoze, float lastUserSetScreenBrightness,
-            boolean userSetBrightnessChanged) {
+            boolean userSetBrightnessChanged, boolean isBedtimeModeEnabled) {
         // If the policy is POLICY_DOZE and the display state is not STATE_OFF, auto-brightness
         // should only be enabled if the config allows it
         final boolean autoBrightnessEnabledInDoze = allowAutoBrightnessWhileDozingConfig

@@ -50,6 +50,10 @@ constexpr bool skip_eglmanager_telemetry() {
 constexpr bool resample_gainmap_regions() {
     return false;
 }
+
+constexpr bool query_global_priority() {
+    return false;
+}
 }  // namespace hwui_flags
 #endif
 
@@ -109,7 +113,7 @@ float Properties::maxHdrHeadroomOn8bit = 5.f;  // TODO: Refine this number
 bool Properties::clipSurfaceViews = false;
 bool Properties::hdr10bitPlus = false;
 bool Properties::skipTelemetry = false;
-bool Properties::resampleGainmapRegions = false;
+bool Properties::queryGlobalPriority = false;
 
 int Properties::timeoutMultiplier = 1;
 
@@ -185,8 +189,7 @@ bool Properties::load() {
     clipSurfaceViews =
             base::GetBoolProperty("debug.hwui.clip_surfaceviews", hwui_flags::clip_surfaceviews());
     hdr10bitPlus = hwui_flags::hdr_10bit_plus();
-    resampleGainmapRegions = base::GetBoolProperty("debug.hwui.resample_gainmap_regions",
-                                                   hwui_flags::resample_gainmap_regions());
+    queryGlobalPriority = hwui_flags::query_global_priority();
 
     timeoutMultiplier = android::base::GetIntProperty("ro.hw_timeout_multiplier", 1);
     skipTelemetry = base::GetBoolProperty(PROPERTY_SKIP_EGLMANAGER_TELEMETRY,
@@ -280,6 +283,12 @@ bool Properties::isDrawingEnabled() {
 
 bool Properties::initializeGlAlways() {
     return base::GetBoolProperty(PROPERTY_INITIALIZE_GL_ALWAYS, hwui_flags::initialize_gl_always());
+}
+
+bool Properties::resampleGainmapRegions() {
+    static bool sResampleGainmapRegions = base::GetBoolProperty(
+            "debug.hwui.resample_gainmap_regions", hwui_flags::resample_gainmap_regions());
+    return sResampleGainmapRegions;
 }
 
 }  // namespace uirenderer

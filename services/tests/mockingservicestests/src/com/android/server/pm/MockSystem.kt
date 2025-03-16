@@ -218,6 +218,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val handler = TestHandler(null)
         val defaultAppProvider: DefaultAppProvider = mock()
         val backgroundHandler = TestHandler(null)
+        val packageInstallerService: PackageInstallerService = mock()
+        val installDependencyHelper: InstallDependencyHelper = mock()
         val updateOwnershipHelper: UpdateOwnershipHelper = mock()
     }
 
@@ -306,6 +308,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.injector.handler) { mocks.handler }
         whenever(mocks.injector.defaultAppProvider) { mocks.defaultAppProvider }
         whenever(mocks.injector.backgroundHandler) { mocks.backgroundHandler }
+        whenever(mocks.injector.packageInstallerService) { mocks.packageInstallerService }
         whenever(mocks.injector.updateOwnershipHelper) { mocks.updateOwnershipHelper }
         whenever(mocks.injector.getSystemService(AppOpsManager::class.java)) { mocks.appOpsManager }
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
@@ -332,6 +335,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             DEVICE_PROVISIONING_PACKAGE_NAME
         }
         whenever(mocks.apexManager.activeApexInfos).thenReturn(DEFAULT_ACTIVE_APEX_INFO_LIST)
+        whenever(mocks.packageInstallerService.installDependencyHelper).thenReturn(
+            mocks.installDependencyHelper)
         whenever(mocks.settings.packagesLocked).thenReturn(mSettingsMap)
         whenever(mocks.settings.internalVersion).thenReturn(DEFAULT_VERSION_INFO)
         whenever(mocks.settings.keySetManagerService).thenReturn(mocks.keySetManagerService)

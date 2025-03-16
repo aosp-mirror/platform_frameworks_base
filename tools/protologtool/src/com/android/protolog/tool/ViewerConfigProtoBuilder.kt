@@ -28,10 +28,14 @@ class ViewerConfigProtoBuilder : ProtoLogTool.ProtologViewerConfigBuilder {
      * @return a byte array of a ProtoLogViewerConfig proto message encoding all the viewer
      * configurations mapping protolog hashes to message information and log group information.
      */
-    override fun build(statements: Map<ProtoLogTool.LogCall, Long>): ByteArray {
+    override fun build(groups: Collection<LogGroup>, statements: Map<ProtoLogTool.LogCall, Long>): ByteArray {
         val configBuilder = ProtoLogViewerConfig.newBuilder()
 
-        val groups = statements.map { it.key.logGroup }.toSet()
+        // TODO(b/373754057): We are passing all the groups now, because some groups might only be
+        //  used by Kotlin code that is not processed, but for group that get enabled to log to
+        //  logcat we try and load the viewer configurations for this group, so the group must exist
+        //  in the viewer config. Once Kotlin is pre-processed or this logic changes we should only
+        //  use the groups that are actually used as an optimization.
         val groupIds = mutableMapOf<LogGroup, Int>()
         groups.forEach {
             groupIds.putIfAbsent(it, groupIds.size + 1)

@@ -191,4 +191,9 @@
     <item msgid="3079622119444911877">"Joaktive"</item>
     <item msgid="3028994095749238254">"Aktive"</item>
   </string-array>
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"Nuk ofrohen"</item>
+    <item msgid="6419996398343291862">"Joaktive"</item>
+    <item msgid="5908720590832378783">"Aktive"</item>
+  </string-array>
 </resources>

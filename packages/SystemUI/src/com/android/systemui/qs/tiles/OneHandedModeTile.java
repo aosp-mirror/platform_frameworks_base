@@ -51,8 +51,8 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
 
     public static final String TILE_SPEC = "onehanded";
 
-    private final Icon mIcon = ResourceIcon.get(
-            com.android.internal.R.drawable.ic_qs_one_handed_mode);
+    @Nullable
+    private Icon mIcon = null;
     private final UserSettingObserver mSetting;
 
     @Inject
@@ -125,6 +125,10 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (mIcon == null) {
+            mIcon = maybeLoadResourceIcon(com.android.internal.R.drawable.ic_qs_one_handed_mode);
+        }
+
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;
         state.value = enabled;

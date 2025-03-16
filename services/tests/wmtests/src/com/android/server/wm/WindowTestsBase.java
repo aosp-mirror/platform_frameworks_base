@@ -1027,7 +1027,8 @@ public class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             @Override
-            public void setImeInputTargetRequestedVisibility(boolean visible) {
+            public void setImeInputTargetRequestedVisibility(boolean visible,
+                    @NonNull ImeTracker.Token statsToken) {
             }
         };
     }
@@ -1121,6 +1122,15 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         final Configuration c = new Configuration();
         displayContent.computeScreenConfiguration(c);
         displayContent.onRequestedOverrideConfigurationChanged(c);
+    }
+
+    static void makeDisplayLargeScreen(DisplayContent displayContent) {
+        final int swDp = displayContent.getConfiguration().smallestScreenWidthDp;
+        if (swDp < WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP) {
+            final int height = 100 + (int) (displayContent.getDisplayMetrics().density
+                    * WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP);
+            resizeDisplay(displayContent, 100 + height, height);
+        }
     }
 
     /** Used for the tests that assume the display is portrait by default. */
@@ -1223,7 +1233,14 @@ public class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     static ComponentName getUniqueComponentName() {
-        return ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
+        return getUniqueComponentName(DEFAULT_COMPONENT_PACKAGE_NAME);
+    }
+
+    static ComponentName getUniqueComponentName(String packageName) {
+        if (packageName == null) {
+            packageName = DEFAULT_COMPONENT_PACKAGE_NAME;
+        }
+        return ComponentName.createRelative(packageName,
                 DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
     }
 
@@ -1298,8 +1315,7 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         ActivityBuilder setActivityTheme(int theme) {
             mActivityTheme = theme;
             // Use the real package of test so it can get a valid context for theme.
-            mComponent = ComponentName.createRelative(mService.mContext.getPackageName(),
-                    DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
+            mComponent = getUniqueComponentName(mService.mContext.getPackageName());
             return this;
         }
 
@@ -1743,7 +1759,7 @@ public class WindowTestsBase extends SystemServiceTestsBase {
             if (mIntent == null) {
                 mIntent = new Intent();
                 if (mComponent == null) {
-                    mComponent = getUniqueComponentName();
+                    mComponent = getUniqueComponentName(mPackage);
                 }
                 mIntent.setComponent(mComponent);
                 mIntent.setFlags(mFlags);
@@ -2023,8 +2039,21 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         return new TestWindowToken(type, dc, persistOnEmpty);
     }
 
+    static TestWindowToken createTestClientWindowToken(int type, DisplayContent dc) {
+        SystemServicesTestRule.checkHoldsLock(dc.mWmService.mGlobalLock);
+
+        return new TestWindowToken(type, dc, false /* persistOnEmpty */, true /* fromClient */);
+    }
+
     /** Used so we can gain access to some protected members of the {@link WindowToken} class */
     static class TestWindowToken extends WindowToken {
+
+        private TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty,
+                boolean fromClient) {
+            super(dc.mWmService, mock(IBinder.class), type, persistOnEmpty, dc,
+                    false /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
+                    fromClient /* fromClientToken */, null /* options */);
+        }
 
         private TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
             super(dc.mWmService, mock(IBinder.class), type, persistOnEmpty, dc,

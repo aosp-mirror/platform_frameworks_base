@@ -21,8 +21,9 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.res.R
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.dagger.HeaderClickAction
 import com.android.systemui.statusbar.notification.dagger.HeaderText
 import com.android.systemui.statusbar.notification.dagger.NodeLabel
@@ -32,30 +33,37 @@ import javax.inject.Inject
 
 interface SectionHeaderController {
     fun reinflateView(parent: ViewGroup)
+
     val headerView: SectionHeaderView?
+
     fun setClearSectionEnabled(enabled: Boolean)
+
     fun setOnClearSectionClickListener(listener: View.OnClickListener)
 }
 
 @SectionHeaderScope
-class SectionHeaderNodeControllerImpl @Inject constructor(
+class SectionHeaderNodeControllerImpl
+@Inject
+constructor(
     @NodeLabel override val nodeLabel: String,
-    private val layoutInflater: LayoutInflater,
+    @ShadeDisplayAware private val layoutInflater: LayoutInflater,
     @HeaderText @StringRes private val headerTextResId: Int,
     private val activityStarter: ActivityStarter,
-    @HeaderClickAction private val clickIntentAction: String
+    @HeaderClickAction private val clickIntentAction: String,
 ) : NodeController, SectionHeaderController {
 
     private var _view: SectionHeaderView? = null
     private var clearAllButtonEnabled = false
     private var clearAllClickListener: View.OnClickListener? = null
-    private val onHeaderClickListener = View.OnClickListener {
-        activityStarter.startActivity(
+    private val onHeaderClickListener =
+        View.OnClickListener {
+            activityStarter.startActivity(
                 Intent(clickIntentAction),
                 true /* onlyProvisioned */,
                 true /* dismissShade */,
-                Intent.FLAG_ACTIVITY_SINGLE_TOP)
-    }
+                Intent.FLAG_ACTIVITY_SINGLE_TOP,
+            )
+        }
 
     override fun reinflateView(parent: ViewGroup) {
         var oldPos = -1
@@ -66,11 +74,12 @@ class SectionHeaderNodeControllerImpl @Inject constructor(
                 parent.removeView(_view)
             }
         }
-        val inflated = layoutInflater.inflate(
+        val inflated =
+            layoutInflater.inflate(
                 R.layout.status_bar_notification_section_header,
                 parent,
-                false /* attachToRoot */)
-                as SectionHeaderView
+                false, /* attachToRoot */
+            ) as SectionHeaderView
         inflated.setHeaderText(headerTextResId)
         inflated.setOnHeaderClickListener(onHeaderClickListener)
         clearAllClickListener?.let { inflated.setOnClearAllClickListener(it) }
@@ -100,7 +109,10 @@ class SectionHeaderNodeControllerImpl @Inject constructor(
 
     override val view: View
         get() = _view!!
+
     override fun offerToKeepInParentForAnimation(): Boolean = false
+
     override fun removeFromParentIfKeptForAnimation(): Boolean = false
+
     override fun resetKeepInParentForAnimation() {}
 }

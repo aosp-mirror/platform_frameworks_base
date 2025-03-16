@@ -15,9 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-/**
- * Known shapes, used for modifiers (clip/background/border)
- */
+/** Known shapes, used for modifiers (clip/background/border) */
 public class ShapeType {
     public static int RECTANGLE = 0;
     public static int CIRCLE = 1;

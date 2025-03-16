@@ -197,6 +197,42 @@ public abstract class PackageManager {
             "android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES";
 
     /**
+     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag
+     * specifying whether the app should be put into the "restricted" backup mode when it's started
+     * for backup and restore operations.
+     *
+     * <p> See <a
+     * href="https://developer.android.com/identity/data/autobackup#ImplementingBackupAgent"> for
+     * information about restricted mode</a>.
+     *
+     * <p> Starting with Android 16 apps may not be started in restricted mode based on this
+     * property.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.app.backup.PROPERTY_USE_RESTRICTED_BACKUP_MODE"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     *
+     * <p>If this property is set, the operating system will respect it for now (see Note below).
+     * If it's not set, the behavior depends on the SDK level that the app is targeting. For apps
+     * targeting SDK level {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or lower, the
+     * property defaults to {@code true}. For apps targeting SDK level
+     * {@link android.os.Build.VERSION_CODES#BAKLAVA} or higher, the operating system will make a
+     * decision dynamically.
+     *
+     * <p>Note: It's not recommended to set this property to {@code true} unless absolutely
+     * necessary. In a future Android version, this property may be deprecated in favor of removing
+     * restricted mode completely.
+     */
+    @FlaggedApi(com.android.server.backup.Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public static final String PROPERTY_USE_RESTRICTED_BACKUP_MODE =
+            "android.app.backup.PROPERTY_USE_RESTRICTED_BACKUP_MODE";
+
+    /**
      * Application level property that an app can specify to opt-out from having private data
      * directories both on the internal and external storages.
      *
@@ -771,7 +807,6 @@ public abstract class PackageManager {
                 inputSignatures = "private final @android.annotation.Nullable java.lang.String mPackageName\nprivate final @android.annotation.Nullable android.content.ComponentName mComponentName\nprivate final @android.content.pm.PackageManager.EnabledState int mEnabledState\nprivate final @android.content.pm.PackageManager.EnabledFlags int mEnabledFlags\npublic @android.annotation.NonNull java.lang.String getPackageName()\npublic @android.annotation.Nullable java.lang.String getClassName()\npublic  boolean isComponent()\nclass ComponentEnabledSetting extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false)")
         @Deprecated
         private void __metadata() {}
-
 
         //@formatter:on
         // End of generated code
@@ -4918,6 +4953,64 @@ public abstract class PackageManager {
   public static final String FEATURE_CONTEXTUAL_SEARCH_HELPER =
       "android.software.contextualsearch";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports XR input from XR controllers.
+     */
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_INPUT_CONTROLLER =
+        "android.hardware.xr.input.controller";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports XR input from the user's hands.
+     */
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_INPUT_HAND_TRACKING =
+        "android.hardware.xr.input.hand_tracking";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports XR input from the user's eye gaze.
+     */
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_INPUT_EYE_TRACKING =
+        "android.hardware.xr.input.eye_tracking";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports <a href="https://www.khronos.org/openxr/">OpenXR</a>. The feature version indicates
+     * the highest version of OpenXR supported by the device using the following encoding:
+     * <ul>
+     * <li> Major version in bits 31-16</li>
+     * <li> Minor version in bits 15-0</li>
+     * </ul>
+     * This is the same encoding as the top 32 bits of an {@code XrVersion}.
+     * <p>
+     * Example: OpenXR 1.1 support is encoded as 0x00010001.
+     */
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_API_OPENXR =
+        "android.software.xr.api.openxr";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports the Android XR Spatial APIs. The feature version indicates the highest version of
+     * the Android XR Spatial APIs supported by the device.
+     *
+     * <p>Also see <a href="https://developer.android.com/xr">Getting started with Spatializing
+     * your app</a>.
+     */
+    // TODO(b/374330735): update public documentation once link content is finalized
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_API_SPATIAL =
+        "android.software.xr.api.spatial";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
@@ -6641,6 +6734,11 @@ public abstract class PackageManager {
      * If the given permission already exists, the info you supply here
      * will be used to update it.
      *
+     * @deprecated Support for dynamic permissions is going to be removed, and apps that use dynamic
+     * permissions should declare their permissions statically inside their app manifest instead.
+     * This method will become a no-op in a future Android release and eventually be removed from
+     * the SDK.
+     *
      * @param info Description of the permission to be added.
      *
      * @return Returns true if a new permission was created, false if an
@@ -6651,7 +6749,9 @@ public abstract class PackageManager {
      *
      * @see #removePermission(String)
      */
-    //@Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_PERMISSION_TREE_APIS_DEPRECATED)
+    @Deprecated
     public abstract boolean addPermission(@NonNull PermissionInfo info);
 
     /**
@@ -6660,8 +6760,15 @@ public abstract class PackageManager {
      * allowing it to return quicker and batch a series of adds at the
      * expense of no guarantee the added permission will be retained if
      * the device is rebooted before it is written.
+     *
+     * @deprecated Support for dynamic permissions is going to be removed, and apps that use dynamic
+     * permissions should declare their permissions statically inside their app manifest instead.
+     * This method will become a no-op in a future Android release and eventually be removed from
+     * the SDK.
      */
-    //@Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_PERMISSION_TREE_APIS_DEPRECATED)
+    @Deprecated
     public abstract boolean addPermissionAsync(@NonNull PermissionInfo info);
 
     /**
@@ -6670,6 +6777,11 @@ public abstract class PackageManager {
      * -- you are only allowed to remove permissions that you are allowed
      * to add.
      *
+     * @deprecated Support for dynamic permissions is going to be removed, and apps that use dynamic
+     * permissions should declare their permissions statically inside their app manifest instead.
+     * This method will become a no-op in a future Android release and eventually be removed from
+     * the SDK.
+     *
      * @param permName The name of the permission to remove.
      *
      * @throws SecurityException if you are not allowed to remove the
@@ -6677,7 +6789,9 @@ public abstract class PackageManager {
      *
      * @see #addPermission(PermissionInfo)
      */
-    //@Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_PERMISSION_TREE_APIS_DEPRECATED)
+    @Deprecated
     public abstract void removePermission(@NonNull String permName);
 
     /**
@@ -10899,6 +11013,41 @@ public abstract class PackageManager {
     }
 
     /**
+     * Set the page compat mode override for given package
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public void setPageSizeAppCompatFlagsSettingsOverride(@NonNull String packageName,
+            boolean enabled) {
+        throw new UnsupportedOperationException(
+                "setPageSizeAppCompatFlagsSettingsOverride not implemented in subclass");
+    }
+
+    /**
+     * Check whether page size app compat mode is enabled for given package
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public boolean isPageSizeCompatEnabled(@NonNull String packageName) {
+        throw new UnsupportedOperationException(
+                "isPageSizeCompatEnabled not implemented in subclass");
+    }
+
+    /**
+     * Get the page size app compat warning dialog to show at app launch time
+     *
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public String getPageSizeCompatWarningMessage(@NonNull String packageName) {
+        throw new UnsupportedOperationException(
+                "getPageSizeCompatWarningMessage not implemented in subclass");
+    }
+
+     /**
      * Returns the harmful app warning string for the given app, or null if there is none set.
      *
      * @param packageName The full name of the desired package.
@@ -11494,7 +11643,7 @@ public abstract class PackageManager {
     private static final PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>
             sApplicationInfoCache =
             new PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>(
-                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO_CACHE,
                     "getApplicationInfo") {
                 @Override
                 public ApplicationInfo recompute(ApplicationInfoQuery query) {
@@ -11523,18 +11672,6 @@ public abstract class PackageManager {
      */
     public static void disableApplicationInfoCache() {
         sApplicationInfoCache.disableLocal();
-    }
-
-    private static final PropertyInvalidatedCache.AutoCorker sCacheAutoCorker =
-            new PropertyInvalidatedCache.AutoCorker(PermissionManager.CACHE_KEY_PACKAGE_INFO);
-
-    /**
-     * Invalidate caches of package and permission information system-wide.
-     *
-     * @hide
-     */
-    public static void invalidatePackageInfoCache() {
-        sCacheAutoCorker.autoCork();
     }
 
     // Some of the flags don't affect the query result, but let's be conservative and cache
@@ -11595,7 +11732,7 @@ public abstract class PackageManager {
     private static final PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>
             sPackageInfoCache =
             new PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>(
-                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO_CACHE,
                     "getPackageInfo") {
                 @Override
                 public PackageInfo recompute(PackageInfoQuery query) {
@@ -11627,17 +11764,40 @@ public abstract class PackageManager {
     /**
      * Inhibit package info cache invalidations when correct.
      *
-     * @hide */
+     * @hide
+     */
     public static void corkPackageInfoCache() {
-        PropertyInvalidatedCache.corkInvalidations(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+        sPackageInfoCache.corkInvalidations();
     }
 
     /**
      * Enable package info cache invalidations.
      *
-     * @hide */
+     * @hide
+     */
     public static void uncorkPackageInfoCache() {
-        PropertyInvalidatedCache.uncorkInvalidations(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+        sPackageInfoCache.uncorkInvalidations();
+    }
+
+    // This auto-corker is obsolete once the separate permission notifications feature is
+    // committed.
+    private static final PropertyInvalidatedCache.AutoCorker sCacheAutoCorker =
+            PropertyInvalidatedCache.separatePermissionNotificationsEnabled()
+            ? null
+            : new PropertyInvalidatedCache
+                    .AutoCorker(PermissionManager.CACHE_KEY_PACKAGE_INFO_CACHE);
+
+    /**
+     * Invalidate caches of package and permission information system-wide.
+     *
+     * @hide
+     */
+    public static void invalidatePackageInfoCache() {
+        if (PropertyInvalidatedCache.separatePermissionNotificationsEnabled()) {
+            sPackageInfoCache.invalidateCache();
+        } else {
+            sCacheAutoCorker.autoCork();
+        }
     }
 
     /**

@@ -45,15 +45,14 @@ import android.view.InputDevice;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.test.input.MockInputManagerRule;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,23 +72,22 @@ public class InputDeviceLightsManagerTest {
     private static final int DEVICE_ID = 1000;
     private static final int PLAYER_ID = 3;
 
-    @Rule public final MockitoRule mockito = MockitoJUnit.rule();
+    @Rule
+    public final MockInputManagerRule mInputManagerRule = new MockInputManagerRule();
 
     private InputManager mInputManager;
 
-    @Mock private IInputManager mIInputManagerMock;
     private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
     @Before
     public void setUp() throws Exception {
         final Context context = spy(
                 new ContextWrapper(InstrumentationRegistry.getInstrumentation().getContext()));
-        when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{DEVICE_ID});
+        when(mInputManagerRule.getMock().getInputDeviceIds()).thenReturn(new int[]{DEVICE_ID});
 
-        when(mIInputManagerMock.getInputDevice(eq(DEVICE_ID))).thenReturn(
+        when(mInputManagerRule.getMock().getInputDevice(eq(DEVICE_ID))).thenReturn(
                 createInputDevice(DEVICE_ID));
 
-        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mIInputManagerMock);
         mInputManager = new InputManager(context);
         when(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(mInputManager);
 
@@ -102,7 +100,7 @@ public class InputDeviceLightsManagerTest {
                 lightStatesById.put(lightIds[i], lightStates[i]);
             }
             return null;
-        }).when(mIInputManagerMock).setLightStates(eq(DEVICE_ID),
+        }).when(mInputManagerRule.getMock()).setLightStates(eq(DEVICE_ID),
                 any(int[].class), any(LightState[].class), any(IBinder.class));
 
         doAnswer(invocation -> {
@@ -111,7 +109,7 @@ public class InputDeviceLightsManagerTest {
                 return lightStatesById.get(lightId);
             }
             return new LightState(0);
-        }).when(mIInputManagerMock).getLightState(eq(DEVICE_ID), anyInt());
+        }).when(mInputManagerRule.getMock()).getLightState(eq(DEVICE_ID), anyInt());
     }
 
     @After
@@ -130,7 +128,7 @@ public class InputDeviceLightsManagerTest {
 
     private void mockLights(Light[] lights) throws Exception {
         // Mock the Lights returned form InputManagerService
-        when(mIInputManagerMock.getLights(eq(DEVICE_ID))).thenReturn(
+        when(mInputManagerRule.getMock().getLights(eq(DEVICE_ID))).thenReturn(
                 new ArrayList(Arrays.asList(lights)));
     }
 
@@ -151,7 +149,7 @@ public class InputDeviceLightsManagerTest {
 
         LightsManager lightsManager = device.getLightsManager();
         List<Light> lights = lightsManager.getLights();
-        verify(mIInputManagerMock).getLights(eq(DEVICE_ID));
+        verify(mInputManagerRule.getMock()).getLights(eq(DEVICE_ID));
         assertEquals(lights, Arrays.asList(mockedLights));
     }
 
@@ -185,9 +183,9 @@ public class InputDeviceLightsManagerTest {
                 .build());
         IBinder token = session.getToken();
 
-        verify(mIInputManagerMock).openLightSession(eq(DEVICE_ID),
+        verify(mInputManagerRule.getMock()).openLightSession(eq(DEVICE_ID),
                 any(String.class), eq(token));
-        verify(mIInputManagerMock).setLightStates(eq(DEVICE_ID), eq(new int[]{1, 2, 3}),
+        verify(mInputManagerRule.getMock()).setLightStates(eq(DEVICE_ID), eq(new int[]{1, 2, 3}),
                 eq(states), eq(token));
 
         // Then all 3 should turn on.
@@ -204,7 +202,7 @@ public class InputDeviceLightsManagerTest {
 
         // close session
         session.close();
-        verify(mIInputManagerMock).closeLightSession(eq(DEVICE_ID), eq(token));
+        verify(mInputManagerRule.getMock()).closeLightSession(eq(DEVICE_ID), eq(token));
     }
 
     @Test
@@ -232,9 +230,9 @@ public class InputDeviceLightsManagerTest {
                 .build());
         IBinder token = session.getToken();
 
-        verify(mIInputManagerMock).openLightSession(eq(DEVICE_ID),
+        verify(mInputManagerRule.getMock()).openLightSession(eq(DEVICE_ID),
                 any(String.class), eq(token));
-        verify(mIInputManagerMock).setLightStates(eq(DEVICE_ID), eq(new int[]{1}),
+        verify(mInputManagerRule.getMock()).setLightStates(eq(DEVICE_ID), eq(new int[]{1}),
                 eq(states), eq(token));
 
         // Verify the light state
@@ -245,7 +243,7 @@ public class InputDeviceLightsManagerTest {
 
         // close session
         session.close();
-        verify(mIInputManagerMock).closeLightSession(eq(DEVICE_ID), eq(token));
+        verify(mInputManagerRule.getMock()).closeLightSession(eq(DEVICE_ID), eq(token));
     }
 
     @Test

@@ -16,9 +16,13 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.Objects;
 
@@ -28,6 +32,8 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public final class SatelliteSubscriptionInfo implements Parcelable {
     /**
      * The ICC ID used for satellite attachment.
@@ -39,6 +45,9 @@ public final class SatelliteSubscriptionInfo implements Parcelable {
      */
     @NonNull private final String mNiddApn;
 
+    /**
+     * @hide
+     */
     public SatelliteSubscriptionInfo(@NonNull String iccId, @NonNull String niddApn) {
         mIccId = iccId;
         mNiddApn = niddApn;
@@ -60,7 +69,8 @@ public final class SatelliteSubscriptionInfo implements Parcelable {
         dest.writeString8(mNiddApn);
     }
 
-    @NonNull public static final Creator<SatelliteSubscriptionInfo> CREATOR = new Creator<>() {
+    @NonNull
+    public static final Creator<SatelliteSubscriptionInfo> CREATOR = new Creator<>() {
         @Override
         public SatelliteSubscriptionInfo createFromParcel(Parcel in) {
             return new SatelliteSubscriptionInfo(in);
@@ -94,11 +104,17 @@ public final class SatelliteSubscriptionInfo implements Parcelable {
         return Objects.hash(getIccId(), getNiddApn());
     }
 
+    /**
+     * Get ICC ID used for satellite attachment.
+     */
     @NonNull
     public String getIccId() {
         return mIccId;
     }
 
+    /**
+     * Get the NIDD(Non IP Data) APN to be used for carrier roaming to satellite attachment.
+     */
     @NonNull
     public String getNiddApn() {
         return mNiddApn;

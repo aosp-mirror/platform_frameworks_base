@@ -21,6 +21,7 @@ import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
+import android.telephony.satellite.NtnSignalStrength
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.dagger.SysUISingleton
@@ -31,11 +32,7 @@ import javax.inject.Inject
 
 /** Logs for inputs into the mobile pipeline. */
 @SysUISingleton
-class MobileInputLogger
-@Inject
-constructor(
-    @MobileInputLog private val buffer: LogBuffer,
-) {
+class MobileInputLogger @Inject constructor(@MobileInputLog private val buffer: LogBuffer) {
     fun logOnServiceStateChanged(serviceState: ServiceState, subId: Int) {
         buffer.log(
             TAG,
@@ -49,7 +46,7 @@ constructor(
             {
                 "onServiceStateChanged: subId=$int1 emergencyOnly=$bool1 roaming=$bool2" +
                     " operator=$str1"
-            }
+            },
         )
     }
 
@@ -61,7 +58,7 @@ constructor(
                 int1 = subId
                 bool1 = serviceState.isEmergencyOnly
             },
-            { "ACTION_SERVICE_STATE for subId=$int1. ServiceState.isEmergencyOnly=$bool1" }
+            { "ACTION_SERVICE_STATE for subId=$int1. ServiceState.isEmergencyOnly=$bool1" },
         )
     }
 
@@ -70,7 +67,7 @@ constructor(
             TAG,
             LogLevel.INFO,
             { int1 = subId },
-            { "ACTION_SERVICE_STATE for subId=$int1. Intent is missing extras. Ignoring" }
+            { "ACTION_SERVICE_STATE for subId=$int1. Intent is missing extras. Ignoring" },
         )
     }
 
@@ -82,7 +79,16 @@ constructor(
                 int1 = subId
                 str1 = signalStrength.toString()
             },
-            { "onSignalStrengthsChanged: subId=$int1 strengths=$str1" }
+            { "onSignalStrengthsChanged: subId=$int1 strengths=$str1" },
+        )
+    }
+
+    fun logNtnSignalStrengthChanged(signalStrength: NtnSignalStrength) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = signalStrength.level },
+            { "onCarrierRoamingNtnSignalStrengthChanged: level=$int1" },
         )
     }
 
@@ -128,7 +134,7 @@ constructor(
             TAG,
             LogLevel.INFO,
             { bool1 = active },
-            { "onCarrierRoamingNtnModeChanged: $bool1" }
+            { "onCarrierRoamingNtnModeChanged: $bool1" },
         )
     }
 
@@ -146,12 +152,7 @@ constructor(
     }
 
     fun logCarrierConfigChanged(subId: Int) {
-        buffer.log(
-            TAG,
-            LogLevel.INFO,
-            { int1 = subId },
-            { "onCarrierConfigChanged: subId=$int1" },
-        )
+        buffer.log(TAG, LogLevel.INFO, { int1 = subId }, { "onCarrierConfigChanged: subId=$int1" })
     }
 
     fun logOnDataEnabledChanged(enabled: Boolean, subId: Int) {
@@ -175,7 +176,7 @@ constructor(
             TAG,
             LogLevel.INFO,
             { str1 = config.toString() },
-            { "defaultDataSubRatConfig: $str1" }
+            { "defaultDataSubRatConfig: $str1" },
         )
     }
 
@@ -184,7 +185,7 @@ constructor(
             TAG,
             LogLevel.INFO,
             { str1 = mapping.toString() },
-            { "defaultMobileIconMapping: $str1" }
+            { "defaultMobileIconMapping: $str1" },
         )
     }
 
@@ -216,7 +217,7 @@ constructor(
             {
                 "Intent: ACTION_SERVICE_PROVIDERS_UPDATED." +
                     " showSpn=$bool1 spn=$str1 dataSpn=$str2 showPlmn=$bool2 plmn=$str3"
-            }
+            },
         )
     }
 

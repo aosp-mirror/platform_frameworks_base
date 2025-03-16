@@ -28,6 +28,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL
+import android.view.accessibility.AccessibilityEvent
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.android.systemui.res.R
@@ -59,17 +61,17 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
                     ev1: MotionEvent?,
                     ev2: MotionEvent,
                     distanceX: Float,
-                    distanceY: Float
+                    distanceY: Float,
                 ): Boolean {
                     actionsContainer.getBoundsOnScreen(tmpRect)
                     val touchedInActionsContainer =
                         tmpRect.contains(ev2.rawX.toInt(), ev2.rawY.toInt())
                     val canHandleInternallyByScrolling =
-                        touchedInActionsContainer
-                        && actionsContainer.canScrollHorizontally(distanceX.toInt())
+                        touchedInActionsContainer &&
+                            actionsContainer.canScrollHorizontally(distanceX.toInt())
                     return !canHandleInternallyByScrolling
                 }
-            }
+            },
         )
 
     init {
@@ -82,6 +84,20 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
         })
 
         gestureDetector.setIsLongpressEnabled(false)
+
+        // Extend the timeout on any accessibility event (e.g. voice access or explore-by-touch).
+        setAccessibilityDelegate(
+            object : AccessibilityDelegate() {
+                override fun onRequestSendAccessibilityEvent(
+                    host: ViewGroup,
+                    child: View,
+                    event: AccessibilityEvent,
+                ): Boolean {
+                    userInteractionCallback?.invoke()
+                    return super.onRequestSendAccessibilityEvent(host, child, event)
+                }
+            }
+        )
     }
 
     override fun onFinishInflate() {
@@ -106,18 +122,24 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     fun getTouchRegion(gestureInsets: Insets): Region {
         val region = getSwipeRegion()
 
-        // Receive touches in gesture insets so they don't cause TOUCH_OUTSIDE
-        // left edge gesture region
-        val insetRect = Rect(0, 0, gestureInsets.left, displayMetrics.heightPixels)
-        region.op(insetRect, Region.Op.UNION)
-        // right edge gesture region
-        insetRect.set(
-            displayMetrics.widthPixels - gestureInsets.right,
-            0,
-            displayMetrics.widthPixels,
-            displayMetrics.heightPixels
-        )
-        region.op(insetRect, Region.Op.UNION)
+        // only add gesture insets to touch region in gestural mode
+        if (
+            resources.getInteger(com.android.internal.R.integer.config_navBarInteractionMode) ==
+                NAV_BAR_MODE_GESTURAL
+        ) {
+            // Receive touches in gesture insets so they don't cause TOUCH_OUTSIDE
+            // left edge gesture region
+            val insetRect = Rect(0, 0, gestureInsets.left, displayMetrics.heightPixels)
+            region.op(insetRect, Region.Op.UNION)
+            // right edge gesture region
+            insetRect.set(
+                displayMetrics.widthPixels - gestureInsets.right,
+                0,
+                displayMetrics.widthPixels,
+                displayMetrics.heightPixels,
+            )
+            region.op(insetRect, Region.Op.UNION)
+        }
 
         return region
     }
@@ -140,7 +162,12 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
             )
 
         if (cutout == null) {
-            screenshotStatic.setPadding(0, 0, 0, navBarInsets.bottom)
+            screenshotStatic.setPadding(
+                navBarInsets.left,
+                navBarInsets.top,
+                navBarInsets.right,
+                navBarInsets.bottom,
+            )
         } else {
             val waterfall = cutout.waterfallInsets
             if (inPortrait) {
@@ -153,18 +180,18 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
                         cutout.safeInsetBottom + verticalPadding,
                         waterfall.bottom + verticalPadding,
                         minimumBottomPadding,
-                    )
+                    ),
                 )
             } else {
                 screenshotStatic.setPadding(
-                    max(cutout.safeInsetLeft, waterfall.left),
+                    max(cutout.safeInsetLeft, waterfall.left, navBarInsets.left),
                     waterfall.top,
-                    max(cutout.safeInsetRight, waterfall.right),
+                    max(cutout.safeInsetRight, waterfall.right, navBarInsets.right),
                     max(
                         navBarInsets.bottom + verticalPadding,
                         waterfall.bottom + verticalPadding,
                         minimumBottomPadding,
-                    )
+                    ),
                 )
             }
         }

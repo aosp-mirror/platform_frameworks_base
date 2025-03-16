@@ -81,10 +81,12 @@
             android:exported="false" />
 
         <activity android:name=".PackageInstallerActivity"
-                android:exported="false" />
+                android:exported="false"
+                android:enableOnBackInvokedCallback="false" />
 
         <activity android:name=".InstallInstalling"
-                android:exported="false" />
+                android:exported="false"
+                android:enableOnBackInvokedCallback="false" />
 
         <receiver android:name=".common.InstallEventReceiver"
                 android:permission="android.permission.INSTALL_PACKAGES"
@@ -138,6 +140,7 @@
 
         <activity android:name=".UninstallUninstalling"
             android:excludeFromRecents="true"
+            android:enableOnBackInvokedCallback="false"
             android:exported="false" />
 
         <receiver android:name=".UninstallFinish"

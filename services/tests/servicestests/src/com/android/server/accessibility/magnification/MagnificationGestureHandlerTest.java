@@ -93,7 +93,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void onMotionEvent_isFromMouse_handleMouseOrStylusEvent() {
         final MotionEvent mouseEvent = MotionEvent.obtain(0, 0, ACTION_HOVER_MOVE, 0, 0, 0);
         mouseEvent.setSource(InputDevice.SOURCE_MOUSE);
@@ -108,7 +108,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void onMotionEvent_isFromStylus_handleMouseOrStylusEvent() {
         final MotionEvent stylusEvent = MotionEvent.obtain(0, 0, ACTION_HOVER_MOVE, 0, 0, 0);
         stylusEvent.setSource(InputDevice.SOURCE_STYLUS);
@@ -123,7 +123,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void onMotionEvent_isFromMouse_handleMouseOrStylusEventNotCalled() {
         final MotionEvent mouseEvent = MotionEvent.obtain(0, 0, ACTION_HOVER_MOVE, 0, 0, 0);
         mouseEvent.setSource(InputDevice.SOURCE_MOUSE);
@@ -138,7 +138,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE_BUGFIX)
     public void onMotionEvent_isFromStylus_handleMouseOrStylusEventNotCalled() {
         final MotionEvent stylusEvent = MotionEvent.obtain(0, 0, ACTION_HOVER_MOVE, 0, 0, 0);
         stylusEvent.setSource(InputDevice.SOURCE_STYLUS);

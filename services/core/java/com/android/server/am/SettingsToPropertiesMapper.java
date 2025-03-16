@@ -40,6 +40,8 @@ import android.aconfigd.Aconfigd.StorageRequestMessages;
 import android.aconfigd.Aconfigd.StorageReturnMessage;
 import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
+import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
+import static com.android.aconfig_new_storage.Flags.supportClearLocalOverridesImmediately;
 import static com.android.aconfig_new_storage.Flags.enableAconfigdFromMainline;
 
 import java.io.DataInputStream;
@@ -139,18 +141,30 @@ public class SettingsToPropertiesMapper {
     // The list is sorted.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "tv_os",
+        "aaos_carframework_triage",
+        "aaos_performance_triage",
+        "aaos_input_triage",
+        "aaos_user_triage",
+        "aaos_window_triage",
+        "aaos_audio_triage",
+        "aaos_power_triage",
+        "aaos_storage_triage",
+        "aaos_sdv",
+        "aaos_vac_triage",
         "accessibility",
         "android_core_networking",
         "android_health_services",
         "android_sdk",
-        "android_stylus",
         "aoc",
         "app_widgets",
         "arc_next",
         "art_mainline",
         "art_performance",
         "attack_tools",
+        "automotive_cast",
         "avic",
+        "desktop_firmware",
         "biometrics",
         "biometrics_framework",
         "biometrics_integration",
@@ -174,6 +188,8 @@ public class SettingsToPropertiesMapper {
         "core_libraries",
         "crumpet",
         "dck_framework",
+        "desktop_hwsec",
+        "desktop_stats",
         "devoptions_settings",
         "game",
         "gpu",
@@ -189,6 +205,7 @@ public class SettingsToPropertiesMapper {
         "make_pixel_haptics",
         "media_audio",
         "media_drm",
+        "media_projection",
         "media_reliability",
         "media_solutions",
         "media_tv",
@@ -201,8 +218,12 @@ public class SettingsToPropertiesMapper {
         "pixel_bluetooth",
         "pixel_connectivity_gps",
         "pixel_continuity",
+        "pixel_display",
+        "pixel_perf",
         "pixel_sensors",
+        "pixel_state_server",
         "pixel_system_sw_video",
+        "pixel_video_sw",
         "pixel_watch",
         "platform_compat",
         "platform_security",
@@ -212,6 +233,8 @@ public class SettingsToPropertiesMapper {
         "preload_safety",
         "printing",
         "privacy_infra_policy",
+        "psap_ai",
+        "ravenwood",
         "resource_manager",
         "responsible_apis",
         "rust",
@@ -228,6 +251,7 @@ public class SettingsToPropertiesMapper {
         "text",
         "threadnetwork",
         "treble",
+        "tv_os_media",
         "tv_system_ui",
         "usb",
         "vibrator",
@@ -244,8 +268,11 @@ public class SettingsToPropertiesMapper {
         "wear_system_health",
         "wear_systems",
         "wear_sysui",
+        "wear_system_managed_surfaces",
+        "wear_watchfaces",
         "window_surfaces",
         "windowing_frontend",
+        "xr",
     };
 
     public static final String NAMESPACE_REBOOT_STAGING = "staged";
@@ -516,14 +543,18 @@ public class SettingsToPropertiesMapper {
     static void writeFlagOverrideRequest(
         ProtoOutputStream proto, String packageName, String flagName, String flagValue,
         boolean isLocal) {
+      int localOverrideTag = supportImmediateLocalOverrides()
+          ? StorageRequestMessage.LOCAL_IMMEDIATE
+          : StorageRequestMessage.LOCAL_ON_REBOOT;
+
       long msgsToken = proto.start(StorageRequestMessages.MSGS);
       long msgToken = proto.start(StorageRequestMessage.FLAG_OVERRIDE_MESSAGE);
       proto.write(StorageRequestMessage.FlagOverrideMessage.PACKAGE_NAME, packageName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_NAME, flagName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_VALUE, flagValue);
       proto.write(StorageRequestMessage.FlagOverrideMessage.OVERRIDE_TYPE, isLocal
-                ? StorageRequestMessage.LOCAL_IMMEDIATE
-                : StorageRequestMessage.SERVER_ON_REBOOT);
+            ? localOverrideTag
+            : StorageRequestMessage.SERVER_ON_REBOOT);
       proto.end(msgToken);
       proto.end(msgsToken);
     }
@@ -534,14 +565,20 @@ public class SettingsToPropertiesMapper {
      * @param proto
      * @param packageName the package of the flag
      * @param flagName the name of the flag
+     * @param immediate if true, clear immediately; otherwise, clear on next reboot
      */
-    static void writeFlagOverrideRemovalRequest(
-        ProtoOutputStream proto, String packageName, String flagName) {
+    @VisibleForTesting
+    public static void writeFlagOverrideRemovalRequest(
+        ProtoOutputStream proto, String packageName, String flagName, boolean immediate) {
       long msgsToken = proto.start(StorageRequestMessages.MSGS);
       long msgToken = proto.start(StorageRequestMessage.REMOVE_LOCAL_OVERRIDE_MESSAGE);
       proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.PACKAGE_NAME, packageName);
       proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.FLAG_NAME, flagName);
       proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.REMOVE_ALL, false);
+      proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.REMOVE_OVERRIDE_TYPE,
+          immediate
+              ? StorageRequestMessage.REMOVE_LOCAL_IMMEDIATE
+              : StorageRequestMessage.REMOVE_LOCAL_ON_REBOOT);
       proto.end(msgToken);
       proto.end(msgsToken);
     }
@@ -586,7 +623,8 @@ public class SettingsToPropertiesMapper {
      * apply flag local override in aconfig new storage
      * @param props
      */
-    static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
+    @VisibleForTesting
+    public static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
         int num_requests = 0;
         ProtoOutputStream requests = new ProtoOutputStream();
         for (String flagName : props.getKeyset()) {
@@ -618,7 +656,11 @@ public class SettingsToPropertiesMapper {
             String realFlagName = fullFlagName.substring(idx+1);
 
             if (Flags.syncLocalOverridesRemovalNewStorage() && flagValue == null) {
-              writeFlagOverrideRemovalRequest(requests, packageName, realFlagName);
+              if (supportClearLocalOverridesImmediately()) {
+                writeFlagOverrideRemovalRequest(requests, packageName, realFlagName, true);
+              } else {
+                writeFlagOverrideRemovalRequest(requests, packageName, realFlagName, false);
+              }
             } else {
               writeFlagOverrideRequest(requests, packageName, realFlagName, flagValue, true);
             }

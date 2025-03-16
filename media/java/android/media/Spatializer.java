@@ -16,7 +16,10 @@
 
 package android.media;
 
+import static android.media.audio.Flags.FLAG_SPATIALIZER_CAPABILITIES;
+
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -35,6 +38,7 @@ import com.android.internal.annotations.GuardedBy;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -523,6 +527,28 @@ public class Spatializer {
             Log.e(TAG, "Error querying canBeSpatialized for attr:" + attributes
                     + " format:" + format + " returning false", e);
             return false;
+        }
+    }
+
+    /**
+     * Returns a list of channel masks that represent the widest channel masks the spatializer
+     * is capable of rendering with individual channel positions.
+     * For instance a spatializer may only support virtual speaker positions for 5.1, it would
+     * therefore return {@link AudioFormat#CHANNEL_OUT_5POINT1}. But it would still return
+     * <code>true</code> when querying {@link #canBeSpatialized(AudioAttributes, AudioFormat)} it
+     * with a channel mask of {@link AudioFormat#CHANNEL_OUT_7POINT1POINT2}: the sound present
+     * in each channel would still be heard, but the sounds from the rear, side and top pairs would
+     * be mixed together, and be spatialized at the same location.
+     * @return a list of channel masks following the <code>CHANNEL_OUT_*</code> output channel
+     *     definitions found in {@link AudioFormat}.
+     */
+    @FlaggedApi(FLAG_SPATIALIZER_CAPABILITIES)
+    public @NonNull List<Integer> getSpatializedChannelMasks() {
+        try {
+            return mAm.getService().getSpatializedChannelMasks();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error querying getSpatializedChannelMasks", e);
+            return Collections.emptyList();
         }
     }
 

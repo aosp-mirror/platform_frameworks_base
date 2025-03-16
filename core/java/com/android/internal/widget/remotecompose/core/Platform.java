@@ -15,13 +15,54 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
-/**
- * Services that are needed to be provided by the platform during encoding.
- */
-public interface Platform {
-    byte[] imageToByteArray(Object image);
-    int getImageWidth(Object image);
-    int getImageHeight(Object image);
-    float[] pathToFloatArray(Object image);
-}
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
+/** Services that are needed to be provided by the platform during encoding. */
+public interface Platform {
+    @Nullable
+    byte[] imageToByteArray(@NonNull Object image);
+
+    int getImageWidth(@NonNull Object image);
+
+    int getImageHeight(@NonNull Object image);
+
+    @Nullable
+    float[] pathToFloatArray(@NonNull Object path);
+
+    enum LogCategory {
+        DEBUG,
+        INFO,
+        WARN,
+        ERROR,
+        TODO,
+    }
+
+    void log(LogCategory category, String message);
+
+    Platform None =
+            new Platform() {
+                @Override
+                public byte[] imageToByteArray(@NonNull Object image) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public int getImageWidth(@NonNull Object image) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public int getImageHeight(@NonNull Object image) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public float[] pathToFloatArray(@NonNull Object path) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public void log(LogCategory category, String message) {}
+            };
+}

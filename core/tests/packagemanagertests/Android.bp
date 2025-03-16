@@ -16,6 +16,7 @@ android_test {
         "androidx.test.rules",
         "frameworks-base-testutils",
         "mockito-target-minus-junit4",
+        "platform-test-annotations",
     ],
     libs: ["android.test.runner.stubs.system"],
     platform_apis: true,

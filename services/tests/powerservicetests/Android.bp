@@ -12,6 +12,7 @@ android_test {
     ],
 
     static_libs: [
+        "truth",
         "flag-junit",
         "frameworks-base-testutils",
         "platform-compat-test-rules",

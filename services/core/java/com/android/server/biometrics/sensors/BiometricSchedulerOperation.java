@@ -162,7 +162,7 @@ public class BiometricSchedulerOperation {
                 STATE_WAITING_IN_QUEUE,
                 STATE_WAITING_FOR_COOKIE,
                 STATE_WAITING_IN_QUEUE_CANCELING)) {
-            return false;
+            return hasOperationAlreadyStarted();
         }
 
         if (mClientMonitor.getCookie() != 0) {
@@ -191,7 +191,7 @@ public class BiometricSchedulerOperation {
                 STATE_WAITING_IN_QUEUE,
                 STATE_WAITING_FOR_COOKIE,
                 STATE_WAITING_IN_QUEUE_CANCELING)) {
-            return false;
+            return hasOperationAlreadyStarted();
         }
 
         return doStart(callback);
@@ -228,6 +228,10 @@ public class BiometricSchedulerOperation {
 
         Slog.v(TAG, "started: " + this);
         return true;
+    }
+
+    private boolean hasOperationAlreadyStarted() {
+        return mState == STATE_STARTED;
     }
 
     /**

@@ -32,7 +32,7 @@ internal class IgnoreableExpect : TestRule {
 
     private var ignore = false
 
-    override fun apply(base: Statement?, description: Description?): Statement {
+    override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             override fun evaluate() {
                 ignore = false

@@ -16,6 +16,7 @@
 
 package com.android.server.job;
 
+import static android.app.job.Flags.FLAG_HANDLE_ABANDONED_JOBS;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -82,6 +83,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -1050,6 +1052,75 @@ public class JobSchedulerServiceTest {
                 JobParameters.STOP_REASON_UNDEFINED,
                 JobParameters.INTERNAL_STOP_REASON_ANR);
         assertEquals(nowElapsed + 5 * initialBackoffMs, rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+    }
+
+    /**
+     * Confirm that
+     * {@link JobSchedulerService#getRescheduleJobForFailureLocked(JobStatus, int, int)}
+     * returns a job with the correct delay for abandoned jobs.
+     */
+    @Test
+    @EnableFlags(FLAG_HANDLE_ABANDONED_JOBS)
+    public void testGetRescheduleJobForFailure_abandonedJob() {
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        final long initialBackoffMs = MINUTE_IN_MILLIS;
+        mService.mConstants.SYSTEM_STOP_TO_FAILURE_RATIO = 3;
+
+        JobStatus originalJob = createJobStatus("testGetRescheduleJobForFailure",
+                createJobInfo()
+                        .setBackoffCriteria(initialBackoffMs, JobInfo.BACKOFF_POLICY_LINEAR));
+        assertEquals(JobStatus.NO_EARLIEST_RUNTIME, originalJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, originalJob.getLatestRunTimeElapsed());
+
+        // failure = 1, systemStop = 0, abandoned = 1
+        JobStatus rescheduledJob = mService.getRescheduleJobForFailureLocked(originalJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED);
+        assertEquals(nowElapsed + initialBackoffMs, rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 2, systemstop = 0, abandoned = 2
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED);
+        assertEquals(nowElapsed + (2 * initialBackoffMs), rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 3, systemstop = 0, abandoned = 3
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED);
+        assertEquals(nowElapsed + (3 * initialBackoffMs), rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 4, systemstop = 0, abandoned = 4
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED);
+        assertEquals(
+                nowElapsed + ((long) Math.scalb((float) initialBackoffMs, 3)),
+                rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 4, systemstop = 1, abandoned = 4
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_DEVICE_THERMAL);
+        assertEquals(
+                nowElapsed + ((long) Math.scalb((float) initialBackoffMs, 3)),
+                rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 4, systemStop =  4  / SYSTEM_STOP_TO_FAILURE_RATIO, abandoned = 4
+        for (int i = 0; i < mService.mConstants.SYSTEM_STOP_TO_FAILURE_RATIO; ++i) {
+            rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                    JobParameters.STOP_REASON_SYSTEM_PROCESSING,
+                    JobParameters.INTERNAL_STOP_REASON_RTC_UPDATED);
+        }
+        assertEquals(
+                nowElapsed + ((long) Math.scalb((float) initialBackoffMs, 4)),
+                rescheduledJob.getEarliestRunTime());
         assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
     }
 
@@ -2351,6 +2422,7 @@ public class JobSchedulerServiceTest {
 
     /** Tests that jobs are removed from the pending list if the user stops the app. */
     @Test
+    @RequiresFlagsDisabled(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_API)
     public void testUserStopRemovesPending() {
         spyOn(mService);
 
@@ -2400,6 +2472,60 @@ public class JobSchedulerServiceTest {
         assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2a));
         assertFalse(mService.getPendingJobQueue().contains(job2b));
         assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2b));
+    }
+
+    /** Tests that jobs are removed from the pending list if the user stops the app. */
+    @Test
+    @RequiresFlagsEnabled(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_API)
+    public void testUserStopRemovesPending_withPendingJobReasonsApi() {
+        spyOn(mService);
+
+        JobStatus job1a = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(1), 1, "pkg1");
+        JobStatus job1b = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(2), 1, "pkg1");
+        JobStatus job2a = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(1), 2, "pkg2");
+        JobStatus job2b = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(2), 2, "pkg2");
+        doReturn(1).when(mPackageManagerInternal).getPackageUid("pkg1", 0, 0);
+        doReturn(11).when(mPackageManagerInternal).getPackageUid("pkg1", 0, 1);
+        doReturn(2).when(mPackageManagerInternal).getPackageUid("pkg2", 0, 0);
+
+        mService.getPendingJobQueue().clear();
+        mService.getPendingJobQueue().add(job1a);
+        mService.getPendingJobQueue().add(job1b);
+        mService.getPendingJobQueue().add(job2a);
+        mService.getPendingJobQueue().add(job2b);
+        mService.getJobStore().add(job1a);
+        mService.getJobStore().add(job1b);
+        mService.getJobStore().add(job2a);
+        mService.getJobStore().add(job2b);
+
+        mService.notePendingUserRequestedAppStopInternal("pkg1", 1, "test");
+        assertEquals(4, mService.getPendingJobQueue().size());
+        assertTrue(mService.getPendingJobQueue().contains(job1a));
+        assertTrue(mService.getPendingJobQueue().contains(job1b));
+        assertTrue(mService.getPendingJobQueue().contains(job2a));
+        assertTrue(mService.getPendingJobQueue().contains(job2b));
+
+        mService.notePendingUserRequestedAppStopInternal("pkg1", 0, "test");
+        assertEquals(2, mService.getPendingJobQueue().size());
+        assertFalse(mService.getPendingJobQueue().contains(job1a));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReasons(job1a)[0]);
+        assertFalse(mService.getPendingJobQueue().contains(job1b));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReasons(job1b)[0]);
+        assertTrue(mService.getPendingJobQueue().contains(job2a));
+        assertTrue(mService.getPendingJobQueue().contains(job2b));
+
+        mService.notePendingUserRequestedAppStopInternal("pkg2", 0, "test");
+        assertEquals(0, mService.getPendingJobQueue().size());
+        assertFalse(mService.getPendingJobQueue().contains(job1a));
+        assertFalse(mService.getPendingJobQueue().contains(job1b));
+        assertFalse(mService.getPendingJobQueue().contains(job2a));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReasons(job2a)[0]);
+        assertFalse(mService.getPendingJobQueue().contains(job2b));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReasons(job2b)[0]);
     }
 
     /**

@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
+import android.app.NotificationManager.INTERRUPTION_FILTER_NONE
 import android.content.Context
 import android.provider.Settings
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
+import android.service.notification.ZenPolicy.STATE_DISALLOW
+import android.service.notification.ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST
 import android.util.Log
 import androidx.concurrent.futures.await
 import com.android.settingslib.notification.data.repository.ZenModeRepository
@@ -29,6 +32,7 @@ import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
@@ -36,11 +40,16 @@ import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
 import java.time.Duration
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * An interactor that performs business logic related to the status and configuration of Zen Mode
@@ -53,9 +62,10 @@ constructor(
     private val zenModeRepository: ZenModeRepository,
     private val notificationSettingsRepository: NotificationSettingsRepository,
     @Background private val bgDispatcher: CoroutineDispatcher,
+    @Background private val backgroundScope: CoroutineScope,
     private val iconLoader: ZenIconLoader,
-    private val deviceProvisioningRepository: DeviceProvisioningRepository,
-    private val userSetupRepository: UserSetupRepository,
+    deviceProvisioningRepository: DeviceProvisioningRepository,
+    userSetupRepository: UserSetupRepository,
 ) {
     val isZenAvailable: Flow<Boolean> =
         combine(
@@ -96,13 +106,16 @@ constructor(
     /**
      * Returns the special "manual DND" mode.
      *
-     * This is only meant as a temporary solution for "legacy" UI pieces that handle DND
-     * specifically; any new or migrated features should use modes more generally, through [modes]
-     * or [activeModes].
+     * This should only be used when there is a strong reason to handle DND specifically (such as
+     * legacy UI pieces that haven't been updated to use modes more generally, or if the user
+     * explicitly wants a shortcut to DND). Please prefer using [modes] or [activeModes] in all
+     * other scenarios.
      */
-    val dndMode: Flow<ZenMode?> by lazy {
+    val dndMode: StateFlow<ZenMode?> by lazy {
         ModesUi.assertInNewMode()
-        zenModeRepository.modes.map { modes -> modes.singleOrNull { it.isManualDnd } }
+        zenModeRepository.modes
+            .map { modes -> modes.singleOrNull { it.isManualDnd } }
+            .stateIn(scope = backgroundScope, started = SharingStarted.Eagerly, initialValue = null)
     }
 
     /** Flow returning the currently active mode(s), if any. */
@@ -111,6 +124,26 @@ constructor(
             .map { modes -> buildActiveZenModes(modes) }
             .flowOn(bgDispatcher)
             .distinctUntilChanged()
+
+    val activeModesBlockingEverything: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
+        mode.interruptionFilter == INTERRUPTION_FILTER_NONE
+    }
+
+    val activeModesBlockingMedia: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
+        mode.policy.priorityCategoryMedia == STATE_DISALLOW
+    }
+
+    val activeModesBlockingAlarms: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
+        mode.policy.priorityCategoryAlarms == STATE_DISALLOW
+    }
+
+    private fun getFilteredActiveModesFlow(predicate: (ZenMode) -> Boolean): Flow<ActiveZenModes> {
+        return modes
+            .map { modes -> modes.filter { mode -> predicate(mode) } }
+            .map { modes -> buildActiveZenModes(modes) }
+            .flowOn(bgDispatcher)
+            .distinctUntilChanged()
+    }
 
     suspend fun getActiveModes() = buildActiveZenModes(zenModeRepository.getModes())
 
@@ -125,6 +158,25 @@ constructor(
 
     val mainActiveMode: Flow<ZenModeInfo?> =
         activeModes.map { a -> a.mainMode }.distinctUntilChanged()
+
+    val modesHidingNotifications: Flow<List<ZenMode>> by lazy {
+        if (ModesEmptyShadeFix.isUnexpectedlyInLegacyMode() || !ModesUi.isEnabled) {
+            flowOf(listOf())
+        } else {
+            modes
+                .map { modes ->
+                    modes.filter { mode ->
+                        mode.isActive &&
+                            !mode.policy.isVisualEffectAllowed(
+                                /* effect = */ VISUAL_EFFECT_NOTIFICATION_LIST,
+                                /* defaultVal = */ true,
+                            )
+                    }
+                }
+                .flowOn(bgDispatcher)
+                .distinctUntilChanged()
+        }
+    }
 
     suspend fun getModeIcon(mode: ZenMode): ZenIcon {
         return iconLoader.getIcon(context, mode).await()
@@ -155,6 +207,14 @@ constructor(
 
     fun deactivateMode(zenMode: ZenMode) {
         zenModeRepository.deactivateMode(zenMode)
+    }
+
+    fun deactivateAllModes() {
+        for (mode in zenModeRepository.getModes()) {
+            if (mode.isActive) {
+                deactivateMode(mode)
+            }
+        }
     }
 
     private val zenDuration

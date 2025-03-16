@@ -29,6 +29,7 @@ import com.android.systemui.scene.domain.startable.StatusBarStartable
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.composable.SceneContainerTransitions
 import com.android.systemui.scene.ui.viewmodel.SplitEdgeDetector
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
@@ -44,6 +45,7 @@ import dagger.multibindings.IntoMap
         [
             BouncerSceneModule::class,
             CommunalSceneModule::class,
+            DreamSceneModule::class,
             EmptySceneModule::class,
             GoneSceneModule::class,
             LockscreenSceneModule::class,
@@ -98,12 +100,14 @@ interface SceneContainerFrameworkModule {
                     listOfNotNull(
                         Scenes.Gone,
                         Scenes.Communal,
+                        Scenes.Dream,
                         Scenes.Lockscreen,
                         Scenes.Bouncer,
                         Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
                         Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Lockscreen,
+                transitions = SceneContainerTransitions,
                 overlayKeys =
                     listOfNotNull(
                         Overlays.NotificationsShade.takeIf { DualShade.isEnabled },
@@ -114,9 +118,10 @@ interface SceneContainerFrameworkModule {
                             Scenes.Gone to 0,
                             Scenes.Lockscreen to 0,
                             Scenes.Communal to 1,
-                            Scenes.Shade to 2.takeUnless { DualShade.isEnabled },
-                            Scenes.QuickSettings to 3.takeUnless { DualShade.isEnabled },
-                            Scenes.Bouncer to 4,
+                            Scenes.Dream to 2,
+                            Scenes.Shade to 3.takeUnless { DualShade.isEnabled },
+                            Scenes.QuickSettings to 4.takeUnless { DualShade.isEnabled },
+                            Scenes.Bouncer to 5,
                         )
                         .filterValues { it != null }
                         .mapValues { checkNotNull(it.value) },

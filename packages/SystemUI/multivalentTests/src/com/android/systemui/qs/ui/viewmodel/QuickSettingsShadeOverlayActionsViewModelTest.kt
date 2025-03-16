@@ -21,13 +21,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
+import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 import com.android.systemui.testKosmos
@@ -62,8 +62,7 @@ class QuickSettingsShadeOverlayActionsViewModelTest : SysuiTestCase() {
     fun back_notEditing_hidesShade() =
         testScope.runTest {
             val actions by collectLastValue(underTest.actions)
-            val isEditing by
-                collectLastValue(kosmos.quickSettingsContainerViewModel.editModeViewModel.isEditing)
+            val isEditing by collectLastValue(kosmos.editModeViewModel.isEditing)
             underTest.activateIn(this)
             assertThat(isEditing).isFalse()
 
@@ -77,7 +76,7 @@ class QuickSettingsShadeOverlayActionsViewModelTest : SysuiTestCase() {
             val actions by collectLastValue(underTest.actions)
             underTest.activateIn(this)
 
-            kosmos.quickSettingsContainerViewModel.editModeViewModel.startEditing()
+            kosmos.editModeViewModel.startEditing()
 
             assertThat(actions?.get(Back)).isNull()
         }
@@ -89,12 +88,8 @@ class QuickSettingsShadeOverlayActionsViewModelTest : SysuiTestCase() {
             underTest.activateIn(this)
 
             assertThat(
-                    (actions?.get(
-                            Swipe(
-                                direction = SwipeDirection.Down,
-                                fromSource = SceneContainerEdge.TopLeft,
-                            )
-                        ) as? UserActionResult.ReplaceByOverlay)
+                    (actions?.get(Swipe.Down(fromSource = SceneContainerEdge.TopLeft))
+                            as? UserActionResult.ReplaceByOverlay)
                         ?.overlay
                 )
                 .isEqualTo(Overlays.NotificationsShade)

@@ -17,6 +17,7 @@
 package com.android.systemui.education.domain.interactor
 
 import android.hardware.input.InputManager
+import com.android.systemui.education.ContextualEducationMetricsLogger
 import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
 import com.android.systemui.inputdevice.tutorial.tutorialSchedulerRepository
@@ -24,6 +25,7 @@ import com.android.systemui.keyboard.data.repository.keyboardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.touchpad.data.repository.touchpadRepository
 import com.android.systemui.user.data.repository.userRepository
 import org.mockito.kotlin.mock
@@ -38,27 +40,15 @@ var Kosmos.keyboardTouchpadEduInteractor by
                     testDispatcher,
                     keyboardRepository,
                     touchpadRepository,
-                    userRepository
+                    userRepository,
                 ),
-            clock = fakeEduClock
+            tutorialRepository = tutorialSchedulerRepository,
+            overviewProxyService = mockOverviewProxyService,
+            metricsLogger = mockEduMetricsLogger,
+            clock = fakeEduClock,
         )
     }
 
+var Kosmos.mockEduMetricsLogger by Kosmos.Fixture { mock<ContextualEducationMetricsLogger>() }
+var Kosmos.mockOverviewProxyService by Kosmos.Fixture { mock<OverviewProxyService>() }
 var Kosmos.mockEduInputManager by Kosmos.Fixture { mock<InputManager>() }
-
-var Kosmos.keyboardTouchpadEduStatsInteractor by
-    Kosmos.Fixture {
-        KeyboardTouchpadEduStatsInteractorImpl(
-            backgroundScope = testScope.backgroundScope,
-            contextualEducationInteractor = contextualEducationInteractor,
-            inputDeviceRepository =
-                UserInputDeviceRepository(
-                    testDispatcher,
-                    keyboardRepository,
-                    touchpadRepository,
-                    userRepository
-                ),
-            tutorialSchedulerRepository,
-            fakeEduClock
-        )
-    }

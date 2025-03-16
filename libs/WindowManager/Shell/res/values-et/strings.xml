@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kas teil on kaameraprobleeme?\nPuudutage ümberpaigutamiseks."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Kas probleemi ei lahendatud?\nPuudutage ennistamiseks."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Kas kaameraprobleeme pole? Puudutage loobumiseks."</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"Rakenduse menüü leiate siit"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"Mitme rakenduse koos avamiseks avage arvutivaade"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Saate rakenduse menüüst igal ajal täisekraanile naasta"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Vaadake ja tehke rohkem"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Lohistage muusse rakendusse, et jagatud ekraanikuva kasutada"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Topeltpuudutage rakendusest väljaspool, et selle asendit muuta"</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"Vali"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Ekraanipilt"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Avamine brauseris"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"Ava rakenduses"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Uus aken"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"Akende haldamine"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"Kuvasuhte muutmine"</string>
     <string name="close_text" msgid="4986518933445178928">"Sule"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Sule menüü"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Ava menüü"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Kuva täisekraanil"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Kuva poolel ekraanil"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Selle rakenduse aknasuurust ei saa muuta"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Suuruse muutmine"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Rakendust ei saa siia teisaldada"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Kaasahaarav"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Taasta"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maksimeeri"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Taasta"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Tõmmake vasakule"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Tõmmake paremale"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"Avamisviisi vaikeseaded"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"Valige, kuidas avada selle rakenduse puhul veebilinke"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"Rakenduses"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"Brauseris"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"OK"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"Avage rakendusi kiiresti oma brauseris siin"</string>
 </resources>

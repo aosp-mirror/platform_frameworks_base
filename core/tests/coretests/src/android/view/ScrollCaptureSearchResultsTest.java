@@ -16,9 +16,9 @@
 
 package android.view;
 
-import static androidx.test.InstrumentationRegistry.getTargetContext;
+import static android.view.flags.Flags.FLAG_SCROLL_CAPTURE_TARGET_Z_ORDER_FIX;
 
-import static com.google.common.truth.Truth.assertThat;
+import static androidx.test.InstrumentationRegistry.getTargetContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -32,13 +32,16 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.SystemClock;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.annotation.NonNull;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -56,6 +59,8 @@ import java.util.function.Consumer;
 @RunWith(AndroidJUnit4.class)
 public class ScrollCaptureSearchResultsTest {
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final Rect EMPTY_RECT = new Rect();
     private static final String TAG = "Test";
@@ -96,6 +101,45 @@ public class ScrollCaptureSearchResultsTest {
 
         assertTrue(results.isComplete());
         assertNull("Expected null due to no valid targets", results.getTopResult());
+    }
+
+    /**
+     * A scrolling target should be excluded even when larger if it will be drawn over by another
+     * scrolling target.
+     */
+    @EnableFlags(FLAG_SCROLL_CAPTURE_TARGET_Z_ORDER_FIX)
+    @Test
+    public void testCoveredTargetsAreExcluded() {
+        ScrollCaptureSearchResults results = new ScrollCaptureSearchResults(mDirectExec);
+
+        FakeScrollCaptureCallback callback1 = new FakeScrollCaptureCallback(mDirectExec);
+        callback1.setScrollBounds(new Rect(0, 0, 200, 200)); // 200 tall
+        View view1 = new FakeView(getTargetContext(), 0, 0, 200, 200, 1);
+        ScrollCaptureTarget target1 = createTargetWithView(view1, callback1,
+                new Rect(0, 0, 200, 200), new Point(0, 0), View.SCROLL_CAPTURE_HINT_AUTO);
+
+        FakeScrollCaptureCallback callback2 = new FakeScrollCaptureCallback(mDirectExec);
+        callback2.setScrollBounds(new Rect(0, 0, 200, 180)); // 180 tall
+        View view2 = new FakeView(getTargetContext(), 0, 20, 200, 200, 2);
+        ScrollCaptureTarget target2 = createTargetWithView(view2, callback2,
+                new Rect(0, 0, 200, 180), new Point(0, 20), View.SCROLL_CAPTURE_HINT_AUTO);
+
+        // Top z-order but smaller, and non-intersecting. (positioned further Y than the first two)
+        FakeScrollCaptureCallback callback3 = new FakeScrollCaptureCallback(mDirectExec);
+        callback3.setScrollBounds(new Rect(0, 0, 50, 50));
+        View view3 = new FakeView(getTargetContext(), 75, 250, 125, 300, 3);
+        ScrollCaptureTarget target3 = createTargetWithView(view3, callback3,
+                new Rect(0, 0, 50, 50), new Point(75, 250), View.SCROLL_CAPTURE_HINT_AUTO);
+
+        results.addTarget(target1);
+        results.addTarget(target2);
+        results.addTarget(target3);
+
+        assertTrue(results.isComplete());
+        ScrollCaptureTarget result = results.getTopResult();
+        assertSame("Expected the second target because of higher z-Index", target2, result);
+        assertEquals("result has wrong scroll bounds",
+                new Rect(0, 0, 200, 180), result.getScrollBounds());
     }
 
     @Test
@@ -152,29 +196,29 @@ public class ScrollCaptureSearchResultsTest {
 
         // 2 - 10x10 + HINT_INCLUDE
         FakeScrollCaptureCallback callback2 = new FakeScrollCaptureCallback(mDirectExec);
-        callback2.setScrollBounds(new Rect(0, 0, 10, 10));
-        ViewGroup targetView2 = new FakeView(getTargetContext(), 0, 0, 60, 60, 2);
+        callback2.setScrollBounds(new Rect(25, 25, 35, 35)); // 10x10
+        ViewGroup targetView2 = new FakeView(getTargetContext(), 0, 60, 60, 120, 2);
         ScrollCaptureTarget target2 = createTargetWithView(targetView2, callback2,
                  new Rect(0, 0, 60, 60), new Point(0, 0), View.SCROLL_CAPTURE_HINT_INCLUDE);
 
         // 3 - 20x20 + AUTO
         FakeScrollCaptureCallback callback3 = new FakeScrollCaptureCallback(mDirectExec);
         callback3.setScrollBounds(new Rect(0, 0, 20, 20));
-        ViewGroup targetView3 = new FakeView(getTargetContext(), 0, 0, 60, 60, 3);
+        ViewGroup targetView3 = new FakeView(getTargetContext(), 0, 120, 60, 180, 3);
         ScrollCaptureTarget target3 = createTargetWithView(targetView3, callback3,
                 new Rect(0, 0, 60, 60), new Point(0, 0), View.SCROLL_CAPTURE_HINT_AUTO);
 
         // 4 - 30x30 + AUTO
         FakeScrollCaptureCallback callback4 = new FakeScrollCaptureCallback(mDirectExec);
         callback4.setScrollBounds(new Rect(0, 0, 10, 10));
-        ViewGroup targetView4 = new FakeView(getTargetContext(), 0, 0, 60, 60, 4);
+        ViewGroup targetView4 = new FakeView(getTargetContext(), 0, 180, 60, 240, 4);
         ScrollCaptureTarget target4 = createTargetWithView(targetView4, callback4,
                 new Rect(0, 0, 60, 60), new Point(0, 0), View.SCROLL_CAPTURE_HINT_AUTO);
 
         // 5 - 10x10 + child of #4
         FakeScrollCaptureCallback callback5 = new FakeScrollCaptureCallback(mDirectExec);
         callback5.setScrollBounds(new Rect(0, 0, 10, 10));
-        ViewGroup targetView5 = new FakeView(getTargetContext(), 0, 0, 60, 60, 5);
+        ViewGroup targetView5 = new FakeView(getTargetContext(), 0, 0, 60, 30, 5);
         ScrollCaptureTarget target5 = createTargetWithView(targetView5, callback5,
                 new Rect(0, 0, 60, 60), new Point(0, 0), View.SCROLL_CAPTURE_HINT_AUTO);
         targetView4.addView(targetView5);
@@ -182,7 +226,7 @@ public class ScrollCaptureSearchResultsTest {
         // 6 - 20x20 + child of #4
         FakeScrollCaptureCallback callback6 = new FakeScrollCaptureCallback(mDirectExec);
         callback6.setScrollBounds(new Rect(0, 0, 20, 20));
-        ViewGroup targetView6 = new FakeView(getTargetContext(), 0, 0, 60, 60, 6);
+        ViewGroup targetView6 = new FakeView(getTargetContext(), 0, 30, 30, 60, 6);
         ScrollCaptureTarget target6 = createTargetWithView(targetView6, callback6,
                 new Rect(0, 0, 60, 60), new Point(0, 0), View.SCROLL_CAPTURE_HINT_AUTO);
         targetView4.addView(targetView6);
@@ -194,20 +238,10 @@ public class ScrollCaptureSearchResultsTest {
         results.addTarget(target4);
         results.addTarget(target5);
         results.addTarget(target6);
-        assertTrue(results.isComplete());
+        assertTrue("results.isComplete()", results.isComplete());
 
         // Verify "top" result
-        assertEquals(target2, results.getTopResult());
-
-        // Verify priority ("best" first)
-        assertThat(results.getTargets())
-                .containsExactly(
-                        target2,
-                        target6,
-                        target5,
-                        target4,
-                        target3,
-                        target1);
+        assertEquals("top result", target2, results.getTopResult());
     }
 
     /**
@@ -291,27 +325,22 @@ public class ScrollCaptureSearchResultsTest {
                 new Rect(1, 2, 3, 4), result.getScrollBounds());
     }
 
-    private void setupTargetView(View view, Rect localVisibleRect, int scrollCaptureHint) {
-        view.setScrollCaptureHint(scrollCaptureHint);
-        view.onVisibilityAggregated(true);
-        // Treat any offset as padding, outset localVisibleRect on all sides and use this as
-        // child bounds
-        Rect bounds = new Rect(localVisibleRect);
-        bounds.inset(-bounds.left, -bounds.top, bounds.left, bounds.top);
-        view.layout(bounds.left, bounds.top, bounds.right, bounds.bottom);
-        view.onVisibilityAggregated(true);
-    }
-
     private ScrollCaptureTarget createTarget(ScrollCaptureCallback callback, Rect localVisibleRect,
             Point positionInWindow, int scrollCaptureHint) {
-        View mockView = new View(getTargetContext());
+        Rect bounds = new Rect(localVisibleRect);
+        // Use localVisibleRect as position, treat left/top offset as padding
+        bounds.left = 0;
+        bounds.top = 0;
+        View mockView = new FakeView(getTargetContext(), bounds.left, bounds.top, bounds.right,
+                bounds.bottom, View.NO_ID);
         return createTargetWithView(mockView, callback, localVisibleRect, positionInWindow,
                 scrollCaptureHint);
     }
 
     private ScrollCaptureTarget createTargetWithView(View view, ScrollCaptureCallback callback,
             Rect localVisibleRect, Point positionInWindow, int scrollCaptureHint) {
-        setupTargetView(view, localVisibleRect, scrollCaptureHint);
+        view.setScrollCaptureHint(scrollCaptureHint);
+        view.onVisibilityAggregated(true);
         return new ScrollCaptureTarget(view, localVisibleRect, positionInWindow, callback);
     }
 
@@ -325,6 +354,32 @@ public class ScrollCaptureSearchResultsTest {
 
         @Override
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        }
+
+        /** Ignores window attachment state. The standard impl always returns [0,0] if the view is
+         *  not attached. This override allows testing without dealing with AttachInfo.
+         */
+        @Override
+        public void getLocationInWindow(int[] outLocation) {
+            outLocation[0] = mLeft;
+            outLocation[1] = mTop;
+            ViewParent viewParent = getParent();
+            while (viewParent instanceof View) {
+                final View view = (View) viewParent;
+
+                outLocation[0] -= view.mScrollX;
+                outLocation[1] -= view.mScrollY;
+
+                // Explicitly do not handle matrix/transforms, not needed for testing
+                if (!view.hasIdentityMatrix()) {
+                    throw new IllegalStateException("This mock does not handle transforms!");
+                }
+
+                outLocation[0] += view.mLeft;
+                outLocation[1] += view.mTop;
+
+                viewParent = view.mParent;
+            }
         }
     }
 

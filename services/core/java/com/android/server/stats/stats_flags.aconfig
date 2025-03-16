@@ -30,3 +30,19 @@ flag {
     bug: "352495181"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "accumulate_network_stats_since_boot"
+    namespace: "statsd"
+    description: "Accumulate results of NetworkStats queries to avoid hitting NetworkStats persistence limit"
+    bug: "352537247"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "add_pressure_stall_information_puller"
+    namespace: "statsd"
+    description: "Adds PressureStallInformation atom logging"
+    bug: "365731097"
+    is_fixed_read_only: true
+}

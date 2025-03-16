@@ -133,10 +133,22 @@ public class PowerStatsStore {
     }
 
     /**
+     * Schedules saving the specified span on the background thread.
+     */
+    public void storePowerStatsSpanAsync(PowerStatsSpan span, Runnable onComplete) {
+        mHandler.post(() -> {
+            try {
+                storePowerStatsSpan(span);
+            } finally {
+                onComplete.run();
+            }
+        });
+    }
+
+    /**
      * Saves the specified span in the store.
      */
     public void storePowerStatsSpan(PowerStatsSpan span) {
-        maybeClearLegacyStore();
         lockStoreDirectory();
         try {
             if (!mStoreDir.exists()) {
@@ -172,6 +184,9 @@ public class PowerStatsStore {
         lockStoreDirectory();
         try {
             File file = makePowerStatsSpanFilename(id);
+            if (!file.exists()) {
+                return null;
+            }
             try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
                 return PowerStatsSpan.read(inputStream, parser, mSectionReaders, sectionTypes);
             } catch (IOException | XmlPullParserException e) {
@@ -187,13 +202,23 @@ public class PowerStatsStore {
      * Stores a {@link PowerStatsSpan} containing a single section for the supplied
      * battery usage stats.
      */
-    public void storeBatteryUsageStats(long monotonicStartTime,
+    public void storeBatteryUsageStatsAsync(long monotonicStartTime,
             BatteryUsageStats batteryUsageStats) {
-        PowerStatsSpan span = new PowerStatsSpan(monotonicStartTime);
-        span.addTimeFrame(monotonicStartTime, batteryUsageStats.getStatsStartTimestamp(),
-                batteryUsageStats.getStatsDuration());
-        span.addSection(new BatteryUsageStatsSection(batteryUsageStats));
-        storePowerStatsSpan(span);
+        mHandler.post(() -> {
+            try {
+                PowerStatsSpan span = new PowerStatsSpan(monotonicStartTime);
+                span.addTimeFrame(monotonicStartTime, batteryUsageStats.getStatsStartTimestamp(),
+                        batteryUsageStats.getStatsDuration());
+                span.addSection(new BatteryUsageStatsSection(batteryUsageStats));
+                storePowerStatsSpan(span);
+            } finally {
+                try {
+                    batteryUsageStats.close();
+                } catch (IOException e) {
+                    Slog.e(TAG, "Cannot close BatteryUsageStats", e);
+                }
+            }
+        });
     }
 
     /**
@@ -306,9 +331,10 @@ public class PowerStatsStore {
         ipw.increaseIndent();
         List<PowerStatsSpan.Metadata> contents = getTableOfContents();
         for (PowerStatsSpan.Metadata metadata : contents) {
-            PowerStatsSpan span = loadPowerStatsSpan(metadata.getId());
-            if (span != null) {
-                span.dump(ipw);
+            try (PowerStatsSpan span = loadPowerStatsSpan(metadata.getId())) {
+                if (span != null) {
+                    span.dump(ipw);
+                }
             }
         }
         ipw.decreaseIndent();

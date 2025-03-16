@@ -17,12 +17,15 @@
 package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
+import android.os.UserHandle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.Flags.multiuserWifiPickerTrackerSupport
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -43,6 +46,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiReposito
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Unavailable.toHotspotDeviceType
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
+import com.android.systemui.user.data.repository.UserRepository
 import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
@@ -53,10 +57,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -68,6 +74,8 @@ import kotlinx.coroutines.flow.stateIn
 class WifiRepositoryImpl
 @Inject
 constructor(
+    @Application applicationContext: Context,
+    private val userRepository: UserRepository,
     @Application private val scope: CoroutineScope,
     @Main private val mainExecutor: Executor,
     @Background private val bgDispatcher: CoroutineDispatcher,
@@ -79,95 +87,215 @@ constructor(
 
     override val lifecycle =
         LifecycleRegistry(this).also {
-            mainExecutor.execute { it.currentState = Lifecycle.State.CREATED }
+            if (multiuserWifiPickerTrackerSupport()) {
+                mainExecutor.execute { it.currentState = Lifecycle.State.STARTED }
+            } else {
+                mainExecutor.execute { it.currentState = Lifecycle.State.CREATED }
+            }
         }
 
     private var wifiPickerTracker: WifiPickerTracker? = null
 
-    private val wifiPickerTrackerInfo: StateFlow<WifiPickerTrackerInfo> = run {
-        var current =
-            WifiPickerTrackerInfo(
-                state = WIFI_STATE_DEFAULT,
-                isDefault = false,
-                primaryNetwork = WIFI_NETWORK_DEFAULT,
-                secondaryNetworks = emptyList(),
-            )
-        callbackFlow {
-                val callback =
-                    object : WifiPickerTracker.WifiPickerTrackerCallback {
-                        override fun onWifiEntriesChanged() {
-                            val connectedEntry = wifiPickerTracker.mergedOrPrimaryConnection
-                            logOnWifiEntriesChanged(connectedEntry)
+    private val selectedUserContext: Flow<Context> =
+        userRepository.selectedUserInfo.map {
+            applicationContext.createContextAsUser(UserHandle.of(it.id), /* flags= */ 0)
+        }
 
-                            val activeNetworks = wifiPickerTracker?.activeWifiEntries ?: emptyList()
-                            val secondaryNetworks =
-                                activeNetworks
-                                    .filter { it != connectedEntry && !it.isPrimaryNetwork }
-                                    .map { it.toWifiNetworkModel() }
+    var current =
+        WifiPickerTrackerInfo(
+            state = WIFI_STATE_DEFAULT,
+            isDefault = false,
+            primaryNetwork = WIFI_NETWORK_DEFAULT,
+            secondaryNetworks = emptyList(),
+        )
 
-                            // [WifiPickerTracker.connectedWifiEntry] will return the same instance
-                            // but with updated internals. For example, when its validation status
-                            // changes from false to true, the same instance is re-used but with the
-                            // validated field updated.
-                            //
-                            // Because it's the same instance, the flow won't re-emit the value
-                            // (even though the internals have changed). So, we need to transform it
-                            // into our internal model immediately. [toWifiNetworkModel] always
-                            // returns a new instance, so the flow is guaranteed to emit.
-                            send(
-                                newPrimaryNetwork =
-                                    connectedEntry?.toPrimaryWifiNetworkModel()
-                                        ?: WIFI_NETWORK_DEFAULT,
-                                newSecondaryNetworks = secondaryNetworks,
-                                newIsDefault = connectedEntry?.isDefaultNetwork ?: false,
-                            )
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
+    private val wifiPickerTrackerInfo: StateFlow<WifiPickerTrackerInfo> =
+        if (multiuserWifiPickerTrackerSupport()) {
+            selectedUserContext
+                .flatMapLatest { currentContext
+                    -> // flatMapLatest because when selectedUserContext emits a new value, we want
+                    // to re-create a whole flow
+                    callbackFlow {
+                            val callback =
+                                object : WifiPickerTracker.WifiPickerTrackerCallback {
+                                    override fun onWifiEntriesChanged() {
+                                        val connectedEntry =
+                                            wifiPickerTracker.mergedOrPrimaryConnection
+                                        logOnWifiEntriesChanged(connectedEntry)
+
+                                        val activeNetworks =
+                                            wifiPickerTracker?.activeWifiEntries ?: emptyList()
+                                        val secondaryNetworks =
+                                            activeNetworks
+                                                .filter {
+                                                    it != connectedEntry && !it.isPrimaryNetwork
+                                                }
+                                                .map { it.toWifiNetworkModel() }
+
+                                        // [WifiPickerTracker.connectedWifiEntry] will return the
+                                        // same instance but with updated internals. For example,
+                                        // when its validation status changes from false to true,
+                                        // the same instance is re-used but with the validated
+                                        // field updated.
+                                        //
+                                        // Because it's the same instance, the flow won't re-emit
+                                        // the value (even though the internals have changed). So,
+                                        // we need to transform it into our internal model
+                                        // immediately. [toWifiNetworkModel] always returns a new
+                                        // instance, so the flow is guaranteed to emit.
+                                        send(
+                                            newPrimaryNetwork =
+                                                connectedEntry?.toPrimaryWifiNetworkModel()
+                                                    ?: WIFI_NETWORK_DEFAULT,
+                                            newSecondaryNetworks = secondaryNetworks,
+                                            newIsDefault = connectedEntry?.isDefaultNetwork ?: false,
+                                        )
+                                    }
+
+                                    override fun onWifiStateChanged() {
+                                        val state = wifiPickerTracker?.wifiState
+                                        logOnWifiStateChanged(state)
+                                        send(newState = state ?: WIFI_STATE_DEFAULT)
+                                    }
+
+                                    override fun onNumSavedNetworksChanged() {}
+
+                                    override fun onNumSavedSubscriptionsChanged() {}
+
+                                    private fun send(
+                                        newState: Int = current.state,
+                                        newIsDefault: Boolean = current.isDefault,
+                                        newPrimaryNetwork: WifiNetworkModel =
+                                            current.primaryNetwork,
+                                        newSecondaryNetworks: List<WifiNetworkModel> =
+                                            current.secondaryNetworks,
+                                    ) {
+                                        val new =
+                                            WifiPickerTrackerInfo(
+                                                newState,
+                                                newIsDefault,
+                                                newPrimaryNetwork,
+                                                newSecondaryNetworks,
+                                            )
+                                        current = new
+                                        trySend(new)
+                                    }
+                                }
+
+                            // If a WifiPicker already exists, call onStop to begin its shutdown
+                            // process in preparation for a new one to be created.
+                            wifiPickerTracker?.onStop()
+                            wifiPickerTracker =
+                                wifiPickerTrackerFactory
+                                    .create(currentContext, lifecycle, callback, "WifiRepository")
+                                    .apply {
+                                        // By default, [WifiPickerTracker] will scan to see all
+                                        // available wifi networks in the area. Because SysUI only
+                                        // needs to display the **connected** network, we don't
+                                        // need scans to be running (and in fact, running scans is
+                                        // costly and should be avoided whenever possible).
+                                        this?.disableScanning()
+                                    }
+                            awaitClose { mainExecutor.execute { wifiPickerTracker?.onStop() } }
                         }
-
-                        override fun onWifiStateChanged() {
-                            val state = wifiPickerTracker?.wifiState
-                            logOnWifiStateChanged(state)
-                            send(newState = state ?: WIFI_STATE_DEFAULT)
-                        }
-
-                        override fun onNumSavedNetworksChanged() {}
-
-                        override fun onNumSavedSubscriptionsChanged() {}
-
-                        private fun send(
-                            newState: Int = current.state,
-                            newIsDefault: Boolean = current.isDefault,
-                            newPrimaryNetwork: WifiNetworkModel = current.primaryNetwork,
-                            newSecondaryNetworks: List<WifiNetworkModel> =
-                                current.secondaryNetworks,
-                        ) {
-                            val new =
-                                WifiPickerTrackerInfo(
-                                    newState,
-                                    newIsDefault,
-                                    newPrimaryNetwork,
-                                    newSecondaryNetworks,
-                                )
-                            current = new
-                            trySend(new)
-                        }
-                    }
-
-                wifiPickerTracker =
-                    wifiPickerTrackerFactory.create(lifecycle, callback, "WifiRepository").apply {
-                        // By default, [WifiPickerTracker] will scan to see all available wifi
-                        // networks in the area. Because SysUI only needs to display the
-                        // **connected** network, we don't need scans to be running (and in fact,
-                        // running scans is costly and should be avoided whenever possible).
-                        this?.disableScanning()
-                    }
-                // The lifecycle must be STARTED in order for the callback to receive events.
-                mainExecutor.execute { lifecycle.currentState = Lifecycle.State.STARTED }
-                awaitClose {
-                    mainExecutor.execute { lifecycle.currentState = Lifecycle.State.CREATED }
+                        .stateIn(scope, SharingStarted.Eagerly, current)
                 }
+                .stateIn(scope, SharingStarted.Eagerly, current)
+        } else {
+
+            run {
+                var current =
+                    WifiPickerTrackerInfo(
+                        state = WIFI_STATE_DEFAULT,
+                        isDefault = false,
+                        primaryNetwork = WIFI_NETWORK_DEFAULT,
+                        secondaryNetworks = emptyList(),
+                    )
+                callbackFlow {
+                        val callback =
+                            object : WifiPickerTracker.WifiPickerTrackerCallback {
+                                override fun onWifiEntriesChanged() {
+                                    val connectedEntry = wifiPickerTracker.mergedOrPrimaryConnection
+                                    logOnWifiEntriesChanged(connectedEntry)
+
+                                    val activeNetworks =
+                                        wifiPickerTracker?.activeWifiEntries ?: emptyList()
+                                    val secondaryNetworks =
+                                        activeNetworks
+                                            .filter { it != connectedEntry && !it.isPrimaryNetwork }
+                                            .map { it.toWifiNetworkModel() }
+
+                                    // [WifiPickerTracker.connectedWifiEntry] will return the same
+                                    // instance but with updated internals. For example, when its
+                                    // validation status changes from false to true, the same
+                                    // instance is re-used but with the validated field updated.
+                                    //
+                                    // Because it's the same instance, the flow won't re-emit the
+                                    // value (even though the internals have changed). So, we need
+                                    // to transform it into our internal model immediately.
+                                    // [toWifiNetworkModel] always returns a new instance, so the
+                                    // flow is guaranteed to emit.
+                                    send(
+                                        newPrimaryNetwork =
+                                            connectedEntry?.toPrimaryWifiNetworkModel()
+                                                ?: WIFI_NETWORK_DEFAULT,
+                                        newSecondaryNetworks = secondaryNetworks,
+                                        newIsDefault = connectedEntry?.isDefaultNetwork ?: false,
+                                    )
+                                }
+
+                                override fun onWifiStateChanged() {
+                                    val state = wifiPickerTracker?.wifiState
+                                    logOnWifiStateChanged(state)
+                                    send(newState = state ?: WIFI_STATE_DEFAULT)
+                                }
+
+                                override fun onNumSavedNetworksChanged() {}
+
+                                override fun onNumSavedSubscriptionsChanged() {}
+
+                                private fun send(
+                                    newState: Int = current.state,
+                                    newIsDefault: Boolean = current.isDefault,
+                                    newPrimaryNetwork: WifiNetworkModel = current.primaryNetwork,
+                                    newSecondaryNetworks: List<WifiNetworkModel> =
+                                        current.secondaryNetworks,
+                                ) {
+                                    val new =
+                                        WifiPickerTrackerInfo(
+                                            newState,
+                                            newIsDefault,
+                                            newPrimaryNetwork,
+                                            newSecondaryNetworks,
+                                        )
+                                    current = new
+                                    trySend(new)
+                                }
+                            }
+                        wifiPickerTracker =
+                            wifiPickerTrackerFactory
+                                .create(applicationContext, lifecycle, callback, "WifiRepository")
+                                .apply {
+                                    // By default, [WifiPickerTracker] will scan to see all
+                                    // available wifi networks in the area. Because SysUI only
+                                    // needs to display the **connected** network, we don't
+                                    // need scans to be running (and in fact, running scans is
+                                    // costly and should be avoided whenever possible).
+                                    this?.disableScanning()
+                                }
+                        // The lifecycle must be STARTED in order for the callback to receive
+                        // events.
+                        mainExecutor.execute { lifecycle.currentState = Lifecycle.State.STARTED }
+                        awaitClose {
+                            mainExecutor.execute {
+                                lifecycle.currentState = Lifecycle.State.CREATED
+                            }
+                        }
+                    }
+                    .stateIn(scope, SharingStarted.Eagerly, current)
             }
-            .stateIn(scope, SharingStarted.Eagerly, current)
-    }
+        }
 
     override val isWifiEnabled: StateFlow<Boolean> =
         wifiPickerTrackerInfo
@@ -185,11 +313,7 @@ constructor(
         wifiPickerTrackerInfo
             .map { it.primaryNetwork }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLogger,
-                columnPrefix = "",
-                initialValue = WIFI_NETWORK_DEFAULT,
-            )
+            .logDiffsForTable(tableLogger, columnPrefix = "", initialValue = WIFI_NETWORK_DEFAULT)
             .stateIn(scope, SharingStarted.Eagerly, WIFI_NETWORK_DEFAULT)
 
     override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> =
@@ -242,16 +366,11 @@ constructor(
 
     private fun MergedCarrierEntry.convertCarrierMergedToModel(): WifiNetworkModel {
         // WifiEntry instance values aren't guaranteed to be stable between method calls
-        // because
-        // WifiPickerTracker is continuously updating the same object. Save the level in a
-        // local
-        // variable so that checking the level validity here guarantees that the level will
-        // still be
-        // valid when we create the `WifiNetworkModel.Active` instance later. Otherwise, the
-        // level
-        // could be valid here but become invalid later, and `WifiNetworkModel.Active` will
-        // throw
-        // an exception. See b/362384551.
+        // because WifiPickerTracker is continuously updating the same object. Save the
+        // level in a local variable so that checking the level validity here guarantees
+        // that the level will still be valid when we create the `WifiNetworkModel.Active`
+        // instance later. Otherwise, the level could be valid here but become invalid
+        // later, and `WifiNetworkModel.Active` will throw an exception. See b/362384551.
 
         return WifiNetworkModel.CarrierMerged.of(
             subscriptionId = this.subscriptionId,
@@ -348,7 +467,7 @@ constructor(
             TAG,
             LogLevel.DEBUG,
             { str1 = prettyPrintActivity(activity) },
-            { "onActivityChanged: $str1" }
+            { "onActivityChanged: $str1" },
         )
     }
 
@@ -379,13 +498,15 @@ constructor(
         /** The currently primary wifi network. */
         val primaryNetwork: WifiNetworkModel,
         /** The current secondary network(s), if any. Specifically excludes the primary network. */
-        val secondaryNetworks: List<WifiNetworkModel>
+        val secondaryNetworks: List<WifiNetworkModel>,
     )
 
     @SysUISingleton
     class Factory
     @Inject
     constructor(
+        @Application private val applicationContext: Context,
+        private val userRepository: UserRepository,
         @Application private val scope: CoroutineScope,
         @Main private val mainExecutor: Executor,
         @Background private val bgDispatcher: CoroutineDispatcher,
@@ -395,6 +516,8 @@ constructor(
     ) {
         fun create(wifiManager: WifiManager): WifiRepositoryImpl {
             return WifiRepositoryImpl(
+                applicationContext,
+                userRepository,
                 scope,
                 mainExecutor,
                 bgDispatcher,

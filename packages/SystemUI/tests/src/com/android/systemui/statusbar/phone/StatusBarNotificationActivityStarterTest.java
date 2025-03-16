@@ -35,7 +35,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -96,7 +95,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -352,7 +351,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 eq(entry.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
-        verifyZeroInteractions(mContentIntent);
+        verifyNoMoreInteractions(mContentIntent);
 
         // Notification should not be cancelled.
         verify(mOnUserInteractionCallback, never())
@@ -385,7 +384,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 eq(entry.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
-        verifyZeroInteractions(mContentIntent);
+        verifyNoMoreInteractions(mContentIntent);
     }
 
     @Test

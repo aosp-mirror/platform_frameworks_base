@@ -23,7 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
 import static com.android.server.wm.ActivityRecord.State.STOPPING;
 
@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Binder;
 import android.util.Slog;
 
 import com.android.internal.protolog.ProtoLog;
@@ -154,7 +155,8 @@ class RecentsAnimation {
                 .setCallingUid(mRecentsUid)
                 .setCallingPackage(mRecentsComponent.getPackageName())
                 .setCallingFeatureId(mRecentsFeatureId)
-                .setActivityOptions(new SafeActivityOptions(options))
+                .setActivityOptions(new SafeActivityOptions(options,
+                        Binder.getCallingPid(), Binder.getCallingUid()))
                 .setUserId(mUserId)
                 .execute();
     }

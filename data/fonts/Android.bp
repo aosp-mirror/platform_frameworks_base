@@ -53,22 +53,9 @@ soong_config_bool_variable {
     name: "use_var_font",
 }
 
-soong_config_module_type {
-    name: "prebuilt_fonts_xml",
-    module_type: "prebuilt_etc",
-    config_namespace: "noto_sans_cjk_config",
-    bool_variables: ["use_var_font"],
-    properties: ["src"],
-}
-
-prebuilt_fonts_xml {
+prebuilt_etc {
     name: "fonts.xml",
     src: "fonts.xml",
-    soong_config_variables: {
-        use_var_font: {
-            src: "fonts_cjkvf.xml",
-        },
-    },
 }
 
 prebuilt_etc {

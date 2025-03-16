@@ -23,6 +23,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.graphics.ColorSpace;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -76,6 +77,19 @@ public final class SessionConfiguration implements Parcelable {
      */
     public static final int SESSION_HIGH_SPEED =
         CameraDevice.SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED;
+
+    /**
+     * A shared session type containing instances of {@link OutputConfiguration} from a set of
+     * predefined stream configurations. A shared session can be shared among multiple clients.
+     * Shared session does not have any {@link InputConfiguration} as it does not support
+     * reprocessable sessions.
+     *
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    @SystemApi
+    public static final int SESSION_SHARED = CameraDevice.SESSION_OPERATION_MODE_SHARED;
 
     /**
      * First vendor-specific session mode

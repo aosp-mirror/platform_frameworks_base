@@ -16,26 +16,33 @@
 
 package com.android.localtransport;
 
-import android.util.KeyValueSettingObserver;
 import android.content.ContentResolver;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
+import android.util.KeyValueSettingObserver;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class LocalTransportParameters extends KeyValueSettingObserver {
-    private static final String TAG = "LocalTransportParams";
     private static final String SETTING = Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS;
     private static final String KEY_FAKE_ENCRYPTION_FLAG = "fake_encryption_flag";
     private static final String KEY_NON_INCREMENTAL_ONLY = "non_incremental_only";
     private static final String KEY_IS_DEVICE_TRANSFER = "is_device_transfer";
     private static final String KEY_IS_ENCRYPTED = "is_encrypted";
     private static final String KEY_LOG_AGENT_RESULTS = "log_agent_results";
+    // This needs to be a list of package names separated by semicolons. For example:
+    // "com.package1;com.package2;com.package3". We can't use commas because the base class uses
+    // commas to split Key/Value pairs.
+    private static final String KEY_NO_RESTRICTED_MODE_PACKAGES = "no_restricted_mode_packages";
 
     private boolean mFakeEncryptionFlag;
     private boolean mIsNonIncrementalOnly;
     private boolean mIsDeviceTransfer;
     private boolean mIsEncrypted;
     private boolean mLogAgentResults;
+    private String mNoRestrictedModePackages;
 
     public LocalTransportParameters(Handler handler, ContentResolver resolver) {
         super(handler, resolver, Settings.Secure.getUriFor(SETTING));
@@ -61,6 +68,13 @@ public class LocalTransportParameters extends KeyValueSettingObserver {
         return mLogAgentResults;
     }
 
+    List<String> noRestrictedModePackages() {
+        if (mNoRestrictedModePackages == null) {
+            return List.of();
+        }
+        return Arrays.stream(mNoRestrictedModePackages.split(";")).toList();
+    }
+
     public String getSettingValue(ContentResolver resolver) {
         return Settings.Secure.getString(resolver, SETTING);
     }
@@ -71,5 +85,6 @@ public class LocalTransportParameters extends KeyValueSettingObserver {
         mIsDeviceTransfer = parser.getBoolean(KEY_IS_DEVICE_TRANSFER, false);
         mIsEncrypted = parser.getBoolean(KEY_IS_ENCRYPTED, false);
         mLogAgentResults = parser.getBoolean(KEY_LOG_AGENT_RESULTS, /* def */ false);
+        mNoRestrictedModePackages = parser.getString(KEY_NO_RESTRICTED_MODE_PACKAGES, /* def */ "");
     }
 }

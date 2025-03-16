@@ -16,17 +16,16 @@
 
 package com.android.systemui.bouncer.shared.model
 
+import androidx.annotation.StringRes
+
 /** Models the action button on the bouncer. */
-data class BouncerActionButtonModel(
-    /** The text to be shown on the button. */
-    val label: String,
+sealed class BouncerActionButtonModel(
+    /** The resource Id of the text to be shown on the button. */
+    @StringRes val labelResId: Int
+) {
+    data class EmergencyButtonModel(@StringRes private val labelResourceId: Int) :
+        BouncerActionButtonModel(labelResourceId)
 
-    /** The action to perform when the user clicks on the button. */
-    val onClick: () -> Unit,
-
-    /**
-     * The action to perform when the user long-clicks on the button. When not provided, long-clicks
-     * will be treated as regular clicks.
-     */
-    val onLongClick: (() -> Unit)? = null,
-)
+    data class ReturnToCallButtonModel(@StringRes private val labelResourceId: Int) :
+        BouncerActionButtonModel(labelResourceId)
+}

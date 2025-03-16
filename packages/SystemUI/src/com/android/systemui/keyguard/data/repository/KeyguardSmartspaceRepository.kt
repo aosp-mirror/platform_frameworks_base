@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import android.content.Context
 import android.os.UserHandle
 import android.provider.Settings
 import android.view.View
@@ -46,7 +45,6 @@ interface KeyguardSmartspaceRepository {
 class KeyguardSmartspaceRepositoryImpl
 @Inject
 constructor(
-    context: Context,
     private val secureSettings: SecureSettings,
     private val userTracker: UserTracker,
     @Application private val applicationScope: CoroutineScope,

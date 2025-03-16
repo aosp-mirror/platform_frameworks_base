@@ -30,7 +30,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Observe the tiles in the QS Panel and perform accessibility related actions */
 @SysUISingleton
@@ -55,7 +55,7 @@ constructor(
     }
 
     private fun startObservingTiles(currentTilesInteractor: CurrentTilesInteractor) {
-        scope.launch(backgroundDispatcher) {
+        scope.launch(context = backgroundDispatcher) {
             currentTilesInteractor.currentTiles
                 .sample(currentTilesInteractor.userContext) { currentTiles, userContext ->
                     Data(currentTiles.map(TileModel::spec), userContext)

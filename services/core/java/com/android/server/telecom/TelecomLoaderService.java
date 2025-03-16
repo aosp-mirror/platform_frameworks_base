@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManagerInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -63,7 +64,10 @@ public class TelecomLoaderService extends SystemService {
             // as this loader (process="system") that's redundant here.
             try {
                 ITelecomLoader telecomLoader = ITelecomLoader.Stub.asInterface(service);
-                ITelecomService telecomService = telecomLoader.createTelecomService(mServiceRepo);
+                PackageManagerInternal packageManagerInternal =
+                        LocalServices.getService(PackageManagerInternal.class);
+                ITelecomService telecomService = telecomLoader.createTelecomService(mServiceRepo,
+                        packageManagerInternal.getSystemUiServiceComponent().getPackageName());
 
                 SmsApplication.getDefaultMmsApplication(mContext, false);
                 ServiceManager.addService(Context.TELECOM_SERVICE, telecomService.asBinder());

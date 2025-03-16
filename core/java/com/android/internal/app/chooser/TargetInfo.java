@@ -17,13 +17,17 @@
 package com.android.internal.app.chooser;
 
 
+import static android.security.Flags.preventIntentRedirect;
+
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 
 import com.android.internal.app.ResolverActivity;
@@ -139,6 +143,22 @@ public interface TargetInfo {
         final int currentUserId = UserHandle.myUserId();
         if (targetUserId != currentUserId) {
             intent.fixUris(currentUserId);
+        }
+    }
+
+    /**
+     * refreshes intent's creatorToken with its current intent key fields. This allows
+     * ChooserActivity to still keep original creatorToken's creator uid after making changes to
+     * the intent and still keep it valid.
+     * @param intent the intent's creatorToken needs to up refreshed.
+     */
+    static void refreshIntentCreatorToken(Intent intent) {
+        if (!preventIntentRedirect()) return;
+        try {
+            intent.setCreatorToken(ActivityManager.getService().refreshIntentCreatorToken(
+                    intent.cloneForCreatorToken()));
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failure from system", e);
         }
     }
 }

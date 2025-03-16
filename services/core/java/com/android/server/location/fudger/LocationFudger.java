@@ -16,13 +16,16 @@
 
 package com.android.server.location.fudger;
 
+import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.location.Location;
 import android.location.LocationResult;
+import android.location.flags.Flags;
 import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.location.geometry.S2CellIdUtils;
 
 import java.security.SecureRandom;
 import java.time.Clock;
@@ -83,6 +86,9 @@ public class LocationFudger {
     @GuardedBy("this")
     @Nullable private LocationResult mCachedCoarseLocationResult;
 
+    @GuardedBy("this")
+    @Nullable private LocationFudgerCache mLocationFudgerCache = null;
+
     public LocationFudger(float accuracyM) {
         this(accuracyM, SystemClock.elapsedRealtimeClock(), new SecureRandom());
     }
@@ -94,6 +100,16 @@ public class LocationFudger {
         mAccuracyM = Math.max(accuracyM, MIN_ACCURACY_M);
 
         resetOffsets();
+    }
+
+    /**
+     * Provides the optional {@link LocationFudgerCache} for coarsening based on population density.
+     */
+    @FlaggedApi(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS)
+    public void setLocationFudgerCache(LocationFudgerCache cache) {
+        synchronized (this) {
+            mLocationFudgerCache = cache;
+        }
     }
 
     /**
@@ -162,16 +178,34 @@ public class LocationFudger {
         longitude += wrapLongitude(metersToDegreesLongitude(mLongitudeOffsetM, latitude));
         latitude += wrapLatitude(metersToDegreesLatitude(mLatitudeOffsetM));
 
-        // quantize location by snapping to a grid. this is the primary means of obfuscation. it
-        // gives nice consistent results and is very effective at hiding the true location (as long
-        // as you are not sitting on a grid boundary, which the random offsets mitigate).
-        //
-        // note that we quantize the latitude first, since the longitude quantization depends on the
-        // latitude value and so leaks information about the latitude
-        double latGranularity = metersToDegreesLatitude(mAccuracyM);
-        latitude = wrapLatitude(Math.round(latitude / latGranularity) * latGranularity);
-        double lonGranularity = metersToDegreesLongitude(mAccuracyM, latitude);
-        longitude = wrapLongitude(Math.round(longitude / lonGranularity) * lonGranularity);
+        // We copy a reference to the cache, so even if mLocationFudgerCache is concurrently set
+        // to null, we can continue executing the condition below.
+        LocationFudgerCache cacheCopy = null;
+        synchronized (this) {
+            cacheCopy = mLocationFudgerCache;
+        }
+
+        // TODO(b/381204398): To ensure a safe rollout, two algorithms co-exist. The first is the
+        // new density-based algorithm, while the second is the traditional coarsening algorithm.
+        // Once rollout is done, clean up the unused algorithm.
+        if (Flags.densityBasedCoarseLocations() && cacheCopy != null
+                && cacheCopy.hasDefaultValue()) {
+            int level = cacheCopy.getCoarseningLevel(latitude, longitude);
+            double[] center = snapToCenterOfS2Cell(latitude, longitude, level);
+            latitude = center[S2CellIdUtils.LAT_INDEX];
+            longitude = center[S2CellIdUtils.LNG_INDEX];
+        } else {
+            // quantize location by snapping to a grid. this is the primary means of obfuscation. it
+            // gives nice consistent results and is very effective at hiding the true location (as
+            // long as you are not sitting on a grid boundary, which the random offsets mitigate).
+            //
+            // note that we quantize the latitude first, since the longitude quantization depends on
+            // the latitude value and so leaks information about the latitude
+            double latGranularity = metersToDegreesLatitude(mAccuracyM);
+            latitude = wrapLatitude(Math.round(latitude / latGranularity) * latGranularity);
+            double lonGranularity = metersToDegreesLongitude(mAccuracyM, latitude);
+            longitude = wrapLongitude(Math.round(longitude / lonGranularity) * lonGranularity);
+        }
 
         coarse.setLatitude(latitude);
         coarse.setLongitude(longitude);
@@ -183,6 +217,15 @@ public class LocationFudger {
         }
 
         return coarse;
+    }
+
+    @VisibleForTesting
+    protected double[] snapToCenterOfS2Cell(double latDegrees, double lngDegrees, int level) {
+        long leafCell = S2CellIdUtils.fromLatLngDegrees(latDegrees, lngDegrees);
+        long coarsenedCell = S2CellIdUtils.getParent(leafCell, level);
+        double[] center = new double[] {0.0, 0.0};
+        S2CellIdUtils.toLatLngDegrees(coarsenedCell, center);
+        return center;
     }
 
     /**

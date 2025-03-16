@@ -39,6 +39,7 @@ android_library {
         "configinfra_framework_flags_java_lib",
         "device_config_service_flags_java",
         "libaconfig_java_proto_lite",
+        "notification_flags_lib",
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibDisplayUtils",
     ],
@@ -75,6 +76,7 @@ android_test {
         "truth",
         "Nene",
         "Harrier",
+        "bedstead-enterprise",
     ],
     libs: [
         "android.test.base.stubs.system",

@@ -56,6 +56,7 @@ public class DividerViewTest extends ShellTestCase {
     private @Mock DisplayController mDisplayController;
     private @Mock DisplayImeController mDisplayImeController;
     private @Mock ShellTaskOrganizer mTaskOrganizer;
+    private @Mock SplitState mSplitState;
     private @Mock Handler mHandler;
     private SplitLayout mSplitLayout;
     private DividerView mDividerView;
@@ -67,7 +68,7 @@ public class DividerViewTest extends ShellTestCase {
         Configuration configuration = getConfiguration();
         mSplitLayout = new SplitLayout("TestSplitLayout", mContext, configuration,
                 mSplitLayoutHandler, mCallbacks, mDisplayController, mDisplayImeController,
-                mTaskOrganizer, SplitLayout.PARALLAX_NONE, mHandler);
+                mTaskOrganizer, SplitLayout.PARALLAX_NONE, mSplitState, mHandler);
         SplitWindowManager splitWindowManager = new SplitWindowManager("TestSplitWindowManager",
                 mContext,
                 configuration, mCallbacks);

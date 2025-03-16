@@ -25,6 +25,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
+
 import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;
@@ -82,7 +84,9 @@ final class UriPermission {
 
     static final long INVALID_TIME = Long.MIN_VALUE;
 
+    @GuardedBy("this")
     private ArraySet<UriPermissionOwner> mReadOwners;
+    @GuardedBy("this")
     private ArraySet<UriPermissionOwner> mWriteOwners;
 
     private String stringName;
@@ -204,14 +208,16 @@ final class UriPermission {
                 persistedModeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
             }
             globalModeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
-            if (mReadOwners != null && includingOwners) {
-                ownedModeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                for (UriPermissionOwner r : mReadOwners) {
-                    if (r != null) {
-                        r.removeReadPermission(this);
+            synchronized (this) {
+                if (mReadOwners != null && includingOwners) {
+                    ownedModeFlags &= ~Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                    for (UriPermissionOwner r : mReadOwners) {
+                        if (r != null) {
+                            r.removeReadPermission(this);
+                        }
                     }
+                    mReadOwners = null;
                 }
-                mReadOwners = null;
             }
         }
         if ((modeFlags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
@@ -220,14 +226,16 @@ final class UriPermission {
                 persistedModeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
             }
             globalModeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-            if (mWriteOwners != null && includingOwners) {
-                ownedModeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-                for (UriPermissionOwner r : mWriteOwners) {
-                    if (r != null) {
-                        r.removeWritePermission(this);
+            synchronized (this) {
+                if (mWriteOwners != null && includingOwners) {
+                    ownedModeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+                    for (UriPermissionOwner r : mWriteOwners) {
+                        if (r != null) {
+                            r.removeWritePermission(this);
+                        }
                     }
+                    mWriteOwners = null;
                 }
-                mWriteOwners = null;
             }
         }
 
@@ -256,7 +264,7 @@ final class UriPermission {
         }
     }
 
-    private void addReadOwner(UriPermissionOwner owner) {
+    private synchronized void addReadOwner(UriPermissionOwner owner) {
         if (mReadOwners == null) {
             mReadOwners = Sets.newArraySet();
             ownedModeFlags |= Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -270,7 +278,7 @@ final class UriPermission {
     /**
      * Remove given read owner, updating {@Link #modeFlags} as needed.
      */
-    void removeReadOwner(UriPermissionOwner owner) {
+    synchronized void removeReadOwner(UriPermissionOwner owner) {
         if (mReadOwners == null || !mReadOwners.remove(owner)) {
             Slog.wtf(TAG, "Unknown read owner " + owner + " in " + this);
             return;
@@ -282,7 +290,7 @@ final class UriPermission {
         }
     }
 
-    private void addWriteOwner(UriPermissionOwner owner) {
+    private synchronized void addWriteOwner(UriPermissionOwner owner) {
         if (mWriteOwners == null) {
             mWriteOwners = Sets.newArraySet();
             ownedModeFlags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
@@ -296,7 +304,7 @@ final class UriPermission {
     /**
      * Remove given write owner, updating {@Link #modeFlags} as needed.
      */
-    void removeWriteOwner(UriPermissionOwner owner) {
+    synchronized void removeWriteOwner(UriPermissionOwner owner) {
         if (mWriteOwners == null || !mWriteOwners.remove(owner)) {
             Slog.wtf(TAG, "Unknown write owner " + owner + " in " + this);
             return;
@@ -339,20 +347,22 @@ final class UriPermission {
         }
         pw.println();
 
-        if (mReadOwners != null) {
-            pw.print(prefix);
-            pw.println("readOwners:");
-            for (UriPermissionOwner owner : mReadOwners) {
+        synchronized (this) {
+            if (mReadOwners != null) {
                 pw.print(prefix);
-                pw.println("  * " + owner);
+                pw.println("readOwners:");
+                for (UriPermissionOwner owner : mReadOwners) {
+                    pw.print(prefix);
+                    pw.println("  * " + owner);
+                }
             }
-        }
-        if (mWriteOwners != null) {
-            pw.print(prefix);
-            pw.println("writeOwners:");
-            for (UriPermissionOwner owner : mWriteOwners) {
+            if (mWriteOwners != null) {
                 pw.print(prefix);
-                pw.println("  * " + owner);
+                pw.println("writeOwners:");
+                for (UriPermissionOwner owner : mWriteOwners) {
+                    pw.print(prefix);
+                    pw.println("  * " + owner);
+                }
             }
         }
     }

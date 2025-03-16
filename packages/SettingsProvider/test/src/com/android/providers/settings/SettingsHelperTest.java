@@ -37,9 +37,12 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.media.AudioManager;
+import android.media.Utils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.LocaleList;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -54,8 +57,11 @@ import com.android.internal.R;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -63,6 +69,7 @@ import org.mockito.MockitoAnnotations;
  * Tests for the SettingsHelperTest
  */
 @RunWith(AndroidJUnit4.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class SettingsHelperTest {
     private static final String SETTING_KEY = "setting_key";
     private static final String SETTING_VALUE = "setting_value";
@@ -74,8 +81,12 @@ public class SettingsHelperTest {
             "content://media/internal/audio/media/20?title=DefaultNotification&canonical=1";
     private static final String DEFAULT_ALARM_VALUE =
             "content://media/internal/audio/media/30?title=DefaultAlarm&canonical=1";
+    private static final String VIBRATION_FILE_NAME = "haptics.xml";
 
     private SettingsHelper mSettingsHelper;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock private Context mContext;
     @Mock private Resources mResources;
@@ -117,6 +128,22 @@ public class SettingsHelperTest {
                 eq(SETTING_KEY));
 
         assertEquals(SETTING_REAL_VALUE, mSettingsHelper.onBackupValue(SETTING_KEY, SETTING_VALUE));
+    }
+
+    @Test
+    @EnableFlags({android.media.audio.Flags.FLAG_ENABLE_RINGTONE_HAPTICS_CUSTOMIZATION,
+            com.android.server.notification.Flags.FLAG_NOTIFICATION_VIBRATION_IN_SOUND_URI})
+    public void testOnBackupValue_ringtoneVibrationSupport_returnsSameValue() {
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_ringtoneVibrationSettingsSupported)).thenReturn(
+                true);
+        String testRingtoneVibrationValue = createUriWithVibration(DEFAULT_RINGTONE_VALUE);
+        String testNotificationVibrationValue = createUriWithVibration(DEFAULT_NOTIFICATION_VALUE);
+
+        assertEquals(testRingtoneVibrationValue, mSettingsHelper.onBackupValue(
+                Settings.System.RINGTONE, testRingtoneVibrationValue));
+        assertEquals(testNotificationVibrationValue, mSettingsHelper.onBackupValue(
+                Settings.System.NOTIFICATION_SOUND, testNotificationVibrationValue));
     }
 
     @Test
@@ -675,6 +702,30 @@ public class SettingsHelperTest {
                 .isEqualTo(null);
     }
 
+    @Test
+    @EnableFlags({android.media.audio.Flags.FLAG_ENABLE_RINGTONE_HAPTICS_CUSTOMIZATION,
+            com.android.server.notification.Flags.FLAG_NOTIFICATION_VIBRATION_IN_SOUND_URI})
+    public void testRestoreValue_ringtoneVibrationSupport_restoreValue() {
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_ringtoneVibrationSettingsSupported)).thenReturn(
+                true);
+        String testRingtoneVibrationValue = createUriWithVibration(DEFAULT_RINGTONE_VALUE);
+        String testNotificationVibrationValue = createUriWithVibration(DEFAULT_NOTIFICATION_VALUE);
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+                };
+        mContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        resetRingtoneSettingsToDefault();
+
+        assertRingtoneSettingsRestoring(Settings.System.RINGTONE, testRingtoneVibrationValue);
+        assertRingtoneSettingsRestoring(
+                Settings.System.NOTIFICATION_SOUND, testNotificationVibrationValue);
+    }
+
     private static class MockSettingsProvider extends MockContentProvider {
         private final ArrayMap<String, String> mKeyValueStore = new ArrayMap<>();
         MockSettingsProvider(Context context) {
@@ -765,5 +816,26 @@ public class SettingsHelperTest {
                 .isEqualTo(DEFAULT_NOTIFICATION_VALUE);
         assertThat(Settings.System.getString(mContentResolver, Settings.System.ALARM_ALERT))
                 .isEqualTo(DEFAULT_ALARM_VALUE);
+    }
+
+    private String createUriWithVibration(String defaultUriString) {
+        return Uri.parse(defaultUriString).buildUpon()
+                .appendQueryParameter(
+                        Utils.VIBRATION_URI_PARAM, VIBRATION_FILE_NAME).build().toString();
+    }
+
+    private void assertRingtoneSettingsRestoring(
+            String settings, String testRingtoneSettingsValue) {
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                settings,
+                testRingtoneSettingsValue,
+                0);
+
+        assertThat(Settings.System.getString(mContentResolver, settings))
+                .isEqualTo(testRingtoneSettingsValue);
     }
 }

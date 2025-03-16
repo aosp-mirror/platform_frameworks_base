@@ -15,10 +15,17 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.android.compose.core.tests" >
 
     <application>
         <uses-library android:name="android.test.runner" />
+
+        <activity
+            android:name="androidx.activity.ComponentActivity"
+            android:theme="@android:style/Theme.DeviceDefault.DayNight"
+            android:exported="true"
+            tools:replace="android:theme" />
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

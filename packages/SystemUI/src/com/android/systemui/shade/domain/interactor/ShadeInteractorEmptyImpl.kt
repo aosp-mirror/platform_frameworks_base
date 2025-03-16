@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
@@ -31,6 +32,7 @@ class ShadeInteractorEmptyImpl @Inject constructor() : ShadeInteractor {
     override val isShadeEnabled: StateFlow<Boolean> = inactiveFlowBoolean
     override val isQsEnabled: StateFlow<Boolean> = inactiveFlowBoolean
     override val shadeExpansion: StateFlow<Float> = inactiveFlowFloat
+    override val isShadeAnyExpanded: StateFlow<Boolean> = inactiveFlowBoolean
     override val qsExpansion: StateFlow<Float> = inactiveFlowFloat
     override val isQsExpanded: StateFlow<Boolean> = inactiveFlowBoolean
     override val isQsBypassingShade: Flow<Boolean> = inactiveFlowBoolean
@@ -50,7 +52,17 @@ class ShadeInteractorEmptyImpl @Inject constructor() : ShadeInteractor {
 
     override fun getTopEdgeSplitFraction(): Float = 0.5f
 
-    override fun expandNotificationShade(loggingReason: String) {}
+    override fun expandNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {}
 
-    override fun expandQuickSettingsShade(loggingReason: String) {}
+    override fun expandQuickSettingsShade(loggingReason: String, transitionKey: TransitionKey?) {}
+
+    override fun collapseNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {}
+
+    override fun collapseQuickSettingsShade(
+        loggingReason: String,
+        transitionKey: TransitionKey?,
+        bypassNotificationsShade: Boolean,
+    ) {}
+
+    override fun collapseEitherShade(loggingReason: String, transitionKey: TransitionKey?) {}
 }

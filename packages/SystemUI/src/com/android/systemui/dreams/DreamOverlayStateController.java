@@ -16,8 +16,6 @@
 
 package com.android.systemui.dreams;
 
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_ENABLED;
-
 import android.service.dreams.DreamService;
 
 import androidx.annotation.NonNull;
@@ -46,7 +44,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * {@link DreamOverlayStateController} is the source of truth for Dream overlay configurations and
@@ -103,7 +100,6 @@ public class DreamOverlayStateController implements
     }
 
     private final Executor mExecutor;
-    private final boolean mOverlayEnabled;
     private final ArrayList<WeakReference<Callback>> mCallbacks = new ArrayList<>();
 
     @Complication.ComplicationType
@@ -123,12 +119,10 @@ public class DreamOverlayStateController implements
     @VisibleForTesting
     @Inject
     public DreamOverlayStateController(@Main Executor executor,
-            @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled,
             FeatureFlags featureFlags,
             @DreamLog LogBuffer logBuffer,
             WeakReferenceFactory weakReferenceFactory) {
         mExecutor = executor;
-        mOverlayEnabled = overlayEnabled;
         mLogger = new DreamLogger(logBuffer, TAG);
         mFeatureFlags = featureFlags;
         mWeakReferenceFactory = weakReferenceFactory;
@@ -138,18 +132,12 @@ public class DreamOverlayStateController implements
         } else {
             mSupportedTypes = Complication.COMPLICATION_TYPE_NONE;
         }
-        mLogger.logDreamOverlayEnabled(mOverlayEnabled);
     }
 
     /**
      * Adds a complication to be included on the dream overlay.
      */
     public void addComplication(Complication complication) {
-        if (!mOverlayEnabled) {
-            mLogger.logIgnoreAddComplication("overlay disabled", complication.toString());
-            return;
-        }
-
         mExecutor.execute(() -> {
             if (mComplications.add(complication)) {
                 mLogger.logAddComplication(complication.toString());
@@ -162,11 +150,6 @@ public class DreamOverlayStateController implements
      * Removes a complication from inclusion on the dream overlay.
      */
     public void removeComplication(Complication complication) {
-        if (!mOverlayEnabled) {
-            mLogger.logIgnoreRemoveComplication("overlay disabled", complication.toString());
-            return;
-        }
-
         mExecutor.execute(() -> {
             if (mComplications.remove(complication)) {
                 mLogger.logRemoveComplication(complication.toString());
@@ -264,7 +247,7 @@ public class DreamOverlayStateController implements
      * @return {@code true} if overlay is active, {@code false} otherwise.
      */
     public boolean isOverlayActive() {
-        return mOverlayEnabled && containsState(STATE_DREAM_OVERLAY_ACTIVE);
+        return containsState(STATE_DREAM_OVERLAY_ACTIVE);
     }
 
     /**

@@ -51,26 +51,24 @@ import android.os.ServiceManager;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
 import android.tracing.perfetto.TracingContext;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.LongArray;
 import android.util.Slog;
-import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLogConfigurationServiceImpl.RegisterClientArgs;
 import com.android.internal.protolog.common.ILogger;
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
 import com.android.internal.protolog.common.LogLevel;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -87,30 +85,23 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Stream;
 
 /**
  * A service for the ProtoLog logging system.
  */
-public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProtoLog {
+public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProtoLog {
     private static final String LOG_TAG = "ProtoLog";
     public static final String NULL_STRING = "null";
     private final AtomicInteger mTracingInstances = new AtomicInteger();
 
     @NonNull
-    private final ProtoLogDataSource mDataSource;
+    protected final ProtoLogDataSource mDataSource;
     @Nullable
-    private final ProtoLogViewerConfigReader mViewerConfigReader;
-    @Deprecated
-    @Nullable
-    private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
+    protected final IProtoLogConfigurationService mConfigurationService;
     @NonNull
-    private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
+    protected final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
     @NonNull
-    private final Runnable mCacheUpdater;
-
-    @Nullable // null when the flag android.tracing.client_side_proto_logging is not flipped
-    private final IProtoLogConfigurationService mProtoLogConfigurationService;
+    private final ProtoLogCacheUpdater mCacheUpdater;
 
     @NonNull
     private final int[] mDefaultLogLevelCounts = new int[LogLevel.values().length];
@@ -120,69 +111,16 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     private final Map<String, Integer> mCollectStackTraceGroupCounts = new ArrayMap<>();
 
     private final Lock mBackgroundServiceLock = new ReentrantLock();
-    private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
+    protected ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
-    public PerfettoProtoLogImpl(@NonNull IProtoLogGroup[] groups)
-            throws ServiceManager.ServiceNotFoundException {
-        this(null, null, null, () -> {}, groups);
-    }
+    // Set to true once this is ready to accept protolog to logcat requests.
+    private boolean mLogcatReady = false;
 
-    public PerfettoProtoLogImpl(@NonNull Runnable cacheUpdater, @NonNull IProtoLogGroup[] groups)
-            throws ServiceManager.ServiceNotFoundException {
-        this(null, null, null, cacheUpdater, groups);
-    }
-
-    public PerfettoProtoLogImpl(
-            @NonNull String viewerConfigFilePath,
-            @NonNull Runnable cacheUpdater,
+    protected PerfettoProtoLogImpl(
+            @NonNull ProtoLogDataSource dataSource,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
-        this(viewerConfigFilePath,
-                null,
-                new ProtoLogViewerConfigReader(() -> {
-                    try {
-                        return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(
-                                "Failed to load viewer config file " + viewerConfigFilePath, e);
-                    }
-                }),
-                cacheUpdater, groups);
-    }
-
-    @Deprecated
-    @VisibleForTesting
-    public PerfettoProtoLogImpl(
-            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
-            @NonNull Runnable cacheUpdater,
-            @NonNull IProtoLogGroup[] groups,
-            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
-            @NonNull ProtoLogConfigurationService configurationService) {
-        this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater,
-                groups, dataSourceBuilder, configurationService);
-    }
-
-    @VisibleForTesting
-    public PerfettoProtoLogImpl(
-            @Nullable String viewerConfigFilePath,
-            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
-            @NonNull Runnable cacheUpdater,
-            @NonNull IProtoLogGroup[] groups,
-            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
-            @NonNull ProtoLogConfigurationService configurationService) {
-        this(viewerConfigFilePath, null, viewerConfigReader, cacheUpdater,
-                groups, dataSourceBuilder, configurationService);
-    }
-
-    private PerfettoProtoLogImpl(
-            @Nullable String viewerConfigFilePath,
-            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
-            @NonNull Runnable cacheUpdater,
-            @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
-        this(viewerConfigFilePath, viewerConfigInputStreamProvider, viewerConfigReader,
-                cacheUpdater, groups,
-                ProtoLogDataSource::new,
+        this(dataSource, cacheUpdater, groups,
                 android.tracing.Flags.clientSideProtoLogging() ?
                     IProtoLogConfigurationService.Stub.asInterface(
                         ServiceManager.getServiceOrThrow(PROTOLOG_CONFIGURATION_SERVICE)
@@ -190,66 +128,65 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         );
     }
 
-    private PerfettoProtoLogImpl(
-            @Nullable String viewerConfigFilePath,
-            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
-            @NonNull Runnable cacheUpdater,
+    protected PerfettoProtoLogImpl(
+            @NonNull ProtoLogDataSource dataSource,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups,
-            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
             @Nullable IProtoLogConfigurationService configurationService) {
-        if (viewerConfigFilePath != null && viewerConfigInputStreamProvider != null) {
-            throw new RuntimeException("Only one of viewerConfigFilePath and "
-                    + "viewerConfigInputStreamProvider can be set");
-        }
-
-        mDataSource = dataSourceBuilder.build(
-                this::onTracingInstanceStart,
-                this::onTracingFlush,
-                this::onTracingInstanceStop);
-        Producer.init(InitArguments.DEFAULTS);
-        DataSourceParams params =
-                new DataSourceParams.Builder()
-                        .setBufferExhaustedPolicy(
-                                DataSourceParams
-                                        .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
-                        .build();
-        // NOTE: Registering that datasource is an async operation, so there may be no data traced
-        // for some messages logged right after the construction of this class.
-        mDataSource.register(params);
-        this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
-        this.mViewerConfigReader = viewerConfigReader;
-        this.mCacheUpdater = cacheUpdater;
+        mDataSource = dataSource;
+        mCacheUpdater = cacheUpdater;
+        mConfigurationService = configurationService;
 
         registerGroupsLocally(groups);
+    }
+
+    /**
+     * To be called to enable the ProtoLogImpl to start tracing to ProtoLog and register with all
+     * the expected ProtoLog components.
+     */
+    public void enable() {
+        Producer.init(InitArguments.DEFAULTS);
 
         if (android.tracing.Flags.clientSideProtoLogging()) {
-            mProtoLogConfigurationService = configurationService;
-            Objects.requireNonNull(mProtoLogConfigurationService,
-                    "A null ProtoLog Configuration Service was provided!");
+            connectToConfigurationService();
+        }
 
-            try {
-                var args = new ProtoLogConfigurationServiceImpl.RegisterClientArgs();
+        mDataSource.registerOnStartCallback(this::onTracingInstanceStart);
+        mDataSource.registerOnFlushCallback(this::onTracingFlush);
+        mDataSource.registerOnStopCallback(this::onTracingInstanceStop);
+    }
 
-                if (viewerConfigFilePath != null) {
-                    args.setViewerConfigFile(viewerConfigFilePath);
-                }
+    private void connectToConfigurationService() {
+        Objects.requireNonNull(mConfigurationService,
+                "A null ProtoLog Configuration Service was provided!");
 
-                final var groupArgs = Stream.of(groups)
-                        .map(group -> new ProtoLogConfigurationServiceImpl.RegisterClientArgs
-                                .GroupConfig(group.name(), group.isLogToLogcat()))
-                        .toArray(ProtoLogConfigurationServiceImpl
-                                .RegisterClientArgs.GroupConfig[]::new);
-                args.setGroups(groupArgs);
+        try {
+            var args = createConfigurationServiceRegisterClientArgs();
 
-                mProtoLogConfigurationService.registerClient(this, args);
-            } catch (RemoteException e) {
-                throw new RuntimeException("Failed to register ProtoLog client");
-            }
-        } else {
-            mProtoLogConfigurationService = null;
+            final var groupArgs = mLogGroups.values().stream()
+                    .map(group -> new RegisterClientArgs
+                            .GroupConfig(group.name(), group.isLogToLogcat()))
+                    .toArray(RegisterClientArgs.GroupConfig[]::new);
+            args.setGroups(groupArgs);
+
+            mConfigurationService.registerClient(this, args);
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed to register ProtoLog client");
         }
     }
+
+    /**
+     * Should be called when we no longer want to use the ProtoLog logger to unlink ourselves from
+     * the datasource and the configuration service to ensure we no longer receive the callback.
+     */
+    public void disable() {
+        mDataSource.unregisterOnStartCallback(this::onTracingInstanceStart);
+        mDataSource.unregisterOnFlushCallback(this::onTracingFlush);
+        mDataSource.unregisterOnStopCallback(this::onTracingInstanceStop);
+    }
+
+    @NonNull
+    protected abstract RegisterClientArgs createConfigurationServiceRegisterClientArgs();
 
     /**
      * Main log method, do not call directly.
@@ -317,9 +254,6 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
      * @return status code
      */
     public int startLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
-        if (mViewerConfigReader != null) {
-            mViewerConfigReader.loadViewerConfig(groups, logger);
-        }
         return setTextLogging(true, logger, groups);
     }
 
@@ -330,9 +264,6 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
      * @return status code
      */
     public int stopLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
-        if (mViewerConfigReader != null) {
-            mViewerConfigReader.unloadViewerConfig(groups, logger);
-        }
         return setTextLogging(false, logger, groups);
     }
 
@@ -351,22 +282,30 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     }
 
     private void registerGroupsLocally(@NonNull IProtoLogGroup[] protoLogGroups) {
-        final var groupsLoggingToLogcat = new ArrayList<String>();
+        // Verify we don't have id collisions, if we do we want to know as soon as possible and
+        // we might want to manually specify an id for the group with a collision
+        verifyNoCollisionsOrDuplicates(protoLogGroups);
+
         for (IProtoLogGroup protoLogGroup : protoLogGroups) {
             mLogGroups.put(protoLogGroup.name(), protoLogGroup);
+        }
+    }
 
-            if (protoLogGroup.isLogToLogcat()) {
-                groupsLoggingToLogcat.add(protoLogGroup.name());
+    private void verifyNoCollisionsOrDuplicates(@NonNull IProtoLogGroup[] protoLogGroups) {
+        final var groupId = new ArraySet<Integer>();
+
+        for (IProtoLogGroup protoLogGroup : protoLogGroups) {
+            if (groupId.contains(protoLogGroup.getId())) {
+                throw new RuntimeException(
+                        "Group with same id (" + protoLogGroup.getId() + ") registered twice. "
+                                + "Potential duplicate or hash id collision.");
             }
+            groupId.add(protoLogGroup.getId());
         }
+    }
 
-        if (mViewerConfigReader != null) {
-            // Load in background to avoid delay in boot process.
-            // The caveat is that any log message that is also logged to logcat will not be
-            // successfully decoded until this completes.
-            mBackgroundLoggingService.execute(() -> mViewerConfigReader
-                    .loadViewerConfig(groupsLoggingToLogcat.toArray(new String[0])));
-        }
+    protected void readyToLogToLogcat() {
+        mLogcatReady = true;
     }
 
     /**
@@ -399,13 +338,10 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 return -1;
             }
             case "enable-text" -> {
-                if (mViewerConfigReader != null) {
-                    mViewerConfigReader.loadViewerConfig(groups, logger);
-                }
-                return setTextLogging(true, logger, groups);
+                return startLoggingToLogcat(groups, logger);
             }
             case "disable-text" -> {
-                return setTextLogging(false, logger, groups);
+                return stopLoggingToLogcat(groups, logger);
             }
             default -> {
                 return unknownCommand(pw);
@@ -468,57 +404,21 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     }
 
     @Deprecated
-    private void dumpViewerConfig() {
-        if (mViewerConfigInputStreamProvider == null) {
-            // No viewer config available
+    abstract void dumpViewerConfig();
+
+    @NonNull
+    abstract String getLogcatMessageString(@NonNull Message message);
+
+    private void logToLogcat(@NonNull String tag, @NonNull LogLevel level, @NonNull Message message,
+            @Nullable Object[] args) {
+        if (!mLogcatReady) {
+            Log.w(LOG_TAG, "Trying to log a protolog message with hash "
+                    + message.getMessageHash() + " to logcat before the service is ready to accept "
+                    + "such requests.");
             return;
         }
 
-        Log.d(LOG_TAG, "Dumping viewer config to trace");
-
-        Utils.dumpViewerConfig(mDataSource, mViewerConfigInputStreamProvider);
-
-        Log.d(LOG_TAG, "Dumped viewer config to trace");
-    }
-
-    private void logToLogcat(String tag, LogLevel level, Message message,
-            @Nullable Object[] args) {
-        String messageString;
-        if (mViewerConfigReader == null) {
-            messageString = message.getMessage();
-
-            if (messageString == null) {
-                Log.e(LOG_TAG, "Failed to decode message for logcat. "
-                        + "Message not available without ViewerConfig to decode the hash.");
-            }
-        } else {
-            messageString = message.getMessage(mViewerConfigReader);
-
-            if (messageString == null) {
-                Log.e(LOG_TAG, "Failed to decode message for logcat. "
-                        + "Message hash either not available in viewerConfig file or "
-                        + "not loaded into memory from file before decoding.");
-            }
-        }
-
-        if (messageString == null) {
-            StringBuilder builder = new StringBuilder("UNKNOWN MESSAGE");
-            if (args != null) {
-                builder.append(" args = (");
-                builder.append(String.join(", ", Arrays.stream(args)
-                        .map(it -> {
-                            if (it == null) {
-                                return "null";
-                            } else {
-                                return it.toString();
-                            }
-                        }).toList()));
-                builder.append(")");
-            }
-            messageString = builder.toString();
-            args = new Object[0];
-        }
-
+        String messageString = getLogcatMessageString(message);
         logToLogcat(tag, level, messageString, args);
     }
 
@@ -789,19 +689,34 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         return internMap.get(string);
     }
 
+    protected boolean validateGroups(ILogger logger, String[] groups) {
+        for (int i = 0; i < groups.length; i++) {
+            String group = groups[i];
+            IProtoLogGroup g = mLogGroups.get(group);
+            if (g == null) {
+                logger.log("No IProtoLogGroup named " + group);
+                return false;
+            }
+        }
+        return true;
+    }
+
     private int setTextLogging(boolean value, ILogger logger, String... groups) {
+        if (!validateGroups(logger, groups)) {
+            return -1;
+        }
+
         for (int i = 0; i < groups.length; i++) {
             String group = groups[i];
             IProtoLogGroup g = mLogGroups.get(group);
             if (g != null) {
                 g.setLogToLogcat(value);
             } else {
-                logger.log("No IProtoLogGroup named " + group);
-                return -1;
+                throw new RuntimeException("No IProtoLogGroup named " + group);
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
         return 0;
     }
 
@@ -844,7 +759,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
 
         this.mTracingInstances.incrementAndGet();
 
@@ -884,7 +799,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
         Log.d(LOG_TAG, "Finished onTracingInstanceStop");
     }
 
@@ -896,7 +811,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         }
     }
 
-    private static class Message {
+    protected static class Message {
         @Nullable
         private final Long mMessageHash;
         private final int mMessageMask;
@@ -921,12 +836,17 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         }
 
         @Nullable
-        private String getMessage() {
+        protected Long getMessageHash() {
+            return mMessageHash;
+        }
+
+        @Nullable
+        protected String getMessage() {
             return mMessageString;
         }
 
         @Nullable
-        private String getMessage(@NonNull ProtoLogViewerConfigReader viewerConfigReader) {
+        protected String getMessage(@NonNull ProtoLogViewerConfigReader viewerConfigReader) {
             if (mMessageString != null) {
                 return mMessageString;
             }

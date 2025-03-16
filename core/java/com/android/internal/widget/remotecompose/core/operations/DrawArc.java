@@ -15,36 +15,125 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
+import java.util.List;
+
+/** Draw an Arc command the specified arc, will be scaled to fit inside the specified oval. */
 public class DrawArc extends DrawBase6 {
-    public static final Companion COMPANION =
-            new Companion(Operations.DRAW_ARC) {
-                @Override
-                public Operation construct(float v1,
-                                           float v2,
-                                           float v3,
-                                           float v4,
-                                           float v5,
-                                           float v6) {
-                    return new DrawArc(v1, v2, v3, v4, v5, v6);
-                }
-            };
+    private static final int OP_CODE = Operations.DRAW_ARC;
+    private static final String CLASS_NAME = "DrawArc";
 
-    public DrawArc(float v1,
-                   float v2,
-                   float v3,
-                   float v4,
-                   float v5,
-                   float v6) {
-        super(v1, v2, v3, v4, v5, v6);
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
+        Maker m = DrawArc::new;
+        read(m, buffer, operations);
+    }
+
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
+    public static int id() {
+        return OP_CODE;
+    }
+
+    /**
+     * Writes out the operation to the buffer
+     *
+     * @param buffer the buffer to write to
+     * @param v1 The left side of the Oval
+     * @param v2 The top of the Oval
+     * @param v3 The right side of the Oval
+     * @param v4 The bottom of the Oval
+     * @param v5 Starting angle (in degrees) where the arc begins
+     * @param v6 Sweep angle (in degrees) measured clockwise
+     */
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            float v1,
+            float v2,
+            float v3,
+            float v4,
+            float v5,
+            float v6) {
+        buffer.start(OP_CODE);
+        buffer.writeFloat(v1);
+        buffer.writeFloat(v2);
+        buffer.writeFloat(v3);
+        buffer.writeFloat(v4);
+        buffer.writeFloat(v5);
+        buffer.writeFloat(v6);
+    }
+
+    @Override
+    protected void write(
+            @NonNull WireBuffer buffer,
+            float v1,
+            float v2,
+            float v3,
+            float v4,
+            float v5,
+            float v6) {
+        apply(buffer, v1, v2, v3, v4, v5, v6);
+    }
+
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
+                .description(
+                        "Draw the specified arc"
+                                + "which will be scaled to fit inside the specified oval")
+                .field(DocumentedOperation.FLOAT, "left", "The left side of the Oval")
+                .field(DocumentedOperation.FLOAT, "top", "The top of the Oval")
+                .field(DocumentedOperation.FLOAT, "right", "The right side of the Oval")
+                .field(DocumentedOperation.FLOAT, "bottom", "The bottom of the Oval")
+                .field(
+                        DocumentedOperation.FLOAT,
+                        "startAngle",
+                        "Starting angle (in degrees) where the arc begins")
+                .field(
+                        DocumentedOperation.FLOAT,
+                        "sweepAngle",
+                        "Sweep angle (in degrees) measured clockwise");
+    }
+
+    /**
+     * Create Draw Arc command Draw the specified arc, which will be scaled to fit inside the
+     * specified oval.
+     *
+     * @param left the left side of the oval
+     * @param top the top of the oval
+     * @param right the right side of the oval
+     * @param bottom the bottom of the oval
+     * @param startAngle Starting angle (in degrees) where the arc begins
+     * @param sweepAngle Sweep angle (in degrees) measured clockwise
+     */
+    public DrawArc(
+            float left, float top, float right, float bottom, float startAngle, float sweepAngle) {
+        super(left, top, right, bottom, startAngle, sweepAngle);
         mName = "DrawArc";
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.drawArc(mV1, mV2, mV3, mV4, mV5, mV6);
     }
 }

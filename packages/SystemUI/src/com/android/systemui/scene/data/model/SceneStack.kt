@@ -21,10 +21,6 @@ import com.android.compose.animation.scene.SceneKey
 /** An immutable stack of [SceneKey]s backed by a singly-linked list. */
 sealed interface SceneStack
 
-private data object EmptyStack : SceneStack
-
-private data class StackedNodes(val head: SceneKey, val tail: SceneStack) : SceneStack
-
 /** Returns the scene at the head of the stack, or `null` if empty. O(1) */
 fun SceneStack.peek(): SceneKey? =
     when (this) {
@@ -69,3 +65,14 @@ fun sceneStackOf(vararg scenes: SceneKey): SceneStack {
     }
     return result
 }
+
+private data object EmptyStack : SceneStack {
+    override fun toString() = sceneStackToString()
+}
+
+private data class StackedNodes(val head: SceneKey, val tail: SceneStack) : SceneStack {
+    override fun toString() = sceneStackToString()
+}
+
+private fun SceneStack.sceneStackToString(): String =
+    asIterable().joinToString { it.testTag }.let { "SceneStack([$it])" }

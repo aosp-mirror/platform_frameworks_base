@@ -45,7 +45,7 @@ class ColorCorrectionTileMapperTest : SysuiTestCase() {
             context.orCreateTestableResources
                 .apply { addOverride(R.drawable.ic_qs_color_correction, TestStubDrawable()) }
                 .resources,
-            context.theme
+            context.theme,
         )
     }
 
@@ -73,11 +73,11 @@ class ColorCorrectionTileMapperTest : SysuiTestCase() {
 
     private fun createColorCorrectionTileState(
         activationState: QSTileState.ActivationState,
-        secondaryLabel: String
+        secondaryLabel: String,
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_color_correction_label)
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(R.drawable.ic_qs_color_correction)!!, null) },
+            Icon.Loaded(context.getDrawable(R.drawable.ic_qs_color_correction)!!, null),
             R.drawable.ic_qs_color_correction,
             label,
             activationState,
@@ -87,7 +87,7 @@ class ColorCorrectionTileMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

@@ -61,7 +61,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0,
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
         mailApp.launchViaIntent(wmHelper)
         newTasksApp.launchViaIntent(wmHelper)
         imeApp.launchViaIntent(wmHelper)

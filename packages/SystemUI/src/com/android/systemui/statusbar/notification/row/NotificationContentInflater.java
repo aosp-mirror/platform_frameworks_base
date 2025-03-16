@@ -54,6 +54,8 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor;
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
@@ -92,6 +94,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private final SmartReplyStateInflater mSmartReplyStateInflater;
     private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
     private final HeadsUpStyleProvider mHeadsUpStyleProvider;
+    private final PromotedNotificationContentExtractor mPromotedNotificationContentExtractor;
 
     private final NotificationRowContentBinderLogger mLogger;
 
@@ -105,6 +108,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             SmartReplyStateInflater smartRepliesInflater,
             NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
             HeadsUpStyleProvider headsUpStyleProvider,
+            PromotedNotificationContentExtractor promotedNotificationContentExtractor,
             NotificationRowContentBinderLogger logger) {
         NotificationRowContentBinderRefactor.assertInLegacyMode();
         mRemoteViewCache = remoteViewCache;
@@ -115,6 +119,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         mSmartReplyStateInflater = smartRepliesInflater;
         mNotifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider;
         mHeadsUpStyleProvider = headsUpStyleProvider;
+        mPromotedNotificationContentExtractor = promotedNotificationContentExtractor;
         mLogger = logger;
     }
 
@@ -165,6 +170,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 mSmartReplyStateInflater,
                 mNotifLayoutInflaterFactoryProvider,
                 mHeadsUpStyleProvider,
+                mPromotedNotificationContentExtractor,
                 mLogger);
         if (mInflateSynchronously) {
             task.onPostExecute(task.doInBackground());
@@ -223,7 +229,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     );
         }
 
-        if (LockscreenOtpRedaction.isEnabled()) {
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
             result.mPublicInflatedSingleLineViewModel =
                     SingleLineViewInflater.inflateRedactedSingleLineViewModel(row.getContext(),
                             isConversation);
@@ -309,7 +315,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 });
                 break;
             case FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE:
-                if (LockscreenOtpRedaction.isEnabled()) {
+                if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
                     row.getPublicLayout()
                             .performWhenContentInactive(VISIBLE_TYPE_SINGLELINE, () -> {
                                 row.getPublicLayout().setSingleLineView(null);
@@ -342,7 +348,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
      * Cancel any pending content view frees from {@link #freeNotificationView} for the provided
      * content views.
      *
-     * @param row top level notification row containing the content views
+     * @param row          top level notification row containing the content views
      * @param contentViews content views to cancel pending frees on
      */
     private void cancelContentViewFrees(
@@ -360,11 +366,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         if ((contentViews & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
             row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_CONTRACTED);
         }
-        if (AsyncHybridViewInflation.isEnabled()
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()
                 && (contentViews & FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE) != 0) {
             row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE);
         }
-        if (LockscreenOtpRedaction.isEnabled()
+        if (AsyncHybridViewInflation.isEnabled()
                 && (contentViews & FLAG_CONTENT_VIEW_SINGLE_LINE) != 0) {
             row.getPrivateLayout().removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE);
         }
@@ -478,6 +484,13 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_HEADS_UP));
         setRemoteViewsInflaterFactory(result.newPublicView,
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_PUBLIC));
+        if (android.app.Flags.notificationsRedesignAppIcons()) {
+            setRemoteViewsInflaterFactory(result.mNewGroupHeaderView,
+                    notifLayoutInflaterFactoryProvider.provide(row, FLAG_GROUP_SUMMARY_HEADER));
+            setRemoteViewsInflaterFactory(result.mNewMinimizedGroupHeaderView,
+                    notifLayoutInflaterFactoryProvider.provide(row,
+                            FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER));
+        }
     }
 
     private static void setRemoteViewsInflaterFactory(RemoteViews remoteViews,
@@ -516,6 +529,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     logger.logAsyncTaskProgress(entry, "contracted view applied");
                     result.inflatedContentView = v;
                 }
+
                 @Override
                 public RemoteViews getRemoteView() {
                     return result.newContentView;
@@ -905,6 +919,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
         logger.logAsyncTaskProgress(entry, "finishing");
+
+        if (PromotedNotificationContentModel.featureFlagEnabled()) {
+            entry.setPromotedNotificationContentModel(result.mExtractedPromotedNotificationContent);
+        }
+
         boolean setRepliesAndActions = true;
         if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
             if (result.inflatedContentView != null) {
@@ -974,7 +993,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             }
         }
 
-        if (LockscreenOtpRedaction.isEnabled()
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()
                 && (reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE) != 0) {
             HybridNotificationView view = result.mPublicInflatedSingleLineView;
             SingleLineViewModel viewModel = result.mPublicInflatedSingleLineViewModel;
@@ -1115,6 +1134,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final SmartReplyStateInflater mSmartRepliesInflater;
         private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
         private final HeadsUpStyleProvider mHeadsUpStyleProvider;
+        private final PromotedNotificationContentExtractor mPromotedNotificationContentExtractor;
         private final NotificationRowContentBinderLogger mLogger;
 
         private AsyncInflationTask(
@@ -1134,6 +1154,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 SmartReplyStateInflater smartRepliesInflater,
                 NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
                 HeadsUpStyleProvider headsUpStyleProvider,
+                PromotedNotificationContentExtractor promotedNotificationContentExtractor,
                 NotificationRowContentBinderLogger logger) {
             mEntry = entry;
             mRow = row;
@@ -1152,6 +1173,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             mIsMediaInQS = isMediaFlagEnabled;
             mNotifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider;
             mHeadsUpStyleProvider = headsUpStyleProvider;
+            mPromotedNotificationContentExtractor = promotedNotificationContentExtractor;
             mLogger = logger;
             entry.setInflationTask(this);
         }
@@ -1254,7 +1276,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         );
             }
 
-            if (LockscreenOtpRedaction.isEnabled()) {
+            if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
                 result.mPublicInflatedSingleLineViewModel =
                         SingleLineViewInflater.inflateRedactedSingleLineViewModel(mContext,
                                 isConversation);
@@ -1266,6 +1288,14 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                                 mContext,
                                 mLogger
                         );
+            }
+
+            if (PromotedNotificationContentModel.featureFlagEnabled()) {
+                mLogger.logAsyncTaskProgress(mEntry, "extracting promoted notification content");
+                result.mExtractedPromotedNotificationContent = mPromotedNotificationContentExtractor
+                        .extractContent(mEntry, recoveredBuilder);
+                mLogger.logAsyncTaskProgress(mEntry, "extracted promoted notification content: "
+                        + result.mExtractedPromotedNotificationContent);
             }
 
             mLogger.logAsyncTaskProgress(mEntry,
@@ -1369,6 +1399,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
     @VisibleForTesting
     static class InflationProgress {
+        PromotedNotificationContentModel mExtractedPromotedNotificationContent;
+
         private RemoteViews newContentView;
         private RemoteViews newHeadsUpView;
         private RemoteViews newExpandedView;
@@ -1406,6 +1438,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     @VisibleForTesting
     abstract static class ApplyCallback {
         public abstract void setResultView(View v);
+
         public abstract RemoteViews getRemoteView();
     }
 

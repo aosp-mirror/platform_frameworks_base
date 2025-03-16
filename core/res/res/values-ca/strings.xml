@@ -72,6 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"El valor predeterminat de l\'identificador de trucada és restringit. Trucada següent: no restringit"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"El valor predeterminat de l\'identificador de trucada és no restringit. Trucada següent: restringit"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"El valor predeterminat de l\'identificador de trucada és no restringit. Trucada següent: no restringit"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Aquesta aplicació no és compatible amb 16 kB. No s\'ha pogut comprovar l\'alineació d\'APK. Aquesta aplicació s\'executarà en el mode compatible amb la mida de la pàgina. Per obtenir la millor compatibilitat, torna a compilar l\'aplicació amb compatibilitat de 16 kB. Per obtenir més informació, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Aquesta aplicació no és compatible amb 16 kB. No s\'ha pogut comprovar l\'alineació d\'ELF. Aquesta aplicació s\'executarà en el mode compatible amb la mida de la pàgina. Per obtenir la millor compatibilitat, torna a compilar l\'aplicació amb compatibilitat de 16 kB. Per obtenir més informació, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Aquesta aplicació no és compatible amb 16 kB. No s\'ha pogut comprovar l\'alineació d\'APK i ELF. Aquesta aplicació s\'executarà en el mode compatible amb la mida de la pàgina. Per obtenir la millor compatibilitat, torna a compilar l\'aplicació amb compatibilitat de 16 kB. Per obtenir més informació, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"No s\'ha proveït el servei."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"No pots canviar la configuració de l\'identificador de trucada."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Les dades s\'han canviat a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1156,6 +1159,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> a"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"fa <xliff:g id="COUNT">%d</xliff:g> m"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"fa <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"fa <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"fa <xliff:g id="COUNT">%d</xliff:g> a"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> hora"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> dia"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> any"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> hora"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> dia"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> any"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"fa <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"fa <xliff:g id="COUNT">%d</xliff:g> hora"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"fa <xliff:g id="COUNT">%d</xliff:g> dia"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"fa <xliff:g id="COUNT">%d</xliff:g> any"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Fa # minut}many{Fa # minuts}other{Fa # minuts}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Fa # hora}many{Fa # hores}other{Fa # hores}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Fa # dia}many{Fa # dies}other{Fa # dies}}"</string>
@@ -1940,12 +1959,15 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Nit entre setmana"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Cap de setmana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Esdeveniment"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Mentre dormo"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Dormint"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"No molestis (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gestionat per <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activat"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivat"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"De <xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualsevol calendari"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> està silenciant alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"S\'ha produït un error intern al dispositiu i és possible que funcioni de manera inestable fins que restableixis les dades de fàbrica."</string>
@@ -2132,11 +2154,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Les trucades i les notificacions vibraran"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Les trucades i les notificacions se silenciaran"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Canvis del sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"No molestis"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novetat: el mode No molestis està amagant notificacions"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toca per obtenir més informació i canviar la configuració."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"S\'ha canviat el mode No molestis"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca per consultar què s\'ha bloquejat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulta la configuració de notificacions"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"A partir de la versió Android 13, les aplicacions que instal·les necessiten el teu permís per enviar notificacions. Toca per canviar aquest permís per a les aplicacions existents."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Recorda-m\'ho més tard"</string>
@@ -2432,7 +2449,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envia i rep missatges sense una xarxa mòbil o Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Obre Missatges"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Com funciona"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Activa l\'opció Selecciona la xarxa automàticament"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Activa l\'opció Selecciona la xarxa automàticament a Configuració perquè el telèfon pugui trobar una xarxa que funcioni per satèl·lit"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Activa"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Torna"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendent..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"SOS per satèl·lit ja està disponible"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Pots enviar missatges als serveis d\'emergències si no tens cap xarxa mòbil ni Wi‑Fi. Missatges de Google ha de ser l\'aplicació de missatgeria predeterminada."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"SOS per satèl·lit no s\'admet"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"SOS per satèl·lit no s\'admet en aquest dispositiu"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"SOS per satèl·lit no està configurat"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Comprova que tinguis connexió a Internet i torna a provar de configurar-lo"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS per satèl·lit no està disponible"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS per satèl·lit no està disponible en aquest país o regió"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"SOS per satèl·lit no està configurat"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Per enviar missatges per satèl·lit, defineix Missatges de Google com a aplicació de missatgeria predeterminada"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS per satèl·lit no està disponible"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Per comprovar si SOS per satèl·lit està disponible en aquest país o regió, activa la configuració d\'ubicació"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Missatges per satèl·lit disponibles"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Pots enviar missatges per satèl·lit si no tens cap xarxa mòbil ni Wi‑Fi. Missatges de Google ha de ser l\'aplicació de missatgeria predeterminada."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Els missatges per satèl·lit no s\'admeten"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Els missatges per satèl·lit no s\'admeten en aquest dispositiu"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Els missatges per satèl·lit no estan configurats"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Comprova que tinguis connexió a Internet i torna a provar de configurar-los"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Els missatges per satèl·lit no estan disponibles"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Els missatges per satèl·lit no estan disponibles en aquest país o regió"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Els missatges per satèl·lit no estan configurats"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Per enviar missatges per satèl·lit, defineix Missatges de Google com a aplicació de missatgeria predeterminada"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Els missatges per satèl·lit no estan disponibles"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Per comprovar si els missatges per satèl·lit estan disponibles en aquest país o regió, activa la configuració d\'ubicació"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Torna a configurar Desbloqueig amb empremta digital"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ja no es pot reconèixer."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ja no es poden reconèixer."</string>

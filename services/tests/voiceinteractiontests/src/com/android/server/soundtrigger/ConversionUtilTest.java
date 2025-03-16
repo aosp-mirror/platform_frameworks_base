@@ -41,6 +41,8 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 
 @RunWith(AndroidJUnit4.class)
@@ -62,18 +64,23 @@ public class ConversionUtilTest {
         final int flags = SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_ECHO_CANCELLATION
                 | SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_NOISE_SUPPRESSION;
         final var data = new byte[] {0x11, 0x22};
-        final var keyphrases = new SoundTrigger.KeyphraseRecognitionExtra[2];
-        keyphrases[0] = new SoundTrigger.KeyphraseRecognitionExtra(99,
+        final var keyphrases = new ArrayList<SoundTrigger.KeyphraseRecognitionExtra>(2);
+        keyphrases.add(new SoundTrigger.KeyphraseRecognitionExtra(99,
                 RECOGNITION_MODE_VOICE_TRIGGER | RECOGNITION_MODE_USER_IDENTIFICATION, 13,
                     new ConfidenceLevel[] {new ConfidenceLevel(9999, 50),
-                                           new ConfidenceLevel(5000, 80)});
-        keyphrases[1] = new SoundTrigger.KeyphraseRecognitionExtra(101,
+                                           new ConfidenceLevel(5000, 80)}));
+        keyphrases.add(new SoundTrigger.KeyphraseRecognitionExtra(101,
                 RECOGNITION_MODE_GENERIC, 8, new ConfidenceLevel[] {
                     new ConfidenceLevel(7777, 30),
-                    new ConfidenceLevel(2222, 60)});
+                    new ConfidenceLevel(2222, 60)}));
 
-        var apiconfig = new SoundTrigger.RecognitionConfig(true, false /** must be false **/,
-                keyphrases, data, flags);
+        var apiconfig = new SoundTrigger.RecognitionConfig.Builder()
+            .setCaptureRequested(true)
+            .setMultipleTriggersAllowed(false) // must be false
+            .setKeyphrases(keyphrases)
+            .setData(data)
+            .setAudioCapabilities(flags)
+            .build();
         assertEquals(apiconfig, aidl2apiRecognitionConfig(api2aidlRecognitionConfig(apiconfig)));
     }
 

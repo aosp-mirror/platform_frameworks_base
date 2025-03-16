@@ -29,6 +29,7 @@ android_test {
 
     srcs: [
         "**/*.java",
+        "**/*.kt",
     ],
 
     static_libs: [
@@ -41,6 +42,7 @@ android_test {
         "androidx.test.ext.junit",
         "flag-junit",
         "mockito-target-extended-minus-junit4",
+        "mockito-kotlin-nodeps",
         "truth",
         "testables",
         "platform-test-annotations",

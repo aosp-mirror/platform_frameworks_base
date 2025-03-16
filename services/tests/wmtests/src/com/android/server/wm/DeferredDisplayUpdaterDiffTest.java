@@ -39,6 +39,7 @@ import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.DisplayShape;
+import android.view.FrameRateCategoryRate;
 import android.view.RoundedCorner;
 import android.view.RoundedCorners;
 import android.view.SurfaceControl.RefreshRateRange;
@@ -235,6 +236,12 @@ public class DeferredDisplayUpdaterDiffTest {
         } else if (type.isArray() && type.getComponentType().equals(Display.Mode.class)) {
             field.set(first, new Display.Mode[]{new Display.Mode(100, 200, 300)});
             field.set(second, new Display.Mode[]{new Display.Mode(10, 20, 30)});
+        } else if (type.equals(FrameRateCategoryRate.class)) {
+            field.set(first, new FrameRateCategoryRate(16666667, 11111111));
+            field.set(second, new FrameRateCategoryRate(11111111, 8333333));
+        } else if (type.isArray() && type.getComponentType().equals(float.class)) {
+            field.set(first, new float[]{60.0f});
+            field.set(second, new float[]{120.0f});
         } else {
             throw new IllegalArgumentException("Field " + field
                     + " is not supported by this test, please add implementation of setting "

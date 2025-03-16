@@ -16,8 +16,10 @@
 
 package com.android.localtransport;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupManagerMonitor;
@@ -52,6 +54,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Backup transport for stashing stuff into a known location on disk, and
@@ -938,5 +941,16 @@ public class LocalTransport extends BackupTransport {
                 }
             }
         }
+    }
+
+    @NonNull
+    @Override
+    public List<String> getPackagesThatShouldNotUseRestrictedMode(
+            @NonNull List<String> packageNames,
+            @BackupAnnotations.OperationType int operationType) {
+        if (DEBUG) {
+            Log.d(TAG, "No restricted mode packages: " + mParameters.noRestrictedModePackages());
+        }
+        return mParameters.noRestrictedModePackages();
     }
 }

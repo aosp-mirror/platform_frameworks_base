@@ -20,11 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
-import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwleSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.IntArray;
@@ -53,7 +53,7 @@ import java.util.concurrent.TimeoutException;
  * VibrationThread. The only thread-safe methods for calling from other threads are the "notify"
  * methods (which should never be used from the VibrationThread thread).
  */
-final class VibrationStepConductor implements IBinder.DeathRecipient {
+final class VibrationStepConductor {
     private static final boolean DEBUG = VibrationThread.DEBUG;
     private static final String TAG = VibrationThread.TAG;
 
@@ -69,6 +69,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     // Used within steps.
     public final VibrationSettings vibrationSettings;
     public final VibrationThread.VibratorManagerHooks vibratorManagerHooks;
+    public final boolean isInSession;
 
     private final DeviceAdapter mDeviceAdapter;
     private final VibrationScaler mVibrationScaler;
@@ -105,12 +106,13 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     private int mRemainingStartSequentialEffectSteps;
     private int mSuccessfulVibratorOnSteps;
 
-    VibrationStepConductor(HalVibration vib, VibrationSettings vibrationSettings,
-            DeviceAdapter deviceAdapter, VibrationScaler vibrationScaler,
-            VibratorFrameworkStatsLogger statsLogger,
+    VibrationStepConductor(HalVibration vib, boolean isInSession,
+            VibrationSettings vibrationSettings, DeviceAdapter deviceAdapter,
+            VibrationScaler vibrationScaler, VibratorFrameworkStatsLogger statsLogger,
             CompletableFuture<Void> requestVibrationParamsFuture,
             VibrationThread.VibratorManagerHooks vibratorManagerHooks) {
         this.mVibration = vib;
+        this.isInSession = isInSession;
         this.vibrationSettings = vibrationSettings;
         this.mDeviceAdapter = deviceAdapter;
         mVibrationScaler = vibrationScaler;
@@ -167,12 +169,20 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
             return new ComposePwleVibratorStep(this, startTime, controller, effect, segmentIndex,
                     pendingVibratorOffDeadline);
         }
+        if (segment instanceof PwleSegment) {
+            return new ComposePwleV2VibratorStep(this, startTime, controller, effect,
+                    segmentIndex, pendingVibratorOffDeadline);
+        }
         return new SetAmplitudeVibratorStep(this, startTime, controller, effect, segmentIndex,
                 pendingVibratorOffDeadline);
     }
 
-    /** Called when this conductor is going to be started running by the VibrationThread. */
-    public void prepareToStart() {
+    /**
+     * Called when this conductor is going to be started running by the VibrationThread.
+     *
+     * @return True if the vibration effect can be played, false otherwise.
+     */
+    public boolean prepareToStart() {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
         }
@@ -183,7 +193,11 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         // Scale resolves the default amplitudes from the effect before scaling them.
         mVibration.scaleEffects(mVibrationScaler);
 
-        mVibration.adaptToDevice(mDeviceAdapter);
+        if (!mVibration.adaptToDevice(mDeviceAdapter)) {
+            // Unable to adapt vibration effect for playback. This likely indicates the presence
+            // of unsupported segments. The original effect will be ignored.
+            return false;
+        }
         CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffectToPlay());
         mPendingVibrateSteps++;
         // This count is decremented at the completion of the step, so we don't subtract one.
@@ -192,6 +206,8 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         // Vibration will start playing in the Vibrator, following the effect timings and delays.
         // Report current time as the vibration start time, for debugging.
         mVibration.stats.reportStarted();
+
+        return true;
     }
 
     public HalVibration getVibration() {
@@ -272,6 +288,9 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         if (nextStep == null) {
             return true;  // Finished
         }
+        if (isInSession) {
+            return true;  // Don't wait to play session vibration steps
+        }
         long waitMillis = nextStep.calculateWaitTime();
         if (waitMillis <= 0) {
             return true;  // Regular step ready
@@ -341,20 +360,6 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
             }
             mNextSteps.addAll(nextSteps);
         }
-    }
-
-    /**
-     * Binder death notification. VibrationThread registers this when it's running a conductor.
-     * Note that cancellation could theoretically happen immediately, before the conductor has
-     * started, but in this case it will be processed in the first signals loop.
-     */
-    @Override
-    public void binderDied() {
-        if (DEBUG) {
-            Slog.d(TAG, "Binder died, cancelling vibration...");
-        }
-        notifyCancelled(new Vibration.EndInfo(Status.CANCELLED_BINDER_DIED),
-                /* immediate= */ false);
     }
 
     /**
@@ -450,6 +455,23 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
             }
             mLock.notify();
         }
+    }
+
+    /**
+     * Notify that the VibrationThread has completed the vibration effect playback.
+     *
+     * <p>This is a lightweight method intended to be called by the vibration thread directly. The
+     * VibrationThread may still be continuing with cleanup tasks, and should not be given new work
+     * until it notifies the manager that it has been released.
+     */
+    public void notifyVibrationComplete(@NonNull Vibration.EndInfo endInfo) {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "Vibration " + mVibration.id + " finished with " + endInfo);
+        }
+        mVibration.end(endInfo);
     }
 
     /** Returns true if a cancellation signal was sent via {@link #notifyCancelled}. */

@@ -14,7 +14,7 @@ import com.android.systemui.res.R
 import com.android.systemui.screenshot.message.ProfileMessageController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * MessageContainerController controls the display of content in the screenshot message container.

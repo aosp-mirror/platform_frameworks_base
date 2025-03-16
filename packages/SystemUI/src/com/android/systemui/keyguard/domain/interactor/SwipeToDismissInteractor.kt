@@ -20,13 +20,13 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.shade.data.repository.FlingInfo
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.util.kotlin.Utils.Companion.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -39,8 +39,8 @@ class SwipeToDismissInteractor
 constructor(
     @Background backgroundScope: CoroutineScope,
     shadeRepository: ShadeRepository,
-    transitionInteractor: KeyguardTransitionInteractor,
-    keyguardInteractor: KeyguardInteractor,
+    private val transitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardInteractor: KeyguardInteractor,
 ) {
     /**
      * Emits a [FlingInfo] whenever a swipe to dismiss gesture has started a fling animation on the
@@ -50,20 +50,15 @@ constructor(
      * LOCKSCREEN -> GONE, and by [KeyguardSurfaceBehindInteractor] to match the surface remote
      * animation's velocity to the fling velocity, if applicable.
      */
-    val dismissFling =
+    val dismissFling: StateFlow<FlingInfo?> =
         shadeRepository.currentFling
-            .sample(
-                transitionInteractor.startedKeyguardTransitionStep,
-                keyguardInteractor.isKeyguardDismissible,
-                keyguardInteractor.statusBarState,
-            )
-            .filter { (flingInfo, startedStep, keyguardDismissable, statusBarState) ->
+            .filter { flingInfo ->
                 flingInfo != null &&
                     !flingInfo.expand &&
-                    statusBarState != StatusBarState.SHADE_LOCKED &&
-                    startedStep.to == KeyguardState.LOCKSCREEN &&
-                    keyguardDismissable
+                    keyguardInteractor.statusBarState.value != StatusBarState.SHADE_LOCKED &&
+                    transitionInteractor.startedKeyguardTransitionStep.value.to ==
+                        KeyguardState.LOCKSCREEN &&
+                    keyguardInteractor.isKeyguardDismissible.value
             }
-            .map { (flingInfo, _) -> flingInfo }
             .stateIn(backgroundScope, SharingStarted.Eagerly, null)
 }

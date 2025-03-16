@@ -149,7 +149,8 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private double mContrast = 0.0;
     // Theme variant: Vibrant, Tonal, Expressive, etc
     @VisibleForTesting
-    protected Style mThemeStyle = Style.TONAL_SPOT;
+    @Style.Type
+    protected int mThemeStyle = Style.TONAL_SPOT;
     // Accent colors overlay
     private FabricatedOverlay mSecondaryOverlay;
     // Neutral system colors overlay
@@ -242,10 +243,16 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         }
     };
 
-    private int getLatestWallpaperType(int userId) {
-        return mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, userId)
-                > mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, userId)
-                ? WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM;
+    private int getDefaultWallpaperColorsSource(int userId) {
+        if (com.android.systemui.shared.Flags.newCustomizationPickerUi()) {
+            // The wallpaper colors source is always the home wallpaper.
+            return WallpaperManager.FLAG_SYSTEM;
+        } else {
+            // The wallpaper colors source is based on the last set wallpaper.
+            return mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, userId)
+                    > mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, userId)
+                    ? WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM;
+        }
     }
 
     private boolean isSeedColorSet(JSONObject jsonObject, WallpaperColors newWallpaperColors) {
@@ -279,9 +286,9 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private void handleWallpaperColors(WallpaperColors wallpaperColors, int flags, int userId) {
         final int currentUser = mUserTracker.getUserId();
         final boolean hadWallpaperColors = mCurrentColors.get(userId) != null;
-        int latestWallpaperType = getLatestWallpaperType(userId);
-        boolean eventForLatestWallpaper = (flags & latestWallpaperType) != 0;
-        if (eventForLatestWallpaper) {
+        int wallpaperColorsSource = getDefaultWallpaperColorsSource(userId);
+        boolean wallpaperColorsNeedUpdate = (flags & wallpaperColorsSource) != 0;
+        if (wallpaperColorsNeedUpdate) {
             mCurrentColors.put(userId, wallpaperColors);
             if (DEBUG) Log.d(TAG, "got new colors: " + wallpaperColors + " where: " + flags);
         }
@@ -328,7 +335,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             boolean userChoseLockScreenColor = COLOR_SOURCE_LOCK.equals(wallpaperPickerColorSource);
             boolean preserveLockScreenColor = isDestinationHomeOnly && userChoseLockScreenColor;
 
-            if (!userChosePresetColor && !preserveLockScreenColor && eventForLatestWallpaper
+            if (!userChosePresetColor && !preserveLockScreenColor && wallpaperColorsNeedUpdate
                     && !isSeedColorSet(jsonObject, wallpaperColors)) {
                 mSkipSettingChange = true;
                 if (jsonObject.has(OVERLAY_CATEGORY_ACCENT_COLOR) || jsonObject.has(
@@ -494,7 +501,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         // Upon boot, make sure we have the most up to date colors
         Runnable updateColors = () -> {
             WallpaperColors systemColor = mWallpaperManager.getWallpaperColors(
-                    getLatestWallpaperType(mUserTracker.getUserId()));
+                    getDefaultWallpaperColorsSource(mUserTracker.getUserId()));
             Runnable applyColors = () -> {
                 if (DEBUG) Log.d(TAG, "Boot colors: " + systemColor);
                 mCurrentColors.put(mUserTracker.getUserId(), systemColor);
@@ -820,15 +827,16 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
 
     }
 
-    private Style fetchThemeStyleFromSetting() {
+    @Style.Type
+    private int fetchThemeStyleFromSetting() {
         // Allow-list of Style objects that can be created from a setting string, i.e. can be
         // used as a system-wide theme.
         // - Content intentionally excluded, intended for media player, not system-wide
-        List<Style> validStyles = new ArrayList<>(Arrays.asList(Style.EXPRESSIVE, Style.SPRITZ,
-                Style.TONAL_SPOT, Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT,
+        @Style.Type List<Integer> validStyles = new ArrayList<>(Arrays.asList(Style.EXPRESSIVE,
+                Style.SPRITZ, Style.TONAL_SPOT, Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT,
                 Style.MONOCHROMATIC));
 
-        Style style = mThemeStyle;
+        @Style.Type int style = mThemeStyle;
         final String overlayPackageJson = mSecureSettings.getStringForUser(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 mUserTracker.getUserId());

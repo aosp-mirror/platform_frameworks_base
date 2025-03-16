@@ -30,7 +30,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_ROOT_TASK;
 import static com.android.server.wm.DisplayContent.alwaysCreateRootTask;
@@ -918,6 +919,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 if (candidateTask.getParent() == null) {
                     addChild(candidateTask, position);
                 } else {
+                    if (candidateTask.getRootTask().mReparentLeafTaskIfRelaunch) {
+                        ProtoLog.d(WM_DEBUG_TASKS, "Reparenting to display area on relaunch: "
+                                + "rootTaskId=%d toTop=%b", candidateTask.mTaskId, onTop);
+                    }
                     candidateTask.reparent(this, onTop);
                 }
             }
@@ -1074,6 +1079,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             final Task launchRootTask = Task.fromWindowContainerToken(options.getLaunchRootTask());
             // We only allow this for created by organizer tasks.
             if (launchRootTask != null && launchRootTask.mCreatedByOrganizer) {
+                Slog.i(TAG_WM, "Using launch root task from activity options: taskId="
+                        + launchRootTask.mTaskId);
                 return launchRootTask;
             }
         }
@@ -1081,19 +1088,25 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Use launch-adjacent-flag-root if launching with launch-adjacent flag.
         if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
                 && mLaunchAdjacentFlagRootTask != null) {
+            final Task launchAdjacentRootAdjacentTask =
+                    mLaunchAdjacentFlagRootTask.getAdjacentTask();
             if (sourceTask != null && (sourceTask == candidateTask
                     || sourceTask.topRunningActivity() == null)) {
                 // Do nothing when task that is getting opened is same as the source or when
                 // the source is no-longer valid.
                 Slog.w(TAG_WM, "Ignoring LAUNCH_ADJACENT because adjacent source is gone.");
             } else if (sourceTask != null
-                    && mLaunchAdjacentFlagRootTask.getAdjacentTask() != null
+                    && launchAdjacentRootAdjacentTask != null
                     && (sourceTask == mLaunchAdjacentFlagRootTask
                     || sourceTask.isDescendantOf(mLaunchAdjacentFlagRootTask))) {
-                // If the adjacent launch is coming from the same root, launch to
-                // adjacent root instead.
-                return mLaunchAdjacentFlagRootTask.getAdjacentTask();
+                // If the adjacent launch is coming from the same root that was specified as the
+                // launch-adjacent task, so instead we launch to its adjacent root instead.
+                Slog.i(TAG_WM, "Using adjacent-to specified launch-adjacent task: taskId="
+                        + launchAdjacentRootAdjacentTask.mTaskId);
+                return launchAdjacentRootAdjacentTask;
             } else {
+                Slog.i(TAG_WM, "Using specified launch-adjacent task: taskId="
+                        + mLaunchAdjacentFlagRootTask.mTaskId);
                 return mLaunchAdjacentFlagRootTask;
             }
         }

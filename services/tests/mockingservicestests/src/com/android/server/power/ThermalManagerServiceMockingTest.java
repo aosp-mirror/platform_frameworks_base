@@ -18,6 +18,7 @@ package com.android.server.power;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -29,10 +30,16 @@ import android.hardware.thermal.TemperatureType;
 import android.hardware.thermal.ThrottlingSeverity;
 import android.os.Binder;
 import android.os.CoolingDevice;
+import android.os.Flags;
 import android.os.RemoteException;
 import android.os.Temperature;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -40,16 +47,36 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 
 public class ThermalManagerServiceMockingTest {
-    @Mock private IThermal mAidlHalMock;
+    @ClassRule
+    public static final SetFlagsRule.ClassRule mSetFlagsClassRule = new SetFlagsRule.ClassRule();
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = mSetFlagsClassRule.createSetFlagsRule();
+
+    @Mock
+    private IThermal mAidlHalMock;
     private Binder mAidlBinder = new Binder();
     private CompletableFuture<Temperature> mTemperatureFuture;
-    private ThermalManagerService.ThermalHalWrapper.TemperatureChangedCallback mTemperatureCallback;
+    private CompletableFuture<TemperatureThreshold> mThresholdFuture;
+    private ThermalManagerService.ThermalHalWrapper.WrapperThermalChangedCallback
+            mTemperatureCallback =
+            new ThermalManagerService.ThermalHalWrapper.WrapperThermalChangedCallback() {
+                @Override
+                public void onTemperatureChanged(Temperature temperature) {
+                    mTemperatureFuture.complete(temperature);
+                }
+
+                @Override
+                public void onThresholdChanged(TemperatureThreshold threshold) {
+                    mThresholdFuture.complete(threshold);
+                }
+            };
     private ThermalManagerService.ThermalHalAidlWrapper mAidlWrapper;
     @Captor
     ArgumentCaptor<IThermalChangedCallback> mAidlCallbackCaptor;
@@ -60,27 +87,63 @@ public class ThermalManagerServiceMockingTest {
         Mockito.when(mAidlHalMock.asBinder()).thenReturn(mAidlBinder);
         mAidlBinder.attachInterface(mAidlHalMock, IThermal.class.getName());
         mTemperatureFuture = new CompletableFuture<>();
-        mTemperatureCallback = temperature -> mTemperatureFuture.complete(temperature);
+        mThresholdFuture = new CompletableFuture<>();
         mAidlWrapper = new ThermalManagerService.ThermalHalAidlWrapper(mTemperatureCallback);
         mAidlWrapper.initProxyAndRegisterCallback(mAidlBinder);
     }
 
     @Test
+    @EnableFlags({Flags.FLAG_ALLOW_THERMAL_THRESHOLDS_CALLBACK})
     public void setCallback_aidl() throws Exception {
         Mockito.verify(mAidlHalMock, Mockito.times(1)).registerThermalChangedCallback(
                 mAidlCallbackCaptor.capture());
-        android.hardware.thermal.Temperature halT =
+        android.hardware.thermal.Temperature halTemperature =
                 new android.hardware.thermal.Temperature();
-        halT.type = TemperatureType.SOC;
-        halT.name = "test";
-        halT.throttlingStatus = ThrottlingSeverity.SHUTDOWN;
-        halT.value = 99.0f;
-        mAidlCallbackCaptor.getValue().notifyThrottling(halT);
+        halTemperature.type = TemperatureType.SOC;
+        halTemperature.name = "test";
+        halTemperature.throttlingStatus = ThrottlingSeverity.SHUTDOWN;
+        halTemperature.value = 99.0f;
+
+        android.hardware.thermal.TemperatureThreshold halThreshold =
+                new android.hardware.thermal.TemperatureThreshold();
+        halThreshold.type = TemperatureType.SKIN;
+        halThreshold.name = "test";
+        halThreshold.hotThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN + 1];
+        Arrays.fill(halThreshold.hotThrottlingThresholds, Float.NaN);
+        halThreshold.hotThrottlingThresholds[ThrottlingSeverity.SEVERE] = 44.0f;
+
+        mAidlCallbackCaptor.getValue().notifyThrottling(halTemperature);
+        mAidlCallbackCaptor.getValue().notifyThresholdChanged(halThreshold);
+
         Temperature temperature = mTemperatureFuture.get(100, TimeUnit.MILLISECONDS);
-        assertEquals(halT.name, temperature.getName());
-        assertEquals(halT.type, temperature.getType());
-        assertEquals(halT.value, temperature.getValue(), 0.1f);
-        assertEquals(halT.throttlingStatus, temperature.getStatus());
+        assertEquals(halTemperature.name, temperature.getName());
+        assertEquals(halTemperature.type, temperature.getType());
+        assertEquals(halTemperature.value, temperature.getValue(), 0.1f);
+        assertEquals(halTemperature.throttlingStatus, temperature.getStatus());
+
+        TemperatureThreshold threshold = mThresholdFuture.get(100, TimeUnit.MILLISECONDS);
+        assertEquals(halThreshold.name, threshold.name);
+        assertEquals(halThreshold.type, threshold.type);
+        assertArrayEquals(halThreshold.hotThrottlingThresholds, threshold.hotThrottlingThresholds,
+                0.01f);
+    }
+
+    @Test
+    @DisableFlags({Flags.FLAG_ALLOW_THERMAL_THRESHOLDS_CALLBACK})
+    public void setCallback_aidl_allow_thermal_thresholds_callback_false() throws Exception {
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).registerThermalChangedCallback(
+                mAidlCallbackCaptor.capture());
+        android.hardware.thermal.TemperatureThreshold halThreshold =
+                new android.hardware.thermal.TemperatureThreshold();
+        halThreshold.type = TemperatureType.SOC;
+        halThreshold.name = "test";
+        halThreshold.hotThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN + 1];
+        Arrays.fill(halThreshold.hotThrottlingThresholds, Float.NaN);
+        halThreshold.hotThrottlingThresholds[ThrottlingSeverity.SEVERE] = 44.0f;
+
+        mAidlCallbackCaptor.getValue().notifyThresholdChanged(halThreshold);
+        Thread.sleep(1000);
+        assertFalse(mThresholdFuture.isDone());
     }
 
     @Test

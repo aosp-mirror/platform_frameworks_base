@@ -26,11 +26,14 @@ android_test {
     // Include all test java files
     srcs: ["src/**/*.java"],
     static_libs: [
+        "androidx.test.ext.junit",
         "androidx.test.rules",
+        "flag-junit",
         "frameworks-base-testutils",
         "mockito-target-minus-junit4",
+        "platform-parametric-runner-lib",
         "platform-test-annotations",
-        "testng",
+        "truth",
     ],
     libs: ["android.test.runner.stubs.system"],
     platform_apis: true,

@@ -16,10 +16,13 @@
 
 package com.android.server.display.brightness.strategy;
 
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.BrightnessUtils;
 import com.android.server.display.brightness.StrategyExecutionRequest;
 import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
@@ -29,6 +32,10 @@ import java.io.PrintWriter;
  * Manages the brightness of the display when the system brightness is overridden
  */
 public class OverrideBrightnessStrategy implements DisplayBrightnessStrategy {
+
+    private float mWindowManagerBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+    private CharSequence mWindowManagerBrightnessOverrideTag = null;
+
     @Override
     public DisplayBrightnessState updateBrightness(
             StrategyExecutionRequest strategyExecutionRequest) {
@@ -36,9 +43,18 @@ public class OverrideBrightnessStrategy implements DisplayBrightnessStrategy {
         // the brightness
         DisplayPowerRequest dpr = strategyExecutionRequest.getDisplayPowerRequest();
         BrightnessReason reason = new BrightnessReason(BrightnessReason.REASON_OVERRIDE);
-        reason.setTag(dpr.screenBrightnessOverrideTag);
+
+        float brightness = dpr.screenBrightnessOverride;
+        if (BrightnessUtils.isValidBrightnessValue(dpr.screenBrightnessOverride)) {
+            brightness = dpr.screenBrightnessOverride;
+            reason.setTag(dpr.screenBrightnessOverrideTag);
+        } else if (BrightnessUtils.isValidBrightnessValue(mWindowManagerBrightnessOverride)) {
+            brightness = mWindowManagerBrightnessOverride;
+            reason.setTag(mWindowManagerBrightnessOverrideTag);
+        }
+
         return new DisplayBrightnessState.Builder()
-                .setBrightness(dpr.screenBrightnessOverride)
+                .setBrightness(brightness)
                 .setBrightnessReason(reason)
                 .setDisplayBrightnessStrategyName(getName())
                 .build();
@@ -50,12 +66,48 @@ public class OverrideBrightnessStrategy implements DisplayBrightnessStrategy {
     }
 
     @Override
-    public void dump(PrintWriter writer) {}
+    public void dump(PrintWriter writer) {
+        writer.println("OverrideBrightnessStrategy:");
+        writer.println("  mWindowManagerBrightnessOverride=" + mWindowManagerBrightnessOverride);
+        writer.println("  mWindowManagerBrightnessOverrideTag="
+                + mWindowManagerBrightnessOverrideTag);
+    }
 
     @Override
     public void strategySelectionPostProcessor(
             StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
         // DO NOTHING
+    }
+
+    /**
+     * Updates the brightness override from WindowManager.
+     *
+     * @param request The request to override the brightness
+     * @return whether this request will result in a change of the brightness
+     */
+    public boolean updateWindowManagerBrightnessOverride(
+            DisplayManagerInternal.DisplayBrightnessOverrideRequest request) {
+        float newBrightness = request == null
+                ? PowerManager.BRIGHTNESS_INVALID_FLOAT : request.brightness;
+        mWindowManagerBrightnessOverrideTag = request == null ? null : request.tag;
+
+        if (floatEquals(newBrightness, mWindowManagerBrightnessOverride)) {
+            return false;
+        }
+
+        mWindowManagerBrightnessOverride = newBrightness;
+        return true;
+    }
+
+    /**
+     * Returns the current brightness override from WindowManager.
+     */
+    public float getWindowManagerBrightnessOverride() {
+        return mWindowManagerBrightnessOverride;
+    }
+
+    private boolean floatEquals(float f1, float f2) {
+        return f1 == f2 || (Float.isNaN(f1) && Float.isNaN(f2));
     }
 
     @Override

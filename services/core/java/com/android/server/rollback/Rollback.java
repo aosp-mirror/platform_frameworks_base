@@ -54,7 +54,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
-import com.android.server.RescueParty;
+import com.android.server.crashrecovery.CrashRecoveryAdaptor;
 import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.File;
@@ -627,7 +627,7 @@ class Rollback {
 
             if (!deprecateFlagsAndSettingsResets()) {
                 // Clear flags.
-                RescueParty.resetDeviceConfigForPackages(packageNames);
+                CrashRecoveryAdaptor.rescuePartyResetDeviceConfigForPackages(packageNames);
             }
 
             Consumer<Intent> onResult = result -> {

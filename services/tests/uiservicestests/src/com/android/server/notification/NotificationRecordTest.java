@@ -546,7 +546,8 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(com.android.server.notification.Flags.FLAG_NOTIFICATION_VIBRATION_IN_SOUND_URI)
+    @EnableFlags(com.android.server.notification.Flags
+            .FLAG_NOTIFICATION_VIBRATION_IN_SOUND_URI_FOR_CHANNEL)
     public void testVibration_customVibrationForSound_withVibrationUri() throws IOException {
         defaultChannel.enableVibration(true);
         VibrationInfo vibration = getTestingVibration(mVibrator);

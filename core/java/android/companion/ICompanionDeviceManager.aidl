@@ -28,6 +28,7 @@ import android.companion.ObservingDevicePresenceRequest;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.content.ComponentName;
 import android.os.ParcelUuid;
+import android.companion.DeviceId;
 
 
 /**
@@ -134,9 +135,7 @@ interface ICompanionDeviceManager {
     @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void enableSecureTransport(boolean enabled);
 
-    void setAssociationTag(int associationId, String tag);
-
-    void clearAssociationTag(int associationId);
+    void setDeviceId(int associationId, in DeviceId deviceId);
 
     byte[] getBackupPayload(int userId);
 

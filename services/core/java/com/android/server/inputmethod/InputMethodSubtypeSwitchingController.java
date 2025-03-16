@@ -85,6 +85,12 @@ final class InputMethodSubtypeSwitchingController {
         public final CharSequence mImeName;
         @Nullable
         public final CharSequence mSubtypeName;
+        /**
+         * The subtype's layout name, or {@code null} if this item doesn't have a subtype,
+         * or doesn't specify a layout.
+         */
+        @Nullable
+        public final CharSequence mLayoutName;
         @NonNull
         public final InputMethodInfo mImi;
         /**
@@ -96,10 +102,11 @@ final class InputMethodSubtypeSwitchingController {
         public final boolean mIsSystemLanguage;
 
         ImeSubtypeListItem(@NonNull CharSequence imeName, @Nullable CharSequence subtypeName,
-                @NonNull InputMethodInfo imi, int subtypeIndex, @Nullable String subtypeLocale,
-                @NonNull String systemLocale) {
+                @Nullable CharSequence layoutName, @NonNull InputMethodInfo imi, int subtypeIndex,
+                @Nullable String subtypeLocale, @NonNull String systemLocale) {
             mImeName = imeName;
             mSubtypeName = subtypeName;
+            mLayoutName = layoutName;
             mImi = imi;
             mSubtypeIndex = subtypeIndex;
             if (TextUtils.isEmpty(subtypeLocale)) {
@@ -252,8 +259,11 @@ final class InputMethodSubtypeSwitchingController {
                                 subtype.overridesImplicitlyEnabledSubtype() ? null : subtype
                                         .getDisplayName(userAwareContext, imi.getPackageName(),
                                                 imi.getServiceInfo().applicationInfo);
-                        imList.add(new ImeSubtypeListItem(imeLabel,
-                                subtypeLabel, imi, j, subtype.getLocale(), mSystemLocaleStr));
+                        final var layoutName = subtype.overridesImplicitlyEnabledSubtype() ? null
+                                : subtype.getLayoutDisplayName(userAwareContext,
+                                        imi.getServiceInfo().applicationInfo);
+                        imList.add(new ImeSubtypeListItem(imeLabel, subtypeLabel, layoutName,
+                                imi, j, subtype.getLocale(), mSystemLocaleStr));
 
                         // Removing this subtype from enabledSubtypeSet because we no
                         // longer need to add an entry of this subtype to imList to avoid
@@ -262,8 +272,8 @@ final class InputMethodSubtypeSwitchingController {
                     }
                 }
             } else {
-                imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_INDEX, null,
-                        mSystemLocaleStr));
+                imList.add(new ImeSubtypeListItem(imeLabel, null /* subtypeName */,
+                        null /* layoutName */, imi, NOT_A_SUBTYPE_INDEX, null, mSystemLocaleStr));
             }
         }
         Collections.sort(imList);
@@ -311,13 +321,16 @@ final class InputMethodSubtypeSwitchingController {
                                 subtype.overridesImplicitlyEnabledSubtype() ? null : subtype
                                         .getDisplayName(userAwareContext, imi.getPackageName(),
                                                 imi.getServiceInfo().applicationInfo);
-                        imList.add(new ImeSubtypeListItem(imeLabel,
-                                subtypeLabel, imi, j, subtype.getLocale(), mSystemLocaleStr));
+                        final var layoutName = subtype.overridesImplicitlyEnabledSubtype() ? null
+                                : subtype.getLayoutDisplayName(userAwareContext,
+                                        imi.getServiceInfo().applicationInfo);
+                        imList.add(new ImeSubtypeListItem(imeLabel, subtypeLabel, layoutName,
+                                imi, j, subtype.getLocale(), mSystemLocaleStr));
                     }
                 }
             } else {
-                imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_INDEX, null,
-                        mSystemLocaleStr));
+                imList.add(new ImeSubtypeListItem(imeLabel, null /* subtypeName */,
+                        null /* layoutName */, imi, NOT_A_SUBTYPE_INDEX, null, mSystemLocaleStr));
             }
         }
         return imList;

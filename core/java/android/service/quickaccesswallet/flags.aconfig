@@ -1,0 +1,17 @@
+package: "android.service.quickaccesswallet"
+container: "system"
+
+flag {
+    name: "launch_wallet_option_on_power_double_tap"
+    namespace: "wallet_integration"
+    description: "Option to launch the Wallet app on double-tap of the power button"
+    bug: "378469025"
+    is_exported: true
+}
+
+flag {
+    name: "launch_selected_card_from_qs_tile"
+    namespace: "wallet_integration"
+    description: "When the wallet QS tile is tapped, launch the selected card pending intent instead of the home screen pending intent."
+    bug: "378469025"
+}

@@ -29,19 +29,15 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.VERTICAL
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel.HorizontalPosition
 
 /**
  * Container for the stack scroller, so that the bounds can be externally specified, such as from
  * the keyguard or shade scenes.
  */
-class SharedNotificationContainer(
-    context: Context,
-    private val attrs: AttributeSet?,
-) :
-    ConstraintLayout(
-        context,
-        attrs,
-    ) {
+class SharedNotificationContainer(context: Context, attrs: AttributeSet?) :
+    ConstraintLayout(context, attrs) {
 
     private val baseConstraintSet = ConstraintSet()
 
@@ -59,24 +55,40 @@ class SharedNotificationContainer(
     }
 
     fun updateConstraints(
-        useSplitShade: Boolean,
+        horizontalPosition: HorizontalPosition,
         marginStart: Int,
         marginTop: Int,
         marginEnd: Int,
-        marginBottom: Int
+        marginBottom: Int,
     ) {
         val constraintSet = ConstraintSet()
         constraintSet.clone(baseConstraintSet)
 
         val startConstraintId =
-            if (useSplitShade) {
+            if (horizontalPosition is HorizontalPosition.MiddleToEdge) {
                 R.id.nssl_guideline
             } else {
                 PARENT_ID
             }
+
         val nsslId = R.id.notification_stack_scroller
         constraintSet.apply {
-            connect(nsslId, START, startConstraintId, START, marginStart)
+            if (SceneContainerFlag.isEnabled) {
+                when (horizontalPosition) {
+                    is HorizontalPosition.FloatAtEnd ->
+                        constrainWidth(nsslId, horizontalPosition.width)
+                    is HorizontalPosition.MiddleToEdge ->
+                        setGuidelinePercent(R.id.nssl_guideline, horizontalPosition.ratio)
+                    else -> Unit
+                }
+            }
+
+            if (
+                !SceneContainerFlag.isEnabled ||
+                    horizontalPosition !is HorizontalPosition.FloatAtEnd
+            ) {
+                connect(nsslId, START, startConstraintId, START, marginStart)
+            }
             connect(nsslId, END, PARENT_ID, END, marginEnd)
             connect(nsslId, BOTTOM, PARENT_ID, BOTTOM, marginBottom)
             connect(nsslId, TOP, PARENT_ID, TOP, marginTop)

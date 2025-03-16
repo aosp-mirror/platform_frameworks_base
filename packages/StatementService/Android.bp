@@ -35,10 +35,13 @@ android_app {
     privileged: true,
     certificate: "platform",
     static_libs: [
+        "StatementServiceParser",
         "androidx.appcompat_appcompat",
         "androidx.collection_collection-ktx",
+        "androidx.room_room-runtime",
         "androidx.work_work-runtime",
         "androidx.work_work-runtime-ktx",
         "kotlinx-coroutines-android",
     ],
+    plugins: ["androidx.room_room-compiler-plugin"],
 }

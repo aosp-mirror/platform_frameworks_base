@@ -24,7 +24,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
@@ -34,7 +33,6 @@ import libcore.util.EmptyArray;
  * @hide
  */
 @DataClass(genGetters = true, genSetters = true, genBuilder = false, genParcelable = false)
-@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class ParsedMainComponentImpl extends ParsedComponentImpl implements ParsedMainComponent,
         Parcelable {
 
@@ -50,6 +48,30 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
     private String splitName;
     @Nullable
     private String[] attributionTags;
+
+    private int mIntentMatchingFlags;
+
+    /**
+     * Opt-out of all intent filter matching rules. The value corresponds to the <code>none</code>
+     * value of {@link android.R.attr#intentMatchingFlags}
+     * @hide
+     */
+    public static final int INTENT_MATCHING_FLAGS_NONE = 1;
+
+    /**
+     * Opt-in to enforce intent filter matching. The value corresponds to the
+     * <code>enforceIntentFilter</code> value of {@link android.R.attr#intentMatchingFlags}
+     * @hide
+     */
+    public static final int INTENT_MATCHING_FLAGS_ENFORCE_INTENT_FILTER = 1 << 1;
+
+    /**
+     * Allows intent filters to match actions even when the action value is null. The value
+     * corresponds to the <code>allowNullAction</code> value of
+     * {@link android.R.attr#intentMatchingFlags}
+     * @hide
+     */
+    public static final int INTENT_MATCHING_FLAGS_ALLOW_NULL_ACTION = 1 << 2;
 
     public ParsedMainComponentImpl() {
     }
@@ -83,6 +105,20 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
         return attributionTags == null ? EmptyArray.STRING : attributionTags;
     }
 
+    /**
+     * Sets the intent matching flags. This value is intended to be set from the "component" tags.
+     * @see android.R.styleable#AndroidManifestApplication_intentMatchingFlags
+     */
+    public ParsedMainComponent setIntentMatchingFlags(int intentMatchingFlags) {
+        mIntentMatchingFlags = intentMatchingFlags;
+        return this;
+    }
+
+    @Override
+    public int getIntentMatchingFlags() {
+        return this.mIntentMatchingFlags;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -98,6 +134,7 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
         dest.writeInt(this.order);
         dest.writeString(this.splitName);
         dest.writeString8Array(this.attributionTags);
+        dest.writeInt(this.mIntentMatchingFlags);
     }
 
     protected ParsedMainComponentImpl(Parcel in) {
@@ -109,6 +146,7 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
         this.order = in.readInt();
         this.splitName = in.readString();
         this.attributionTags = in.createString8Array();
+        this.mIntentMatchingFlags = in.readInt();
     }
 
     public static final Parcelable.Creator<ParsedMainComponentImpl> CREATOR =
@@ -139,6 +177,28 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
     //@formatter:off
 
 
+    @android.annotation.IntDef(prefix = "INTENT_MATCHING_FLAGS_", value = {
+        INTENT_MATCHING_FLAGS_NONE,
+        INTENT_MATCHING_FLAGS_ENFORCE_INTENT_FILTER,
+        INTENT_MATCHING_FLAGS_ALLOW_NULL_ACTION
+    })
+    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)
+    @DataClass.Generated.Member
+    public @interface IntentMatchingFlags {}
+
+    @DataClass.Generated.Member
+    public static String intentMatchingFlagsToString(@IntentMatchingFlags int value) {
+        switch (value) {
+            case INTENT_MATCHING_FLAGS_NONE:
+                    return "INTENT_MATCHING_FLAGS_NONE";
+            case INTENT_MATCHING_FLAGS_ENFORCE_INTENT_FILTER:
+                    return "INTENT_MATCHING_FLAGS_ENFORCE_INTENT_FILTER";
+            case INTENT_MATCHING_FLAGS_ALLOW_NULL_ACTION:
+                    return "INTENT_MATCHING_FLAGS_ALLOW_NULL_ACTION";
+            default: return Integer.toHexString(value);
+        }
+    }
+
     @DataClass.Generated.Member
     public ParsedMainComponentImpl(
             @Nullable String processName,
@@ -147,7 +207,8 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
             boolean exported,
             int order,
             @Nullable String splitName,
-            @Nullable String[] attributionTags) {
+            @Nullable String[] attributionTags,
+            int intentMatchingFlags) {
         this.processName = processName;
         this.directBootAware = directBootAware;
         this.enabled = enabled;
@@ -155,6 +216,7 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
         this.order = order;
         this.splitName = splitName;
         this.attributionTags = attributionTags;
+        this.mIntentMatchingFlags = intentMatchingFlags;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -226,10 +288,10 @@ public class ParsedMainComponentImpl extends ParsedComponentImpl implements Pars
     }
 
     @DataClass.Generated(
-            time = 1701447884766L,
+            time = 1729613643190L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/com/android/internal/pm/pkg/component/ParsedMainComponentImpl.java",
-            inputSignatures = "private @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String processName\nprivate  boolean directBootAware\nprivate  boolean enabled\nprivate  boolean exported\nprivate  int order\nprivate @android.annotation.Nullable java.lang.String splitName\nprivate @android.annotation.Nullable java.lang.String[] attributionTags\npublic static final  android.os.Parcelable.Creator<com.android.internal.pm.pkg.component.ParsedMainComponentImpl> CREATOR\npublic  com.android.internal.pm.pkg.component.ParsedMainComponentImpl setProcessName(java.lang.String)\npublic  java.lang.String getClassName()\npublic @android.annotation.NonNull @java.lang.Override java.lang.String[] getAttributionTags()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedMainComponentImpl extends com.android.internal.pm.pkg.component.ParsedComponentImpl implements [com.android.internal.pm.pkg.component.ParsedMainComponent, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
+            inputSignatures = "private @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String processName\nprivate  boolean directBootAware\nprivate  boolean enabled\nprivate  boolean exported\nprivate  int order\nprivate @android.annotation.Nullable java.lang.String splitName\nprivate @android.annotation.Nullable java.lang.String[] attributionTags\nprivate  int mIntentMatchingFlags\npublic static final  int INTENT_MATCHING_FLAGS_NONE\npublic static final  int INTENT_MATCHING_FLAGS_ENFORCE_INTENT_FILTER\npublic static final  int INTENT_MATCHING_FLAGS_ALLOW_NULL_ACTION\npublic static final  android.os.Parcelable.Creator<com.android.internal.pm.pkg.component.ParsedMainComponentImpl> CREATOR\npublic  com.android.internal.pm.pkg.component.ParsedMainComponentImpl setProcessName(java.lang.String)\npublic  java.lang.String getClassName()\npublic @android.annotation.NonNull @java.lang.Override java.lang.String[] getAttributionTags()\npublic  com.android.internal.pm.pkg.component.ParsedMainComponent setIntentMatchingFlags(int)\npublic @java.lang.Override int getIntentMatchingFlags()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedMainComponentImpl extends com.android.internal.pm.pkg.component.ParsedComponentImpl implements [com.android.internal.pm.pkg.component.ParsedMainComponent, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
     @Deprecated
     private void __metadata() {}
 

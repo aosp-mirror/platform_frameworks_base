@@ -51,7 +51,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds the side fingerprint sensor indicator view to [SideFpsOverlayViewModel]. */
 @OptIn(ExperimentalCoroutinesApi::class)

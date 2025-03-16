@@ -22,7 +22,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.DisableFlagsRepositoryLog
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
-import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope

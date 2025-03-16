@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"相機有問題？\n輕按即可修正"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"未能修正問題？\n輕按即可還原"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相機冇問題？㩒一下就可以即可閂咗佢。"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"你可在這裡找到應用程式選單"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"進入桌面電腦檢視模式以同時開啟多個應用程式"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"你可隨時從應用程式選單返回全螢幕"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"瀏覽更多內容及執行更多操作"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"拖入另一個應用程式即可分割螢幕"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"在應用程式外輕按兩下即可調整位置"</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"選取"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"螢幕截圖"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"在瀏覽器中開啟"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"喺應用程式入面打開"</string>
     <string name="new_window_text" msgid="6318648868380652280">"新視窗"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"管理視窗"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"變更長寬比"</string>
     <string name="close_text" msgid="4986518933445178928">"關閉"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"關閉選單"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"打開選單"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"畫面最大化"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"貼齊畫面"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"此應用程式無法調整大小"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"調整大小"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"應用程式無法移至這裡"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"身歷其境"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"還原"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"最大化"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"還原"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"貼齊左邊"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"貼齊右邊"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"採用預設設定打開"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"選擇此應用程式開啟網絡連結的方式"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"在應用程式內"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"在瀏覽器中"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"確定"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"在此透過瀏覽器快速開啟應用程式"</string>
 </resources>

@@ -86,7 +86,8 @@ public final class TotalCaptureResult extends CaptureResult {
         mPhysicalCaptureResults = new HashMap<String, TotalCaptureResult>();
         for (PhysicalCaptureResultInfo onePhysicalResult : physicalResults) {
             TotalCaptureResult physicalResult = new TotalCaptureResult(
-                    onePhysicalResult.getCameraId(), onePhysicalResult.getCameraMetadata(),
+                    onePhysicalResult.getCameraId(),
+                    onePhysicalResult.getCameraMetadata(),
                     parent, extras, /*partials*/null, sessionId, new PhysicalCaptureResultInfo[0]);
             mPhysicalCaptureResults.put(onePhysicalResult.getCameraId(),
                     physicalResult);
@@ -115,7 +116,8 @@ public final class TotalCaptureResult extends CaptureResult {
         mPhysicalCaptureResults = new HashMap<String, TotalCaptureResult>();
         for (PhysicalCaptureResultInfo onePhysicalResult : physicalResults) {
             TotalCaptureResult physicalResult = new TotalCaptureResult(
-                    onePhysicalResult.getCameraId(), onePhysicalResult.getCameraMetadata(),
+                    onePhysicalResult.getCameraId(),
+                    onePhysicalResult.getCameraMetadata(),
                     parent, requestId, frameNumber, /*partials*/null, sessionId,
                     new PhysicalCaptureResultInfo[0]);
             mPhysicalCaptureResults.put(onePhysicalResult.getCameraId(),

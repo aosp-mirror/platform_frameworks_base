@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ক্যামেরা সংক্রান্ত সমস্যা?\nরিফিট করতে ট্যাপ করুন"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"এখনও সমাধান হয়নি?\nরিভার্ট করার জন্য ট্যাপ করুন"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ক্যামেরা সংক্রান্ত সমস্যা নেই? বাতিল করতে ট্যাপ করুন।"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"অ্যাপ মেনু এখানে খুঁজে পাওয়া যাবে"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"একসাথে একাধিক অ্যাপ খোলার জন্য ডেস্কটপ ভিউতে যান"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"অ্যাপ মেনু থেকে ফুল-স্ক্রিন মোডে যেকোনও সময়ে ফিরে আসুন"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"দেখুন ও আরও অনেক কিছু করুন"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"স্প্লিট স্ক্রিনের ক্ষেত্রে অন্য কোনও অ্যাপ টেনে আনুন"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"কোনও অ্যাপের স্থান পরিবর্তন করতে তার বাইরে ডবল ট্যাপ করুন"</string>
@@ -122,15 +125,26 @@
     <string name="select_text" msgid="5139083974039906583">"বেছে নিন"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"স্ক্রিনশট"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ব্রাউজারে খুলুন"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"অ্যাপে খুলুন"</string>
     <string name="new_window_text" msgid="6318648868380652280">"নতুন উইন্ডো"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"উইন্ডো ম্যানেজ করুন"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"অ্যাস্পেক্ট রেশিও পরিবর্তন করুন"</string>
     <string name="close_text" msgid="4986518933445178928">"বন্ধ করুন"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"\'মেনু\' বন্ধ করুন"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"মেনু খুলুন"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"স্ক্রিন বড় করুন"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"স্ক্রিনে অ্যাপ মানানসই হিসেবে ছোট বড় করুন"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"এই অ্যাপ ছোট বড় করা যাবে না"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"ছোট বড় করুন"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"অ্যাপটি এখানে সরানো যাবে না"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"ইমারসিভ"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"ফিরিয়ে আনুন"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"বড় করুন"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"ফিরিয়ে আনুন"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"বাঁদিকে স্ন্যাপ করুন"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"ডানদিকে স্ন্যাপ করুন"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"ডিফল্ট হিসেবে থাকা সেটিংস খুলুন"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"এই অ্যাপের জন্য কীভাবে ওয়েব লিঙ্ক খুলবেন তা বেছে নিন"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"অ্যাপের মধ্যে"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"আপনার ব্রাউজারে"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"ঠিক আছে"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"এখানে আপনার ব্রাউজারে দ্রুত অ্যাপ খুলুন"</string>
 </resources>

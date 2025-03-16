@@ -24,6 +24,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.util.InitializationChecker;
+import com.android.wm.shell.dagger.WMComponent;
 
 import dagger.BindsInstance;
 

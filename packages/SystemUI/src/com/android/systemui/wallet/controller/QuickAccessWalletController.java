@@ -32,6 +32,7 @@ import android.provider.Settings;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
+import android.service.quickaccesswallet.WalletCard;
 import android.util.Log;
 
 import com.android.systemui.animation.ActivityTransitionAnimator;
@@ -266,6 +267,23 @@ public class QuickAccessWalletController {
                             animationController);
 
                 });
+    }
+
+    /**
+     * Starts the {@link android.app.PendingIntent} for a {@link WalletCard}.
+     *
+     * This should be used to open a selected card from the QuickAccessWallet UI or
+     * the settings tile.
+     *
+     * @param activityStarter an {@link ActivityStarter} to launch the Intent or PendingIntent.
+     * @param animationController an {@link ActivityTransitionAnimator.Controller} to provide a
+     *                            smooth animation for the activity launch.
+     */
+    public void startWalletCardPendingIntent(WalletCard card,
+            ActivityStarter activityStarter,
+            ActivityTransitionAnimator.Controller animationController) {
+        activityStarter.postStartActivityDismissingKeyguard(
+                card.getPendingIntent(), animationController);
     }
 
     private Intent getSysUiWalletIntent() {

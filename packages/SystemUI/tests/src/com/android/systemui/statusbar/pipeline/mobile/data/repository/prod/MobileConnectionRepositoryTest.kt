@@ -655,14 +655,14 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             // CDMA roaming is off, GSM roaming is off
             whenever(telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber).thenReturn(ERI_OFF)
             cb.onDisplayInfoChanged(
-                TelephonyDisplayInfo(NETWORK_TYPE_LTE, NETWORK_TYPE_UNKNOWN, false)
+                TelephonyDisplayInfo(NETWORK_TYPE_LTE, NETWORK_TYPE_UNKNOWN, false, false, false)
             )
 
             assertThat(latest).isFalse()
 
             // CDMA roaming is off, GSM roaming is on
             cb.onDisplayInfoChanged(
-                TelephonyDisplayInfo(NETWORK_TYPE_LTE, NETWORK_TYPE_UNKNOWN, true)
+                TelephonyDisplayInfo(NETWORK_TYPE_LTE, NETWORK_TYPE_UNKNOWN, true, false, false)
             )
 
             assertThat(latest).isTrue()

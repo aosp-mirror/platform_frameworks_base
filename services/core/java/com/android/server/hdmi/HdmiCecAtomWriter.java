@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static android.media.tv.flags.Flags.hdmiControlCollectPhysicalAddress;
+
 import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_ARC_PENDING;
 import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_EARC_CONNECTED;
 import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_EARC_PENDING;
@@ -35,6 +37,8 @@ public class HdmiCecAtomWriter {
     @VisibleForTesting
     protected static final int FEATURE_ABORT_OPCODE_UNKNOWN = 0x100;
     private static final int ERROR_CODE_UNKNOWN = -1;
+    @VisibleForTesting
+    protected static final int PHYSICAL_ADDRESS_INVALID = 0xFFFF;
 
     /**
      * Writes a HdmiCecMessageReported atom representing an HDMI CEC message.
@@ -95,6 +99,11 @@ public class HdmiCecAtomWriter {
                 return createUserControlPressedSpecialArgs(message);
             case Constants.MESSAGE_FEATURE_ABORT:
                 return createFeatureAbortSpecialArgs(message);
+            case Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS:
+                if (hdmiControlCollectPhysicalAddress()) {
+                    return createReportPhysicalAddressSpecialArgs(message);
+                }
+                return new MessageReportedSpecialArgs();
             default:
                 return new MessageReportedSpecialArgs();
         }
@@ -140,6 +149,23 @@ public class HdmiCecAtomWriter {
     }
 
     /**
+     * Constructs the special arguments for a <Report Physical Address> message.
+     *
+     * @param message The HDMI CEC message to log
+     */
+    private MessageReportedSpecialArgs createReportPhysicalAddressSpecialArgs(
+            HdmiCecMessage message) {
+        MessageReportedSpecialArgs specialArgs = new MessageReportedSpecialArgs();
+
+        if (message.getParams().length > 1) {
+            int physicalAddress = (message.getParams()[0] << 8) | message.getParams()[1];
+            specialArgs.mPhysicalAddress = physicalAddress;
+        }
+
+        return specialArgs;
+    }
+
+    /**
      * Writes a HdmiCecMessageReported atom.
      *
      * @param genericArgs Generic arguments; shared by all HdmiCecMessageReported atoms
@@ -156,7 +182,8 @@ public class HdmiCecAtomWriter {
                 genericArgs.mSendMessageResult,
                 specialArgs.mUserControlPressedCommand,
                 specialArgs.mFeatureAbortOpcode,
-                specialArgs.mFeatureAbortReason);
+                specialArgs.mFeatureAbortReason,
+                specialArgs.mPhysicalAddress);
     }
 
     /**
@@ -166,7 +193,7 @@ public class HdmiCecAtomWriter {
     protected void writeHdmiCecMessageReportedAtom(int uid, int direction,
             int initiatorLogicalAddress, int destinationLogicalAddress, int opcode,
             int sendMessageResult, int userControlPressedCommand, int featureAbortOpcode,
-            int featureAbortReason) {
+            int featureAbortReason, int physicalAddress) {
         FrameworkStatsLog.write(
                 FrameworkStatsLog.HDMI_CEC_MESSAGE_REPORTED,
                 uid,
@@ -177,7 +204,8 @@ public class HdmiCecAtomWriter {
                 sendMessageResult,
                 userControlPressedCommand,
                 featureAbortOpcode,
-                featureAbortReason);
+                featureAbortReason,
+                physicalAddress);
     }
 
     /**
@@ -237,6 +265,26 @@ public class HdmiCecAtomWriter {
                 enumLogReason);
     }
 
+    /**
+     * Writes a HdmiPowerStateChangeOnActiveSourceLostToggled atom representing a
+     * HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST setting change.
+     * @param isEnabled           Whether the setting is enabled.
+     * @param enumLogReason       The event that triggered the log.
+     * @param manufacturerPnpId   Manufacturer PNP ID reported in the EDID.
+     * @param manufacturerYear    Manufacture year reported in the EDID.
+     * @param manufacturerWeek    Manufacture week reporter in the EDID.
+     */
+    public void powerStateChangeOnActiveSourceLostChanged(boolean isEnabled, int enumLogReason,
+            String manufacturerPnpId, int manufacturerYear, int manufacturerWeek) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.HDMI_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLED,
+                isEnabled,
+                enumLogReason,
+                manufacturerPnpId,
+                manufacturerYear,
+                manufacturerWeek);
+    }
+
     private int earcStateToEnum(int earcState) {
         switch (earcState) {
             case HDMI_EARC_STATUS_IDLE:
@@ -284,5 +332,6 @@ public class HdmiCecAtomWriter {
         int mUserControlPressedCommand = HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN;
         int mFeatureAbortOpcode = FEATURE_ABORT_OPCODE_UNKNOWN;
         int mFeatureAbortReason = HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN;
+        int mPhysicalAddress = PHYSICAL_ADDRESS_INVALID;
     }
 }

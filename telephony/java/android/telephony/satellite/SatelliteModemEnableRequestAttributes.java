@@ -16,9 +16,13 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.Objects;
 
@@ -28,6 +32,8 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public final class SatelliteModemEnableRequestAttributes implements Parcelable {
 
     /** {@code true} to enable satellite and {@code false} to disable satellite */
@@ -47,6 +53,9 @@ public final class SatelliteModemEnableRequestAttributes implements Parcelable {
     /** The subscription related info */
     @NonNull private final SatelliteSubscriptionInfo mSatelliteSubscriptionInfo;
 
+    /**
+     * @hide
+     */
     public SatelliteModemEnableRequestAttributes(boolean isEnabled, boolean isDemoMode,
             boolean isEmergencyMode, @NonNull SatelliteSubscriptionInfo satelliteSubscriptionInfo) {
         mIsEnabled = isEnabled;
@@ -76,6 +85,7 @@ public final class SatelliteModemEnableRequestAttributes implements Parcelable {
         mSatelliteSubscriptionInfo.writeToParcel(dest, flags);
     }
 
+    @NonNull
     public static final Creator<SatelliteModemEnableRequestAttributes> CREATOR = new Creator<>() {
         @Override
         public SatelliteModemEnableRequestAttributes createFromParcel(Parcel in) {
@@ -114,19 +124,39 @@ public final class SatelliteModemEnableRequestAttributes implements Parcelable {
         return Objects.hash(mIsEnabled, mIsDemoMode, mIsEmergencyMode, mSatelliteSubscriptionInfo);
     }
 
+
+    /**
+     * Get whether satellite modem needs to be enabled or disabled.
+     * @return {@code true} if the request is to enable satellite, else {@code false} to disable
+     * satellite.
+     */
     public boolean isEnabled() {
         return mIsEnabled;
     }
 
+    /**
+     * Get whether satellite modem is enabled for demo mode.
+     * @return {@code true} if the request is to enable demo mode, else {@code false}.
+     */
     public boolean isDemoMode() {
         return mIsDemoMode;
     }
 
+    /**
+     * Get whether satellite modem is enabled for emergency mode.
+     * @return {@code true} if the request is to enable satellite for emergency mode,
+     * else {@code false}.
+     */
     public boolean isEmergencyMode() {
         return mIsEmergencyMode;
     }
 
-    @NonNull public SatelliteSubscriptionInfo getSatelliteSubscriptionInfo() {
+
+    /**
+     * Return subscription info related to satellite.
+     */
+    @NonNull
+    public SatelliteSubscriptionInfo getSatelliteSubscriptionInfo() {
         return mSatelliteSubscriptionInfo;
     }
 }

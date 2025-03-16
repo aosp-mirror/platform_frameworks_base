@@ -25,3 +25,36 @@ fun Modifier.contentDescription(contentDescription: String?) =
     if (contentDescription != null) this.semantics {
         this.contentDescription = contentDescription
     } else this
+
+/**
+ * Concatenates this modifier with another if `condition` is true.
+ *
+ * This method allows inline conditional addition of modifiers to a modifier chain. Instead of
+ * writing
+ *
+ * ```
+ * val aModifier = Modifier.a()
+ * val bModifier = if(condition) aModifier.b() else aModifier
+ * Composable(modifier = bModifier)
+ * ```
+ *
+ * You can instead write
+ *
+ * ```
+ * Composable(modifier = Modifier.a().thenIf(condition){
+ *   Modifier.b()
+ * }
+ * ```
+ *
+ * This makes the modifier chain easier to read.
+ *
+ * Note that unlike the non-factory version, the conditional modifier is recreated each time, and
+ * may never be created at all.
+ *
+ * @param condition Whether or not to apply the modifiers.
+ * @param factory Creates the modifier to concatenate with the current one.
+ * @return a Modifier representing this modifier followed by other in sequence.
+ * @see Modifier.then
+ */
+inline fun Modifier.thenIf(condition: Boolean, crossinline factory: () -> Modifier): Modifier =
+    if (condition) this.then(factory()) else this

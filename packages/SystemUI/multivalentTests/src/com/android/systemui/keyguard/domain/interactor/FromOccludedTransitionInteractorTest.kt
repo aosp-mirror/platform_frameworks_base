@@ -42,9 +42,9 @@ import com.android.systemui.Flags.FLAG_COMMUNAL_SCENE_KTF_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
 import com.android.systemui.kosmos.testScope
@@ -60,7 +60,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.spy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -68,14 +67,14 @@ import org.mockito.Mockito.spy
 class FromOccludedTransitionInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            this.fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
         }
 
     private val testScope = kosmos.testScope
     private val underTest = kosmos.fromOccludedTransitionInteractor
 
     private val powerInteractor = kosmos.powerInteractor
-    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
 
     @Before
     fun setup() {
@@ -88,7 +87,7 @@ class FromOccludedTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.OCCLUDED,
-                testScope
+                testScope,
             )
             reset(transitionRepository)
         }
@@ -102,10 +101,7 @@ class FromOccludedTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.OCCLUDED,
-                    to = KeyguardState.LOCKSCREEN,
-                )
+                .startedTransition(from = KeyguardState.OCCLUDED, to = KeyguardState.LOCKSCREEN)
         }
 
     @Test
@@ -122,9 +118,6 @@ class FromOccludedTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.OCCLUDED,
-                    to = KeyguardState.GLANCEABLE_HUB,
-                )
+                .startedTransition(from = KeyguardState.OCCLUDED, to = KeyguardState.GLANCEABLE_HUB)
         }
 }

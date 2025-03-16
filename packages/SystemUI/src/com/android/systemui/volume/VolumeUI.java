@@ -16,8 +16,6 @@
 
 package com.android.systemui.volume;
 
-import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.Log;
@@ -28,7 +26,12 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.volume.domain.interactor.AudioSharingInteractor;
+import com.android.systemui.volume.shared.VolumeLogger;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 import java.io.PrintWriter;
 
@@ -44,16 +47,22 @@ public class VolumeUI implements CoreStartable, ConfigurationController.Configur
     private VolumeDialogComponent mVolumeComponent;
     private AudioSharingInteractor mAudioSharingInteractor;
     private AudioRepository mAudioRepository;
+    private JavaAdapter mJavaAdapter;
+    private VolumeLogger mVolumeLogger;
 
     @Inject
     public VolumeUI(Context context,
             VolumeDialogComponent volumeDialogComponent,
             AudioRepository audioRepository,
-            AudioSharingInteractor audioSharingInteractor) {
+            AudioSharingInteractor audioSharingInteractor,
+            JavaAdapter javaAdapter,
+            VolumeLogger volumeLogger) {
         mContext = context;
         mVolumeComponent = volumeDialogComponent;
         mAudioRepository = audioRepository;
         mAudioSharingInteractor = audioSharingInteractor;
+        mJavaAdapter = javaAdapter;
+        mVolumeLogger = volumeLogger;
     }
 
     @Override
@@ -67,9 +76,22 @@ public class VolumeUI implements CoreStartable, ConfigurationController.Configur
 
         mVolumeComponent.setEnableDialogs(enableVolumeUi, enableSafetyWarning);
         setDefaultVolumeController();
-        if (volumeDialogAudioSharingFix()) {
-            mAudioSharingInteractor.handlePrimaryGroupChange();
-        }
+        Function1<Throwable, Unit> errorCallback = (ex) -> {
+            mVolumeLogger.onAudioSharingAvailabilityRequestedError("start()",
+                    ex.getMessage());
+            return null;
+        };
+        var unused =
+                mJavaAdapter.<Context, Boolean>callSuspend(
+                        mAudioSharingInteractor::audioSharingVolumeBarAvailable, mContext,
+                        result -> {
+                            if (result) {
+                                mAudioSharingInteractor.handlePrimaryGroupChange();
+                            }
+                            return null;
+                        },
+                        errorCallback,
+                        errorCallback);
     }
 
     @Override

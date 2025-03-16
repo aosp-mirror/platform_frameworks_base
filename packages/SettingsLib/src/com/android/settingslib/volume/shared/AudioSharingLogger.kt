@@ -26,4 +26,6 @@ interface AudioSharingLogger {
     fun onVolumeMapChanged(map: Map<Int, Int>)
 
     fun onSetDeviceVolumeRequested(volume: Int)
+
+    fun onAudioSharingAvailabilityRequestedError(requestFrom: String, e: String)
 }

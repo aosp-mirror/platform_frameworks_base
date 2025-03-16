@@ -42,7 +42,7 @@ import androidx.annotation.Nullable;
  *
  * All touch events must be passed through this class to track a drag event.
  */
-class DragDetector {
+public class DragDetector {
     private final MotionEventHandler mEventHandler;
 
     private final PointF mInputDownPoint = new PointF();
@@ -55,7 +55,14 @@ class DragDetector {
 
     private boolean mResultOfDownAction;
 
-    DragDetector(@NonNull MotionEventHandler eventHandler, long holdToDragMinDurationMs,
+    /**
+     * Initialises a drag detector.
+     *
+     * @param eventHandler drag event handler.
+     * @param holdToDragMinDurationMs hold to drag duration.
+     * @param touchSlop touch slope threshold.
+     */
+    public DragDetector(@NonNull MotionEventHandler eventHandler, long holdToDragMinDurationMs,
             int touchSlop) {
         resetState();
         mEventHandler = eventHandler;
@@ -69,7 +76,7 @@ class DragDetector {
      * @return the result returned by {@link #mEventHandler}, or the result when
      * {@link #mEventHandler} handles the previous down event if the event shouldn't be passed
      */
-    boolean onMotionEvent(MotionEvent ev) {
+    public boolean onMotionEvent(MotionEvent ev) {
         return onMotionEvent(null /* view */, ev);
     }
 
@@ -79,7 +86,7 @@ class DragDetector {
      * @return the result returned by {@link #mEventHandler}, or the result when
      * {@link #mEventHandler} handles the previous down event if the event shouldn't be passed
      */
-    boolean onMotionEvent(View v, MotionEvent ev) {
+    public boolean onMotionEvent(View v, MotionEvent ev) {
         final boolean isTouchScreen =
                 (ev.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
         if (!isTouchScreen) {
@@ -190,7 +197,16 @@ class DragDetector {
         mDidHoldForMinDuration = false;
     }
 
-    interface MotionEventHandler {
+    /**
+     * Interface to be implemented by the class using the DragDetector for callback.
+     */
+    public interface MotionEventHandler {
+        /**
+         * Called back when drag is detected to notify the implementing class to handle drag events.
+         * @param v view on which the input arrived.
+         * @param ev motion event that resulted in drag.
+         * @return whether this was a drag event or not.
+         */
         boolean handleMotionEvent(@Nullable View v, MotionEvent ev);
     }
 }

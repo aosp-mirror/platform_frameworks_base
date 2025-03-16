@@ -167,12 +167,7 @@ abstract class WindowTracing {
 
             long token = os.start(WINDOW_MANAGER_SERVICE);
             synchronized (mGlobalLock) {
-                Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "dumpDebugLocked");
-                try {
-                    mService.dumpDebugLocked(os, logLevel);
-                } finally {
-                    Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-                }
+                mService.dumpDebugLocked(os, logLevel);
             }
             os.end(token);
         } catch (Exception e) {

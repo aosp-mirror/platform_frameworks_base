@@ -16,11 +16,14 @@
 
 package android.telephony.cdma;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,18 +37,36 @@ import java.lang.annotation.RetentionPolicy;
  * containing an array of these objects to update its list of cell broadcast service categories
  * to display.
  *
+ * @deprecated Legacy CDMA is unsupported.
  * {@hide}
  */
+@FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+@Deprecated
 @SystemApi
 public final class CdmaSmsCbProgramData implements Parcelable {
 
-    /** Delete the specified service category from the list of enabled categories. */
+    /**
+     * Delete the specified service category from the list of enabled categories.
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int OPERATION_DELETE_CATEGORY   = 0;
 
-    /** Add the specified service category to the list of enabled categories. */
+    /**
+     * Add the specified service category to the list of enabled categories.
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int OPERATION_ADD_CATEGORY      = 1;
 
-    /** Clear all service categories from the list of enabled categories. */
+    /**
+     * Clear all service categories from the list of enabled categories.
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int OPERATION_CLEAR_CATEGORIES  = 2;
 
     /** @hide */
@@ -59,23 +80,53 @@ public final class CdmaSmsCbProgramData implements Parcelable {
     public @interface Operation {}
 
     // CMAS alert service category assignments, see 3GPP2 C.R1001 table 9.3.3-1
-    /** Indicates a presidential-level alert */
+    /**
+     * Indicates a presidential-level alert
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT  = 0x1000;
 
-    /** Indicates an extreme threat to life and property */
+    /**
+     * Indicates an extreme threat to life and property
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CATEGORY_CMAS_EXTREME_THREAT            = 0x1001;
 
-    /** Indicates an severe threat to life and property */
+    /**
+     * Indicates an severe threat to life and property
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CATEGORY_CMAS_SEVERE_THREAT             = 0x1002;
 
-    /** Indicates an AMBER child abduction emergency */
+    /**
+     * Indicates an AMBER child abduction emergency
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY = 0x1003;
 
-    /** Indicates a CMAS test message */
+    /**
+     * Indicates a CMAS test message
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CATEGORY_CMAS_TEST_MESSAGE              = 0x1004;
 
-    /** The last reserved value of a CMAS service category according to 3GPP C.R1001 table
-     * 9.3.3-1. */
+    /**
+     * The last reserved value of a CMAS service category according to 3GPP C.R1001 table
+     * 9.3.3-1.
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CATEGORY_CMAS_LAST_RESERVED_VALUE       = 0x10ff;
 
     /** @hide */
@@ -177,7 +228,10 @@ public final class CdmaSmsCbProgramData implements Parcelable {
      *
      * @param dest  The Parcel in which the object should be written.
      * @param flags Additional flags about how the object should be written (ignored).
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mOperation);
@@ -192,7 +246,10 @@ public final class CdmaSmsCbProgramData implements Parcelable {
      * Returns the service category operation, e.g. {@link #OPERATION_ADD_CATEGORY}.
      *
      * @return the service category operation
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public @Operation int getOperation() {
         return mOperation;
     }
@@ -203,7 +260,10 @@ public final class CdmaSmsCbProgramData implements Parcelable {
      * 0x10FF are supported.
      *
      * @return a 16-bit CDMA service category value
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public @Category int getCategory() {
         return mCategory;
     }
@@ -255,7 +315,11 @@ public final class CdmaSmsCbProgramData implements Parcelable {
     /**
      * Describe the kinds of special objects contained in the marshalled representation.
      * @return a bitmask indicating this Parcelable contains no special objects
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @Override
     public int describeContents() {
         return 0;
@@ -263,7 +327,11 @@ public final class CdmaSmsCbProgramData implements Parcelable {
 
     /**
      * Creator for unparcelling objects.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @NonNull
     public static final Parcelable.Creator<CdmaSmsCbProgramData>
             CREATOR = new Parcelable.Creator<CdmaSmsCbProgramData>() {

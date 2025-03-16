@@ -67,7 +67,7 @@ import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import com.android.app.tracing.coroutines.asyncTraced as async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -84,6 +84,7 @@ constructor(
     private val mediaFlags: MediaFlags,
     private val imageLoader: ImageLoader,
     private val statusBarManager: StatusBarManager,
+    private val media3ActionFactory: Media3ActionFactory,
 ) {
     private val mediaProcessingJobs = ConcurrentHashMap<String, Job>()
 
@@ -364,7 +365,7 @@ constructor(
             )
         }
 
-    private fun createActionsFromState(
+    private suspend fun createActionsFromState(
         packageName: String,
         controller: MediaController,
         user: UserHandle,
@@ -373,6 +374,12 @@ constructor(
             return null
         }
 
+        if (mediaFlags.areMedia3ActionsEnabled(packageName, user)) {
+            return media3ActionFactory.createActionsFromSession(
+                packageName,
+                controller.sessionToken,
+            )
+        }
         return createActionsFromState(context, packageName, controller)
     }
 

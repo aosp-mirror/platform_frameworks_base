@@ -16,12 +16,16 @@
 
 package com.android.systemui.bouncer.data.repository
 
+import android.content.applicationContext
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.util.settings.fakeGlobalSettings
 
 val Kosmos.bouncerRepository by Fixture {
     BouncerRepository(
+        applicationContext = applicationContext,
         flags = featureFlagsClassic,
+        globalSettings = fakeGlobalSettings,
     )
 }

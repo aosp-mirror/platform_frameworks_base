@@ -17,7 +17,6 @@
 package android.hardware.input;
 
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -31,8 +30,8 @@ import android.view.KeyEvent;
  * A virtual keyboard representing a key input mechanism on a remote device, such as a built-in
  * keyboard on a laptop, a software keyboard on a tablet, or a keypad on a TV remote control.
  *
- * This registers an InputDevice that is interpreted like a physically-connected device and
- * dispatches received events to it.
+ * <p>This registers an InputDevice that is interpreted like a physically-connected device and
+ * dispatches received events to it.</p>
  *
  * @hide
  */
@@ -52,7 +51,6 @@ public class VirtualKeyboard extends VirtualInputDevice {
      *
      * @param event the event to send
      */
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendKeyEvent(@NonNull VirtualKeyEvent event) {
         try {
             if (mUnsupportedKeyCode == event.getKeyCode()) {

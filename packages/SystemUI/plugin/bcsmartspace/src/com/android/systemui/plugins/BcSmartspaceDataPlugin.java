@@ -103,6 +103,15 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void onSmartspaceTargetsUpdated(List<? extends Parcelable> targets);
     }
 
+    /**
+     * Sets {@link BcSmartspaceConfigPlugin}.
+     *
+     * TODO: b/259566300 - Remove once isViewPager2Enabled is fully rolled out
+     */
+    default void registerConfigProvider(BcSmartspaceConfigPlugin configProvider) {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
+    }
+
     /** View to which this plugin can be registered, in order to get updates. */
     interface SmartspaceView {
         void registerDataProvider(BcSmartspaceDataPlugin plugin);
@@ -202,6 +211,13 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * card.
          */
         default int getCurrentCardTopPadding() {
+            throw new UnsupportedOperationException("Not implemented by " + getClass());
+        }
+
+        /**
+         * Set the horizontal paddings for applicable children inside the SmartspaceView.
+         */
+        default void setHorizontalPaddings(int horizontalPadding) {
             throw new UnsupportedOperationException("Not implemented by " + getClass());
         }
     }

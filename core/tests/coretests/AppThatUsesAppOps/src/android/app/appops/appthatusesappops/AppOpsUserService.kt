@@ -22,7 +22,9 @@ import android.app.AsyncNotedAppOp
 import android.app.Service
 import android.app.SyncNotedAppOp
 import android.content.Intent
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import com.android.frameworks.coretests.aidl.IAppOpsUserClient
 import com.android.frameworks.coretests.aidl.IAppOpsUserService
@@ -71,6 +73,7 @@ class AppOpsUserService : Service() {
     override fun onBind(intent: Intent?): IBinder {
         return object : IAppOpsUserService.Stub() {
             private val appOpsManager = getSystemService(AppOpsManager::class.java)!!
+            private val handler = Handler(Looper.getMainLooper())
 
             // Collected note-op calls inside of this process
             private val noted = mutableListOf<Pair<SyncNotedAppOp, Array<StackTraceElement>>>()
@@ -179,6 +182,18 @@ class AppOpsUserService : Service() {
                     }
                     assertThat(noted).isEmpty()
                     assertThat(selfNoted).isEmpty()
+                }
+            }
+
+            override fun callFreezeAndNoteSyncOp(client: IAppOpsUserClient) {
+                handler.post {
+                    client.freezeAndNoteSyncOp()
+                }
+            }
+
+            override fun assertEmptyAsyncNoted() {
+                forwardThrowableFrom {
+                    assertThat(asyncNoted).isEmpty()
                 }
             }
 

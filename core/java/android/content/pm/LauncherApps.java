@@ -182,6 +182,8 @@ public class LauncherApps {
      */
     public static final int FLAG_CACHE_PEOPLE_TILE_SHORTCUTS = 2;
 
+    private static final String LAUNCHER_USER_INFO_EXTRA_KEY = "launcher_user_info";
+
     /** @hide */
     @IntDef(flag = false, prefix = { "FLAG_CACHE_" }, value = {
             FLAG_CACHE_NOTIFICATION_SHORTCUTS,
@@ -349,6 +351,19 @@ public class LauncherApps {
          */
         public void onPackageLoadingProgressChanged(@NonNull String packageName,
                 @NonNull UserHandle user, float progress) {}
+
+        /**
+         * Indicates {@link LauncherUserInfo} configs for a user have changed. The new
+         * {@link LauncherUserInfo} is given as a parameter.
+         *
+         * {@link LauncherUserInfo#getUserConfig} to get the updated user configs.
+         *
+         * @param launcherUserInfo The LauncherUserInfo of the user/profile whose configs have
+         *                         changed.
+         */
+        @FlaggedApi(android.multiuser.Flags.FLAG_ADD_LAUNCHER_USER_CONFIG)
+        public void onUserConfigChanged(@NonNull LauncherUserInfo launcherUserInfo) {
+        }
     }
 
     /**
@@ -2168,6 +2183,21 @@ public class LauncherApps {
                 }
             }
         }
+
+        public void onUserConfigChanged(LauncherUserInfo launcherUserInfo) {
+            if (DEBUG) {
+                if (Flags.allowPrivateProfile()
+                        && android.multiuser.Flags.addLauncherUserConfig()) {
+                    Log.d(TAG, "OnUserConfigChanged for user type " + launcherUserInfo.getUserType()
+                            + ", new userConfig: " + launcherUserInfo.getUserConfig());
+                }
+            }
+            synchronized (LauncherApps.this) {
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnUserConfigChanged(launcherUserInfo);
+                }
+            }
+        }
     };
 
     /**
@@ -2224,6 +2254,7 @@ public class LauncherApps {
         private static final int MSG_UNSUSPENDED = 7;
         private static final int MSG_SHORTCUT_CHANGED = 8;
         private static final int MSG_LOADING_PROGRESS_CHANGED = 9;
+        private static final int MSG_USER_CONFIG_CHANGED = 10;
 
         private final LauncherApps.Callback mCallback;
 
@@ -2277,6 +2308,14 @@ public class LauncherApps {
                 case MSG_LOADING_PROGRESS_CHANGED:
                     mCallback.onPackageLoadingProgressChanged(info.packageName, info.user,
                             info.mLoadingProgress);
+                    break;
+                case MSG_USER_CONFIG_CHANGED:
+                    if (Flags.allowPrivateProfile()
+                            && android.multiuser.Flags.addLauncherUserConfig()) {
+                        mCallback.onUserConfigChanged(Objects.requireNonNull(
+                                info.launcherExtras.getParcelable(LAUNCHER_USER_INFO_EXTRA_KEY,
+                                        LauncherUserInfo.class)));
+                    }
                     break;
             }
         }
@@ -2352,6 +2391,13 @@ public class LauncherApps {
             info.user = user;
             info.mLoadingProgress = progress;
             obtainMessage(MSG_LOADING_PROGRESS_CHANGED, info).sendToTarget();
+        }
+
+        public void postOnUserConfigChanged(LauncherUserInfo launcherUserInfo) {
+            CallbackInfo info = new CallbackInfo();
+            info.launcherExtras = new Bundle();
+            info.launcherExtras.putParcelable(LAUNCHER_USER_INFO_EXTRA_KEY, launcherUserInfo);
+            obtainMessage(MSG_USER_CONFIG_CHANGED, info).sendToTarget();
         }
     }
 

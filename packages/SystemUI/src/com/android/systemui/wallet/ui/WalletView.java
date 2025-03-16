@@ -283,6 +283,11 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         return mCardLabel;
     }
 
+    @VisibleForTesting
+    ImageView getIcon() {
+        return mIcon;
+    }
+
     @Nullable
     private static Drawable getHeaderIcon(Context context, WalletCardViewInfo walletCard) {
         Drawable icon = walletCard.getIcon();

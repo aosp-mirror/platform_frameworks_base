@@ -18,19 +18,19 @@ package com.android.systemui.qs.tiles.impl.onehanded.ui
 
 import android.content.res.Resources
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.onehanded.domain.model.OneHandedModeTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [OneHandedModeTileModel] to [QSTileState]. */
 class OneHandedModeTileMapper
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val theme: Resources.Theme,
 ) : QSTileDataToStateMapper<OneHandedModeTileModel> {
 
@@ -39,7 +39,7 @@ constructor(
             val subtitleArray = resources.getStringArray(R.array.tile_states_onehanded)
             label = resources.getString(R.string.quick_settings_onehanded_label)
             iconRes = com.android.internal.R.drawable.ic_qs_one_handed_mode
-            icon = { Icon.Loaded(resources.getDrawable(iconRes!!, theme), null) }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 secondaryLabel = subtitleArray[2]

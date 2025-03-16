@@ -28,6 +28,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TAS
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.app.WindowConfiguration;
@@ -44,6 +45,7 @@ import android.util.ArrayMap;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.SurfaceControl;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 
 import com.android.window.flags.Flags;
@@ -263,6 +265,23 @@ public final class WindowContainerTransaction implements Parcelable {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mFocusable = focusable;
         chg.mChangeMask |= Change.CHANGE_FOCUSABLE;
+        return this;
+    }
+
+    /**
+     * Sets whether the IME insets should be excluded by {@link com.android.server.wm.InsetsPolicy}.
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi")
+    @NonNull
+    public WindowContainerTransaction setExcludeImeInsets(
+            @NonNull WindowContainerToken container, boolean exclude) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES)
+                        .setContainer(container.asBinder())
+                        .setExcludeInsetsTypes(exclude ? WindowInsets.Type.ime() : 0)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
         return this;
     }
 
@@ -502,6 +521,22 @@ public final class WindowContainerTransaction implements Parcelable {
             @NonNull WindowContainerToken container) {
         mHierarchyOps.add(HierarchyOp.createForSetLaunchAdjacentFlagRoot(container.asBinder(),
                 true /* clearRoot */));
+        return this;
+    }
+
+    /**
+     * Disables or enables activities to be started in adjacent tasks (see
+     * {@link FLAG_ACTIVITY_LAUNCH_ADJACENT}) for the specified root of any child tasks.  This
+     * differs from {@link #setLaunchAdjacentFlagRoot(WindowContainerToken)} which controls the
+     * preferred launch-adjacent target and allows for selectively setting which root tasks can
+     * support launch-adjacent.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setDisableLaunchAdjacent(
+            @NonNull WindowContainerToken container, boolean disabled) {
+        mHierarchyOps.add(HierarchyOp.createForSetDisableLaunchAdjacent(container.asBinder(),
+                disabled));
         return this;
     }
 
@@ -850,6 +885,24 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Adds a {@link KeyguardState} to apply to the given displays.
+     *
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction addKeyguardState(
+            @NonNull KeyguardState keyguardState) {
+        Objects.requireNonNull(keyguardState);
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE)
+                        .setKeyguardState(keyguardState)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
      * Sets/removes the always on top flag for this {@code windowContainer}. See
      * {@link com.android.server.wm.ConfigurationContainer#setAlwaysOnTop(boolean)}.
      * Please note that this method is only intended to be used for a
@@ -1067,8 +1120,8 @@ public final class WindowContainerTransaction implements Parcelable {
     @NonNull
     public String toString() {
         return "WindowContainerTransaction {"
-                + " changes = " + mChanges
-                + " hops = " + mHierarchyOps
+                + " changes= " + mChanges
+                + " hops= " + mHierarchyOps
                 + " errorCallbackToken=" + mErrorCallbackToken
                 + " taskFragmentOrganizer=" + mTaskFragmentOrganizer
                 + " }";
@@ -1449,6 +1502,9 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK = 18;
         public static final int HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE = 19;
         public static final int HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION = 20;
+        public static final int HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES = 21;
+        public static final int HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE = 22;
+        public static final int HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT = 23;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1496,6 +1552,9 @@ public final class WindowContainerTransaction implements Parcelable {
         private TaskFragmentOperation mTaskFragmentOperation;
 
         @Nullable
+        private KeyguardState mKeyguardState;
+
+        @Nullable
         private PendingIntent mPendingIntent;
 
         @Nullable
@@ -1511,6 +1570,10 @@ public final class WindowContainerTransaction implements Parcelable {
         private boolean mReparentLeafTaskIfRelaunch;
 
         private boolean mIsTrimmableFromRecents;
+
+        private @InsetsType int mExcludeInsetsTypes;
+
+        private boolean mLaunchAdjacentDisabled;
 
         public static HierarchyOp createForReparent(
                 @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
@@ -1600,6 +1663,15 @@ public final class WindowContainerTransaction implements Parcelable {
                     .build();
         }
 
+        /** Create a hierarchy op for disabling launch adjacent. */
+        public static HierarchyOp createForSetDisableLaunchAdjacent(IBinder container,
+                boolean disabled) {
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT)
+                    .setContainer(container)
+                    .setLaunchAdjacentDisabled(disabled)
+                    .build();
+        }
+
         /** create a hierarchy op for deleting a task **/
         public static HierarchyOp createForRemoveTask(@NonNull IBinder container) {
             return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_REMOVE_TASK)
@@ -1644,11 +1716,14 @@ public final class WindowContainerTransaction implements Parcelable {
             mLaunchOptions = copy.mLaunchOptions;
             mActivityIntent = copy.mActivityIntent;
             mTaskFragmentOperation = copy.mTaskFragmentOperation;
+            mKeyguardState = copy.mKeyguardState;
             mPendingIntent = copy.mPendingIntent;
             mShortcutInfo = copy.mShortcutInfo;
             mAlwaysOnTop = copy.mAlwaysOnTop;
             mReparentLeafTaskIfRelaunch = copy.mReparentLeafTaskIfRelaunch;
             mIsTrimmableFromRecents = copy.mIsTrimmableFromRecents;
+            mExcludeInsetsTypes = copy.mExcludeInsetsTypes;
+            mLaunchAdjacentDisabled = copy.mLaunchAdjacentDisabled;
         }
 
         protected HierarchyOp(Parcel in) {
@@ -1666,11 +1741,14 @@ public final class WindowContainerTransaction implements Parcelable {
             mLaunchOptions = in.readBundle();
             mActivityIntent = in.readTypedObject(Intent.CREATOR);
             mTaskFragmentOperation = in.readTypedObject(TaskFragmentOperation.CREATOR);
+            mKeyguardState = in.readTypedObject(KeyguardState.CREATOR);
             mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
             mShortcutInfo = in.readTypedObject(ShortcutInfo.CREATOR);
             mAlwaysOnTop = in.readBoolean();
             mReparentLeafTaskIfRelaunch = in.readBoolean();
             mIsTrimmableFromRecents = in.readBoolean();
+            mExcludeInsetsTypes = in.readInt();
+            mLaunchAdjacentDisabled = in.readBoolean();
         }
 
         public int getType() {
@@ -1746,6 +1824,11 @@ public final class WindowContainerTransaction implements Parcelable {
         }
 
         @Nullable
+        public KeyguardState getKeyguardState() {
+            return mKeyguardState;
+        }
+
+        @Nullable
         public PendingIntent getPendingIntent() {
             return mPendingIntent;
         }
@@ -1761,15 +1844,22 @@ public final class WindowContainerTransaction implements Parcelable {
         }
 
         /** Denotes whether the parents should also be included in the op. */
-        @NonNull
         public boolean includingParents() {
             return mIncludingParents;
         }
 
-        /** Set the task to be trimmable */
-        @NonNull
+        /** Denotes whether the task can be trimmable from recents */
         public boolean isTrimmableFromRecents() {
             return mIsTrimmableFromRecents;
+        }
+
+        public @InsetsType int getExcludeInsetsTypes() {
+            return mExcludeInsetsTypes;
+        }
+
+        /** Denotes whether launch-adjacent flag is respected from this task or its children */
+        public boolean isLaunchAdjacentDisabled() {
+            return mLaunchAdjacentDisabled;
         }
 
         /** Gets a string representation of a hierarchy-op type. */
@@ -1777,24 +1867,33 @@ public final class WindowContainerTransaction implements Parcelable {
             switch (type) {
                 case HIERARCHY_OP_TYPE_REPARENT: return "reparent";
                 case HIERARCHY_OP_TYPE_REORDER: return "reorder";
-                case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT: return "ChildrenTasksReparent";
-                case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: return "SetLaunchRoot";
-                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS: return "SetAdjacentRoot";
-                case HIERARCHY_OP_TYPE_LAUNCH_TASK: return "LaunchTask";
-                case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: return "SetAdjacentFlagRoot";
-                case HIERARCHY_OP_TYPE_PENDING_INTENT: return "PendingIntent";
-                case HIERARCHY_OP_TYPE_START_SHORTCUT: return "StartShortcut";
+                case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT: return "childrenTasksReparent";
+                case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: return "setLaunchRoot";
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS: return "setAdjacentRoot";
+                case HIERARCHY_OP_TYPE_LAUNCH_TASK: return "launchTask";
+                case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: return "setAdjacentFlagRoot";
+                case HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT:
+                    return "setDisableLaunchAdjacent";
+                case HIERARCHY_OP_TYPE_PENDING_INTENT: return "pendingIntent";
+                case HIERARCHY_OP_TYPE_START_SHORTCUT: return "startShortcut";
+                case HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER: return "restoreTransientOrder";
                 case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER: return "addInsetsFrameProvider";
                 case HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER:
                     return "removeInsetsFrameProvider";
                 case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: return "setAlwaysOnTop";
-                case HIERARCHY_OP_TYPE_REMOVE_TASK: return "RemoveTask";
+                case HIERARCHY_OP_TYPE_REMOVE_TASK: return "removeTask";
                 case HIERARCHY_OP_TYPE_FINISH_ACTIVITY: return "finishActivity";
-                case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: return "ClearAdjacentRoot";
+                case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: return "clearAdjacentRoot";
                 case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH:
                     return "setReparentLeafTaskIfRelaunch";
                 case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION:
                     return "addTaskFragmentOperation";
+                case HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK:
+                    return "movePipActivityToPinnedTask";
+                case HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE: return "setIsTrimmable";
+                case HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION: return "restoreBackNav";
+                case HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES: return "setExcludeInsetsTypes";
+                case HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE: return "setKeyguardState";
                 default: return "HOP(" + type + ")";
             }
         }
@@ -1833,6 +1932,10 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT:
                     sb.append("container=").append(mContainer).append(" clearRoot=").append(mToTop);
                     break;
+                case HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT:
+                    sb.append("container=").append(mContainer).append(" disabled=")
+                            .append(mLaunchAdjacentDisabled);
+                    break;
                 case HIERARCHY_OP_TYPE_START_SHORTCUT:
                     sb.append("options=").append(mLaunchOptions)
                             .append(" info=").append(mShortcutInfo);
@@ -1868,6 +1971,14 @@ public final class WindowContainerTransaction implements Parcelable {
                     sb.append("fragmentToken= ").append(mContainer)
                             .append(" operation= ").append(mTaskFragmentOperation);
                     break;
+                case HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES:
+                    sb.append("container= ").append(mContainer)
+                            .append(" mExcludeInsetsTypes= ")
+                            .append(WindowInsets.Type.toString(mExcludeInsetsTypes));
+                    break;
+                case HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE:
+                    sb.append("KeyguardState= ").append(mKeyguardState);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE:
                     sb.append("container= ").append(mContainer)
                             .append(" isTrimmable= ")
@@ -1898,11 +2009,14 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeBundle(mLaunchOptions);
             dest.writeTypedObject(mActivityIntent, flags);
             dest.writeTypedObject(mTaskFragmentOperation, flags);
+            dest.writeTypedObject(mKeyguardState, flags);
             dest.writeTypedObject(mPendingIntent, flags);
             dest.writeTypedObject(mShortcutInfo, flags);
             dest.writeBoolean(mAlwaysOnTop);
             dest.writeBoolean(mReparentLeafTaskIfRelaunch);
             dest.writeBoolean(mIsTrimmableFromRecents);
+            dest.writeInt(mExcludeInsetsTypes);
+            dest.writeBoolean(mLaunchAdjacentDisabled);
         }
 
         @Override
@@ -1958,6 +2072,9 @@ public final class WindowContainerTransaction implements Parcelable {
             private TaskFragmentOperation mTaskFragmentOperation;
 
             @Nullable
+            private KeyguardState mKeyguardState;
+
+            @Nullable
             private PendingIntent mPendingIntent;
 
             @Nullable
@@ -1973,6 +2090,10 @@ public final class WindowContainerTransaction implements Parcelable {
             private boolean mReparentLeafTaskIfRelaunch;
 
             private boolean mIsTrimmableFromRecents;
+
+            private @InsetsType int mExcludeInsetsTypes;
+
+            private boolean mLaunchAdjacentDisabled;
 
             Builder(int type) {
                 mType = type;
@@ -2044,6 +2165,12 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setKeyguardState(
+                    @Nullable KeyguardState keyguardState) {
+                mKeyguardState = keyguardState;
+                return this;
+            }
+
             Builder setReparentLeafTaskIfRelaunch(boolean reparentLeafTaskIfRelaunch) {
                 mReparentLeafTaskIfRelaunch = reparentLeafTaskIfRelaunch;
                 return this;
@@ -2069,6 +2196,16 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setExcludeInsetsTypes(@InsetsType int excludeInsetsTypes) {
+                mExcludeInsetsTypes = excludeInsetsTypes;
+                return this;
+            }
+
+            Builder setLaunchAdjacentDisabled(boolean disabled) {
+                mLaunchAdjacentDisabled = disabled;
+                return this;
+            }
+
             HierarchyOp build() {
                 final HierarchyOp hierarchyOp = new HierarchyOp(mType);
                 hierarchyOp.mContainer = mContainer;
@@ -2088,11 +2225,14 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mPendingIntent = mPendingIntent;
                 hierarchyOp.mAlwaysOnTop = mAlwaysOnTop;
                 hierarchyOp.mTaskFragmentOperation = mTaskFragmentOperation;
+                hierarchyOp.mKeyguardState = mKeyguardState;
                 hierarchyOp.mShortcutInfo = mShortcutInfo;
                 hierarchyOp.mBounds = mBounds;
                 hierarchyOp.mIncludingParents = mIncludingParents;
                 hierarchyOp.mReparentLeafTaskIfRelaunch = mReparentLeafTaskIfRelaunch;
                 hierarchyOp.mIsTrimmableFromRecents = mIsTrimmableFromRecents;
+                hierarchyOp.mExcludeInsetsTypes = mExcludeInsetsTypes;
+                hierarchyOp.mLaunchAdjacentDisabled = mLaunchAdjacentDisabled;
 
                 return hierarchyOp;
             }

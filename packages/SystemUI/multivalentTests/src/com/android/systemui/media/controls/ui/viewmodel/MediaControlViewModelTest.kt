@@ -99,14 +99,14 @@ class MediaControlViewModelTest : SysuiTestCase() {
             assertThat(playerModel).isNotNull()
             assertThat(playerModel?.titleName).isEqualTo(TITLE)
             assertThat(playerModel?.artistName).isEqualTo(ARTIST)
-            assertThat(underTest.isNewPlayer(playerModel!!)).isTrue()
+            assertThat(underTest.setPlayer(playerModel!!)).isTrue()
 
             mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
 
             assertThat(playerModel).isNotNull()
             assertThat(playerModel?.titleName).isEqualTo(TITLE)
             assertThat(playerModel?.artistName).isEqualTo(ARTIST)
-            assertThat(underTest.isNewPlayer(playerModel!!)).isFalse()
+            assertThat(underTest.setPlayer(playerModel!!)).isFalse()
         }
 
     @Test
@@ -120,7 +120,7 @@ class MediaControlViewModelTest : SysuiTestCase() {
             assertThat(playerModel).isNotNull()
             assertThat(playerModel?.titleName).isEqualTo(TITLE)
             assertThat(playerModel?.artistName).isEqualTo(ARTIST)
-            assertThat(underTest.isNewPlayer(playerModel!!)).isTrue()
+            assertThat(underTest.setPlayer(playerModel!!)).isTrue()
 
             mediaData = initMediaData(ARTIST_2, TITLE_2)
 
@@ -129,7 +129,7 @@ class MediaControlViewModelTest : SysuiTestCase() {
             assertThat(playerModel).isNotNull()
             assertThat(playerModel?.titleName).isEqualTo(TITLE_2)
             assertThat(playerModel?.artistName).isEqualTo(ARTIST_2)
-            assertThat(underTest.isNewPlayer(playerModel!!)).isTrue()
+            assertThat(underTest.setPlayer(playerModel!!)).isTrue()
         }
 
     private fun initMediaData(artist: String, title: String): MediaData {

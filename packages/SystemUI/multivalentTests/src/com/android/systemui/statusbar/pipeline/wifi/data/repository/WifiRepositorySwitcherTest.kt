@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoMod
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
+import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
@@ -71,6 +72,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
     private val demoModelFlow = MutableStateFlow<FakeWifiEventModel?>(null)
 
     private val mainExecutor = FakeExecutor(FakeSystemClock())
+    private val userRepository = FakeUserRepository()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -82,10 +84,13 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
         // Never start in demo mode
         whenever(demoModeController.isInDemoMode).thenReturn(false)
 
-        whenever(wifiPickerTrackerFactory.create(any(), any(), any())).thenReturn(wifiPickerTracker)
+        whenever(wifiPickerTrackerFactory.create(any(), any(), any(), any()))
+            .thenReturn(wifiPickerTracker)
 
         realImpl =
             WifiRepositoryImpl(
+                mContext,
+                userRepository,
                 testScope.backgroundScope,
                 mainExecutor,
                 testDispatcher,
@@ -97,11 +102,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
 
         whenever(demoModeWifiDataSource.wifiEvents).thenReturn(demoModelFlow)
 
-        demoImpl =
-            DemoWifiRepository(
-                demoModeWifiDataSource,
-                testScope.backgroundScope,
-            )
+        demoImpl = DemoWifiRepository(demoModeWifiDataSource, testScope.backgroundScope)
 
         underTest =
             WifiRepositorySwitcher(

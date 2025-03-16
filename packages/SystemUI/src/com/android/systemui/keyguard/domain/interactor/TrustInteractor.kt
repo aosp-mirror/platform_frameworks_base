@@ -22,7 +22,7 @@ import com.android.systemui.keyguard.data.repository.TrustRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Encapsulates any state relevant to trust agents and trust grants. */
 @SysUISingleton

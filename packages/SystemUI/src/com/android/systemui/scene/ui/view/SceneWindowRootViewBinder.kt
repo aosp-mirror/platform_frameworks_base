@@ -36,14 +36,12 @@ import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.ScreenDecorProvider
-import com.android.systemui.keyguard.ui.composable.AlternateBouncer
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.Overlay
@@ -51,6 +49,7 @@ import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -74,7 +73,7 @@ object SceneWindowRootViewBinder {
         overlays: Set<Overlay>,
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
         dataSourceDelegator: SceneDataSourceDelegator,
-        alternateBouncerDependencies: AlternateBouncerDependencies,
+        qsSceneAdapter: Provider<QSSceneAdapter>,
     ) {
         val unsortedSceneByKey: Map<SceneKey, Scene> = scenes.associateBy { scene -> scene.key }
         val sortedSceneByKey: Map<SceneKey, Scene> =
@@ -107,7 +106,7 @@ object SceneWindowRootViewBinder {
             view.viewModel(
                 traceName = "SceneWindowRootViewBinder",
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                factory = { viewModelFactory.create(motionEventHandlerReceiver) },
+                factory = { viewModelFactory.create(view, motionEventHandlerReceiver) },
             ) { viewModel ->
                 try {
                     view.setViewTreeOnBackPressedDispatcherOwner(
@@ -132,6 +131,7 @@ object SceneWindowRootViewBinder {
                                 sceneByKey = sortedSceneByKey,
                                 overlayByKey = sortedOverlayByKey,
                                 dataSourceDelegator = dataSourceDelegator,
+                                qsSceneAdapter = qsSceneAdapter,
                                 containerConfig = containerConfig,
                             )
                             .also { it.id = R.id.scene_container_root_composable }
@@ -144,20 +144,10 @@ object SceneWindowRootViewBinder {
                     //  the SceneContainerView. This SharedNotificationContainer should contain NSSL
                     //  due to the NotificationStackScrollLayoutSection (legacy) or
                     //  NotificationSection (scene container) moving it there.
-                    if (SceneContainerFlag.isEnabled) {
-                        (sharedNotificationContainer.parent as? ViewGroup)?.removeView(
-                            sharedNotificationContainer
-                        )
-                        view.addView(sharedNotificationContainer)
-
-                        // TODO(b/358354906): use an overlay for the alternate bouncer
-                        view.addView(
-                            createAlternateBouncerView(
-                                context = view.context,
-                                alternateBouncerDependencies = alternateBouncerDependencies,
-                            )
-                        )
-                    }
+                    (sharedNotificationContainer.parent as? ViewGroup)?.removeView(
+                        sharedNotificationContainer
+                    )
+                    view.addView(sharedNotificationContainer)
 
                     view.setSnapshotBinding { onVisibilityChangedInternal(viewModel.isVisible) }
                     awaitCancellation()
@@ -177,6 +167,7 @@ object SceneWindowRootViewBinder {
         sceneByKey: Map<SceneKey, Scene>,
         overlayByKey: Map<OverlayKey, Overlay>,
         dataSourceDelegator: SceneDataSourceDelegator,
+        qsSceneAdapter: Provider<QSSceneAdapter>,
         containerConfig: SceneContainerConfig,
     ): View {
         return ComposeView(context).apply {
@@ -184,30 +175,19 @@ object SceneWindowRootViewBinder {
                 PlatformTheme {
                     ScreenDecorProvider(
                         displayCutout = displayCutoutFromWindowInsets(scope, context, windowInsets),
-                        screenCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
+                        screenCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context),
                     ) {
                         SceneContainer(
                             viewModel = viewModel,
                             sceneByKey = sceneByKey,
                             overlayByKey = overlayByKey,
                             initialSceneKey = containerConfig.initialSceneKey,
+                            sceneTransitions = containerConfig.transitions,
                             dataSourceDelegator = dataSourceDelegator,
+                            qsSceneAdapter = qsSceneAdapter,
                         )
                     }
                 }
-            }
-        }
-    }
-
-    private fun createAlternateBouncerView(
-        context: Context,
-        alternateBouncerDependencies: AlternateBouncerDependencies,
-    ): ComposeView {
-        return ComposeView(context).apply {
-            setContent {
-                AlternateBouncer(
-                    alternateBouncerDependencies = alternateBouncerDependencies,
-                )
             }
         }
     }
@@ -234,14 +214,7 @@ object SceneWindowRootViewBinder {
                         else -> CutoutLocation.CENTER
                     }
                 val viewDisplayCutout = it?.displayCutout
-                DisplayCutout(
-                    left,
-                    top,
-                    right,
-                    bottom,
-                    location,
-                    viewDisplayCutout,
-                )
+                DisplayCutout(left, top, right, bottom, location, viewDisplayCutout)
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), DisplayCutout())
 

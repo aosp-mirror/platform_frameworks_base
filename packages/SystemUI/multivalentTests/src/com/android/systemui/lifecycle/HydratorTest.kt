@@ -59,11 +59,11 @@ class HydratorTest : SysuiTestCase() {
                 Column {
                     Text(
                         "upstreamStateFlow=${viewModel.stateBackedByStateFlow}",
-                        Modifier.testTag("upstreamStateFlow")
+                        Modifier.testTag("upstreamStateFlow"),
                     )
                     Text(
                         "upstreamFlow=${viewModel.stateBackedByFlow}",
-                        Modifier.testTag("upstreamFlow")
+                        Modifier.testTag("upstreamFlow"),
                     )
                 }
             }

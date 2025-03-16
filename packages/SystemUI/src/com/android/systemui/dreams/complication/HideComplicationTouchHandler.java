@@ -17,8 +17,8 @@
 package com.android.systemui.dreams.complication;
 
 import static com.android.systemui.Flags.removeDreamOverlayHideOnTouch;
-import static com.android.systemui.dreams.complication.dagger.ComplicationModule.COMPLICATIONS_FADE_OUT_DELAY;
-import static com.android.systemui.dreams.complication.dagger.ComplicationModule.COMPLICATIONS_RESTORE_TIMEOUT;
+import static com.android.systemui.dreams.complication.dagger.DreamComplicationModule.COMPLICATIONS_FADE_OUT_DELAY;
+import static com.android.systemui.dreams.complication.dagger.DreamComplicationModule.COMPLICATIONS_RESTORE_TIMEOUT;
 
 import android.util.Log;
 import android.view.MotionEvent;

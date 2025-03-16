@@ -42,7 +42,7 @@
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Želite da napravite pristupni ključ da biste se prijavili u <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="4481366993598649224">"Želite da sačuvate lozinku da biste se prijavili u <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Želite da sačuvate podatke za prijavljivanje za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="passkey" msgid="632353688396759522">"pristupni kôd"</string>
+    <string name="passkey" msgid="632353688396759522">"pristupni ključ"</string>
     <string name="password" msgid="6738570945182936667">"lozinka"</string>
     <string name="passkeys" msgid="5733880786866559847">"pristupni kodovi"</string>
     <string name="passwords" msgid="5419394230391253816">"lozinke"</string>
@@ -61,7 +61,7 @@
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Lozinki: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Pristupnih kodova: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> akreditiva"</string>
-    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Pristupni kôd"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Pristupni ključ"</string>
     <string name="another_device" msgid="5147276802037801217">"Drugi uređaj"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Drugi menadžeri lozinki"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Zatvorite tabelu"</string>

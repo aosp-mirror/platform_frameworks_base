@@ -1,0 +1,18 @@
+package: "com.android.server.am"
+container: "system"
+
+flag {
+    name: "restrict_priority_values"
+    namespace: "backstage_power"
+    description: "Restrict priority values defined by non-system apps"
+    is_fixed_read_only: true
+    bug: "369487976"
+}
+
+flag {
+    name: "limit_priority_scope"
+    namespace: "backstage_power"
+    description: "Limit the scope of receiver priorities to within a process"
+    is_fixed_read_only: true
+    bug: "369487976"
+}

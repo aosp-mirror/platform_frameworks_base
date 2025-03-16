@@ -37,8 +37,6 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
-import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
-import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -179,10 +177,7 @@ public class StackStateAnimator {
         mHeadsUpDisappearChildren.clear();
         mNewEvents.clear();
         mNewAddChildren.clear();
-        if (NotificationsImprovedHunAnimation.isEnabled()
-                || NotificationHeadsUpCycling.isEnabled()) {
-            mAnimationProperties.resetCustomInterpolators();
-        }
+        mAnimationProperties.resetCustomInterpolators();
     }
 
     private void initAnimationProperties(ExpandableView child,
@@ -498,8 +493,7 @@ public class StackStateAnimator {
                 }
                 changingView.performAddAnimation(0, ANIMATION_DURATION_HEADS_UP_CYCLING,
                         /* isHeadsUpAppear= */ true, onAnimationEnd);
-            } else if (NotificationsImprovedHunAnimation.isEnabled()
-                    && (event.animationType == ANIMATION_TYPE_HEADS_UP_APPEAR)) {
+            } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_APPEAR) {
                 mHeadsUpAppearChildren.add(changingView);
 
                 mTmpState.copyFrom(changingView.getViewState());
@@ -602,30 +596,6 @@ public class StackStateAnimator {
                     endRunnable.run();
                 }
                 needsCustomAnimation |= needsAnimation;
-            } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_APPEAR) {
-                NotificationsImprovedHunAnimation.assertInLegacyMode();
-                // This item is added, initialize its properties.
-                ExpandableViewState viewState = changingView.getViewState();
-                mTmpState.copyFrom(viewState);
-                if (event.headsUpFromBottom) {
-                    mTmpState.setYTranslation(mHeadsUpAppearHeightBottom);
-                } else {
-                    Runnable onAnimationEnd = null;
-                    if (loggable) {
-                        String finalKey = key;
-                        onAnimationEnd = () -> mLogger.appearAnimationEnded(finalKey);
-                    }
-                    changingView.performAddAnimation(0, ANIMATION_DURATION_HEADS_UP_APPEAR,
-                            true /* isHeadsUpAppear */, onAnimationEnd);
-                }
-                mHeadsUpAppearChildren.add(changingView);
-                // this only captures HEADS_UP_APPEAR animations, but HUNs can appear with normal
-                // ADD animations, which would not be logged here.
-                if (loggable) {
-                    mLogger.logHUNViewAppearing(key);
-                }
-
-                mTmpState.applyToView(changingView);
             } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_DISAPPEAR
                     || event.animationType == ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
                 mHeadsUpDisappearChildren.add(changingView);
@@ -636,14 +606,10 @@ public class StackStateAnimator {
                     // transiently
                     mHostLayout.addTransientView(changingView, 0);
                     changingView.setTransientContainer(mHostLayout);
-                    if (NotificationsImprovedHunAnimation.isEnabled()) {
-                        // StackScrollAlgorithm cannot find this view because it has been removed
-                        // from the NSSL. To correctly translate the view to the top or bottom of
-                        // the screen (where it animated from), we need to update its translation.
-                        mTmpState.setYTranslation(
-                                getHeadsUpYTranslationStart(event.headsUpFromBottom)
-                        );
-                    }
+                    // StackScrollAlgorithm cannot find this view because it has been removed
+                    // from the NSSL. To correctly translate the view to the top or bottom of
+                    // the screen (where it animated from), we need to update its translation.
+                    mTmpState.setYTranslation(getHeadsUpYTranslationStart(event.headsUpFromBottom));
                     endRunnable = changingView::removeFromTransientContainer;
                 }
 
@@ -697,14 +663,12 @@ public class StackStateAnimator {
                             startAnimation, postAnimation,
                             getGlobalAnimationFinishedListener(), ExpandableView.ClipSide.BOTTOM);
                     mAnimationProperties.delay += removeAnimationDelay;
-                    if (NotificationsImprovedHunAnimation.isEnabled()) {
-                        mAnimationProperties.duration = ANIMATION_DURATION_HEADS_UP_DISAPPEAR;
-                        mAnimationProperties.setCustomInterpolator(View.TRANSLATION_Y,
-                                Interpolators.FAST_OUT_SLOW_IN_REVERSE);
-                        mAnimationProperties.getAnimationFilter().animateY = true;
-                        mTmpState.animateTo(changingView, mAnimationProperties);
-                        mAnimationProperties.resetCustomInterpolators();
-                    }
+                    mAnimationProperties.duration = ANIMATION_DURATION_HEADS_UP_DISAPPEAR;
+                    mAnimationProperties.setCustomInterpolator(View.TRANSLATION_Y,
+                            Interpolators.FAST_OUT_SLOW_IN_REVERSE);
+                    mAnimationProperties.getAnimationFilter().animateY = true;
+                    mTmpState.animateTo(changingView, mAnimationProperties);
+                    mAnimationProperties.resetCustomInterpolators();
                 } else if (endRunnable != null) {
                     endRunnable.run();
                 }

@@ -509,6 +509,28 @@ final class Constants {
     static final String PROPERTY_STRIP_AUDIO_TV_NO_SYSTEM_AUDIO =
         "persist.sys.hdmi.property_strip_audio_tv_no_system_audio";
 
+    /**
+     * Property that decides whether CEC should be disabled on standby when the low energy mode
+     * option is used.
+     */
+    static final String PROPERTY_WAS_CEC_DISABLED_ON_STANDBY_BY_LOW_ENERGY_MODE =
+            "persist.sys.hdmi.property_was_cec_disabled_on_standby_by_low_energy_mode";
+
+    /**
+     * Property that checks if CEC was disabled on standby by low energy mode. With the help of this
+     * property we avoid re-enabling CEC if the user explicitly disabled it, unrelated to the
+     * selected energy mode.
+     */
+    static final String PROPERTY_DISABLE_CEC_ON_STANDBY_IN_LOW_ENERGY_MODE =
+            "persist.sys.hdmi.property_disable_cec_on_standby_in_low_energy_mode";
+
+    /**
+     * Property that checks if CEC was manually enabled by the user in offline mode. With the help
+     * of this property we avoid turning off CEC when the device goes to sleep and if the device
+     * is in low energy mode.
+     */
+    static final String PROPERTY_USER_ACTION_KEEP_CEC_ENABLED_IN_OFFLINE_MODE =
+            "persist.sys.hdmi.property_user_action_keep_cec_enabled_in_offline_mode";
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;
     static final int RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS = 3;
@@ -643,6 +665,11 @@ final class Constants {
             DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI
     })
     @interface FeatureFlag {}
+
+    /**
+     * Identifier key for Low energy mode.
+     */
+    static final String KEY_LOW_ENERGY_USE = "low_energy_use";
 
     private Constants() {
         /* cannot be instantiated */

@@ -27,6 +27,7 @@ import android.aconfig.Aconfig.parsed_flags;
 import android.aconfigd.AconfigdFlagInfo;
 import android.os.Looper;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.Xml;

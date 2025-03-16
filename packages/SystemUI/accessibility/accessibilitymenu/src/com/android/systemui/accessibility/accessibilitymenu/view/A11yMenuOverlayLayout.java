@@ -57,7 +57,6 @@ import androidx.annotation.UiContext;
 
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
-import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
@@ -220,9 +219,6 @@ public class A11yMenuOverlayLayout {
 
     @SuppressLint("MissingPermission")
     private boolean isShortcutRestricted(int shortcutId) {
-        if (!Flags.hideRestrictedActions()) {
-            return false;
-        }
         final UserManager userManager = mService.getSystemService(UserManager.class);
         if (userManager == null) {
             return false;
@@ -366,12 +362,11 @@ public class A11yMenuOverlayLayout {
         if (mLayout.getVisibility() == View.VISIBLE) {
             mLayout.setVisibility(View.GONE);
         } else {
-            if (Flags.hideRestrictedActions()) {
-                // Reconfigure the shortcut list in case the set of restricted actions has changed.
-                mA11yMenuViewPager.configureViewPagerAndFooter(
-                        mLayout, createShortcutList(), getPageIndex());
-                updateViewLayout();
-            }
+            // Reconfigure the shortcut list in case the set of restricted actions has changed.
+            mA11yMenuViewPager.configureViewPagerAndFooter(
+                    mLayout, createShortcutList(), getPageIndex());
+            updateViewLayout();
+
             mLayout.setVisibility(View.VISIBLE);
         }
     }
@@ -387,9 +382,7 @@ public class A11yMenuOverlayLayout {
             return;
         }
         snackbar.setText(text);
-        if (Flags.a11yMenuSnackbarLiveRegion()) {
-            snackbar.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
-        }
+        snackbar.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
 
         // Remove any existing fade-out animation before starting any new animations.
         mHandler.removeCallbacksAndMessages(null);

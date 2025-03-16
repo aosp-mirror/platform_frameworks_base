@@ -586,13 +586,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ໂທລະສັບນີ້"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ແທັບເລັດນີ້"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ຄອມພິວເຕີນີ້ (ພາຍໃນ)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"ໄມໂຄຣໂຟນ (ພາຍໃນ)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ໂທລະທັດນີ້"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ແທ່ນວາງລຳໂພງ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ອຸປະກອນພາຍນອກ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ອຸປະກອນທີ່ເຊື່ອມຕໍ່"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ໂທລະສັບນີ້"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"ໂມງເຂັມ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ຫຼິ້ນຢູ່ອຸປະກອນນີ້ບໍ່ໄດ້"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ອັບເກຣດບັນຊີເພື່ອສະຫຼັບ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ບໍ່ສາມາດຫຼິ້ນເນື້ອຫາທີ່ດາວໂຫຼດຢູ່ນີ້ໄດ້"</string>
@@ -605,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ເຊື່ອມຕໍ່ຜ່ານ ARC ແລ້ວ"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"ເຊື່ອມຕໍ່ຜ່ານ eARC ແລ້ວ"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ຄ່າເລີ່ມຕົ້ນສຳລັບໂທລະທັດ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"ເອົ້າພຸດ HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ລຳໂພງຂອງເຄື່ອງ"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"ລຳໂພງທີ່ມີໃນຕົວ"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"ສຽງນີ້"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ເກີດບັນຫາໃນການເຊື່ອມຕໍ່. ປິດອຸປະກອນແລ້ວເປີດກັບຄືນມາໃໝ່"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ອຸປະກອນສຽງແບບມີສາຍ"</string>
     <string name="help_label" msgid="3528360748637781274">"ຊ່ວຍເຫຼືອ ແລະ ຕິຊົມ"</string>
@@ -690,10 +690,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ເປີດການນຳໃຊ້ແລ້ວ"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ທ່ານຕ້ອງປິດເປີດອຸປະກອນຄືນໃໝ່ເພື່ອນຳໃຊ້ການປ່ຽນແປງນີ້. ປິດເປີດໃໝ່ດຽວນີ້ ຫຼື ຍົກເລີກ."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"ຫູຟັງແບບມີສາຍ"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"ຫູຟັງ"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"ລຳໂພງ USB"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"ຊ່ອງສຽງໄມ"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"ໄມ USB"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"ສຽງແບບມີສາຍ"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"ສຽງ USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"ໄມໂຄຣໂຟນແບບມີສາຍ"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"ໄມໂຄຣໂຟນ USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"ໄມໂຄຣໂຟນ BT"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ເປີດ"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ປິດ"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"ການປ່ຽນເຄືອຂ່າຍຜູ້ໃຫ້ບໍລິການ"</string>

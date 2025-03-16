@@ -27,6 +27,7 @@ import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
 import android.app.wearable.Flags;
 import android.app.wearable.IWearableSensingCallback;
+import android.app.wearable.WearableConnection;
 import android.app.wearable.WearableSensingDataRequest;
 import android.app.wearable.WearableSensingManager;
 import android.content.Context;
@@ -63,16 +64,15 @@ import java.util.function.Consumer;
 
 /**
  * Abstract base class for sensing with wearable devices. An example of this is {@link
- *AmbientContextEvent} detection.
+ * AmbientContextEvent} detection.
  *
- * <p> A service that provides requested sensing events to the system, such as a {@link
- *AmbientContextEvent}. The system's default WearableSensingService implementation is configured in
- * {@code config_defaultWearableSensingService}. If this config has no value, a stub is
- * returned.
+ * <p>A service that provides requested sensing events to the system, such as a {@link
+ * AmbientContextEvent}. The system's default WearableSensingService implementation is configured in
+ * {@code config_defaultWearableSensingService}. If this config has no value, a stub is returned.
  *
- * <p> An implementation of a WearableSensingService should be an isolated service. Using the
- * "isolatedProcess=true" attribute in the service's configurations. </p>
- **
+ * <p>An implementation of a WearableSensingService should be an isolated service. Using the
+ * "isolatedProcess=true" attribute in the service's configurations.
+ *
  * <pre>
  * {@literal
  * <service android:name=".YourWearableSensingService"
@@ -82,7 +82,7 @@ import java.util.function.Consumer;
  * </pre>
  *
  * <p>The use of "Wearable" here is not the same as the Android Wear platform and should be treated
- * separately. </p>
+ * separately.
  *
  * @hide
  */
@@ -108,9 +108,9 @@ public abstract class WearableSensingService extends Service {
 
     /**
      * The {@link Intent} that must be declared as handled by the service. To be supported, the
-     * service must also require the
-     * {@link android.Manifest.permission#BIND_WEARABLE_SENSING_SERVICE}
-     * permission so that other applications can not abuse it.
+     * service must also require the {@link
+     * android.Manifest.permission#BIND_WEARABLE_SENSING_SERVICE} permission so that other
+     * applications can not abuse it.
      */
     public static final String SERVICE_INTERFACE =
             "android.service.wearable.WearableSensingService";
@@ -141,6 +141,35 @@ public abstract class WearableSensingService extends Service {
                     Consumer<Integer> consumer = createWearableStatusConsumer(callback);
                     WearableSensingService.this.onSecureConnectionProvided(
                             secureWearableConnection, consumer);
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void provideConcurrentSecureConnection(
+                        ParcelFileDescriptor secureWearableConnection,
+                        PersistableBundle metadata,
+                        IWearableSensingCallback wearableSensingCallback,
+                        RemoteCallback callback) {
+                    Objects.requireNonNull(secureWearableConnection);
+                    Objects.requireNonNull(metadata);
+                    if (wearableSensingCallback != null) {
+                        mWearableSensingCallback = wearableSensingCallback;
+                    }
+                    Consumer<Integer> consumer = createWearableStatusConsumer(callback);
+                    WearableSensingService.this.onSecureConnectionProvided(
+                            secureWearableConnection, metadata, consumer);
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void provideReadOnlyParcelFileDescriptor(
+                        ParcelFileDescriptor parcelFileDescriptor,
+                        PersistableBundle metadata,
+                        RemoteCallback callback) {
+                    Objects.requireNonNull(parcelFileDescriptor);
+                    Consumer<Integer> consumer = createWearableStatusConsumer(callback);
+                    WearableSensingService.this.onReadOnlyParcelFileDescriptorProvided(
+                            parcelFileDescriptor, metadata, consumer);
                 }
 
                 /** {@inheritDoc} */
@@ -339,25 +368,76 @@ public abstract class WearableSensingService extends Service {
 
     /**
      * Called when a secure connection to the wearable is available. See {@link
-     * WearableSensingManager#provideConnection(ParcelFileDescriptor, Executor, Consumer)}
-     * for details about the secure connection.
+     * WearableSensingManager#provideConnection(ParcelFileDescriptor, Executor, Consumer)} for
+     * details about the secure connection.
      *
      * <p>When the {@code secureWearableConnection} is closed, the system will send a {@link
      * WearableSensingManager#STATUS_CHANNEL_ERROR} status code to the status consumer provided by
-     * the caller of {@link WearableSensingManager#provideConnection(ParcelFileDescriptor,
-     * Executor, Consumer)}.
+     * the caller of {@link WearableSensingManager#provideConnection(ParcelFileDescriptor, Executor,
+     * Consumer)}.
      *
      * <p>The implementing class should override this method. It should return an appropriate status
      * code via {@code statusConsumer} after receiving the {@code secureWearableConnection}.
      *
      * @param secureWearableConnection The secure connection to the wearable.
      * @param statusConsumer The consumer for the service status.
+     * @deprecated Use {@link #onSecureConnectionProvided(ParcelFileDescriptor, PersistableBundle,
+     *     Consumer)} instead to receive a remote wearable device connection.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    @Deprecated
     @BinderThread
     public void onSecureConnectionProvided(
             @NonNull ParcelFileDescriptor secureWearableConnection,
             @NonNull Consumer<Integer> statusConsumer) {
+        statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);
+    }
+
+    /**
+     * Called when a secure connection to the wearable is available. See {@link
+     * WearableSensingManager#provideConnection(WearableConnection, Executor)} for details about the
+     * secure connection.
+     *
+     * <p>When the {@code secureWearableConnection} is closed, the system will send a {@link
+     * WearableSensingManager#STATUS_CHANNEL_ERROR} status code to the error callback provided by
+     * the caller of {@link WearableSensingManager#provideConnection(WearableConnection, Executor)}.
+     *
+     * <p>The implementing class should override this method. It should return an appropriate status
+     * code via {@code statusConsumer} after receiving the {@code secureWearableConnection}.
+     *
+     * @param secureWearableConnection The secure connection to the wearable.
+     * @param metadata Metadata related to the provided connection.
+     * @param statusConsumer The consumer for the service status.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    @BinderThread
+    public void onSecureConnectionProvided(
+            @NonNull ParcelFileDescriptor secureWearableConnection,
+            @NonNull PersistableBundle metadata,
+            @NonNull Consumer<Integer> statusConsumer) {
+        statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);
+    }
+
+    /**
+     * Called when a read-only {@link ParcelFileDescriptor} is provided.
+     *
+     * <p>It is up to the implementation to close the {@link ParcelFileDescriptor} when it is
+     * finished.
+     *
+     * <p>The implementation should return one of the status code defined in the {@link
+     * WearableSensingManager} via the {@code statusConsumer}.
+     *
+     * @param parcelFileDescriptor The provided read-only {@link ParcelFileDescriptor}
+     * @param metadata The metadata provided along with the {@code parcelFileDescriptor}
+     * @param statusConsumer the consumer for the status code
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_READ_ONLY_PFD)
+    @BinderThread
+    public void onReadOnlyParcelFileDescriptorProvided(
+            @NonNull ParcelFileDescriptor parcelFileDescriptor,
+            @NonNull PersistableBundle metadata,
+            @NonNull Consumer<Integer> statusConsumer) {
+        // placeholder implementation
         statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);
     }
 
@@ -370,7 +450,8 @@ public abstract class WearableSensingService extends Service {
      * @param statusConsumer the consumer for the service status.
      */
     @BinderThread
-    public abstract void onDataStreamProvided(@NonNull ParcelFileDescriptor parcelFileDescriptor,
+    public abstract void onDataStreamProvided(
+            @NonNull ParcelFileDescriptor parcelFileDescriptor,
             @NonNull Consumer<Integer> statusConsumer);
 
     /**
@@ -419,7 +500,6 @@ public abstract class WearableSensingService extends Service {
      * @param statusConsumer the consumer for the status of the data request observer registration.
      *     This is different from the status for each data request.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @BinderThread
     public void onDataRequestObserverRegistered(
             int dataType,
@@ -447,7 +527,6 @@ public abstract class WearableSensingService extends Service {
      * @param statusConsumer the consumer for the status of the data request observer
      *     unregistration. This is different from the status for each data request.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @BinderThread
     public void onDataRequestObserverUnregistered(
             int dataType,
@@ -514,16 +593,16 @@ public abstract class WearableSensingService extends Service {
 
     /**
      * Called when hotword audio data sent to the {@code hotwordAudioConsumer} in {@link
-     * #onStartHotwordRecognition(Consumer, Consumer)} is accepted by the
-     * {@link android.service.voice.HotwordDetectionService} as valid hotword.
+     * #onStartHotwordRecognition(Consumer, Consumer)} is accepted by the {@link
+     * android.service.voice.HotwordDetectionService} as valid hotword.
      *
      * <p>After the implementation of this class sends the hotword audio data to the {@code
-     * hotwordAudioConsumer} in {@link #onStartHotwordRecognition(Consumer,
-     * Consumer)}, the system will forward the data into {@link
-     * android.service.voice.HotwordDetectionService} (which runs in an isolated process) for
-     * second-stage hotword detection. If accepted as valid hotword there, this method will be
-     * called, and then the system will send the data to the currently active {@link
-     * android.service.voice.AlwaysOnHotwordDetector} (which may not run in an isolated process).
+     * hotwordAudioConsumer} in {@link #onStartHotwordRecognition(Consumer, Consumer)}, the system
+     * will forward the data into {@link android.service.voice.HotwordDetectionService} (which runs
+     * in an isolated process) for second-stage hotword detection. If accepted as valid hotword
+     * there, this method will be called, and then the system will send the data to the currently
+     * active {@link android.service.voice.AlwaysOnHotwordDetector} (which may not run in an
+     * isolated process).
      *
      * <p>This method is expected to be overridden by a derived class. The implementation must
      * request the wearable to turn on the microphone indicator to notify the user that audio data
@@ -554,17 +633,16 @@ public abstract class WearableSensingService extends Service {
     /**
      * Called when a client app requests starting detection of the events in the request. The
      * implementation should keep track of whether the user has explicitly consented to detecting
-     * the events using on-going ambient sensor (e.g. microphone), and agreed to share the
-     * detection results with this client app. If the user has not consented, the detection
-     * should not start, and the statusConsumer should get a response with STATUS_ACCESS_DENIED.
-     * If the user has made the consent and the underlying services are available, the
-     * implementation should start detection and provide detected events to the
-     * detectionResultConsumer. If the type of event needs immediate attention, the implementation
-     * should send result as soon as detected. Otherwise, the implementation can batch response.
-     * The ongoing detection will keep running, until onStopDetection is called. If there were
-     * previously requested detections from the same package, regardless of the type of events in
-     * the request, the previous request will be replaced with the new request and pending events
-     * are discarded.
+     * the events using on-going ambient sensor (e.g. microphone), and agreed to share the detection
+     * results with this client app. If the user has not consented, the detection should not start,
+     * and the statusConsumer should get a response with STATUS_ACCESS_DENIED. If the user has made
+     * the consent and the underlying services are available, the implementation should start
+     * detection and provide detected events to the detectionResultConsumer. If the type of event
+     * needs immediate attention, the implementation should send result as soon as detected.
+     * Otherwise, the implementation can batch response. The ongoing detection will keep running,
+     * until onStopDetection is called. If there were previously requested detections from the same
+     * package, regardless of the type of events in the request, the previous request will be
+     * replaced with the new request and pending events are discarded.
      *
      * @param request The request with events to detect.
      * @param packageName the requesting app's package name
@@ -572,7 +650,8 @@ public abstract class WearableSensingService extends Service {
      * @param detectionResultConsumer the consumer for the detected event
      */
     @BinderThread
-    public abstract void onStartDetection(@NonNull AmbientContextEventRequest request,
+    public abstract void onStartDetection(
+            @NonNull AmbientContextEventRequest request,
             @NonNull String packageName,
             @NonNull Consumer<AmbientContextDetectionServiceStatus> statusConsumer,
             @NonNull Consumer<AmbientContextDetectionResult> detectionResultConsumer);
@@ -585,16 +664,17 @@ public abstract class WearableSensingService extends Service {
     public abstract void onStopDetection(@NonNull String packageName);
 
     /**
-     * Called when a query for the detection status occurs. The implementation should check
-     * the detection status of the requested events for the package, and provide results in a
-     * {@link AmbientContextDetectionServiceStatus} for the consumer.
+     * Called when a query for the detection status occurs. The implementation should check the
+     * detection status of the requested events for the package, and provide results in a {@link
+     * AmbientContextDetectionServiceStatus} for the consumer.
      *
      * @param eventTypes The events to check for status.
      * @param packageName the requesting app's package name
      * @param consumer the consumer for the query results
      */
     @BinderThread
-    public abstract void onQueryServiceStatus(@NonNull Set<Integer> eventTypes,
+    public abstract void onQueryServiceStatus(
+            @NonNull Set<Integer> eventTypes,
             @NonNull String packageName,
             @NonNull Consumer<AmbientContextDetectionServiceStatus> consumer);
 
@@ -693,6 +773,4 @@ public abstract class WearableSensingService extends Service {
             statusCallback.sendResult(bundle);
         };
     }
-
-
 }

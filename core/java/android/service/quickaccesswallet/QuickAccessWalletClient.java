@@ -17,6 +17,7 @@
 package android.service.quickaccesswallet;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -178,6 +179,23 @@ public interface QuickAccessWalletClient extends Closeable {
      */
     interface WalletPendingIntentCallback {
         void onWalletPendingIntentRetrieved(@Nullable PendingIntent walletPendingIntent);
+    }
+
+    /**
+     * Gets the {@link PendingIntent} provided by QuickAccessWalletService to be sent when the user
+     * launches Wallet via gesture.
+     */
+    @FlaggedApi(Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    void getGestureTargetActivityPendingIntent(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull GesturePendingIntentCallback gesturePendingIntentCallback);
+
+    /** Callback interface for getGesturePendingIntent. */
+    @FlaggedApi(Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    interface GesturePendingIntentCallback {
+        /** Callback method for getGesturePendingIntent */
+        @FlaggedApi(Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+        void onGesturePendingIntentRetrieved(@Nullable PendingIntent pendingIntent);
     }
 
     /**

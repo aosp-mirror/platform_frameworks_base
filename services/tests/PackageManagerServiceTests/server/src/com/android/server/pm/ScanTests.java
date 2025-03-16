@@ -511,7 +511,7 @@ public class ScanTests {
                 .addUsesPermission(
                         new ParsedUsesPermissionImpl(Manifest.permission.FACTORY_TEST, 0));
 
-        final ScanResult scanResult = ScanPackageUtils.scanPackageOnlyLI(
+        final ScanResult scanResult = ScanPackageUtils.scanPackageOnly(
                 createBasicScanRequestBuilder(basicPackage).build(),
                 mMockInjector,
                 true /*isUnderFactoryTest*/,
@@ -559,7 +559,7 @@ public class ScanTests {
 
     private ScanResult executeScan(
             ScanRequest scanRequest) throws PackageManagerException {
-        ScanResult result = ScanPackageUtils.scanPackageOnlyLI(
+        ScanResult result = ScanPackageUtils.scanPackageOnly(
                 scanRequest,
                 mMockInjector,
                 false /*isUnderFactoryTest*/,

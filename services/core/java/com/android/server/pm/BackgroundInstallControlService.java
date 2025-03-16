@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.Manifest.permission.GET_BACKGROUND_INSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.app.Flags;
@@ -64,6 +65,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -76,11 +79,23 @@ import java.util.TreeSet;
  * @hide
  */
 public class BackgroundInstallControlService extends SystemService {
+    public static final int INSTALL_EVENT_TYPE_UNKNOWN = 0;
+    public static final int INSTALL_EVENT_TYPE_INSTALL = 1;
+    public static final int INSTALL_EVENT_TYPE_UNINSTALL = 2;
+
+    @IntDef(
+            value = {
+                INSTALL_EVENT_TYPE_UNKNOWN,
+                INSTALL_EVENT_TYPE_INSTALL,
+                INSTALL_EVENT_TYPE_UNINSTALL,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InstallEventType {}
+
     private static final String TAG = "BackgroundInstallControlService";
 
     private static final String DISK_FILE_NAME = "states";
     private static final String DISK_DIR_NAME = "bic";
-
     private static final String ENFORCE_PERMISSION_ERROR_MSG =
             "User is not permitted to call service: ";
 
@@ -250,6 +265,7 @@ public class BackgroundInstallControlService extends SystemService {
 
         @Override
         public void handleMessage(Message msg) {
+            Slog.d(TAG, "Package event received: " + msg.what);
             switch (msg.what) {
                 case MSG_USAGE_EVENT_RECEIVED:
                     mService.handleUsageEvent(
@@ -311,9 +327,11 @@ public class BackgroundInstallControlService extends SystemService {
             return;
         }
 
+        Slog.d(TAG, "handlePackageAdd: adding " + packageName + " from "
+            + userId + " and notifying callbacks");
         initBackgroundInstalledPackages();
         mBackgroundInstalledPackages.add(userId, packageName);
-        mCallbackHelper.notifyAllCallbacks(userId, packageName);
+        mCallbackHelper.notifyAllCallbacks(userId, packageName, INSTALL_EVENT_TYPE_INSTALL);
         writeBackgroundInstalledPackagesToDisk();
     }
 
@@ -349,7 +367,11 @@ public class BackgroundInstallControlService extends SystemService {
     // ADB sets installerPackageName to null, this creates a loophole to bypass BIC which will be
     // addressed with b/265203007
     private boolean installedByAdb(String initiatingPackageName) {
-        return PackageManagerServiceUtils.isInstalledByAdb(initiatingPackageName);
+        if(PackageManagerServiceUtils.isInstalledByAdb(initiatingPackageName)) {
+            Slog.d(TAG, "handlePackageAdd: is installed by ADB, skipping");
+            return true;
+        }
+        return false;
     }
 
     private boolean wasForegroundInstallation(
@@ -389,6 +411,10 @@ public class BackgroundInstallControlService extends SystemService {
 
     void handlePackageRemove(String packageName, int userId) {
         initBackgroundInstalledPackages();
+        if (mBackgroundInstalledPackages.contains(userId, packageName)) {
+            mCallbackHelper.notifyAllCallbacks(userId, packageName, INSTALL_EVENT_TYPE_UNINSTALL);
+        }
+        Slog.d(TAG, "handlePackageRemove: removing " + packageName + " from " + userId);
         mBackgroundInstalledPackages.remove(userId, packageName);
         writeBackgroundInstalledPackagesToDisk();
     }

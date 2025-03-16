@@ -29,7 +29,7 @@
             android:tint="?android:attr/textColorSecondary"
             android:layout_gravity="center_vertical"
             android:layout_weight="0"
-            android:layout_marginRight="@dimen/screenrecord_option_padding"
+            android:layout_marginEnd="@dimen/screenrecord_option_padding"
             android:importantForAccessibility="no"/>
         <Spinner
             android:id="@+id/screen_recording_options"
@@ -63,7 +63,7 @@
             android:layout_height="@dimen/screenrecord_option_icon_size"
             android:src="@drawable/ic_touch"
             android:tint="?android:attr/textColorSecondary"
-            android:layout_marginRight="@dimen/screenrecord_option_padding"
+            android:layout_marginEnd="@dimen/screenrecord_option_padding"
             android:importantForAccessibility="no"/>
         <TextView
             android:layout_width="0dp"

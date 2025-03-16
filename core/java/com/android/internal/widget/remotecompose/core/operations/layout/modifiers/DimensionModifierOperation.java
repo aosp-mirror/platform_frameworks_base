@@ -15,47 +15,59 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
-import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
+import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
-import java.util.List;
-
-/**
- * Base class for dimension modifiers
- */
-public class DimensionModifierOperation implements ModifierOperation {
-
-    public static final DimensionModifierOperation.Companion COMPANION =
-            new DimensionModifierOperation.Companion(0, "DIMENSION");
+/** Base class for dimension modifiers */
+public abstract class DimensionModifierOperation extends Operation
+        implements ModifierOperation, VariableSupport {
 
     public enum Type {
-        EXACT, FILL, WRAP, WEIGHT, INTRINSIC_MIN, INTRINSIC_MAX;
+        EXACT,
+        FILL,
+        WRAP,
+        WEIGHT,
+        INTRINSIC_MIN,
+        INTRINSIC_MAX,
+        EXACT_DP;
 
+        @NonNull
         static Type fromInt(int value) {
             switch (value) {
-                case 0: return EXACT;
-                case 1: return FILL;
-                case 2: return WRAP;
-                case 3: return WEIGHT;
-                case 4: return INTRINSIC_MIN;
-                case 5: return INTRINSIC_MAX;
+                case 0:
+                    return EXACT;
+                case 1:
+                    return FILL;
+                case 2:
+                    return WRAP;
+                case 3:
+                    return WEIGHT;
+                case 4:
+                    return INTRINSIC_MIN;
+                case 5:
+                    return INTRINSIC_MAX;
+                case 6:
+                    return EXACT_DP;
             }
             return EXACT;
         }
     }
 
-    Type mType = Type.EXACT;
+    @NonNull Type mType = Type.EXACT;
     float mValue = Float.NaN;
+    float mOutValue = Float.NaN;
 
-    public DimensionModifierOperation(Type type, float value) {
+    public DimensionModifierOperation(@NonNull Type type, float value) {
         mType = type;
-        mValue = value;
+        mOutValue = mValue = value;
     }
 
-    public DimensionModifierOperation(Type type) {
+    public DimensionModifierOperation(@NonNull Type type) {
         this(type, Float.NaN);
     }
 
@@ -63,6 +75,34 @@ public class DimensionModifierOperation implements ModifierOperation {
         this(Type.EXACT, value);
     }
 
+    @Override
+    public void updateVariables(@NonNull RemoteContext context) {
+        if (mType == Type.EXACT) {
+            mOutValue = Float.isNaN(mValue) ? context.getFloat(Utils.idFromNan(mValue)) : mValue;
+        }
+        if (mType == Type.EXACT_DP) {
+            float pre = mOutValue;
+            mOutValue = Float.isNaN(mValue) ? context.getFloat(Utils.idFromNan(mValue)) : mValue;
+            mOutValue *= context.getDensity();
+            if (pre != mOutValue) {
+                context.getDocument().getRootLayoutComponent().invalidateMeasure();
+            }
+        }
+    }
+
+    @Override
+    public void registerListening(@NonNull RemoteContext context) {
+        if (mType == Type.EXACT) {
+            if (Float.isNaN(mValue)) {
+                context.listensTo(Utils.idFromNan(mValue), this);
+            }
+        }
+        if (mType == Type.EXACT_DP) {
+            if (Float.isNaN(mValue)) {
+                context.listensTo(Utils.idFromNan(mValue), this);
+            }
+        }
+    }
 
     public boolean hasWeight() {
         return mType == Type.WEIGHT;
@@ -76,84 +116,53 @@ public class DimensionModifierOperation implements ModifierOperation {
         return mType == Type.FILL;
     }
 
-    public Type getType() {
+    public boolean isIntrinsicMin() {
+        return mType == Type.INTRINSIC_MIN;
+    }
+
+    public boolean isIntrinsicMax() {
+        return mType == Type.INTRINSIC_MAX;
+    }
+
+    public @NonNull Type getType() {
         return mType;
     }
 
     public float getValue() {
-        return mValue;
+        return mOutValue;
     }
 
     public void setValue(float value) {
-        this.mValue = value;
+        mOutValue = mValue = value;
     }
 
-    @Override
-    public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mType.ordinal(), mValue);
-    }
-
+    @NonNull
     public String serializedName() {
         return "DIMENSION";
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         if (mType == Type.EXACT) {
             serializer.append(indent, serializedName() + " = " + mValue);
         }
+        if (mType == Type.EXACT_DP) {
+            serializer.append(indent, serializedName() + " = " + mValue + " dp");
+        }
     }
 
     @Override
-    public void apply(RemoteContext context) {
-    }
+    public void apply(@NonNull RemoteContext context) {}
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DimensionModifierOperation(" + mValue + ")";
-    }
-
-    public static class Companion implements CompanionOperation {
-
-        int mOperation;
-        String mName;
-
-        public Companion(int operation, String name) {
-            mOperation = operation;
-            mName = name;
-        }
-
-        @Override
-        public String name() {
-            return mName;
-        }
-
-        @Override
-        public int id() {
-            return mOperation;
-        }
-
-        public void apply(WireBuffer buffer, int type, float value) {
-            buffer.start(mOperation);
-            buffer.writeInt(type);
-            buffer.writeFloat(value);
-        }
-
-        public Operation construct(Type type, float value) {
-            return null;
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            Type type = Type.fromInt(buffer.readInt());
-            float value = buffer.readFloat();
-            Operation op = construct(type, value);
-            operations.add(op);
-        }
     }
 }

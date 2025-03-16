@@ -88,9 +88,10 @@ void ensureAPerformanceHintBindingInitialized() {
                         "Failed to find required symbol "
                         "APerformanceHint_getPreferredUpdateRateNanos!");
 
-    gAPH_createSessionFn = (APH_createSession)dlsym(handle_, "APerformanceHint_createSession");
+    gAPH_createSessionFn =
+            (APH_createSession)dlsym(handle_, "APerformanceHint_createSessionFromJava");
     LOG_ALWAYS_FATAL_IF(gAPH_createSessionFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_createSession!");
+                        "Failed to find required symbol APerformanceHint_createSessionFromJava!");
 
     gAPH_updateTargetWorkDurationFn =
             (APH_updateTargetWorkDuration)dlsym(handle_,
@@ -106,9 +107,9 @@ void ensureAPerformanceHintBindingInitialized() {
                         "Failed to find required symbol "
                         "APerformanceHint_reportActualWorkDuration!");
 
-    gAPH_closeSessionFn = (APH_closeSession)dlsym(handle_, "APerformanceHint_closeSession");
+    gAPH_closeSessionFn = (APH_closeSession)dlsym(handle_, "APerformanceHint_closeSessionFromJava");
     LOG_ALWAYS_FATAL_IF(gAPH_closeSessionFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_closeSession!");
+                        "Failed to find required symbol APerformanceHint_closeSessionFromJava!");
 
     gAPH_sendHintFn = (APH_sendHint)dlsym(handle_, "APerformanceHint_sendHint");
     LOG_ALWAYS_FATAL_IF(gAPH_sendHintFn == nullptr,

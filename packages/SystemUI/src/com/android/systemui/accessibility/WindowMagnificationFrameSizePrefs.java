@@ -22,8 +22,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Size;
 
-import com.android.systemui.Flags;
-
 /**
  * Class to handle SharedPreference for window magnification size.
  */
@@ -52,14 +50,10 @@ final class WindowMagnificationFrameSizePrefs {
      * Saves the window frame size for current screen density.
      */
     public void saveIndexAndSizeForCurrentDensity(int index, Size size) {
-        if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
-            mWindowMagnificationSizePreferences.edit()
-                    .putString(getKey(),
-                            WindowMagnificationFrameSpec.serialize(index, size)).apply();
-        } else {
-            mWindowMagnificationSizePreferences.edit()
-                    .putString(getKey(), size.toString()).apply();
-        }
+        mWindowMagnificationSizePreferences
+                .edit()
+                .putString(getKey(), WindowMagnificationFrameSpec.serialize(index, size))
+                .apply();
     }
 
     /**
@@ -91,13 +85,9 @@ final class WindowMagnificationFrameSizePrefs {
      * Gets the size preference for current screen density.
      */
     public Size getSizeForCurrentDensity() {
-        if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
-            return WindowMagnificationFrameSpec
-                    .deserialize(mWindowMagnificationSizePreferences.getString(getKey(), null))
-                    .getSize();
-        } else {
-            return Size.parseSize(mWindowMagnificationSizePreferences.getString(getKey(), null));
-        }
+        return WindowMagnificationFrameSpec.deserialize(
+                        mWindowMagnificationSizePreferences.getString(getKey(), null))
+                .getSize();
     }
 
 }

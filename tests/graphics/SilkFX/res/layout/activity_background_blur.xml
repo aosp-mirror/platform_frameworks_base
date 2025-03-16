@@ -13,161 +13,168 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/background"
-    android:layout_width="390dp"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:padding="15dp"
-    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     tools:context=".materials.BackgroundBlurActivity">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:padding="10dp"
-        android:textColor="#ffffffff"
-        android:text="Hello blurry world!"/>
-
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="#ffffffff"
-            android:text="Background blur"/>
-
-        <SeekBar
-            android:id="@+id/set_background_blur"
-            android:min="0"
-            android:max="300"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:id="@+id/background_blur_radius"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffffff"
-            android:ems="3"
-            android:gravity="center"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="TODO"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="#ffffffff"
-            android:text="Background alpha"/>
-
-        <SeekBar
-            android:id="@+id/set_background_alpha"
-            android:min="0"
-            android:max="100"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/background_alpha"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffffff"
-            android:ems="3"
-            android:gravity="center"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="TODO"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="#ffffffff"
-            android:text="Blur behind"/>
-
-        <SeekBar
-            android:id="@+id/set_blur_behind"
-            android:min="0"
-            android:max="300"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/blur_behind_radius"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="#ffffffff"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:ems="3"
-            android:text="TODO"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="#ffffffff"
-            android:text="Dim amount"/>
-
-        <SeekBar
-            android:id="@+id/set_dim_amount"
-            android:min="0"
-            android:max="100"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/dim_amount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="#ffffffff"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:ems="3"
-            android:text="TODO"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/background"
+        android:layout_width="390dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="5dp"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:padding="15dp"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/toggle_blur_enabled"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Disable blur"
-            android:onClick="toggleForceBlurDisabled"/>
+            android:gravity="center_horizontal"
+            android:padding="10dp"
+            android:textColor="#ffffffff"
+            android:text="Hello blurry world!"/>
 
-        <Button
-            android:id="@+id/toggle_battery_saving_mode"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TODO"
-            android:onClick="toggleBatterySavingMode"/>
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#ffffffff"
+                android:text="Background blur"/>
+
+            <SeekBar
+                android:id="@+id/set_background_blur"
+                android:min="0"
+                android:max="300"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/background_blur_radius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffffff"
+                android:ems="3"
+                android:gravity="center"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="TODO"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#ffffffff"
+                android:text="Background alpha"/>
+
+            <SeekBar
+                android:id="@+id/set_background_alpha"
+                android:min="0"
+                android:max="100"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/background_alpha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffffff"
+                android:ems="3"
+                android:gravity="center"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="TODO"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#ffffffff"
+                android:text="Blur behind"/>
+
+            <SeekBar
+                android:id="@+id/set_blur_behind"
+                android:min="0"
+                android:max="300"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/blur_behind_radius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="#ffffffff"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:ems="3"
+                android:text="TODO"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#ffffffff"
+                android:text="Dim amount"/>
+
+            <SeekBar
+                android:id="@+id/set_dim_amount"
+                android:min="0"
+                android:max="100"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/dim_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="#ffffffff"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:ems="3"
+                android:text="TODO"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/toggle_blur_enabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Disable blur"
+                android:onClick="toggleForceBlurDisabled"/>
+
+            <Button
+                android:id="@+id/toggle_battery_saving_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TODO"
+                android:onClick="toggleBatterySavingMode"/>
+        </LinearLayout>
+        <requestFocus/>
+
     </LinearLayout>
-    <requestFocus/>
-
-</LinearLayout>
+</FrameLayout>

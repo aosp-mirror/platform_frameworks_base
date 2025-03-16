@@ -91,10 +91,13 @@ void TestDirectoryFixture::WriteFile(const std::string& path, const std::string&
 }
 
 bool CommandTestFixture::CompileFile(const std::string& path, const std::string& contents,
-                                     android::StringPiece out_dir, android::IDiagnostics* diag) {
+                                     android::StringPiece out_dir, android::IDiagnostics* diag,
+                                     const std::vector<android::StringPiece>& additional_args) {
   WriteFile(path, contents);
   CHECK(file::mkdirs(out_dir.data()));
-  return CompileCommand(diag).Execute({path, "-o", out_dir, "-v"}, &std::cerr) == 0;
+  std::vector<android::StringPiece> args = {path, "-o", out_dir, "-v"};
+  args.insert(args.end(), additional_args.begin(), additional_args.end());
+  return CompileCommand(diag).Execute(args, &std::cerr) == 0;
 }
 
 bool CommandTestFixture::Link(const std::vector<std::string>& args, android::IDiagnostics* diag) {

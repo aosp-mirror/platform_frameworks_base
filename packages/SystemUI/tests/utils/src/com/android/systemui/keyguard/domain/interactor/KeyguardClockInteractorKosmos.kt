@@ -27,13 +27,13 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.heads
 val Kosmos.keyguardClockInteractor by
     Kosmos.Fixture {
         KeyguardClockInteractor(
-            keyguardClockRepository = keyguardClockRepository,
-            applicationScope = applicationCoroutineScope,
             mediaCarouselInteractor = mediaCarouselInteractor,
             activeNotificationsInteractor = activeNotificationsInteractor,
             shadeInteractor = shadeInteractor,
             keyguardInteractor = keyguardInteractor,
             keyguardTransitionInteractor = keyguardTransitionInteractor,
             headsUpNotificationInteractor = headsUpNotificationInteractor,
+            applicationScope = applicationCoroutineScope,
+            keyguardClockRepository = keyguardClockRepository,
         )
     }

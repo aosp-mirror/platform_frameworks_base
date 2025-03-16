@@ -16,74 +16,88 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QQS
 import com.android.systemui.qs.panels.domain.interactor.QuickQuickSettingsRowInteractor
-import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.shared.model.splitInRowsSequence
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
-import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalCoroutinesApi::class)
-@SysUISingleton
 class QuickQuickSettingsViewModel
-@Inject
+@AssistedInject
 constructor(
     tilesInteractor: CurrentTilesInteractor,
-    fixedColumnsSizeViewModel: FixedColumnsSizeViewModel,
+    qsColumnsViewModelFactory: QSColumnsViewModel.Factory,
     quickQuickSettingsRowInteractor: QuickQuickSettingsRowInteractor,
-    private val iconTilesViewModel: IconTilesViewModel,
-    @Application private val applicationScope: CoroutineScope,
-) {
+    mediaInRowInLandscapeViewModelFactory: MediaInRowInLandscapeViewModel.Factory,
+    val squishinessViewModel: TileSquishinessViewModel,
+    iconTilesViewModel: IconTilesViewModel,
+    val tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
+) : ExclusiveActivatable() {
 
-    val columns = fixedColumnsSizeViewModel.columns
+    private val hydrator = Hydrator("QuickQuickSettingsViewModel")
+    private val qsColumnsViewModel = qsColumnsViewModelFactory.create(LOCATION_QQS)
+    private val mediaInRowViewModel = mediaInRowInLandscapeViewModelFactory.create(LOCATION_QQS)
 
-    private val rows =
-        quickQuickSettingsRowInteractor.rows.stateIn(
-            applicationScope,
-            SharingStarted.WhileSubscribed(),
-            quickQuickSettingsRowInteractor.defaultRows
+    val columns: Int
+        get() = qsColumnsViewModel.columns
+
+    private val largeTiles by
+        hydrator.hydratedStateOf(traceName = "largeTiles", source = iconTilesViewModel.largeTiles)
+
+    private val rows: Int
+        get() =
+            if (mediaInRowViewModel.shouldMediaShowInRow) {
+                rowsWithoutMedia * 2
+            } else {
+                rowsWithoutMedia
+            }
+
+    private val rowsWithoutMedia by
+        hydrator.hydratedStateOf(
+            traceName = "rowsWithoutMedia",
+            initialValue = quickQuickSettingsRowInteractor.defaultRows,
+            source = quickQuickSettingsRowInteractor.rows,
         )
 
-    val tileViewModels: StateFlow<List<SizedTile<TileViewModel>>> =
-        columns
-            .flatMapLatest { columns ->
-                tilesInteractor.currentTiles.combine(rows, ::Pair).mapLatest { (tiles, rows) ->
-                    tiles
-                        .map {
-                            SizedTileImpl(
-                                TileViewModel(it.tile, it.spec),
-                                it.spec.width,
-                            )
-                        }
-                        .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
-                }
-            }
-            .stateIn(
-                applicationScope,
-                SharingStarted.WhileSubscribed(),
-                tilesInteractor.currentTiles.value
-                    .map {
-                        SizedTileImpl(
-                            TileViewModel(it.tile, it.spec),
-                            it.spec.width,
-                        )
-                    }
-                    .let {
-                        splitInRowsSequence(it, columns.value).take(rows.value).toList().flatten()
-                    }
-            )
+    private val largeTilesSpan by
+        hydrator.hydratedStateOf(
+            traceName = "largeTilesSpan",
+            source = iconTilesViewModel.largeTilesSpan,
+        )
 
-    private val TileSpec.width: Int
-        get() = if (iconTilesViewModel.isIconTile(this)) 1 else 2
+    private val currentTiles by
+        hydrator.hydratedStateOf(traceName = "currentTiles", source = tilesInteractor.currentTiles)
+
+    val tileViewModels by derivedStateOf {
+        currentTiles
+            .map { SizedTileImpl(TileViewModel(it.tile, it.spec), it.spec.width()) }
+            .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
+    }
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch { hydrator.activate() }
+            launch { qsColumnsViewModel.activate() }
+            launch { mediaInRowViewModel.activate() }
+            awaitCancellation()
+        }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): QuickQuickSettingsViewModel
+    }
+
+    private fun TileSpec.width(): Int = if (largeTiles.contains(this)) largeTilesSpan else 1
 }

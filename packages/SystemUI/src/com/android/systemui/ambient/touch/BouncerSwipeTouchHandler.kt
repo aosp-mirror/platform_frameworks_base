@@ -27,6 +27,7 @@ import android.view.InputEvent
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags
@@ -38,6 +39,9 @@ import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -45,12 +49,12 @@ import com.android.wm.shell.animation.FlingAnimationUtils
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /** Monitor for tracking touches on the DreamOverlay to bring up the bouncer. */
 class BouncerSwipeTouchHandler
@@ -74,6 +78,8 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     private val activityStarter: ActivityStarter,
     private val keyguardInteractor: KeyguardInteractor,
+    private val sceneInteractor: SceneInteractor,
+    private val windowRootViewProvider: Optional<Provider<WindowRootView>>,
 ) : TouchHandler {
     /** An interface for creating ValueAnimators. */
     interface ValueAnimatorCreator {
@@ -100,6 +106,8 @@ constructor(
             currentScrimController = controller
         }
 
+    private val windowRootView by lazy { windowRootViewProvider.get().get() }
+
     /** Determines whether the touch handler should process touches in fullscreen swiping mode */
     private var touchAvailable = false
 
@@ -109,7 +117,7 @@ constructor(
                 e1: MotionEvent?,
                 e2: MotionEvent,
                 distanceX: Float,
-                distanceY: Float
+                distanceY: Float,
             ): Boolean {
                 if (capture == null) {
                     capture =
@@ -128,6 +136,11 @@ constructor(
                         expanded = false
                         // Since the user is dragging the bouncer up, set scrimmed to false.
                         currentScrimController?.show()
+
+                        if (SceneContainerFlag.isEnabled) {
+                            sceneInteractor.onRemoteUserInputStarted("bouncer touch handler")
+                            e1?.apply { windowRootView.dispatchTouchEvent(e1) }
+                        }
                     }
                 }
                 if (capture != true) {
@@ -152,20 +165,27 @@ constructor(
                             /* cancelAction= */ null,
                             /* dismissShade= */ true,
                             /* afterKeyguardGone= */ true,
-                            /* deferred= */ false
+                            /* deferred= */ false,
                         )
                         return true
                     }
 
-                    // For consistency, we adopt the expansion definition found in the
-                    // PanelViewController. In this case, expansion refers to the view above the
-                    // bouncer. As that view's expansion shrinks, the bouncer appears. The bouncer
-                    // is fully hidden at full expansion (1) and fully visible when fully collapsed
-                    // (0).
-                    touchSession?.apply {
-                        val screenTravelPercentage =
-                            (abs((this@outer.y - e2.y).toDouble()) / getBounds().height()).toFloat()
-                        setPanelExpansion(1 - screenTravelPercentage)
+                    if (SceneContainerFlag.isEnabled) {
+                        windowRootView.dispatchTouchEvent(e2)
+                    } else {
+                        // For consistency, we adopt the expansion definition found in the
+                        // PanelViewController. In this case, expansion refers to the view above the
+                        // bouncer. As that view's expansion shrinks, the bouncer appears. The
+                        // bouncer
+                        // is fully hidden at full expansion (1) and fully visible when fully
+                        // collapsed
+                        // (0).
+                        touchSession?.apply {
+                            val screenTravelPercentage =
+                                (abs((this@outer.y - e2.y).toDouble()) / getBounds().height())
+                                    .toFloat()
+                            setPanelExpansion(1 - screenTravelPercentage)
+                        }
                     }
                 }
 
@@ -194,7 +214,7 @@ constructor(
             ShadeExpansionChangeEvent(
                 /* fraction= */ currentExpansion,
                 /* expanded= */ expanded,
-                /* tracking= */ true
+                /* tracking= */ true,
             )
         currentScrimController?.expand(event)
     }
@@ -347,7 +367,7 @@ constructor(
                     currentHeight,
                     targetHeight,
                     velocity,
-                    viewHeight
+                    viewHeight,
                 )
             } else {
                 // Shows the bouncer, i.e., fully collapses the space above the bouncer.
@@ -356,7 +376,7 @@ constructor(
                     currentHeight,
                     targetHeight,
                     velocity,
-                    viewHeight
+                    viewHeight,
                 )
             }
             animator.start()

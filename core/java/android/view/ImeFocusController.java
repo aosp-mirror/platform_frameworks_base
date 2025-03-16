@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.UiThread;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -149,6 +150,17 @@ public final class ImeFocusController {
             InputMethodManager.FinishedInputEventCallback callback) {
         if (!mHasImeFocus || isInLocalFocusMode(windowAttribute)) {
             return InputMethodManager.DISPATCH_NOT_HANDLED;
+        }
+        if (Flags.refactorInsetsController() && event instanceof KeyEvent keyEvent
+                && keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            final var insetsController = mViewRootImpl.getInsetsController();
+            if (insetsController.getAnimationType(WindowInsets.Type.ime())
+                    == InsetsController.ANIMATION_TYPE_HIDE
+                    || insetsController.isPredictiveBackImeHideAnimInProgress()) {
+                // if there is an ongoing hide animation, the back event should not be dispatched
+                // to the IME.
+                return InputMethodManager.DISPATCH_NOT_HANDLED;
+            }
         }
         final InputMethodManager imm =
                 mViewRootImpl.mContext.getSystemService(InputMethodManager.class);

@@ -35,7 +35,7 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class EditTileListStateTest : SysuiTestCase() {
-    private val underTest = EditTileListState(TestEditTiles, 4)
+    private val underTest = EditTileListState(TestEditTiles, columns = 4, largeTilesSpan = 2)
 
     @Test
     fun startDrag_listHasSpacers() {

@@ -16,11 +16,11 @@
 
 package com.android.server.wallpaper;
 
-import static android.app.WallpaperManager.LANDSCAPE;
+import static android.app.WallpaperManager.ORIENTATION_LANDSCAPE;
 import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
-import static android.app.WallpaperManager.PORTRAIT;
-import static android.app.WallpaperManager.SQUARE_LANDSCAPE;
-import static android.app.WallpaperManager.SQUARE_PORTRAIT;
+import static android.app.WallpaperManager.ORIENTATION_PORTRAIT;
+import static android.app.WallpaperManager.ORIENTATION_SQUARE_LANDSCAPE;
+import static android.app.WallpaperManager.ORIENTATION_SQUARE_PORTRAIT;
 import static android.app.WallpaperManager.getOrientation;
 import static android.app.WallpaperManager.getRotatedOrientation;
 
@@ -406,15 +406,16 @@ public class WallpaperCropperTest {
         setUpWithDisplays(STANDARD_DISPLAY);
         Point bitmapSize = new Point(800, 1000);
         SparseArray<Rect> suggestedCrops = new SparseArray<>();
-        suggestedCrops.put(PORTRAIT, new Rect(0, 0, 400, 800));
-        for (int otherOrientation: List.of(LANDSCAPE, SQUARE_LANDSCAPE, SQUARE_PORTRAIT)) {
+        suggestedCrops.put(ORIENTATION_PORTRAIT, new Rect(0, 0, 400, 800));
+        for (int otherOrientation: List.of(ORIENTATION_LANDSCAPE, ORIENTATION_SQUARE_LANDSCAPE,
+                ORIENTATION_SQUARE_PORTRAIT)) {
             suggestedCrops.put(otherOrientation, new Rect(0, 0, 10, 10));
         }
 
         for (boolean rtl : List.of(false, true)) {
             assertThat(mWallpaperCropper.getCrop(
                     new Point(300, 800), bitmapSize, suggestedCrops, rtl))
-                    .isEqualTo(suggestedCrops.get(PORTRAIT));
+                    .isEqualTo(suggestedCrops.get(ORIENTATION_PORTRAIT));
             assertThat(mWallpaperCropper.getCrop(
                     new Point(500, 800), bitmapSize, suggestedCrops, rtl))
                     .isEqualTo(new Rect(0, 0, 500, 800));
@@ -440,8 +441,8 @@ public class WallpaperCropperTest {
         Point landscape = new Point(PORTRAIT_ONE.y, PORTRAIT_ONE.x);
         Point squarePortrait = SQUARE_PORTRAIT_ONE;
         Point squareLandscape = new Point(SQUARE_PORTRAIT_ONE.y, SQUARE_PORTRAIT_ONE.y);
-        suggestedCrops.put(PORTRAIT, centerOf(bitmapRect, portrait));
-        suggestedCrops.put(SQUARE_LANDSCAPE, centerOf(bitmapRect, squareLandscape));
+        suggestedCrops.put(ORIENTATION_PORTRAIT, centerOf(bitmapRect, portrait));
+        suggestedCrops.put(ORIENTATION_SQUARE_LANDSCAPE, centerOf(bitmapRect, squareLandscape));
         for (boolean rtl : List.of(false, true)) {
             assertThat(mWallpaperCropper.getCrop(
                     landscape, bitmapSize, suggestedCrops, rtl))

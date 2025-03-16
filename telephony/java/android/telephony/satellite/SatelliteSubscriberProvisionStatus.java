@@ -18,6 +18,7 @@ package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -30,49 +31,49 @@ import java.util.Objects;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-public class SatelliteSubscriberProvisionStatus implements Parcelable {
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+public final class SatelliteSubscriberProvisionStatus implements Parcelable {
     private SatelliteSubscriberInfo mSubscriberInfo;
     /** {@code true} mean the satellite subscriber is provisioned, {@code false} otherwise. */
-    private boolean mProvisionStatus;
+    private boolean mProvisioned;
 
+    /**
+     * @hide
+     */
     public SatelliteSubscriberProvisionStatus(@NonNull Builder builder) {
         mSubscriberInfo = builder.mSubscriberInfo;
-        mProvisionStatus = builder.mProvisionStatus;
+        mProvisioned = builder.mProvisioned;
     }
 
     /**
      * Builder class for constructing SatelliteSubscriberProvisionStatus objects
-     *
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public static class Builder {
+    public static final class Builder {
         private SatelliteSubscriberInfo mSubscriberInfo;
-        private boolean mProvisionStatus;
+        private boolean mProvisioned;
 
         /**
          * Set the SatelliteSubscriberInfo and returns the Builder class.
-         * @hide
          */
-        public Builder setSatelliteSubscriberInfo(SatelliteSubscriberInfo satelliteSubscriberInfo) {
+        @NonNull
+        public Builder setSatelliteSubscriberInfo(
+                @NonNull SatelliteSubscriberInfo satelliteSubscriberInfo) {
             mSubscriberInfo = satelliteSubscriberInfo;
             return this;
         }
 
         /**
          * Set the SatelliteSubscriberInfo's provisionStatus and returns the Builder class.
-         * @hide
          */
         @NonNull
-        public Builder setProvisionStatus(boolean provisionStatus) {
-            mProvisionStatus = provisionStatus;
+        public Builder setProvisioned(boolean provisioned) {
+            mProvisioned = provisioned;
             return this;
         }
 
         /**
          * Returns SatelliteSubscriberProvisionStatus object.
-         * @hide
          */
         @NonNull
         public SatelliteSubscriberProvisionStatus build() {
@@ -84,17 +85,12 @@ public class SatelliteSubscriberProvisionStatus implements Parcelable {
         readFromParcel(in);
     }
 
-    /**
-     * @hide
-     */
     @Override
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeParcelable(mSubscriberInfo, flags);
-        out.writeBoolean(mProvisionStatus);
+        out.writeBoolean(mProvisioned);
     }
 
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public static final @android.annotation.NonNull Creator<SatelliteSubscriberProvisionStatus>
             CREATOR =
             new Creator<SatelliteSubscriberProvisionStatus>() {
@@ -109,11 +105,7 @@ public class SatelliteSubscriberProvisionStatus implements Parcelable {
                 }
             };
 
-    /**
-     * @hide
-     */
     @Override
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public int describeContents() {
         return 0;
     }
@@ -121,9 +113,7 @@ public class SatelliteSubscriberProvisionStatus implements Parcelable {
     /**
      * SatelliteSubscriberInfo that has a provisioning state.
      * @return SatelliteSubscriberInfo.
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public @NonNull SatelliteSubscriberInfo getSatelliteSubscriberInfo() {
         return mSubscriberInfo;
     }
@@ -131,11 +121,9 @@ public class SatelliteSubscriberProvisionStatus implements Parcelable {
     /**
      * SatelliteSubscriberInfo's provisioning state.
      * @return {@code true} means provisioning. {@code false} means deprovisioning.
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public @NonNull  boolean getProvisionStatus() {
-        return mProvisionStatus;
+    public boolean isProvisioned() {
+        return mProvisioned;
     }
 
     @NonNull
@@ -148,13 +136,13 @@ public class SatelliteSubscriberProvisionStatus implements Parcelable {
         sb.append(",");
 
         sb.append("ProvisionStatus:");
-        sb.append(mProvisionStatus);
+        sb.append(mProvisioned);
         return sb.toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mSubscriberInfo, mProvisionStatus);
+        return Objects.hash(mSubscriberInfo, mProvisioned);
     }
 
     @Override
@@ -163,12 +151,12 @@ public class SatelliteSubscriberProvisionStatus implements Parcelable {
         if (!(o instanceof SatelliteSubscriberProvisionStatus)) return false;
         SatelliteSubscriberProvisionStatus that = (SatelliteSubscriberProvisionStatus) o;
         return Objects.equals(mSubscriberInfo, that.mSubscriberInfo)
-                && mProvisionStatus == that.mProvisionStatus;
+                && mProvisioned == that.mProvisioned;
     }
 
     private void readFromParcel(Parcel in) {
         mSubscriberInfo = in.readParcelable(SatelliteSubscriberInfo.class.getClassLoader(),
                 SatelliteSubscriberInfo.class);
-        mProvisionStatus = in.readBoolean();
+        mProvisioned = in.readBoolean();
     }
 }

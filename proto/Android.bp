@@ -25,6 +25,10 @@ java_library_static {
             static_libs: ["libprotobuf-java-nano"],
         },
     },
+    apex_available: [
+        "com.android.neuralnetworks",
+        "//apex_available:platform",
+    ],
 }
 
 java_library_static {

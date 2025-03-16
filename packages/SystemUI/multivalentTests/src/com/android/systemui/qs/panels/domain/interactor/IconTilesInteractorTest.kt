@@ -98,23 +98,6 @@ class IconTilesInteractorTest : SysuiTestCase() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun removingTile_updatesSharedPreferences() =
-        with(kosmos) {
-            testScope.runTest {
-                val latest by collectLastValue(qsPreferencesRepository.largeTilesSpecs)
-                runCurrent()
-
-                // Remove the large tile from the current tiles
-                currentTilesInteractor.removeTiles(listOf(largeTile))
-                runCurrent()
-
-                // Assert that it resized to small
-                assertThat(latest).doesNotContain(largeTile)
-            }
-        }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
     fun resizingNonCurrentTile_doesNothing() =
         with(kosmos) {
             testScope.runTest {

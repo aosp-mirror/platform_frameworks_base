@@ -125,6 +125,10 @@ class PowerComponentAggregatedPowerStats {
         mProcessor.noteStateChange(this, item);
     }
 
+    public void noteBatteryLevel(int batteryLevel, int batteryChargeUah, long timestampMs) {
+        mProcessor.noteBatteryLevel(batteryLevel, batteryChargeUah, timestampMs);
+    }
+
     void setState(@AggregatedPowerStatsConfig.TrackedState int stateId, int state,
             long timestampMs) {
         if (mDeviceStats == null) {
@@ -163,6 +167,11 @@ class PowerComponentAggregatedPowerStats {
 
     void setUidState(int uid, @AggregatedPowerStatsConfig.TrackedState int stateId, int state,
             long timestampMs) {
+        mProcessor.setUidState(this, uid, stateId, state, timestampMs);
+    }
+
+    void setProcessedUidState(int uid, @AggregatedPowerStatsConfig.TrackedState int stateId,
+            int state, long timestampMs) {
         if (!mUidStateConfig[stateId].isTracked()) {
             return;
         }

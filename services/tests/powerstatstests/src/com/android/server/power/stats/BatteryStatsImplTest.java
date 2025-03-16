@@ -54,6 +54,8 @@ import android.os.HandlerThread;
 import android.os.Parcel;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 import android.view.Display;
@@ -65,7 +67,9 @@ import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelSingleUidTimeReader;
 import com.android.internal.os.LongArrayMultiStateCounter;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
+import com.android.server.power.feature.flags.Flags;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.LongSubject;
@@ -86,10 +90,15 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @SuppressWarnings("GuardedBy")
 public class BatteryStatsImplTest {
-    @Rule
+    @Rule(order = 0)
     public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
             .setProvideMainThread(true)
+            .setSystemPropertyImmutable("persist.sys.com.android.server.power.feature.flags."
+                + "framework_wakelock_info-override", null)
             .build();
+
+    @Rule(order = 1)
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private KernelCpuUidFreqTimeReader mKernelUidCpuFreqTimeReader;
@@ -112,6 +121,7 @@ public class BatteryStatsImplTest {
             }});
 
     private final MockClock mMockClock = new MockClock();
+    private final MonotonicClock mMonotonicClock = new MonotonicClock(777666, mMockClock);
     private MockBatteryStatsImpl mBatteryStatsImpl;
     private Handler mHandler;
     private PowerStatsStore mPowerStatsStore;
@@ -151,8 +161,8 @@ public class BatteryStatsImplTest {
         }
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerAttributor,
-                mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore,
-                mMockClock);
+                mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore, 0,
+                mMockClock, mMonotonicClock);
     }
 
     @Test
@@ -430,10 +440,7 @@ public class BatteryStatsImplTest {
         doAnswer(invocation -> {
             LongArrayMultiStateCounter counter = invocation.getArgument(1);
             long timestampMs = invocation.getArgument(2);
-            LongArrayMultiStateCounter.LongArrayContainer container =
-                    new LongArrayMultiStateCounter.LongArrayContainer(NUM_CPU_FREQS);
-            container.setValues(cpuTimes);
-            counter.updateValues(container, timestampMs);
+            counter.updateValues(cpuTimes, timestampMs);
             return null;
         }).when(mKernelSingleUidTimeReader).addDelta(eq(testUid),
                 any(LongArrayMultiStateCounter.class), anyLong());
@@ -443,20 +450,13 @@ public class BatteryStatsImplTest {
         doAnswer(invocation -> {
             LongArrayMultiStateCounter counter = invocation.getArgument(1);
             long timestampMs = invocation.getArgument(2);
-            LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
-                    invocation.getArgument(3);
-
-            LongArrayMultiStateCounter.LongArrayContainer container =
-                    new LongArrayMultiStateCounter.LongArrayContainer(NUM_CPU_FREQS);
-            container.setValues(cpuTimes);
-            counter.updateValues(container, timestampMs);
-            if (deltaContainer != null) {
-                deltaContainer.setValues(delta);
-            }
+            long[] deltaOut = invocation.getArgument(3);
+            counter.updateValues(cpuTimes, timestampMs);
+            System.arraycopy(delta, 0, deltaOut, 0, delta.length);
             return null;
         }).when(mKernelSingleUidTimeReader).addDelta(eq(testUid),
                 any(LongArrayMultiStateCounter.class), anyLong(),
-                any(LongArrayMultiStateCounter.LongArrayContainer.class));
+                any(long[].class));
     }
 
     @Test
@@ -572,6 +572,7 @@ public class BatteryStatsImplTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
     public void testGetWakeLockStats() {
         mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
 
@@ -927,7 +928,7 @@ public class BatteryStatsImplTest {
         assertThat(mPowerStatsStore.getTableOfContents()).isEmpty();
 
         mBatteryStatsImpl.saveBatteryUsageStatsOnReset(mBatteryUsageStatsProvider,
-                mPowerStatsStore);
+                mPowerStatsStore, /* accumulateBatteryUsageStats */ false);
 
         synchronized (mBatteryStatsImpl) {
             mBatteryStatsImpl.noteFlashlightOnLocked(42, mMockClock.realtime, mMockClock.uptime);
@@ -978,5 +979,7 @@ public class BatteryStatsImplTest {
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isEqualTo(60000);
+
+        span.close();
     }
 }

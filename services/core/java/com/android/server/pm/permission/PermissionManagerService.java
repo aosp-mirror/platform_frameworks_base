@@ -1015,7 +1015,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     permission, attributionSource, message, forDataDelivery, startDataDelivery,
                     fromDatasource, attributedOp);
             // Finish any started op if some step in the attribution chain failed.
-            if (startDataDelivery && result != PermissionChecker.PERMISSION_GRANTED) {
+            if (startDataDelivery && result != PermissionChecker.PERMISSION_GRANTED
+                    && result != PermissionChecker.PERMISSION_SOFT_DENIED) {
                 if (attributedOp == AppOpsManager.OP_NONE) {
                     finishDataDelivery(AppOpsManager.permissionToOpCode(permission),
                             attributionSource.asState(), fromDatasource);
@@ -1244,6 +1245,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final boolean hasChain = attributionChainId != ATTRIBUTION_CHAIN_ID_NONE;
             AttributionSource current = attributionSource;
             AttributionSource next = null;
+            AttributionSource prev = null;
             // We consider the chain trusted if the start node has UPDATE_APP_OPS_STATS, and
             // every attributionSource in the chain is registered with the system.
             final boolean isChainStartTrusted = !hasChain || checkPermission(context,
@@ -1310,6 +1312,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         selfAccess, singleReceiverFromDatasource, attributedOp,
                         proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
 
+                if (startDataDelivery && opMode != AppOpsManager.MODE_ALLOWED) {
+                    // Current failed the perm check, so if we are part-way through an attr chain,
+                    // we need to clean up the already started proxy op higher up the chain.  Note,
+                    // proxy ops are verified two by two, which means we have to clear the 2nd next
+                    // from the previous iteration (since it is actually curr.next which failed
+                    // to pass the perm check).
+                    if (prev != null) {
+                        final var cutAttrSourceState = prev.asState();
+                        if (cutAttrSourceState.next.length > 0) {
+                            cutAttrSourceState.next[0].next = new AttributionSourceState[0];
+                        }
+                        finishDataDelivery(context, attributedOp,
+                                cutAttrSourceState, fromDatasource);
+                    }
+                }
+
                 switch (opMode) {
                     case AppOpsManager.MODE_ERRORED: {
                         if (permission.equals(Manifest.permission.BLUETOOTH_CONNECT)) {
@@ -1335,6 +1353,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     return PermissionChecker.PERMISSION_GRANTED;
                 }
 
+                // an attribution we have already possibly started an op for
+                prev = current;
                 current = next;
             }
         }

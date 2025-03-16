@@ -92,9 +92,10 @@ public abstract class DisplayManagerInternal {
             boolean waitForNegativeProximity);
 
     /**
-     * Returns {@code true} if the proximity sensor screen-off function is available.
+     * Returns {@code true} if the proximity sensor screen-off function is available for the given
+     * display.
      */
-    public abstract boolean isProximitySensorAvailable();
+    public abstract boolean isProximitySensorAvailable(int displayId);
 
     /**
      * Registers a display group listener which will be informed of the addition, removal, or change
@@ -431,12 +432,68 @@ public abstract class DisplayManagerInternal {
      */
     public abstract IntArray getDisplayGroupIds();
 
+
+    /**
+     * Get all display ids belonging to the display group with given id.
+     */
+    public abstract int[] getDisplayIdsForGroup(int groupId);
+
+    /**
+     * Get the mapping of display group ids to the display ids that belong to them.
+     */
+    public abstract SparseArray<int[]> getDisplayIdsByGroupsIds();
+
+    /**
+     * Get all available display ids.
+     */
+    public abstract IntArray getDisplayIds();
+
     /**
      * Called upon presentation started/ended on the display.
      * @param displayId the id of the display where presentation started.
      * @param isShown whether presentation is shown.
      */
     public abstract void onPresentation(int displayId, boolean isShown);
+
+    /**
+     * Called upon the usage of stylus.
+     */
+    public abstract void stylusGestureStarted(long eventTime);
+
+    /**
+     * Called by {@link com.android.server.wm.ContentRecorder} to verify whether
+     * the display is allowed to mirror primary display's content.
+     * @param displayId the id of the display where we mirror to.
+     * @return true if the mirroring dialog is confirmed (display is enabled), or
+     * {@link com.android.server.display.ExternalDisplayPolicy#ENABLE_ON_CONNECT}
+     * system property is enabled.
+     */
+    public abstract boolean isDisplayReadyForMirroring(int displayId);
+
+
+    /**
+     * Used by the window manager to override the per-display screen brightness based on the
+     * current foreground activity.
+     *
+     * The key of the array is the displayId. If a displayId is missing from the array, this is
+     * equivalent to clearing any existing brightness overrides for that display.
+     *
+     * This method must only be called by the window manager.
+     */
+    public abstract void setScreenBrightnessOverrideFromWindowManager(
+            SparseArray<DisplayBrightnessOverrideRequest> brightnessOverrides);
+
+    /**
+     * Describes a request for overriding the brightness of a single display.
+     */
+    public static class DisplayBrightnessOverrideRequest {
+        // An override of the screen brightness.
+        // Set to PowerManager.BRIGHTNESS_INVALID if there's no override.
+        public float brightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+
+        // Tag used to identify the app window requesting the brightness override.
+        public CharSequence tag;
+    }
 
     /**
      * Describes the requested power state of the display.
@@ -459,19 +516,25 @@ public abstract class DisplayManagerInternal {
         public static final int POLICY_DIM = 2;
         // Policy: Make the screen bright as usual.
         public static final int POLICY_BRIGHT = 3;
+        // The maximum policy constant. Useful for iterating through all constants in tests.
+        public static final int POLICY_MAX = POLICY_BRIGHT;
 
         // The basic overall policy to apply: off, doze, dim or bright.
         public int policy;
+
+        // The reason behind the current policy.
+        @Display.StateReason
+        public int policyReason;
 
         // If true, the proximity sensor overrides the screen state when an object is
         // nearby, turning it off temporarily until the object is moved away.
         public boolean useProximitySensor;
 
-        // An override of the screen brightness.
+        // A global override of the screen brightness, applied to all displays.
         // Set to PowerManager.BRIGHTNESS_INVALID if there's no override.
         public float screenBrightnessOverride;
 
-        // Tag used to identify the app window requesting the brightness override.
+        // Tag used to identify the reason for the global brightness override.
         public CharSequence screenBrightnessOverrideTag;
 
         // An override of the screen auto-brightness adjustment factor in the range -1 (dimmer) to
@@ -509,6 +572,7 @@ public abstract class DisplayManagerInternal {
 
         public DisplayPowerRequest() {
             policy = POLICY_BRIGHT;
+            policyReason = Display.STATE_REASON_DEFAULT_POLICY;
             useProximitySensor = false;
             screenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             screenAutoBrightnessAdjustmentOverride = Float.NaN;
@@ -529,6 +593,7 @@ public abstract class DisplayManagerInternal {
 
         public void copyFrom(DisplayPowerRequest other) {
             policy = other.policy;
+            policyReason = other.policyReason;
             useProximitySensor = other.useProximitySensor;
             screenBrightnessOverride = other.screenBrightnessOverride;
             screenBrightnessOverrideTag = other.screenBrightnessOverrideTag;

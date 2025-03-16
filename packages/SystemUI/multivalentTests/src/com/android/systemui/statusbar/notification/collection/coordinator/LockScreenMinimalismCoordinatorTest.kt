@@ -21,7 +21,6 @@ import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.platform.test.annotations.EnableFlags
-import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -42,7 +41,9 @@ import com.android.systemui.statusbar.notification.collection.modifyEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.domain.interactor.lockScreenNotificationMinimalismSetting
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.FakeSettings
@@ -66,7 +67,7 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@EnableFlags(NotificationMinimalismPrototype.FLAG_NAME)
+@EnableFlags(NotificationMinimalism.FLAG_NAME)
 class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
 
     private val kosmos =
@@ -76,7 +77,7 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
                 mock<SysuiStatusBarStateController>().also { mock ->
                     doAnswer { statusBarState.ordinal }.whenever(mock).state
                 }
-            fakeSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS, 1)
+            lockScreenNotificationMinimalismSetting = true
         }
     private val notifPipeline: NotifPipeline = mock()
     private var statusBarState: StatusBarState = StatusBarState.KEYGUARD
@@ -193,7 +194,7 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
             kosmos.activeNotificationListRepository.topUnseenNotificationKey.value = child2.key
             assertThat(promoter.shouldPromoteToTopLevel(child1)).isFalse()
             assertThat(promoter.shouldPromoteToTopLevel(child2))
-                .isEqualTo(NotificationMinimalismPrototype.ungroupTopUnseen)
+                .isEqualTo(NotificationMinimalism.ungroupTopUnseen)
             assertThat(promoter.shouldPromoteToTopLevel(child3)).isFalse()
             assertThat(promoter.shouldPromoteToTopLevel(parent)).isFalse()
 
@@ -201,7 +202,7 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
             kosmos.activeNotificationListRepository.topUnseenNotificationKey.value = child2.key
             assertThat(promoter.shouldPromoteToTopLevel(child1)).isTrue()
             assertThat(promoter.shouldPromoteToTopLevel(child2))
-                .isEqualTo(NotificationMinimalismPrototype.ungroupTopUnseen)
+                .isEqualTo(NotificationMinimalism.ungroupTopUnseen)
             assertThat(promoter.shouldPromoteToTopLevel(child3)).isFalse()
             assertThat(promoter.shouldPromoteToTopLevel(parent)).isFalse()
         }
@@ -393,7 +394,7 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
             assertThatTopUnseenKey().isEqualTo(solo1.key)
 
             // TEST: even being pinned doesn't take effect immediately
-            hunRepo1.isPinned.value = true
+            hunRepo1.pinnedStatus.value = PinnedStatus.PinnedBySystem
             testScheduler.advanceTimeBy(0.5.seconds)
             onBeforeTransformGroupsListener.onBeforeTransformGroups(listEntryList)
             assertThatTopUnseenKey().isEqualTo(solo1.key)
@@ -405,8 +406,8 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
 
             // TEST: repeat; being heads up and pinned for 1 second triggers seen
             kosmos.headsUpNotificationRepository.orderedHeadsUpRows.value = listOf(hunRepo2)
-            hunRepo1.isPinned.value = false
-            hunRepo2.isPinned.value = true
+            hunRepo1.pinnedStatus.value = PinnedStatus.NotPinned
+            hunRepo2.pinnedStatus.value = PinnedStatus.PinnedBySystem
             testScheduler.advanceTimeBy(1.seconds)
             onBeforeTransformGroupsListener.onBeforeTransformGroups(listEntryList)
             assertThatTopUnseenKey().isEqualTo(null)

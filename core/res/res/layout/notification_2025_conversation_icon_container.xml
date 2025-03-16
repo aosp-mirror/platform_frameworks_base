@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/conversation_icon_container"
+    android:layout_width="@dimen/notification_2025_content_margin_start"
+    android:layout_height="wrap_content"
+    android:gravity="start|top"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:importantForAccessibility="no"
+    >
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/notification_2025_margin"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:layout_gravity="top|center_horizontal"
+        >
+
+        <com.android.internal.widget.CachingIconView
+            android:id="@+id/conversation_icon"
+            android:layout_width="@dimen/notification_2025_icon_circle_size"
+            android:layout_height="@dimen/notification_2025_icon_circle_size"
+            android:background="@drawable/notification_icon_circle"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            android:importantForAccessibility="no"
+            />
+
+        <ViewStub
+            android:layout="@layout/notification_2025_conversation_face_pile_layout"
+            android:layout_width="@dimen/notification_2025_icon_circle_size"
+            android:layout_height="@dimen/notification_2025_icon_circle_size"
+            android:id="@+id/conversation_face_pile"
+            />
+
+        <!-- The badge icon is visually aligned to the square containing the conversation icon,
+        but it has a border in the color of the background that is meant to delimit it from the
+        conversation icon. This border, although not visible due to the color, is technically
+        outside these bounds.
+        In order to align the badge properly to the bottom end of the square, we use a top/start
+        margin that is equal to (size of the conversation icon - size of the badge - size of the
+        border on one side).
+        -->
+        <FrameLayout
+            android:id="@+id/conversation_icon_badge"
+            android:layout_width="@dimen/notification_2025_conversation_icon_badge_size"
+            android:layout_height="@dimen/notification_2025_conversation_icon_badge_size"
+            android:layout_marginTop="@dimen/notification_2025_conversation_icon_badge_position"
+            android:layout_marginStart="@dimen/notification_2025_conversation_icon_badge_position"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            >
+
+            <com.android.internal.widget.CachingIconView
+                android:id="@+id/conversation_icon_badge_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@drawable/conversation_badge_background"
+                android:forceHasOverlappingRendering="false"
+                android:scaleType="center"
+                />
+
+            <com.android.internal.widget.NotificationRowIconView
+                android:id="@+id/icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/notification_2025_conversation_icon_badge_padding"
+                android:layout_gravity="center"
+                android:forceHasOverlappingRendering="false"
+                />
+
+            <com.android.internal.widget.CachingIconView
+                android:id="@+id/conversation_icon_badge_ring"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/conversation_badge_ring"
+                android:visibility="gone"
+                android:forceHasOverlappingRendering="false"
+                android:clipToPadding="false"
+                android:scaleType="center"
+                />
+        </FrameLayout>
+    </FrameLayout>
+</FrameLayout>
