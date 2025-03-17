@@ -257,8 +257,6 @@ public class SettingsToPropertiesMapper {
 
     private final String[] mDeviceConfigScopes;
 
-    private final String[] mDeviceConfigAconfigScopes;
-
     private final ContentResolver mContentResolver;
 
     @VisibleForTesting
@@ -269,7 +267,6 @@ public class SettingsToPropertiesMapper {
         mContentResolver = contentResolver;
         mGlobalSettings = globalSettings;
         mDeviceConfigScopes = deviceConfigScopes;
-        mDeviceConfigAconfigScopes = deviceConfigAconfigScopes;
     }
 
     @VisibleForTesting
@@ -315,36 +312,6 @@ public class SettingsToPropertiesMapper {
                                 return;
                             }
                             setProperty(propertyName, properties.getString(key, null));
-
-                            // for legacy namespaces, they can also be used for trunk stable
-                            // purposes. so push flag also into trunk stable slot in sys prop,
-                            // later all legacy usage will be refactored and the sync to old
-                            // sys prop slot can be removed.
-                            String aconfigPropertyName = makeAconfigFlagPropertyName(scope, key);
-                            if (aconfigPropertyName == null) {
-                                logErr("unable to construct system property for " + scope + "/"
-                                        + key);
-                                return;
-                            }
-                            setProperty(aconfigPropertyName, properties.getString(key, null));
-                        }
-                    });
-        }
-
-        for (String deviceConfigAconfigScope : mDeviceConfigAconfigScopes) {
-            DeviceConfig.addOnPropertiesChangedListener(
-                    deviceConfigAconfigScope,
-                    AsyncTask.THREAD_POOL_EXECUTOR,
-                    (DeviceConfig.Properties properties) -> {
-                        String scope = properties.getNamespace();
-                        for (String key : properties.getKeyset()) {
-                            String aconfigPropertyName = makeAconfigFlagPropertyName(scope, key);
-                            if (aconfigPropertyName == null) {
-                                logErr("unable to construct system property for " + scope + "/"
-                                        + key);
-                                return;
-                            }
-                            setProperty(aconfigPropertyName, properties.getString(key, null));
                         }
                     });
         }
@@ -354,34 +321,6 @@ public class SettingsToPropertiesMapper {
             NAMESPACE_REBOOT_STAGING,
             newSingleThreadScheduledExecutor(),
             (DeviceConfig.Properties properties) -> {
-
-              for (String flagName : properties.getKeyset()) {
-                  String flagValue = properties.getString(flagName, null);
-                  if (flagName == null || flagValue == null) {
-                      continue;
-                  }
-
-                  int idx = flagName.indexOf(NAMESPACE_REBOOT_STAGING_DELIMITER);
-                  if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
-                      logErr("invalid staged flag: " + flagName);
-                      continue;
-                  }
-
-                  String actualNamespace = flagName.substring(0, idx);
-                  String actualFlagName = flagName.substring(idx+1);
-                  String propertyName = "next_boot." + makeAconfigFlagPropertyName(
-                      actualNamespace, actualFlagName);
-
-                  if (Flags.supportLocalOverridesSysprops()) {
-                    // Don't propagate if there is a local override.
-                    String overrideName = actualNamespace + ":" + actualFlagName;
-                    if (DeviceConfig.getProperty(NAMESPACE_LOCAL_OVERRIDES, overrideName) != null) {
-                      continue;
-                    }
-                  }
-                  setProperty(propertyName, flagValue);
-              }
-
               // send prop stage request to new storage
               if (enableAconfigStorageDaemon()) {
                   stageFlagsInNewStorage(properties);
@@ -396,42 +335,6 @@ public class SettingsToPropertiesMapper {
             (DeviceConfig.Properties properties) -> {
                 if (enableAconfigStorageDaemon()) {
                     setLocalOverridesInNewStorage(properties);
-                }
-
-                if (Flags.supportLocalOverridesSysprops()) {
-                  String overridesNamespace = properties.getNamespace();
-                  for (String key : properties.getKeyset()) {
-                    String realNamespace = key.split(":")[0];
-                    String realFlagName = key.split(":")[1];
-                    String aconfigPropertyName =
-                        makeAconfigFlagPropertyName(realNamespace, realFlagName);
-                    if (aconfigPropertyName == null) {
-                      logErr("unable to construct system property for " + realNamespace + "/"
-                        + key);
-                      return;
-                    }
-
-                    if (properties.getString(key, null) == null) {
-                      String deviceConfigValue =
-                              DeviceConfig.getProperty(realNamespace, realFlagName);
-                      String stagedDeviceConfigValue =
-                              DeviceConfig.getProperty(NAMESPACE_REBOOT_STAGING,
-                                              realNamespace + "*" + realFlagName);
-
-                      setProperty(aconfigPropertyName, deviceConfigValue);
-                      if (stagedDeviceConfigValue == null) {
-                        setProperty("next_boot." + aconfigPropertyName, deviceConfigValue);
-                      } else {
-                        setProperty("next_boot." + aconfigPropertyName, stagedDeviceConfigValue);
-                      }
-                    } else {
-                      // Otherwise, propagate the override to sysprops.
-                      setProperty(aconfigPropertyName, properties.getString(key, null));
-                      // If there's a staged value, make sure it's the override value.
-                      setProperty("next_boot." + aconfigPropertyName,
-                                properties.getString(key, null));
-                    }
-                  }
                 }
         });
     }
@@ -743,28 +646,6 @@ public class SettingsToPropertiesMapper {
 
         // send requests to aconfigd
         sendAconfigdRequests(requests);
-    }
-
-    /**
-     * system property name constructing rule for aconfig flags:
-     * "persist.device_config.aconfig_flags.[category_name].[flag_name]".
-     * If the name contains invalid characters or substrings for system property name,
-     * will return null.
-     * @param categoryName
-     * @param flagName
-     * @return
-     */
-    @VisibleForTesting
-    static String makeAconfigFlagPropertyName(String categoryName, String flagName) {
-        String propertyName = SYSTEM_PROPERTY_PREFIX + "aconfig_flags." +
-                              categoryName + "." + flagName;
-
-        if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
-                || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
-            return null;
-        }
-
-        return propertyName;
     }
 
     private void setProperty(String key, String value) {
