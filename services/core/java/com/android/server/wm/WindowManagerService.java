@@ -1452,7 +1452,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mStartingSurfaceController = new StartingSurfaceController(this);
 
         mBlurController = new BlurController(mContext, mPowerManager);
-        mTaskFpsCallbackController = new TaskFpsCallbackController(mContext);
+        mTaskFpsCallbackController = new TaskFpsCallbackController();
         mAccessibilityController = new AccessibilityController(this);
         mScreenRecordingCallbackController = new ScreenRecordingCallbackController(this);
         mSystemPerformanceHinter = new SystemPerformanceHinter(mContext, displayId -> {
