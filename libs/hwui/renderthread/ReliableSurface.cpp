@@ -149,25 +149,9 @@ ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer(int error) {
         return AHardwareBuffer_to_ANativeWindowBuffer(mScratchBuffer.get());
     }
 
-    int width = -1;
-    int result = mWindow->query(mWindow, NATIVE_WINDOW_DEFAULT_WIDTH, &width);
-    if (result != OK || width < 0) {
-        ALOGW("Failed to query window default width: %s (%d) value=%d", strerror(-result), result,
-              width);
-        width = 1;
-    }
-
-    int height = -1;
-    result = mWindow->query(mWindow, NATIVE_WINDOW_DEFAULT_HEIGHT, &height);
-    if (result != OK || height < 0) {
-        ALOGW("Failed to query window default height: %s (%d) value=%d", strerror(-result), result,
-              height);
-        height = 1;
-    }
-
     AHardwareBuffer_Desc desc = AHardwareBuffer_Desc{
-            .width = static_cast<uint32_t>(width),
-            .height = static_cast<uint32_t>(height),
+            .width = 1,
+            .height = 1,
             .layers = 1,
             .format = mFormat,
             .usage = mUsage,
@@ -176,9 +160,9 @@ ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer(int error) {
     };
 
     AHardwareBuffer* newBuffer;
-    result = AHardwareBuffer_allocate(&desc, &newBuffer);
+    int result = AHardwareBuffer_allocate(&desc, &newBuffer);
 
-    if (result != OK) {
+    if (result != NO_ERROR) {
         // Allocate failed, that sucks
         ALOGW("Failed to allocate scratch buffer, error=%d", result);
         return nullptr;
