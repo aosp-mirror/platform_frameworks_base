@@ -608,12 +608,6 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_INTRUSION_DETECTION_STATE" />
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.statementservice">
-        <permission name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"/>
-        <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.soundpicker">
         <permission name="android.permission.INTERACT_ACROSS_USERS" />
     </privapp-permissions>
