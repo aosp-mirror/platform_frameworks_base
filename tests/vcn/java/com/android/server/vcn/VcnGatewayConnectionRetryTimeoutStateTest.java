@@ -27,21 +27,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import android.os.Build;
-
 import androidx.test.filters.SmallTest;
-
-import com.android.testutils.DevSdkIgnoreRule;
-import com.android.testutils.DevSdkIgnoreRunner;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
-// Android B/B+
-@RunWith(DevSdkIgnoreRunner.class)
-@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnectionTestBase {
     private long mFirstRetryInterval;

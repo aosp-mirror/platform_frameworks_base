@@ -16,8 +16,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.frameworks.tests.vcn">
-    <!-- TODO: b/374174952 Use 36 after Android B finalization -->
-    <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="35" />
+
+    <uses-sdk android:minSdkVersion="36" android:targetSdkVersion="36" />
 
     <application>
         <uses-library android:name="android.test.runner" />

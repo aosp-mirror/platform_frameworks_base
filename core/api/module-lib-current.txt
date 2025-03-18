@@ -294,6 +294,8 @@ package android.net {
     field public static final int TYPE_VPN_LEGACY = 3; // 0x3
     field public static final int TYPE_VPN_NONE = -1; // 0xffffffff
     field public static final int TYPE_VPN_OEM = 4; // 0x4
+    field @FlaggedApi("android.net.platform.flags.vpn_type_oem_service_and_legacy") public static final int TYPE_VPN_OEM_LEGACY = 6; // 0x6
+    field @FlaggedApi("android.net.platform.flags.vpn_type_oem_service_and_legacy") public static final int TYPE_VPN_OEM_SERVICE = 5; // 0x5
     field public static final int TYPE_VPN_PLATFORM = 2; // 0x2
     field public static final int TYPE_VPN_SERVICE = 1; // 0x1
   }

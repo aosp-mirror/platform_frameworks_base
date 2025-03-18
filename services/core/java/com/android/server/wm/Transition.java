@@ -3378,7 +3378,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * Applies the new configuration for the changed displays. Returns the activities that should
      * check whether to deliver the new configuration to clients.
      */
-    @Nullable
     void applyDisplayChangeIfNeeded(@NonNull ArraySet<WindowContainer<?>> activitiesMayChange) {
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WindowContainer<?> wc = mParticipants.valueAt(i);

@@ -168,7 +168,6 @@ public class AdbDebuggingManager {
     private AdbConnectionInfo mAdbConnectionInfo = new AdbConnectionInfo();
     // Polls for a tls port property when adb wifi is enabled
     private AdbConnectionPortPoller mConnectionPortPoller;
-    private final PortListenerImpl mPortListener = new PortListenerImpl();
     private final Ticker mTicker;
 
     public AdbDebuggingManager(Context context) {
@@ -323,10 +322,6 @@ public class AdbDebuggingManager {
         }
     }
 
-    interface AdbConnectionPortListener {
-        void onPortReceived(int port);
-    }
-
     /**
      * This class will poll for a period of time for adbd to write the port
      * it connected to.
@@ -336,15 +331,10 @@ public class AdbDebuggingManager {
      * port through different means. A better fix would be to always start AdbDebuggingManager, but
      * it needs to adjust accordingly on whether ro.adb.secure is set.
      */
-    static class AdbConnectionPortPoller extends Thread {
+    private class AdbConnectionPortPoller extends Thread {
         private final String mAdbPortProp = "service.adb.tls.port";
-        private AdbConnectionPortListener mListener;
         private final int mDurationSecs = 10;
         private AtomicBoolean mCanceled = new AtomicBoolean(false);
-
-        AdbConnectionPortPoller(AdbConnectionPortListener listener) {
-            mListener = listener;
-        }
 
         @Override
         public void run() {
@@ -362,13 +352,22 @@ public class AdbDebuggingManager {
                 // to start the server. Otherwise we should have a valid port.
                 int port = SystemProperties.getInt(mAdbPortProp, Integer.MAX_VALUE);
                 if (port == -1 || (port > 0 && port <= 65535)) {
-                    mListener.onPortReceived(port);
+                    onPortReceived(port);
                     return;
                 }
                 SystemClock.sleep(1000);
             }
             Slog.w(TAG, "Failed to receive adb connection port");
-            mListener.onPortReceived(-1);
+            onPortReceived(-1);
+        }
+
+        private void onPortReceived(int port) {
+            Slog.d(TAG, "Received tls port=" + port);
+            Message msg = mHandler.obtainMessage(port > 0
+                    ? AdbDebuggingHandler.MSG_SERVER_CONNECTED
+                    : AdbDebuggingHandler.MSG_SERVER_DISCONNECTED);
+            msg.obj = port;
+            mHandler.sendMessage(msg);
         }
 
         public void cancelAndWait() {
@@ -379,17 +378,6 @@ public class AdbDebuggingManager {
                 } catch (InterruptedException e) {
                 }
             }
-        }
-    }
-
-    class PortListenerImpl implements AdbConnectionPortListener {
-        public void onPortReceived(int port) {
-            Slog.d(TAG, "Received tls port=" + port);
-            Message msg = mHandler.obtainMessage(port > 0
-                     ? AdbDebuggingHandler.MSG_SERVER_CONNECTED
-                     : AdbDebuggingHandler.MSG_SERVER_DISCONNECTED);
-            msg.obj = port;
-            mHandler.sendMessage(msg);
         }
     }
 
@@ -800,7 +788,6 @@ public class AdbDebuggingManager {
 
         // === Messages we can send to adbd ===========
         static final String MSG_DISCONNECT_DEVICE = "DD";
-        static final String MSG_DISABLE_ADBDWIFI = "DA";
 
         @Nullable @VisibleForTesting AdbKeyStore mAdbKeyStore;
 
@@ -1088,8 +1075,7 @@ public class AdbDebuggingManager {
                     mContext.registerReceiver(mBroadcastReceiver, intentFilter);
 
                     SystemProperties.set(AdbService.WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
-                    mConnectionPortPoller =
-                            new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
+                    mConnectionPortPoller = new AdbDebuggingManager.AdbConnectionPortPoller();
                     mConnectionPortPoller.start();
 
                     startAdbDebuggingThread();
@@ -1106,9 +1092,6 @@ public class AdbDebuggingManager {
                     setAdbConnectionInfo(null);
                     mContext.unregisterReceiver(mBroadcastReceiver);
 
-                    if (mThread != null) {
-                        mThread.sendResponse(MSG_DISABLE_ADBDWIFI);
-                    }
                     onAdbdWifiServerDisconnected(-1);
                     stopAdbDebuggingThread();
                     break;
@@ -1138,8 +1121,7 @@ public class AdbDebuggingManager {
                     mContext.registerReceiver(mBroadcastReceiver, intentFilter);
 
                     SystemProperties.set(AdbService.WIFI_PERSISTENT_CONFIG_PROPERTY, "1");
-                    mConnectionPortPoller =
-                            new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
+                    mConnectionPortPoller = new AdbDebuggingManager.AdbConnectionPortPoller();
                     mConnectionPortPoller.start();
 
                     startAdbDebuggingThread();
@@ -1257,7 +1239,7 @@ public class AdbDebuggingManager {
                     if (mAdbWifiEnabled) {
                         // In scenarios where adbd is restarted, the tls port may change.
                         mConnectionPortPoller =
-                                new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
+                                new AdbDebuggingManager.AdbConnectionPortPoller();
                         mConnectionPortPoller.start();
                     }
                     break;

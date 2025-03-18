@@ -219,13 +219,14 @@ public final class MediaCodecInfo {
     private static final int DEFAULT_MAX_SUPPORTED_INSTANCES = 32;
     private static final int MAX_SUPPORTED_INSTANCES_LIMIT = 256;
 
-    private static final class LazyHolder {
-        private static final Range<Integer> SIZE_RANGE = Process.is64Bit()
-                ? Range.create(1, 32768)
-                : Range.create(1, MediaProperties.resolution_limit_32bit().orElse(4096));
-    }
-    private static Range<Integer> getSizeRange() {
-        return LazyHolder.SIZE_RANGE;
+    private static Range<Integer> SIZE_RANGE;
+    private static synchronized Range<Integer> getSizeRange() {
+        if (SIZE_RANGE == null) {
+            SIZE_RANGE = Process.is64Bit()
+                    ? Range.create(1, 32768)
+                    : Range.create(1, MediaProperties.resolution_limit_32bit().orElse(4096));
+        }
+        return SIZE_RANGE;
     }
 
     // found stuff that is not supported by framework (=> this should not happen)
