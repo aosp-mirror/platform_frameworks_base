@@ -45,3 +45,11 @@ flag {
   description: "Flag for MDNS quality, reliability and performance improvement in 25Q2"
   bug: "373270045"
 }
+
+flag {
+  name: "vpn_type_oem_service_and_legacy"
+  namespace: "android_core_networking"
+  is_exported: false
+  description: "Flags the TYPE_VPN_OEM_SERVICE and TYPE_VPN_OEM_LEGACY VpnManager API constants"
+  bug: "389829981"
+}

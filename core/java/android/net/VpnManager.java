@@ -20,6 +20,7 @@ import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +33,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.net.platform.flags.Flags;
 import android.os.RemoteException;
 
 import com.android.internal.net.LegacyVpnInfo;
@@ -85,11 +87,31 @@ public class VpnManager {
     public static final int TYPE_VPN_LEGACY = 3;
 
     /**
-     * An VPN created by OEM code through other means than {@link VpnService} or {@link VpnManager}.
+     * A VPN created by OEM code through other means than {@link VpnService} or {@link VpnManager}.
      * @hide
      */
     @SystemApi(client = MODULE_LIBRARIES)
     public static final int TYPE_VPN_OEM = 4;
+
+    /**
+     * A VPN created by OEM code using {@link VpnService}, and which OEM code desires to
+     * differentiate from other VPN types. The core networking stack will treat this VPN type
+     * similarly to {@link #TYPE_VPN_SERVICE}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_VPN_TYPE_OEM_SERVICE_AND_LEGACY)
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int TYPE_VPN_OEM_SERVICE = 5;
+
+    /**
+     * A VPN created by OEM code using the legacy VPN mechanisms, and which OEM code desires to
+     * differentiate from other VPN types. The core networking stack will treat this VPN type
+     * similarly to {@link #TYPE_VPN_LEGACY}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_VPN_TYPE_OEM_SERVICE_AND_LEGACY)
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int TYPE_VPN_OEM_LEGACY = 6;
 
     /**
      * Channel for VPN notifications.
@@ -308,7 +330,7 @@ public class VpnManager {
 
     /** @hide */
     @IntDef(value = {TYPE_VPN_NONE, TYPE_VPN_SERVICE, TYPE_VPN_PLATFORM, TYPE_VPN_LEGACY,
-            TYPE_VPN_OEM})
+            TYPE_VPN_OEM, TYPE_VPN_OEM_SERVICE, TYPE_VPN_OEM_LEGACY})
     @Retention(RetentionPolicy.SOURCE)
     public @interface VpnType {}
 

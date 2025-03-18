@@ -20,20 +20,14 @@ import static org.junit.Assert.assertEquals;
 
 import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
-import android.os.Build;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.testutils.DevSdkIgnoreRule;
-import com.android.testutils.DevSdkIgnoreRunner;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
-// Android B/B+
-@RunWith(DevSdkIgnoreRunner.class)
-@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class TunnelConnectionParamsUtilsTest {
     // Public for use in VcnGatewayConnectionConfigTest

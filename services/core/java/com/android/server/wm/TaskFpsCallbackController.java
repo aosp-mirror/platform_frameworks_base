@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.window.ITaskFpsCallback;
@@ -25,12 +24,10 @@ import java.util.HashMap;
 
 final class TaskFpsCallbackController {
 
-    private final Context mContext;
     private final HashMap<IBinder, Long> mTaskFpsCallbacks;
     private final HashMap<IBinder, IBinder.DeathRecipient> mDeathRecipients;
 
-    TaskFpsCallbackController(Context context) {
-        mContext = context;
+    TaskFpsCallbackController() {
         mTaskFpsCallbacks = new HashMap<>();
         mDeathRecipients = new HashMap<>();
     }

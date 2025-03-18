@@ -22,20 +22,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import android.net.NetworkCapabilities;
-import android.os.Build;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.testutils.DevSdkIgnoreRule;
-import com.android.testutils.DevSdkIgnoreRunner;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
-// Android B/B+
-@RunWith(DevSdkIgnoreRunner.class)
-@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnUnderlyingNetworkPolicyTest {
     private static final VcnUnderlyingNetworkPolicy DEFAULT_NETWORK_POLICY =

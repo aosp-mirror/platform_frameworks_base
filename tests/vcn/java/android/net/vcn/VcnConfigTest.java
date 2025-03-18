@@ -29,14 +29,11 @@ import static org.mockito.Mockito.mock;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.os.Build;
 import android.os.Parcel;
 import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.testutils.DevSdkIgnoreRule;
-import com.android.testutils.DevSdkIgnoreRunner;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,10 +42,7 @@ import org.junit.runner.RunWith;
 import java.util.Collections;
 import java.util.Set;
 
-// TODO: b/374174952 After B finalization, use Sdk36ModuleController to ensure VCN tests only run on
-// Android B/B+
-@RunWith(DevSdkIgnoreRunner.class)
-@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnConfigTest {
     private static final String TEST_PACKAGE_NAME = VcnConfigTest.class.getPackage().getName();

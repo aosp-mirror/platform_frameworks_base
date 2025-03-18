@@ -226,7 +226,6 @@ java_library_static {
         "securebox",
         "apache-commons-math",
         "battery_saver_flag_lib",
-        "guava",
         "notification_flags_lib",
         "power_hint_flags_lib",
         "biometrics_flags_lib",
