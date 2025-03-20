@@ -32,7 +32,11 @@ android_app {
     },
     target_sdk_version: "29",
     platform_apis: true,
+    system_ext_specific: true,
     privileged: true,
+    required: [
+        "privapp_whitelist_com.android.statementservice",
+    ],
     certificate: "platform",
     static_libs: [
         "StatementServiceParser",
