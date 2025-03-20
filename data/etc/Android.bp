@@ -184,6 +184,14 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_whitelist_com.android.statementservice",
+    system_ext_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.statementservice.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "privapp_whitelist_com.android.settings.intelligence",
     product_specific: true,
     sub_dir: "permissions",

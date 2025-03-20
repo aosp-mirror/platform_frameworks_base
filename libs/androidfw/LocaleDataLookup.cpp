@@ -5774,7 +5774,6 @@ const char* lookupLikelyScript(uint32_t packed_lang_region) {
         case 0xD2120000u: // squ -> Latn
         case 0x73724D45u: // sr-ME -> Latn
         case 0x7372524Fu: // sr-RO -> Latn
-        case 0x73725255u: // sr-RU -> Latn
         case 0x73725452u: // sr-TR -> Latn
         case 0x82320000u: // sra -> Latn
         case 0x92320000u: // sre -> Latn
@@ -7265,7 +7264,6 @@ const char* lookupLikelyScript(uint32_t packed_lang_region) {
             return SCRIPT_CODES[73u];
         case 0x8ACD0000u: // nwc -> Newa
             return SCRIPT_CODES[74u];
-        case 0xB40C474Eu: // man-GN -> Nkoo
         case 0xBA0D0000u: // nqo -> Nkoo
             return SCRIPT_CODES[75u];
         case 0xDCF90000u: // zhx -> Nshu
