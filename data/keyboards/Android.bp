@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
 genrule {
     name: "validate_framework_keymaps",
     srcs: [
-        "*.kl",
-        "*.kcm",
         "*.idc",
+        "*.kcm",
+        "*.kl",
     ],
     tools: ["validatekeymaps"],
     out: ["stamp"],
@@ -33,7 +37,6 @@ prebuilt_usr_keylayout {
     srcs: [
         "*.kl",
     ],
-    no_full_install: true,
 }
 
 prebuilt_usr_keychars {
@@ -41,7 +44,6 @@ prebuilt_usr_keychars {
     srcs: [
         "*.kcm",
     ],
-    no_full_install: true,
 }
 
 prebuilt_usr_idc {
@@ -49,5 +51,4 @@ prebuilt_usr_idc {
     srcs: [
         "*.idc",
     ],
-    no_full_install: true,
 }
