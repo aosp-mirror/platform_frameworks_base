@@ -269,6 +269,9 @@ system_java_library {
     installable: true,
 
     exclude_kotlinc_generated_files: true,
+    optimize: {
+        d8_on_eng: true,
+    },
 
     srcs: [":services-main-sources"],
 
