@@ -55,15 +55,17 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
 
     @Override
     public void onInputDeviceAdded(int deviceId) {
+        if (!mTouchpadVisualizerEnabled) {
+            return;
+        }
         final InputManager inputManager = Objects.requireNonNull(
                 mContext.getSystemService(InputManager.class));
         InputDevice inputDevice = inputManager.getInputDevice(deviceId);
-
-        if (Objects.requireNonNull(inputDevice).supportsSource(
-                InputDevice.SOURCE_TOUCHPAD | InputDevice.SOURCE_MOUSE)
-                && mTouchpadVisualizerEnabled) {
-            showDebugView(deviceId);
+        if (inputDevice == null || !inputDevice.supportsSource(
+                InputDevice.SOURCE_TOUCHPAD | InputDevice.SOURCE_MOUSE)) {
+            return;
         }
+        showDebugView(deviceId);
     }
 
     @Override
