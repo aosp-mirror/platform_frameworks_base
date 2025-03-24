@@ -97,7 +97,13 @@ public class OperatorNameViewController extends ViewController<OperatorNameView>
         boolean showOperatorName =
                 mCarrierConfigTracker
                         .getShowOperatorNameInStatusBarConfig(defaultSubInfo.getSubId())
-                        && (mTunerService.getValue(KEY_SHOW_OPERATOR_NAME, 1) != 0);
+                        && (mTunerService.getValue(
+                                KEY_SHOW_OPERATOR_NAME,
+                                mView.getResources()
+                                        .getInteger(
+                                                com.android.internal.R.integer
+                                                        .config_showOperatorNameDefault))
+                                != 0);
         mView.update(
                 showOperatorName,
                 mTelephonyManager.isDataCapable(),

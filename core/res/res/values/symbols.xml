@@ -2691,6 +2691,9 @@
   <java-symbol type="string" name="muted_by" />
   <java-symbol type="string" name="zen_mode_alarm" />
 
+  <!-- For default state of operator name in status bar -->
+  <java-symbol type="integer" name="config_showOperatorNameDefault"/>
+
   <java-symbol type="string" name="select_day" />
   <java-symbol type="string" name="select_year" />
 
