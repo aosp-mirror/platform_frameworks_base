@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar
 
+import android.content.res.Resources
 import android.telephony.ServiceState
 import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyManager
 import android.telephony.telephonyManager
+import android.testing.TestableResources
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.keyguardUpdateMonitor
@@ -72,9 +74,17 @@ class OperatorNameViewControllerTest : SysuiTestCase() {
     private val airplaneModeRepository = FakeAirplaneModeRepository()
     private val connectivityRepository = FakeConnectivityRepository()
 
+    @Mock private lateinit var resources: Resources
+    private lateinit var testableResources: TestableResources
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+
+        testableResources = mContext.getOrCreateTestableResources()
+        testableResources.addOverride(
+            com.android.internal.R.integer.config_showOperatorNameDefault,
+                1)
 
         airplaneModeInteractor =
             AirplaneModeInteractor(

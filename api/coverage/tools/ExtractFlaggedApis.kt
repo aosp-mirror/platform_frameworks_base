@@ -88,6 +88,6 @@ fun getFlagAnnotation(item: Item): String? {
     return item.modifiers
         .findAnnotation("android.annotation.FlaggedApi")
         ?.findAttribute("value")
-        ?.value
+        ?.legacyValue
         ?.value() as? String
 }

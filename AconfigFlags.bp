@@ -828,6 +828,7 @@ java_aconfig_library {
         "//apex_available:platform",
         "com.android.permission",
         "com.android.nfcservices",
+        "com.android.extservices",
     ],
 }
 

@@ -3977,6 +3977,11 @@
         <item>-44</item>
     </integer-array>
 
+    <!-- Provides default value for operator name in status bar option in  setting:
+         0 - Hide operator name in status bar
+         1 - Show operator name in status bar (default) -->
+    <integer name="config_showOperatorNameDefault">1</integer>
+
     <!-- Enabled built-in zen mode condition providers -->
     <string-array translatable="false" name="config_system_condition_providers">
         <item>countdown</item>

@@ -64,12 +64,14 @@ public final class SystemBarUtils {
         display.getDisplayInfo(info);
         Insets insets;
         Insets waterfallInsets;
+        final int localWidth = context.getResources().getDisplayMetrics().widthPixels;
+        final int localHeight = context.getResources().getDisplayMetrics().heightPixels;
         if (cutout == null) {
             insets = Insets.NONE;
             waterfallInsets = Insets.NONE;
         } else {
             DisplayCutout rotated =
-                    cutout.getRotated(info.logicalWidth, info.logicalHeight, rotation, targetRot);
+                    cutout.getRotated(localWidth, localHeight, rotation, targetRot);
             insets = Insets.of(rotated.getSafeInsets());
             waterfallInsets = rotated.getWaterfallInsets();
         }

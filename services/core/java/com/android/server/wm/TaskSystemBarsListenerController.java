@@ -48,8 +48,10 @@ final class TaskSystemBarsListenerController {
             int taskId,
             boolean visible,
             boolean wereRevealedFromSwipeOnSystemBar) {
-        HashSet<TaskSystemBarsListener> localListeners;
-        localListeners = new HashSet<>(mListeners);
+        if (mListeners.isEmpty()) {
+            return;
+        }
+        final HashSet<TaskSystemBarsListener> localListeners = new HashSet<>(mListeners);
 
         mBackgroundExecutor.execute(() -> {
             for (TaskSystemBarsListener listener : localListeners) {

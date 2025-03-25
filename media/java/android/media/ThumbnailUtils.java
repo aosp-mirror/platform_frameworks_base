@@ -372,10 +372,8 @@ public class ThumbnailUtils {
 
             final int width = Integer.parseInt(mmr.extractMetadata(METADATA_KEY_VIDEO_WIDTH));
             final int height = Integer.parseInt(mmr.extractMetadata(METADATA_KEY_VIDEO_HEIGHT));
-            // Fall back to middle of video
-            // Note: METADATA_KEY_DURATION unit is in ms, not us.
-            final long thumbnailTimeUs =
-                    Long.parseLong(mmr.extractMetadata(METADATA_KEY_DURATION)) * 1000 / 2;
+            // Returns whatever frame the implementation considers representative.
+            final long thumbnailTimeUs = -1;
 
             // If we're okay with something larger than native format, just
             // return a frame without up-scaling it
