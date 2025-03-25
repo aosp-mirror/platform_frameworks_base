@@ -154,6 +154,13 @@ jobject legacy2aidl_audio_channel_mask_t_AudioChannelLayout_Parcel(
             });
 }
 
+/* Used for test purposes only, not efficient. */
+jobject legacy2aidl_audio_devices_t_AudioDeviceDescription_Parcel(JNIEnv* env, jobject,
+                                                                  int /*audio_devices_t*/ legacy) {
+    return legacy2aidlParcel(env, static_cast<audio_devices_t>(legacy),
+                             legacy2aidl_audio_devices_t_AudioDeviceDescription);
+}
+
 int aidl2legacy_AudioFormatDescription_Parcel_audio_format_t(JNIEnv* env, jobject,
                                                              jobject jParcel) {
     return aidlParcel2legacy<
@@ -208,6 +215,8 @@ const JNINativeMethod gMethods[] = {
          reinterpret_cast<void*>(aidl2legacy_AudioChannelLayout_Parcel_audio_channel_mask_t)},
         {"legacy2aidl_audio_channel_mask_t_AudioChannelLayout_Parcel", "(IZ)Landroid/os/Parcel;",
          reinterpret_cast<void*>(legacy2aidl_audio_channel_mask_t_AudioChannelLayout_Parcel)},
+        {"legacy2aidl_audio_devices_t_AudioDeviceDescription_Parcel", "(I)Landroid/os/Parcel;",
+         reinterpret_cast<void*>(legacy2aidl_audio_devices_t_AudioDeviceDescription_Parcel)},
         {"aidl2legacy_AudioFormatDescription_Parcel_audio_format_t", "(Landroid/os/Parcel;)I",
          reinterpret_cast<void*>(aidl2legacy_AudioFormatDescription_Parcel_audio_format_t)},
         {"legacy2aidl_audio_format_t_AudioFormatDescription_Parcel", "(I)Landroid/os/Parcel;",

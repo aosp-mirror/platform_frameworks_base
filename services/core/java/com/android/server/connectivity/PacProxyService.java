@@ -36,6 +36,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IServiceManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -355,7 +356,9 @@ public class PacProxyService extends IPacProxyManager.Stub {
                     } catch (RemoteException e1) {
                         Log.e(TAG, "Remote Exception", e1);
                     }
-                    ServiceManager.addService(PAC_SERVICE_NAME, binder);
+                    // Do not cache the service, otherwise it will crash com.android.pacprocessor
+                    ServiceManager.addService(PAC_SERVICE_NAME, binder, /* allowIsolated */ false,
+                            IServiceManager.FLAG_IS_LAZY_SERVICE);
                     mProxyService = IProxyService.Stub.asInterface(binder);
                     if (mProxyService == null) {
                         Log.e(TAG, "No proxy service");
