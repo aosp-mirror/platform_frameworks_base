@@ -566,16 +566,14 @@ final class SharedPreferencesImpl implements SharedPreferences {
                         // setting a value to "null" for a given key is specified to be
                         // equivalent to calling remove on that key.
                         if (v == this || v == null) {
-                            if (!mapToWriteToDisk.containsKey(k)) {
+                            if (mapToWriteToDisk.remove(k) == null) {
+                                //mapToWriteToDisk does not contain given key, k
                                 continue;
                             }
-                            mapToWriteToDisk.remove(k);
                         } else {
-                            if (mapToWriteToDisk.containsKey(k)) {
-                                Object existingValue = mapToWriteToDisk.get(k);
-                                if (existingValue != null && existingValue.equals(v)) {
-                                    continue;
-                                }
+                            if (v.equals(mapToWriteToDisk.get(k))) {
+                                //mapToWriteToDisk already contains the same key value pairing
+                                continue;
                             }
                             mapToWriteToDisk.put(k, v);
                         }
