@@ -463,32 +463,56 @@ public class ResourcesImpl {
                 // the framework.
                 mDisplayAdjustments.getCompatibilityInfo().applyToDisplayMetrics(mMetrics);
 
-                final @Config int configChanges = calcConfigChanges(config);
+                final @Config int configChanges = applyConfigChanges(config);
 
                 // If even after the update there are no Locales set, grab the default locales.
-                LocaleList locales = mConfiguration.getLocales();
-                if (locales.isEmpty()) {
-                    locales = LocaleList.getDefault();
-                    mConfiguration.setLocales(locales);
+                LocaleList configLocales = mConfiguration.getLocales();
+                if (configLocales.isEmpty()) {
+                    configLocales = LocaleList.getDefault();
+                    mConfiguration.setLocales(configLocales);
                 }
+
+                // Note: `locales` should be a list in the following order:
+                // 1. App-specific locales (typically at most one, set by the user in settings)
+                // 2. One or more system locales
 
                 String[] selectedLocales = null;
                 String defaultLocale = null;
                 LocaleConfig lc = ResourcesManager.getInstance().getLocaleConfig();
                 if ((configChanges & ActivityInfo.CONFIG_LOCALE) != 0) {
-                    if (locales.size() > 1) {
+                    if (configLocales.size() > 1) {
+                        // There is more than one locale in the configuration. We need to update
+                        // the locales in the configuration based on what is supported by the app
+                        // so that we will use the same locales on other non-locale config changes.
+
+                        Locale[] intersection = null;
                         if (Flags.defaultLocale() && (lc.getDefaultLocale() != null)) {
-                            Locale[] intersection =
-                                    locales.getIntersection(lc.getSupportedLocales());
-                            mConfiguration.setLocales(new LocaleList(intersection));
-                            selectedLocales = new String[intersection.length];
-                            for (int i = 0; i < intersection.length; i++) {
-                                selectedLocales[i] =
-                                        adjustLanguageTag(intersection[i].toLanguageTag());
+                            // Note: getIntersection() returns a list of locales in the same order
+                            // currently in `configLocales`, which is desired (i.e., app-specific
+                            // locales first before system locales).
+                            defaultLocale = adjustLanguageTag(
+                                    lc.getDefaultLocale().toLanguageTag());
+                            intersection =
+                                    configLocales.getIntersection(
+                                            lc.getSupportedLocales());
+                            if (intersection.length > 0) {
+                                mConfiguration.setLocales(new LocaleList(intersection));
+                                selectedLocales = new String[intersection.length];
+                                for (int i = 0; i < intersection.length; i++) {
+                                    selectedLocales[i] =
+                                            adjustLanguageTag(intersection[i].toLanguageTag());
+                                }
+                                Slog.v(TAG, "Updating configuration, with default locale "
+                                        + defaultLocale + " and selected locales "
+                                        + Arrays.toString(selectedLocales));
                             }
-                            defaultLocale =
-                                    adjustLanguageTag(lc.getDefaultLocale().toLanguageTag());
-                        } else {
+                        }
+
+                        if (intersection == null || intersection.length == 0) {
+                            // This is the fallback behavior when multi-locale is not enabled,
+                            // or when there was no intersection between the app's supported
+                            // locales and the locales in the configuration.
+
                             String[] availableLocales;
                             // The LocaleList has changed. We must query the AssetManager's
                             // available Locales and figure out the best matching Locale in the new
@@ -503,29 +527,44 @@ public class ResourcesImpl {
                             }
 
                             if (availableLocales != null) {
-                                final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
-                                        availableLocales);
+                                final Locale bestLocale =
+                                        configLocales.getFirstMatchWithEnglishSupported(
+                                                availableLocales);
                                 if (bestLocale != null) {
                                     selectedLocales = new String[]{
                                             adjustLanguageTag(bestLocale.toLanguageTag())};
-                                    if (!bestLocale.equals(locales.get(0))) {
+                                    if (!bestLocale.equals(configLocales.get(0))) {
+                                        // There was an locale available in the app that matched.
+                                        // Update the configuration so that it goes first.
                                         mConfiguration.setLocales(
-                                                new LocaleList(bestLocale, locales));
+                                                new LocaleList(bestLocale, configLocales));
+                                        Slog.v(TAG, "Updating configuration with selected locales "
+                                                + Arrays.toString(selectedLocales));
                                     }
                                 }
                             }
                         }
                     }
                 }
-                if (selectedLocales == null) {
+
+                if (selectedLocales == null || selectedLocales.length == 0) {
+                    // Either:
+                    // 1. The locales were not changed in the configuration, in which case we
+                    //    use whatever was last set in the configuration.
+                    // 2. Locales changed, but there was only one locale in the configuration, in
+                    //    which case we simply use that locale.
+                    // 3. Locales changed, and there were multiple locales in the configuration,
+                    //    but the app does not support any of them, so we use whatever locales are
+                    //    currently in the configuration.
                     if (Flags.defaultLocale() && (lc.getDefaultLocale() != null)) {
-                        selectedLocales = new String[locales.size()];
-                        for (int i = 0; i < locales.size(); i++) {
-                            selectedLocales[i] = adjustLanguageTag(locales.get(i).toLanguageTag());
+                        selectedLocales = new String[configLocales.size()];
+                        for (int i = 0; i < configLocales.size(); i++) {
+                            selectedLocales[i] =
+                                    adjustLanguageTag(configLocales.get(i).toLanguageTag());
                         }
                     } else {
                         selectedLocales = new String[]{
-                                adjustLanguageTag(locales.get(0).toLanguageTag())};
+                                adjustLanguageTag(configLocales.get(0).toLanguageTag())};
                     }
                 }
 
@@ -605,7 +644,7 @@ public class ResourcesImpl {
      * @param config the new configuration
      * @return bitmask of config changes
      */
-    public @Config int calcConfigChanges(@Nullable Configuration config) {
+    public @Config int applyConfigChanges(@Nullable Configuration config) {
         if (config == null) {
             // If there is no configuration, assume all flags have changed.
             return 0xFFFFFFFF;
@@ -850,7 +889,10 @@ public class ResourcesImpl {
                 }
             } else {
                 if (verifyPreloadConfig(
-                        changingConfigs, ActivityInfo.CONFIG_LAYOUT_DIRECTION, value.resourceId, "drawable")) {
+                        changingConfigs,
+                        ActivityInfo.CONFIG_LAYOUT_DIRECTION,
+                        value.resourceId,
+                        "drawable")) {
                     if ((changingConfigs & ActivityInfo.CONFIG_LAYOUT_DIRECTION) == 0) {
                         // If this resource does not vary based on layout direction,
                         // we can put it in all of the preload maps.
