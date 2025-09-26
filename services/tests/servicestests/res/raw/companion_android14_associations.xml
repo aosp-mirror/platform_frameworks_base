@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<state persistence-version="1">
+    <associations>
+        <association
+            id="100001"
+            profile="android.app.role.COMPANION_DEVICE_WATCH"
+            package="com.example.watchapp"
+            tag="my_watch_tag"
+            mac_address="AA:BB:CC:DD:EE:00"
+            display_name="John's Watch"
+            self_managed="false"
+            notify_device_nearby="true"
+            revoked="false"
+            time_approved="1678886400000"
+            last_time_connected="1678972800000"
+            system_data_sync_flags="3"/>
+        <association
+            id="100002"
+            package="com.example.carapp"
+            tag="my_car_tag"
+            mac_address="11:22:33:44:55:66"
+            display_name="My Car"
+            self_managed="true"
+            notify_device_nearby="false"
+            revoked="false"
+            time_approved="1678890000000"
+            last_time_connected="9223372036854775807"
+            system_data_sync_flags="0"/>
+    </associations>
+    <previously-used-ids>
+        <package package_name="com.example.watchapp">
+            <id>1</id>
+            <id>5</id>
+        </package>
+        <package package_name="com.example.carapp">
+            <id>2</id>
+        </package>
+        <package package_name="com.another.old.app">
+            <id>10</id>
+        </package>
+    </previously-used-ids>
+</state>
