@@ -265,6 +265,14 @@ public class ExternalDisplayPolicyTest {
     }
 
     @Test
+    public void testExternalDisplayAutoEnabledWithLayoutConfiguration() {
+        when(mMockedLogicalDisplayMapper.isEnabledInLayoutLocked(any())).thenReturn(true);
+        mExternalDisplayPolicy.handleExternalDisplayConnectedLocked(mMockedLogicalDisplay);
+        mExternalDisplayPolicy.onBootCompleted();
+        assertNotAskedToEnableDisplay();
+    }
+
+    @Test
     public void testNoThermalListenerRegistered_featureDisabled(
             @TestParameter final boolean isConnectedDisplayManagementEnabled,
             @TestParameter final boolean isErrorHandlingEnabled) throws RemoteException {
